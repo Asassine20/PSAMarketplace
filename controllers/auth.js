@@ -62,15 +62,16 @@ exports.login = (req, res) => {
         }
 
         // Correctly reference the UserID from the query results
-        const id = results[0].UserID; // Use UserID, as per your database schema
-        const token = jwt.sign({ id }, process.env.JWT_SECRET, {
+        const id = results[0].UserID;
+        const username = results[0].Username; // Fetch the username
+        const token = jwt.sign({ id, username }, process.env.JWT_SECRET, {
             expiresIn: process.env.JWT_EXPIRES_IN
         });
-
-        console.log("The token is: " + token);
-        
         // Set the token in a cookie and redirect to the dashboard
         res.cookie('jwt', token, { httpOnly: true, maxAge: 7200000 });
         res.status(200).redirect("/dashboard");
+        
+        console.log("The token is: " + token);
+        
     });
 };

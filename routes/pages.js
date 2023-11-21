@@ -14,8 +14,19 @@ router.get('/login', (req, res) => {
 });
 
 router.get('/dashboard', authenticateToken, (req, res) => {
-    res.render('dashboard');
+    res.render('dashboard', { username: req.user.username });
 });
+
+router.get('/inventory', authenticateToken, (req, res) => {
+    res.render('inventory', { username: req.user.username });
+});
+
+router.get('/logout', (req, res) => {
+    res.clearCookie('jwt');
+    res.redirect('login');
+});
+
+
 
 
 module.exports = router;
