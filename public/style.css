@@ -43,3 +43,27 @@ nav li a:hover {
     border-radius: 5px;
     text-align: center;
 }
+
+.charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: stretch;
+}
+
+.charts-container canvas {
+    flex: auto;
+    margin: 10px;
+    max-width: 600px;
+}
+
+#feedbackChart, #salesChart, #inventoryChart {
+    min-width: 300px;
+    min-height: 300px;
+    max-width: 400px;
+    max-height: 400px;
+    border: 1px solid #9BA0AA;
+    padding: 10px;
+    border-radius: 8px;
+}
+
