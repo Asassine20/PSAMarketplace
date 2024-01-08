@@ -6,6 +6,8 @@ const port = 3001;
 const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
 const cookieParser = require('cookie-parser');
+const inventoryRoutes = require('./routes/pages');
+const hbs = require('hbs');
 
 server.use(cookieParser());
 
@@ -23,6 +25,20 @@ server.use(express.json());
 server.use('/', require('./routes/pages'));
 server.use('/auth', require('./routes/auth'));
 
+server.use('/', inventoryRoutes);
+
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
+});
+
+hbs.registerHelper('plus', function(value, increment) {
+    return value + increment;
+});
+
+hbs.registerHelper('minus', function(value, decrement) {
+    return value - decrement;
+});
+
+hbs.registerHelper('eq', function(arg1, arg2, options) {
+    return arg1 === arg2;
 });

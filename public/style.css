@@ -1,6 +1,5 @@
 nav {
-    background-color: blue;
-    color: #fff;
+    color: #9BA0AA;
     padding: 30px 60px;
     display: flex;
     justify-content: space-between;
@@ -17,7 +16,7 @@ nav li {
 }
 
 nav li a {
-    color: #fff;
+    color: #9BA0AA;
     text-decoration: none;
     font-weight: bold;
     padding: 5px 8px;
@@ -66,4 +65,78 @@ nav li a:hover {
     padding: 10px;
     border-radius: 8px;
 }
+.table-container {
+    margin: 20px 0;
+}
 
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h2 {
+    margin: 0;
+    color: #333;
+    /* Other styling as needed */
+}
+
+.table-header span {
+    font-size: 1rem;
+    color: #666;
+    /* Other styling as needed */
+}
+
+table {
+    margin: 0 auto;
+    width: 90%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+    /* Other styling as needed */
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+caption {
+    caption-side: top;
+    text-align: left;
+    padding: 10px;
+    font-size: 1.2em;
+}
+
+
+.pagination-bottom {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.inventorySearch {
+    width: 50%;
+    display: flex;
+    background-color: rgba(155, 160, 170, 0.5);
+    border-radius: 4px;
+    border: black 1px solid;
+}

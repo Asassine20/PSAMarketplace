@@ -18,5 +18,14 @@ connection.connect((err) => {
     console.log('Connected to MySQL Database as ID ' + connection.threadId);
 });
 
+const query = (sql, params) => new Promise((resolve, reject) => {
+    connection.query(sql, params, (error, results) => {
+        if (error) {
+            reject(error);
+        }
+        resolve(results);
+    });
+});
 
-module.exports = connection;
+
+module.exports = { query };

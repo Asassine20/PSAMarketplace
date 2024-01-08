@@ -9,6 +9,12 @@
     <title>Document</title>
 </head>
 <body>
+    <div id="spinner" style="display:none;">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
     <nav>
         <h4 style="font-size:13px">Logo Placeholder</h4>
         <ul>
@@ -23,4 +29,171 @@
         </ul>
     </nav>
     <h4>{{username}} Inventory</h4>
+    <div class="inventorySearch">
+        <form action="/inventory" method="get">
+            <div>
+                <label for="searchTerm">Search by Name:</label>
+                <input type="text" id="searchTerm" name="searchTerm" placeholder="Card Name" value="{{searchTerm}}">
+            </div>
+            <div>
+                <label for="sport">Sport:</label>
+                <select id="sport" name="sport" onchange="loadSetsAndYears()">
+                    <option value="">All Sports</option>
+                    {{#each sports}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <label for="cardSet">Card Set:</label>
+                <select id="cardSet" name="cardSet">
+                    <option value="">All Sets</option>
+                    {{#each cardSets}}
+                    <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <label for="cardYear">Card Year:</label>
+                <select id="cardYear" name="cardYear">
+                    <option value="">All Years</option>
+                    {{#each cardYears}}
+                    <option value="{{this}}" {{#if (eq this ../cardYear)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <button type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+
+<div class="table-container">
+    <table>
+        <!-- Table Title and Results as Caption -->
+        <caption>
+            <div class="table-header">
+                <h2>Product Catalog</h2>
+                <span>{{totalItems}} Results</span>
+            </div>
+        </caption>
+
+        <thead>
+            <tr>
+                <th>Sport</th>
+                <th>CardImage</th>
+                <th>CardName</th>
+                <th>CardSet</th>
+                <th>CardYear</th>
+                <th>CardNumber</th>
+                <th>CardColor</th>
+                <th>CardVariant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each cards}}
+            <tr>
+                <td>{{this.Sport}}</td>
+                <td><img src="{{this.CardImage}}" alt="Card Image"></td>
+                <td>{{this.CardName}}</td>
+                <td>{{this.CardSet}}</td>
+                <td>{{this.CardYear}}</td>
+                <td>{{this.CardNumber}}</td>
+                <td>{{this.CardColor}}</td>
+                <td>{{this.CardVariant}}</td>
+            </tr>            
+            {{else}}
+            <tr><td colspan="8">No cards found</td></tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <nav aria-label="Page navigation" class="pagination-bottom">
+        <ul class="pagination">
+            {{#if showPrevious}}
+            <li class="page-item"><a class="page-link" href="?page={{minus currentPage 1}}">Previous</a></li>
+            {{/if}}
+            {{#if showNext}}
+            <li class="page-item"><a class="page-link" href="?page={{plus currentPage 1}}">Next</a></li>
+            {{/if}}
+
+        </ul>
+    </nav>
+</div>
+
+<script>
+    function loadSetsAndYears(caller) {
+        // Disable the dropdowns while loading
+        document.getElementById('sport').disabled = true;
+        document.getElementById('cardSet').disabled = true;
+        document.getElementById('cardYear').disabled = true;
+        document.getElementById('spinner').style.display = 'block';
+        const sport = document.getElementById('sport').value;
+        const cardSet = document.getElementById('cardSet').value;
+        const year = document.getElementById('cardYear').value;
+
+        if (caller === 'sport') {
+            // Fetch card sets based on the sport
+            fetch(`/cardsets?sport=${encodeURIComponent(sport)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const setSelect = document.getElementById('cardSet');
+                    setSelect.innerHTML = '<option value="">All Sets</option>';
+                    data.forEach(set => {
+                        const option = document.createElement('option');
+                        option.value = set;
+                        option.textContent = set;
+                        if(set === cardSet) {
+                            option.selected = true;
+                        }
+                        setSelect.appendChild(option);
+                    });
+                })
+
+                .catch(error => console.error('Error loading sets:', error));
+        }
+
+        // Fetch years based on the sport and set
+        fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}`)
+            .then(response => response.json())
+            .then(years => {
+                const yearSelect = document.getElementById('cardYear');
+                yearSelect.innerHTML = '<option value="">All Years</option>';
+                years.forEach(yr => {
+                    const option = document.createElement('option');
+                    option.value = yr;
+                    option.textContent = yr;
+                    if (yr === year) {  // Check if this is the previously selected year
+                        option.selected = true;  // Mark this option as selected
+                    }
+                    yearSelect.appendChild(option);
+                });
+                document.getElementById('spinner').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error loading years:', error);
+                document.getElementById('spinner').style.display = 'none';
+            });
+        document.getElementById('sport').disabled = false;
+        document.getElementById('cardSet').disabled = false;
+        document.getElementById('cardYear').disabled = false;
+    }
+
+// Modify event listeners to include the caller (sport or set)
+document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
+document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
+document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
+
+
+// Disable the dropdowns
+document.getElementById('sport').disabled = true;
+document.getElementById('cardYear').disabled = true;
+
+// Enable the dropdowns again after loading is complete
+document.getElementById('sport').disabled = false;
+document.getElementById('cardYear').disabled = false;
+
+
+</script>
+
 </body>
