@@ -11,7 +11,7 @@
 <body>
     <div id="spinner" style="display:none;">
         <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="sr-only"></span>
         </div>
     </div>
 
@@ -33,11 +33,11 @@
         <form action="/inventory" method="get">
             <div>
                 <label for="searchTerm">Search by Name:</label>
-                <input type="text" id="searchTerm" name="searchTerm" placeholder="Card Name" value="{{searchTerm}}">
+                <input type="text" id="searchTerm" name="searchTerm" class="filter-input" placeholder="Player Name" value="{{searchTerm}}">
             </div>
             <div>
                 <label for="sport">Sport:</label>
-                <select id="sport" name="sport" onchange="loadSetsAndYears()">
+                <select id="sport" name="sport" class="filter-input" onchange="loadSetsAndYears()">
                     <option value="">All Sports</option>
                     {{#each sports}}
                     <option value="{{this}}">{{this}}</option>
@@ -46,7 +46,7 @@
             </div>
             <div>
                 <label for="cardSet">Card Set:</label>
-                <select id="cardSet" name="cardSet">
+                <select id="cardSet" name="cardSet" class="filter-input">
                     <option value="">All Sets</option>
                     {{#each cardSets}}
                     <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
@@ -55,7 +55,7 @@
             </div>
             <div>
                 <label for="cardYear">Card Year:</label>
-                <select id="cardYear" name="cardYear">
+                <select id="cardYear" name="cardYear" class="filter-input">
                     <option value="">All Years</option>
                     {{#each cardYears}}
                     <option value="{{this}}" {{#if (eq this ../cardYear)}}selected{{/if}}>{{this}}</option>
@@ -127,7 +127,7 @@
         document.getElementById('sport').disabled = true;
         document.getElementById('cardSet').disabled = true;
         document.getElementById('cardYear').disabled = true;
-        document.getElementById('spinner').style.display = 'block';
+        document.getElementById('spinner').style.display = 'flex';
         const sport = document.getElementById('sport').value;
         const cardSet = document.getElementById('cardSet').value;
         const year = document.getElementById('cardYear').value;
@@ -172,27 +172,20 @@
             })
             .catch(error => {
                 console.error('Error loading years:', error);
+            })
+            .finally(() => {
+                // Re-enable dropdowns and hide spinner after fetching is complete
+                document.getElementById('sport').disabled = false;
+                document.getElementById('cardSet').disabled = false;
+                document.getElementById('cardYear').disabled = false;
                 document.getElementById('spinner').style.display = 'none';
             });
-        document.getElementById('sport').disabled = false;
-        document.getElementById('cardSet').disabled = false;
-        document.getElementById('cardYear').disabled = false;
     }
 
 // Modify event listeners to include the caller (sport or set)
 document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
 document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
 document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
-
-
-// Disable the dropdowns
-document.getElementById('sport').disabled = true;
-document.getElementById('cardYear').disabled = true;
-
-// Enable the dropdowns again after loading is complete
-document.getElementById('sport').disabled = false;
-document.getElementById('cardYear').disabled = false;
-
 
 </script>
 
