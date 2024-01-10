@@ -50,7 +50,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         const showPrevious = page > 1;
         const showNext = page < totalPages;
 
-        const cardSets = await db.query('SELECT DISTINCT CardSet FROM Card LIMIT 100');
+        const cardSets = await db.query('SELECT DISTINCT CardSet FROM Card');
         const cardYears = await db.query('SELECT DISTINCT CardYear FROM Card');
         const sports = await db.query('SELECT DISTINCT Sport FROM Card');
 
@@ -76,9 +76,27 @@ router.get('/inventory', authenticateToken, async (req, res) => {
 router.get('/cardsets', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
+    
+    let query = "SELECT DISTINCT CardSet FROM Card";
+    let conditions = [];
+    let values = [];
+
+    if (sport) {
+        conditions.push("Sport LIKE ?");
+        values.push(`%${sport}%`);
+    }
+    if (year) {
+        conditions.push("CardYear LIKE ?");
+        values.push(`%${year}%`);
+    }
+    
+    if (conditions.length) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY CardSet";
+
     try {
-        const query = "SELECT DISTINCT CardSet FROM Card WHERE Sport LIKE ? AND CardYear LIKE ? ORDER BY CardSet";
-        const values = [`%${sport}%`, `%${year}%`];
         const cardSets = await db.query(query, values);
         res.json(cardSets.map(row => row.CardSet));
     } catch (error) {
@@ -87,20 +105,72 @@ router.get('/cardsets', authenticateToken, async (req, res) => {
     }
 });
 
+
 router.get('/years', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
+    
+    let query = "SELECT DISTINCT CardYear FROM Card";
+    let conditions = [];
+    let values = [];
+
+    if (sport) {
+        conditions.push("Sport LIKE ?");
+        values.push(`%${sport}%`);
+    }
+    if (cardSet) {
+        conditions.push("CardSet LIKE ?");
+        values.push(`%${cardSet}%`);
+    }
+    
+    if (conditions.length) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY CardYear DESC";
+
     try {
-        const query = "SELECT DISTINCT CardYear FROM Card WHERE Sport LIKE ? AND CardSet LIKE ? ORDER BY CardYear DESC";
-        const values = [`%${sport}%`, `%${cardSet}%`];
         const years = await db.query(query, values);
         res.json(years.map(row => row.CardYear));
     } catch (error) {
         console.error('Error fetching years:', error);
         res.status(500).send('Server error');
     }
-    });
+});
 
+router.get('/sports', authenticateToken, async (req, res) => {
+    const cardSet = req.query.cardSet || '';
+    const year = req.query.year || '';
+
+    let query = "SELECT DISTINCT Sport FROM Card";
+    let conditions = [];
+    let values = [];
+
+    if (cardSet) {
+        conditions.push("CardSet LIKE ?");
+        values.push(`%${cardSet}%`);
+    }
+    if (year) {
+        conditions.push("CardYear LIKE ?");
+        values.push(`%${year}%`);
+    }
+
+    if (conditions.length) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY Sport";
+
+    try {
+        const sports = await db.query(query, values);
+        res.json(sports.map(row => row.Sport));
+    } catch (error) {
+        console.error('Error fetching sports:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+    
 
 
 

@@ -169,7 +169,7 @@ caption {
 }
 
 .inventorySearch label {
-    flex-basis: 20%;
+    flex-basis: 30%;
     flex-shrink: 0;
     margin-right: 10px; /* Add some space between label and input */
 }
