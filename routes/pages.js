@@ -58,7 +58,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             username: req.user.username, 
             cards,
             searchTerm,
-            cardSets: cardSets.map(row => row.CardSet),
+            cardSets: [], //cardSets'''.map(row => row.CardSet),
             cardYears: cardYears.map(row => row.CardYear),
             sports: sports.map(row => row.Sport),
             currentPage: page,
@@ -170,7 +170,42 @@ router.get('/sports', authenticateToken, async (req, res) => {
     }
 });
 
-    
+// Endpoint for initial limited card sets
+router.get('/get-limited-card-sets', authenticateToken, async (req, res) => {
+    try {
+        const query = "SELECT DISTINCT CardSet FROM Card LIMIT 10"; // Adjust the limit as needed
+        const result = await db.query(query);
+        res.json(result.map(row => row.CardSet));
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
+// Endpoint for full search
+router.get('/search-card-sets', authenticateToken, async (req, res) => {
+    const searchTerm = req.query.term || '';
+    try {
+        const query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
+        const values = [`%${searchTerm}%`];
+        const result = await db.query(query, values);
+        res.json(result.map(row => row.CardSet));
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
+
+router.get('/get-all-card-sets', authenticateToken, async (req, res) => {
+    try {
+        const query = "SELECT DISTINCT CardSet FROM Card";
+        const result = await db.query(query);
+        const cardSets = result.map(row => row.CardSet);
+        res.json(cardSets);
+    } catch (error) {
+        console.error('Error fetching all card sets:', error);
+        res.status(500).send('Server error');
+    }
+});
 
 
 

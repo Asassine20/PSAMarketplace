@@ -46,13 +46,14 @@
             </div>
             <div class="dropdown">
                 <label for="cardSet">Card Set:</label>
-                <input type="text" id="cardSetSearch" placeholder="Search sets..." onkeyup="filterCardSets()" />
-                <div class="dropdown-content">
+                <input type="text" id="cardSetSearch" placeholder="Search sets..." onkeyup="debouncedSearchCardSets(this.value)" class="filter-input" />
+                <div class="dropdown-content consistent-width-dropdown">
                     <select id="cardSet" name="cardSet" class="filter-input">
                         <option value="">All Sets</option>
-                        {{#each cardSets}}
+                        <!--{{#each cardSets}}
                         <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
                         {{/each}}
+                        -->
                     </select>
                 </div>
             </div>
@@ -219,9 +220,71 @@
             }
         }
     }
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+
+function searchCardSets(searchTerm) {
+    // Always search based on the searchTerm, regardless of other filters
+    const url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(sets => populateDropdown(sets))
+        .catch(error => console.error('Error:', error));
+}
+
+    // This function populates the dropdown with the results
+    function populateDropdown(sets) {
+        const setSelect = document.getElementById('cardSet');
+        setSelect.innerHTML = '<option value="">All Sets</option>'; // Add the default option
+        sets.forEach(set => {
+            const option = document.createElement('option');
+            option.value = set;
+            option.textContent = set;
+            setSelect.appendChild(option);
+        });
+    }
+
+    // Debounce function to limit the number of searches during typing
+    var debouncedSearchCardSets = debounce(function(searchTerm) {
+        searchCardSets(searchTerm);
+    }, 300);
+
+    // Event listener for the card set search input
+    document.getElementById('cardSetSearch').addEventListener('keyup', (e) => {
+        debouncedSearchCardSets(e.target.value);
+    });
 
 
+    function loadInitialCardSets() {
+        // Fetch a limited number of card sets or some predefined sets
+        fetch('/get-limited-card-sets')
+            .then(response => response.json())
+            .then(sets => populateDropdown(sets))
+            .catch(error => console.error('Error:', error));
+    }
 
+    // The debounce function
+    function debounce(callback, delay) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                callback.apply(this, args);
+            }, delay);
+        };
+    }
 
     // Modify event listeners to include the caller (sport or set)
     document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
