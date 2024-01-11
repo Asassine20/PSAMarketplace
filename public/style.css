@@ -168,7 +168,7 @@ caption {
 
 .inventorySearch div {
     display: flex;
-    margin-bottom: 10px; /* Add some space between each row */
+    margin-bottom: 2px; /* Add some space between each row */
 }
 
 .inventorySearch label {

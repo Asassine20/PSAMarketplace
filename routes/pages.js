@@ -76,20 +76,20 @@ router.get('/inventory', authenticateToken, async (req, res) => {
 router.get('/cardsets', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
-    
+
     let query = "SELECT DISTINCT CardSet FROM Card";
     let conditions = [];
     let values = [];
 
     if (sport) {
-        conditions.push("Sport LIKE ?");
-        values.push(`%${sport}%`);
+        conditions.push("Sport = ?");
+        values.push(sport);
     }
     if (year) {
-        conditions.push("CardYear LIKE ?");
-        values.push(`%${year}%`);
+        conditions.push("CardYear = ?");
+        values.push(year);
     }
-    
+
     if (conditions.length) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -115,12 +115,12 @@ router.get('/years', authenticateToken, async (req, res) => {
     let values = [];
 
     if (sport) {
-        conditions.push("Sport LIKE ?");
-        values.push(`%${sport}%`);
+        conditions.push("Sport = ?");
+        values.push(sport); // Use exact match for sport
     }
     if (cardSet) {
-        conditions.push("CardSet LIKE ?");
-        values.push(`%${cardSet}%`);
+        conditions.push("CardSet = ?");
+        values.push(cardSet); // Use exact match for cardSet
     }
     
     if (conditions.length) {
@@ -138,6 +138,7 @@ router.get('/years', authenticateToken, async (req, res) => {
     }
 });
 
+
 router.get('/sports', authenticateToken, async (req, res) => {
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
@@ -147,12 +148,12 @@ router.get('/sports', authenticateToken, async (req, res) => {
     let values = [];
 
     if (cardSet) {
-        conditions.push("CardSet LIKE ?");
-        values.push(`%${cardSet}%`);
+        conditions.push("CardSet = ?");
+        values.push(cardSet);
     }
     if (year) {
-        conditions.push("CardYear LIKE ?");
-        values.push(`%${year}%`);
+        conditions.push("CardYear = ?");
+        values.push(year);
     }
 
     if (conditions.length) {
@@ -170,6 +171,7 @@ router.get('/sports', authenticateToken, async (req, res) => {
     }
 });
 
+
 // Endpoint for initial limited card sets
 router.get('/get-limited-card-sets', authenticateToken, async (req, res) => {
     try {
@@ -183,13 +185,26 @@ router.get('/get-limited-card-sets', authenticateToken, async (req, res) => {
 
 // Endpoint for full search
 router.get('/search-card-sets', authenticateToken, async (req, res) => {
-    const searchTerm = req.query.term || '';
+    const { term, sport, year } = req.query;
+    let query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
+    let values = [`%${term}%`];
+
+    // Use exact matches for sport and year
+    if (sport) {
+        query += " AND Sport = ?";
+        values.push(sport); 
+    }
+    if (year) {
+        query += " AND CardYear = ?";
+        values.push(year); 
+    }
+
     try {
-        const query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
-        const values = [`%${searchTerm}%`];
         const result = await db.query(query, values);
-        res.json(result.map(row => row.CardSet));
+        const cardSets = result.map(row => row.CardSet);
+        res.json(cardSets);
     } catch (error) {
+        console.error('Error searching card sets:', error);
         res.status(500).send('Server error');
     }
 });

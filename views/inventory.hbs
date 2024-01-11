@@ -235,14 +235,32 @@
         };
     };
 
-function searchCardSets(searchTerm) {
-    // Always search based on the searchTerm, regardless of other filters
-    const url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
-    fetch(url)
-        .then(response => response.json())
-        .then(sets => populateDropdown(sets))
-        .catch(error => console.error('Error:', error));
-}
+    function searchCardSets(searchTerm) {
+        const sport = document.getElementById('sport').value;
+        const year = document.getElementById('cardYear').value;
+
+        let url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
+        if (sport) {
+            url += `&sport=${encodeURIComponent(sport)}`;
+        }
+        if (year) {
+            url += `&year=${encodeURIComponent(year)}`;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(sets => populateDropdown(sets))
+            .catch(error => console.error('Error:', error));
+    }
+
+    document.getElementById('sport').addEventListener('change', () => {
+        searchCardSets(document.getElementById('cardSetSearch').value);
+    });
+    
+    document.getElementById('cardYear').addEventListener('change', () => {
+        searchCardSets(document.getElementById('cardSetSearch').value);
+    });
+
 
     // This function populates the dropdown with the results
     function populateDropdown(sets) {
@@ -261,10 +279,11 @@ function searchCardSets(searchTerm) {
         searchCardSets(searchTerm);
     }, 300);
 
-    // Event listener for the card set search input
-    document.getElementById('cardSetSearch').addEventListener('keyup', (e) => {
-        debouncedSearchCardSets(e.target.value);
-    });
+    // Attach the debounced function to the keyup event
+    document.getElementById('cardSetSearch').addEventListener('keyup', debounce(function(e) {
+        searchCardSets(e.target.value);
+    }, 300));
+
 
 
     function loadInitialCardSets() {
