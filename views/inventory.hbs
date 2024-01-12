@@ -50,10 +50,6 @@
                 <div class="dropdown-content consistent-width-dropdown">
                     <select id="cardSet" name="cardSet" class="filter-input">
                         <option value="">All Sets</option>
-                        <!--{{#each cardSets}}
-                        <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
-                        {{/each}}
-                        -->
                     </select>
                 </div>
             </div>
@@ -127,23 +123,33 @@
 </div>
 
 <script>
+    // Populates the dropdown menus based on user selections
     function loadSetsAndYears(caller) {
         // Disable the dropdowns while loading
         document.getElementById('sport').disabled = true;
         document.getElementById('cardSet').disabled = true;
         document.getElementById('cardYear').disabled = true;
+
+        // Displays spinner while loading
         document.getElementById('spinner').style.display = 'flex';
 
+        // Retrieves the value of the element (sport, cardSet, cardYear) from the user input on the dropdown,
+        // and stores it in the const variable
         const sport = document.getElementById('sport').value;
         const cardSet = document.getElementById('cardSet').value;
         const year = document.getElementById('cardYear').value;
 
         // Fetch sports based on card set and year
+        // Sends a HTTP GET request to server endpoint '/sports' with parameters cardSet and year
         fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}`)
+            // Converts the response from JSON to a JavaScript object
             .then(response => response.json())
             .then(sports => {
+                // Resets the content for the sport dropdown menu
                 const sportSelect = document.getElementById('sport');
+                // Starts the sport dropdown menu with 'All Sports' initially
                 sportSelect.innerHTML = '<option value="">All Sports</option>';
+                // Iterates over each item in the sports array and creates a new option element for each sport
                 sports.forEach(sportItem => {
                     const option = document.createElement('option');
                     option.value = sportItem;
@@ -156,8 +162,8 @@
             })
             .catch(error => console.error('Error loading sports:', error));
 
-
         // Fetch card sets based on sport and year
+        // Sends a HTTP GET request to server endpoint '/cardsets' with parameters sport and year
         fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}`)
             .then(response => response.json())
             .then(sets => {
@@ -175,8 +181,8 @@
             })
             .catch(error => console.error('Error loading card sets:', error));
 
-
         // Fetch years based on sport and card set
+        // Sends a HTTP GET request to server endpoint '/years' with parameters sport and cardset
         fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}`)
             .then(response => response.json())
             .then(years => {
@@ -198,24 +204,33 @@
                 document.getElementById('sport').disabled = false;
                 document.getElementById('cardSet').disabled = false;
                 document.getElementById('cardYear').disabled = false;
+                // Removes the display of the spinner after fetching is complete
                 document.getElementById('spinner').style.display = 'none';
             });
-
     }
 
     // JavaScript function to filter card set options
     function filterCardSets() {
+        // Declares variables input, filter, ul, li, a, and i
         var input, filter, ul, li, a, i;
+        // Assigns the value of the cardSetSearch to input variable
         input = document.getElementById('cardSetSearch');
+        // Converts the value of input to upper case
         filter = input.value.toUpperCase();
+        // Stores the cardSet dropdown menu in the select variable
         var select = document.getElementById("cardSet");
+        // Gets all of the option elements within the select element and stores them in the options variable as a collection
         var options = select.getElementsByTagName('option');
-
+        // Iterates through each option in the dropdown menu
         for (i = 1; i < options.length; i++) { // Start from 1 to skip the placeholder option
-            txtValue = options[i].textContent || options[i].innerText;
+            // Extracts the text content from each option in the dropdown menu (the select element)
+            txtValue = options[i].textContent;
+            // Searches the filter string within the txtValue and returns the index of the first occurrence of a specified value in a string
             if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                // If the option contains the search term, it remains in the dropdown menu
                 options[i].style.display = "";
             } else {
+                // If the option doesn't contain the search term, it gets hidden from the dropdown menu
                 options[i].style.display = "none";
             }
         }
@@ -261,7 +276,6 @@
         searchCardSets(document.getElementById('cardSetSearch').value);
     });
 
-
     // This function populates the dropdown with the results
     function populateDropdown(sets) {
         const setSelect = document.getElementById('cardSet');
@@ -283,8 +297,6 @@
     document.getElementById('cardSetSearch').addEventListener('keyup', debounce(function(e) {
         searchCardSets(e.target.value);
     }, 300));
-
-
 
     function loadInitialCardSets() {
         // Fetch a limited number of card sets or some predefined sets
@@ -309,8 +321,6 @@
     document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
     document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
     document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
-
-
 
 </script>
 
