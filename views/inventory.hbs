@@ -33,11 +33,11 @@
         <form action="/inventory" method="get">
             <div>
                 <label for="searchTerm">Search by Name:</label>
-                <input type="text" id="searchTerm" name="searchTerm" class="filter-input" placeholder="Player Name" value="{{searchTerm}}">
+                <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown" placeholder="Player Name" value="{{searchTerm}}">
             </div>
             <div>
                 <label for="sport">Sport:</label>
-                <select id="sport" name="sport" class="filter-input" onchange="loadSetsAndYears()">
+                <select id="sport" name="sport" class="filter-input fixed-width-dropdown" onchange="loadSetsAndYears()">
                     <option value="">All Sports</option>
                     {{#each sports}}
                     <option value="{{this}}">{{this}}</option>
@@ -46,9 +46,9 @@
             </div>
             <div class="dropdown">
                 <label for="cardSet">Card Set:</label>
-                <input type="text" id="cardSetSearch" placeholder="Search sets..." onkeyup="debouncedSearchCardSets(this.value)" class="filter-input" />
+                <input type="text" id="cardSetSearch" placeholder="Search sets..." onkeyup="debouncedSearchCardSets(this.value)" class="filter-input fixed-width-input" />
                 <div class="dropdown-content consistent-width-dropdown">
-                    <select id="cardSet" name="cardSet" class="filter-input">
+                    <select id="cardSet" name="cardSet" class="filter-input fixed-width-dropdown">
                         <option value="">All Sets</option>
                     </select>
                 </div>
@@ -56,7 +56,7 @@
 
             <div>
                 <label for="cardYear">Card Year:</label>
-                <select id="cardYear" name="cardYear" class="filter-input">
+                <select id="cardYear" name="cardYear" class="filter-input fixed-width-dropdown">
                     <option value="">All Years</option>
                     {{#each cardYears}}
                     <option value="{{this}}" {{#if (eq this ../cardYear)}}selected{{/if}}>{{this}}</option>
@@ -235,86 +235,95 @@
             }
         }
     }
-    function debounce(func, wait, immediate) {
-        var timeout;
-        return function() {
-            var context = this, args = arguments;
-            var later = function() {
-                timeout = null;
-                if (!immediate) func.apply(context, args);
-            };
-            var callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(context, args);
-        };
-    };
-
+    
+    // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
     function searchCardSets(searchTerm) {
+        // Stores the value of the sport selected into the sport variable
         const sport = document.getElementById('sport').value;
+        // Stores the value of the year selected into the year variable
         const year = document.getElementById('cardYear').value;
-
+        // Starts constructing the URL for the API call and appends the search term as a query
         let url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
+        // Checks if a sport has been selected and appends it to the URL
         if (sport) {
             url += `&sport=${encodeURIComponent(sport)}`;
         }
+        // Checks if a year has been selected and appends it to the URL
         if (year) {
             url += `&year=${encodeURIComponent(year)}`;
         }
-
+        // Sends a request to the server at the constructed URL
         fetch(url)
+            // Processes the response by converting it to JSON
             .then(response => response.json())
+            // Takes the data (array of card sets) and calls the populateDropdown function to update the dropdown with the values
             .then(sets => populateDropdown(sets))
             .catch(error => console.error('Error:', error));
     }
 
+    // Selects the element with the ID sport and updates the CardSet dropdown based on the current selection
     document.getElementById('sport').addEventListener('change', () => {
         searchCardSets(document.getElementById('cardSetSearch').value);
     });
-    
+
+    // Selects the element with the ID cardYear and updates the CardSet dropdown based on the current selection
     document.getElementById('cardYear').addEventListener('change', () => {
         searchCardSets(document.getElementById('cardSetSearch').value);
     });
 
     // This function populates the dropdown with the results
     function populateDropdown(sets) {
+        // Accesses the dropdown element with the ID cardSet amd assigns it to variable setSelect
         const setSelect = document.getElementById('cardSet');
-        setSelect.innerHTML = '<option value="">All Sets</option>'; // Add the default option
+        // Clears any existing options in the dropdown and adds a default option of 'All Sets' to serve as a placeholder
+        setSelect.innerHTML = '<option value="">All Sets</option>'; 
+        // Loops through the sets 
         sets.forEach(set => {
+            // Creates an option element for the dropdown 
             const option = document.createElement('option');
+            // Makes the set as the value of the option
             option.value = set;
+            // Makes the set as the text content for the option
             option.textContent = set;
+            // Appends the newly created option to the dropdown
             setSelect.appendChild(option);
         });
-    }
-
-    // Debounce function to limit the number of searches during typing
-    var debouncedSearchCardSets = debounce(function(searchTerm) {
-        searchCardSets(searchTerm);
-    }, 300);
-
-    // Attach the debounced function to the keyup event
-    document.getElementById('cardSetSearch').addEventListener('keyup', debounce(function(e) {
-        searchCardSets(e.target.value);
-    }, 300));
-
-    function loadInitialCardSets() {
-        // Fetch a limited number of card sets or some predefined sets
-        fetch('/get-limited-card-sets')
-            .then(response => response.json())
-            .then(sets => populateDropdown(sets))
-            .catch(error => console.error('Error:', error));
     }
 
     // The debounce function
     function debounce(callback, delay) {
         let timeout;
+        // Returns a new function that can take any number of arguments
         return (...args) => {
+            // Clears any existing timeout associated with the timeout variable
             clearTimeout(timeout);
+            // Sets a new timeout that will execute the function after the specified delay 
             timeout = setTimeout(() => {
+                // The apply method allows us to invoke callback with a specific 'this' value and 'args' array
                 callback.apply(this, args);
             }, delay);
         };
+    }
+
+    // Debounce function to limit the number of searches during typing
+    var debouncedSearchCardSets = debounce(function(searchTerm) {
+        searchCardSets(searchTerm);
+    }, 400);
+
+    // Attach the debounced function to the keyup event
+    document.getElementById('cardSetSearch').addEventListener('keyup', function(e) {
+        debouncedSearchCardSets(e.target.value);
+    });
+
+
+    function loadInitialCardSets() {
+        // Uses the fetch API to make an HTTP GET request to the server at the '/get-limited-card-sets' endpoint
+        fetch('/get-limited-card-sets')
+            // Reads the response body and returns it as JSON
+            .then(response => response.json())
+            // Takes the parsed JSON data and calls the populateDropdown function with the data
+            .then(sets => populateDropdown(sets))
+            .catch(error => console.error('Error:', error));
     }
 
     // Modify event listeners to include the caller (sport or set)
