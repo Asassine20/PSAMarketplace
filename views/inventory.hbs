@@ -112,13 +112,21 @@
     <nav aria-label="Page navigation" class="pagination-bottom">
         <ul class="pagination">
             {{#if showPrevious}}
-            <li class="page-item"><a class="page-link" href="?page={{minus currentPage 1}}">Previous</a></li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{minus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}">
+                    Previous
+                </a>
+            </li>
             {{/if}}
             {{#if showNext}}
-            <li class="page-item"><a class="page-link" href="?page={{plus currentPage 1}}">Next</a></li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{plus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}">
+                    Next
+                </a>
+            </li>
             {{/if}}
-
         </ul>
+
     </nav>
 </div>
 

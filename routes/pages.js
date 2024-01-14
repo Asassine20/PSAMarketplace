@@ -25,6 +25,7 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/inventory', authenticateToken, async (req, res) => {
+    console.log('Query Parameters:', req.query);
     const page = parseInt(req.query.page) || 1;
     const limit = 25;
     const offset = (page - 1) * limit;
@@ -50,22 +51,26 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         const showPrevious = page > 1;
         const showNext = page < totalPages;
 
-        const cardSets = await db.query('SELECT DISTINCT CardSet FROM Card');
-        const cardYears = await db.query('SELECT DISTINCT CardYear FROM Card');
-        const sports = await db.query('SELECT DISTINCT Sport FROM Card');
+        const cardSetsData = await db.query('SELECT DISTINCT CardSet FROM Card');
+        const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card');
+        const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');    
 
         res.render('inventory', { 
             username: req.user.username, 
             cards,
             searchTerm,
-            cardSets: [], //cardSets'''.map(row => row.CardSet),
-            cardYears: cardYears.map(row => row.CardYear),
-            sports: sports.map(row => row.Sport),
+            cardSet, // Use the same name as the query parameter
+            cardYear, // Use the same name as the query parameter
+            sport, // Use the same name as the query parameter
+            cardSets: cardSetsData.map(row => row.CardSet),
+            cardYears: cardYearsData.map(row => row.CardYear),
+            sports: sportsData.map(row => row.Sport),
             currentPage: page,
             totalPages,
             showPrevious,
             showNext,
             totalItems
+    
         });
     } catch (error) {
         console.error('Error fetching cards:', error);
