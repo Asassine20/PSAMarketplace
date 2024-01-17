@@ -87,13 +87,14 @@
         <thead>
             <tr>
                 <th>Sport</th>
-                <th>CardImage</th>
-                <th>CardName</th>
-                <th>CardSet</th>
-                <th>CardYear</th>
-                <th>CardNumber</th>
-                <th>CardColor</th>
-                <th>CardVariant</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Set</th>
+                <th>Year</th>
+                <th>Number</th>
+                <th>Color</th>
+                <th>Variant</th>
+                <th style="width:100px;"></th>
             </tr>
         </thead>
         <tbody>
@@ -107,9 +108,12 @@
                 <td>{{this.CardNumber}}</td>
                 <td>{{this.CardColor}}</td>
                 <td>{{this.CardVariant}}</td>
+                <td class="button-cell">
+                    <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId={{this.CardID}}'" class="table-button">Add</button>
+                </td>
             </tr>            
             {{else}}
-            <tr><td colspan="8">No cards found</td></tr>
+            <tr><td colspan="9">No cards found</td></tr>
             {{/each}}
         </tbody>
     </table>
@@ -328,17 +332,6 @@
         debouncedSearchCardSets(e.target.value);
     });
 
-/*
-    function loadInitialCardSets() {
-        // Uses the fetch API to make an HTTP GET request to the server at the '/get-limited-card-sets' endpoint
-        fetch('/get-limited-card-sets')
-            // Reads the response body and returns it as JSON
-            .then(response => response.json())
-            // Takes the parsed JSON data and calls the populateDropdown function with the data
-            .then(sets => populateDropdown(sets))
-            .catch(error => console.error('Error:', error));
-    }
-*/
     function resetFilters() {
         // Clear the player search term
         document.getElementById('searchTerm').value = '';

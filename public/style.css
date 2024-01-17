@@ -181,3 +181,16 @@ caption {
     min-width: 200px;
 }
 
+.button-cell {
+    text-align: center;
+    padding: 10px; /* Adjust the padding as needed */
+}
+.table-button {
+    background-color: #0050a2;
+    color: white;
+    width: 100%; /* Makes the button expand to the full width of the cell */
+    height: 30px; /* Sets a fixed height for the button */
+    display: block; /* Allows margin: auto to center the button horizontally */
+    margin: auto; /* Centers the button within the cell */
+    border-radius: 4px;
+}

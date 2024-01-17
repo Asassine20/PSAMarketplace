@@ -3,6 +3,8 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/middleware.js');
 const db = require('../db');
 
+router.use(express.urlencoded({ extended: true }));
+
 router.get('/', (req, res) => {
     res.render('index')
 });
@@ -226,6 +228,51 @@ router.get('/get-all-card-sets', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/update-inventory-pricing', authenticateToken, (req, res) => {
+    const cardId = req.query.cardId;
+    const sellerId = req.user.id;
 
+    console.log("Executing query with CardID:", cardId, "and SellerID:", sellerId);
+/*
+    const query = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
+
+    db.query(query, [cardId, sellerId], (err, result) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Database error');
+        }
+
+        console.log('Database result:', result);
+        if (result.length > 0) {
+            res.render('update_inventory', { inventory: result[0] });
+        } else {
+            res.render('update_inventory', { message: 'No inventory found.' });
+        }
+    });
+    */
+});
+
+/*
+// Define the route for processing the update form
+router.post('/update-inventory-pricing', (req, res) => {
+    const { listingId, gradeId, salePrice, quantity } = req.body;
+
+    const updateQuery = `
+        UPDATE Inventory 
+        SET GradeID = ?, SalePrice = ?, Quantity = ?
+        WHERE ListingID = ?
+    `;
+    db.query(updateQuery, [gradeId, salePrice, quantity, listingId], (err, result) => {
+        if (err) {
+            // Handle the error properly
+            res.status(500).send('Server Error');
+            return;
+        }
+
+        res.redirect('/inventory'); // Redirect to inventory list or a confirmation page
+    });
+});
+
+*/
 
 module.exports = router;
