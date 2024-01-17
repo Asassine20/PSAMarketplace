@@ -25,7 +25,6 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/inventory', authenticateToken, async (req, res) => {
-    console.log('Query Parameters:', req.query);
     const page = parseInt(req.query.page) || 1;
     const limit = 25;
     const offset = (page - 1) * limit;

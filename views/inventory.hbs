@@ -29,15 +29,15 @@
         </ul>
     </nav>
     <h4>{{username}} Inventory</h4>
-    <div class="inventorySearch">
-        <form action="/inventory" method="get">
+    <div class="inventorySearch" style="display: flex; justify-content: space-between; align-items: center;">
+        <form action="/inventory" method="get" style="flex-grow 1">
             <div>
-                <label for="searchTerm">Search by Name:</label>
+                <label for="searchTerm">Player:</label>
                 <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown" placeholder="Player Name" value="{{searchTerm}}">
             </div>
             <div>
                 <label for="sport">Sport:</label>
-                <select id="sport" name="sport" class="filter-input fixed-width-dropdown" onchange="loadSetsAndYears()">
+                <select id="sport" name="sport" class="filter-input fixed-width-dropdown">
                     <option value="">All Sports</option>
                     {{#each sports}}
                     <option value="{{this}}">{{this}}</option>
@@ -63,8 +63,13 @@
                     {{/each}}
                 </select>
             </div>
-            <div>
-                <button type="submit">Search</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <button type="submit" class="filter-input fixed-width-dropdown">Search</button>
+                </div>
+                <div>
+                    <button id="resetButton" type="reset" class="filter-input fixed-width-dropdown" onclick="resetFilters()">Reset</button>
+                </div>
             </div>
         </form>
     </div>
@@ -323,7 +328,7 @@
         debouncedSearchCardSets(e.target.value);
     });
 
-
+/*
     function loadInitialCardSets() {
         // Uses the fetch API to make an HTTP GET request to the server at the '/get-limited-card-sets' endpoint
         fetch('/get-limited-card-sets')
@@ -333,6 +338,21 @@
             .then(sets => populateDropdown(sets))
             .catch(error => console.error('Error:', error));
     }
+*/
+    function resetFilters() {
+        // Clear the player search term
+        document.getElementById('searchTerm').value = '';
+
+        // Reset dropdowns to their default option
+        document.getElementById('sport').selectedIndex = 0;
+        document.getElementById('cardSet').selectedIndex = 0;
+        document.getElementById('cardYear').selectedIndex = 0;
+
+        // If you need to fetch initial data for sports and years dropdowns, call the loadSetsAndYears function
+        // with null or a proper identifier if required by your implementation
+        loadSetsAndYears(null);
+    }
+    document.getElementById('resetButton').addEventListener('click', resetFilters);
 
     // Modify event listeners to include the caller (sport or set)
     document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
