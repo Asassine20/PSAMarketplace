@@ -66,10 +66,26 @@
         <!-- Hidden Inputs for Card ID and Listing ID -->
         <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
         <input type="hidden" name="listingId" value="{{inventory.ListingID}}">
+        <p>CardID: {{cardDetails.CardID}}</p>
+        <p>ListingID: {{inventory.ListingID}}</p>
 
         <div class="button-container">
             <button style="border-radius: 4px;" type="submit">{{#if inventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
         </div>
     </form>
 </body>
+<script>
+document.querySelector('form').addEventListener('submit', function(event) {
+    // Prevent actual submission for debugging
+    event.preventDefault(); 
+
+    const formData = new FormData(this);
+    for (const [key, value] of formData) {
+        console.log(`${key}: ${value}`);
+    }
+
+    // Remove the event.preventDefault(); line to allow normal submission after debugging
+});
+</script>
+
 </html>

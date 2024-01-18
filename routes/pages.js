@@ -233,31 +233,47 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const sellerId = req.user.id;
 
     try {
-        // Fetch inventory item and card details
+        // Define the inventory query
         const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
-        const cardQuery = 'SELECT * FROM Card WHERE CardID = ?';
-        // Additionally, fetch market price data as needed
-
         const inventoryItem = await db.query(inventoryQuery, [cardId, sellerId]);
-        const cardDetailsQuery = 'SELECT CardName, CardSet, CardYear, CardNumber, CardImage FROM Card WHERE CardID = ?';
+
+        let inventoryData = {};
+        if (inventoryItem.length > 0) {
+            inventoryData = {
+                ...inventoryItem[0],
+                ListingID: inventoryItem[0].ListingID // assuming ListingID is the column name
+            };
+        }
+
+        // Define the card details query and fetch data
+        const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardImage FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
-        // Fetch market price data here
+
+        // Fetch market price data here (if necessary)
         const grades = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
+        // Render the page with fetched data
         res.render('update_inventory', {
-            inventory: inventoryItem.length > 0 ? inventoryItem[0] : { CardID: cardId, SellerID: sellerId },
+            inventory: inventoryData,
             cardDetails: cardDetails.length > 0 ? cardDetails[0] : {},
-            grades
-            // Include market price data here
+            grades,
+            // Include other necessary data here
         });
+
+        console.log("Card Details:", cardDetails);
+        console.log("Inventory Item:", inventoryItem);
+
     } catch (error) {
         console.error('Database error:', error);
         res.status(500).send('Server error');
     }
 });
 
+
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], quantities = [] } = req.body;
+    console.log({ cardId, listingId, gradeIds, salePrices, quantities });
+
     const sellerId = req.user.id;
 
     try {
@@ -266,7 +282,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
             const salePrice = salePrices[index];
             const quantity = quantities[index];
 
-            // Skip processing if salePrice or quantity is missing
+            // Process only if both salePrice and quantity are provided for a grade
             if (salePrice && quantity) {
                 if (listingId) {
                     // Update existing inventory item
@@ -279,15 +295,13 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
                 }
             }
         }
-        
+
         res.redirect('/inventory');
     } catch (err) {
         console.error('Error processing inventory:', err);
         res.status(500).send('Error processing inventory');
     }
 });
-
-
 
 
 module.exports = router;
