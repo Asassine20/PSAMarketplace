@@ -228,51 +228,62 @@ router.get('/get-all-card-sets', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/update-inventory-pricing', authenticateToken, (req, res) => {
+router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const cardId = req.query.cardId;
     const sellerId = req.user.id;
 
-    console.log("Executing query with CardID:", cardId, "and SellerID:", sellerId);
-/*
-    const query = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
+    try {
+        // Fetch inventory item and card details
+        const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
+        const cardQuery = 'SELECT * FROM Card WHERE CardID = ?';
+        // Additionally, fetch market price data as needed
 
-    db.query(query, [cardId, sellerId], (err, result) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).send('Database error');
-        }
+        const inventoryItem = await db.query(inventoryQuery, [cardId, sellerId]);
+        const cardDetailsQuery = 'SELECT CardName, CardSet, CardYear, CardNumber, CardImage FROM Card WHERE CardID = ?';
+        const cardDetails = await db.query(cardDetailsQuery, [cardId]);
+        // Fetch market price data here
+        const grades = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
-        console.log('Database result:', result);
-        if (result.length > 0) {
-            res.render('update_inventory', { inventory: result[0] });
-        } else {
-            res.render('update_inventory', { message: 'No inventory found.' });
-        }
-    });
-    */
+        res.render('update_inventory', {
+            inventory: inventoryItem.length > 0 ? inventoryItem[0] : { CardID: cardId, SellerID: sellerId },
+            cardDetails: cardDetails.length > 0 ? cardDetails[0] : {},
+            grades
+            // Include market price data here
+        });
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).send('Server error');
+    }
 });
 
-/*
-// Define the route for processing the update form
-router.post('/update-inventory-pricing', (req, res) => {
-    const { listingId, gradeId, salePrice, quantity } = req.body;
 
-    const updateQuery = `
-        UPDATE Inventory 
-        SET GradeID = ?, SalePrice = ?, Quantity = ?
-        WHERE ListingID = ?
-    `;
-    db.query(updateQuery, [gradeId, salePrice, quantity, listingId], (err, result) => {
-        if (err) {
-            // Handle the error properly
-            res.status(500).send('Server Error');
-            return;
-        }
+router.post('/submit-inventory', authenticateToken, (req, res) => {
+    const { cardId, listingId, gradeIds, salePrices, quantity } = req.body;
+    const sellerId = req.user.id;
 
-        res.redirect('/inventory'); // Redirect to inventory list or a confirmation page
-    });
+    if (listingId) {
+        // Update existing inventory item
+        const updateQuery = 'UPDATE Inventory SET GradeID = ?, SalePrice = ?, Quantity = ? WHERE ListingID = ? AND SellerID = ?';
+        db.query(updateQuery, [gradeId, salePrice, quantity, listingId, sellerId], (err, result) => {
+            if (err) {
+                console.error('Error updating inventory:', err);
+                return res.status(500).send('Error updating inventory');
+            }
+            // Redirect or send a success message after update
+            res.redirect('/inventory'); // Redirect to inventory page or appropriate route
+        });
+    } else {
+        // Add new inventory item
+        const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
+        db.query(insertQuery, [cardId, gradeId, salePrice, sellerId, quantity], (err, result) => {
+            if (err) {
+                console.error('Error adding to inventory:', err);
+                return res.status(500).send('Error adding to inventory');
+            }
+            // Redirect or send a success message after addition
+            res.redirect('/inventory'); // Redirect to inventory page or appropriate route
+        });
+    }
 });
-
-*/
 
 module.exports = router;

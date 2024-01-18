@@ -194,3 +194,24 @@ caption {
     margin: auto; /* Centers the button within the cell */
     border-radius: 4px;
 }
+
+.flex-container {
+    display: flex;
+    align-items: flex-start; /* Align items at the top */
+    justify-content: space-between; /* Space between the items */
+}
+
+.product-info {
+    flex-basis: 30%; /* Adjust the width as needed */
+    margin-right: 20px; /* Optional spacing between the elements */
+}
+
+.table-container {
+    flex-basis: 70%; /* Adjust the width as needed */
+}
+
+.button-container {
+    text-align: right; /* Aligns the button to the right */
+    margin-top: 10px; /* Adds some space above the button, adjust as needed */
+    padding-right: 35px;
+}
