@@ -256,34 +256,38 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     }
 });
 
-
-router.post('/submit-inventory', authenticateToken, (req, res) => {
-    const { cardId, listingId, gradeIds, salePrices, quantity } = req.body;
+router.post('/submit-inventory', authenticateToken, async (req, res) => {
+    const { cardId, listingId, gradeIds = [], salePrices = [], quantities = [] } = req.body;
     const sellerId = req.user.id;
 
-    if (listingId) {
-        // Update existing inventory item
-        const updateQuery = 'UPDATE Inventory SET GradeID = ?, SalePrice = ?, Quantity = ? WHERE ListingID = ? AND SellerID = ?';
-        db.query(updateQuery, [gradeId, salePrice, quantity, listingId, sellerId], (err, result) => {
-            if (err) {
-                console.error('Error updating inventory:', err);
-                return res.status(500).send('Error updating inventory');
+    try {
+        for (let index = 0; index < gradeIds.length; index++) {
+            const gradeId = gradeIds[index];
+            const salePrice = salePrices[index];
+            const quantity = quantities[index];
+
+            // Skip processing if salePrice or quantity is missing
+            if (salePrice && quantity) {
+                if (listingId) {
+                    // Update existing inventory item
+                    const updateQuery = 'UPDATE Inventory SET GradeID = ?, SalePrice = ?, Quantity = ? WHERE ListingID = ? AND SellerID = ?';
+                    await db.query(updateQuery, [gradeId, salePrice, quantity, listingId, sellerId]);
+                } else {
+                    // Add new inventory item
+                    const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
+                    await db.query(insertQuery, [cardId, gradeId, salePrice, sellerId, quantity]);
+                }
             }
-            // Redirect or send a success message after update
-            res.redirect('/inventory'); // Redirect to inventory page or appropriate route
-        });
-    } else {
-        // Add new inventory item
-        const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
-        db.query(insertQuery, [cardId, gradeId, salePrice, sellerId, quantity], (err, result) => {
-            if (err) {
-                console.error('Error adding to inventory:', err);
-                return res.status(500).send('Error adding to inventory');
-            }
-            // Redirect or send a success message after addition
-            res.redirect('/inventory'); // Redirect to inventory page or appropriate route
-        });
+        }
+        
+        res.redirect('/inventory');
+    } catch (err) {
+        console.error('Error processing inventory:', err);
+        res.status(500).send('Error processing inventory');
     }
 });
+
+
+
 
 module.exports = router;
