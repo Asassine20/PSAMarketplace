@@ -47,22 +47,19 @@
                 </thead>
                 <tbody>
                     {{#each grades}}
-                    <tr>
-                        <td>{{this.gradeValue}}</td>
-                        <td>{{lookup ../marketPrices this}}</td>
-                        <td>
-                            <input type="hidden" name="gradeIds[]" value="{{this.gradeId}}">
-                            <!-- Check for existing inventory data and set the value if available -->
-                            <input type="text" name="salePrices[]" value="{{#if ../existingInventory}} {{#if (eq this.gradeId ../existingInventory.GradeID)}} {{../existingInventory.SalePrice}} {{/if}} {{/if}}">
-                        </td>
-                        <td>
-                            <!-- Check for existing inventory data and set the value if available -->
-                            <input type="number" name="quantities[]" value="{{#if ../existingInventory}} {{#if (eq this.gradeId ../existingInventory.GradeID)}} {{../existingInventory.Quantity}} {{/if}} {{/if}}">
-                        </td>
-                    </tr>
-                    <p>Debug: Existing Inventory Quantity - {{existingInventory.Quantity}}</p>
+                        <tr>
+                            <td>{{this.gradeValue}}</td>
+                            <td>{{lookup ../marketPrices this}}</td>
+                            <td>
+                                <input type="hidden" name="gradeIds[]" value="{{this.gradeId}}">
+                                <input type="text" name="salePrices[]" value="{{#if ../existingInventory}}{{#if (eq this.gradeId ../existingInventory.GradeID)}}{{../existingInventory.SalePrice}}{{/if}}{{/if}}">
+                            </td>
+                            <td>
+                                <input type="number" name="quantities[]" value="{{#if ../existingInventory}}{{#if (eq this.gradeId ../existingInventory.GradeID)}}{{../existingInventory.Quantity}}{{/if}}{{/if}}">
+                            </td>
+                        </tr>
+                        {{/each}}
 
-                    {{/each}}
                 </tbody>
             </table>
         </div>

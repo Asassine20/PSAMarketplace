@@ -255,6 +255,8 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
         const inventoryItem = await db.query(inventoryQuery, [cardId, sellerId]);
         let inventoryData = inventoryItem.length > 0 ? inventoryItem[0] : {};
+        console.log("Existing Inventory:", inventoryData);
+
 
         // Fetch card details
         const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardImage FROM Card WHERE CardID = ?';
