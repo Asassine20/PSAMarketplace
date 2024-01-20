@@ -285,16 +285,30 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
 });
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
-    const { cardId, listingId, gradeIds = [], salePrices = [], quantities = [] } = req.body;
+    const { cardId, listingId, gradeIds = [], salePrices = [], quantities = [], clearInventory } = req.body;
     const sellerId = req.user.id;
 
     try {
+        // Check if the "Clear Inventory" button was pressed
+        if (clearInventory && listingId) {
+            await db.query('DELETE FROM Inventory WHERE ListingID = ? AND SellerID = ?', [listingId, sellerId]);
+            return res.redirect('/inventory');
+        }
+
         for (let index = 0; index < gradeIds.length; index++) {
             const gradeId = gradeIds[index];
             const salePrice = salePrices[index];
             const quantity = quantities[index];
             
+            // If the quantity is 0, remove the item from inventory if it exists
+            if (quantity === '0') {
+                if (listingId) {
+                    await db.query('DELETE FROM Inventory WHERE ListingID = ? AND SellerID = ?', [listingId, sellerId]);
+                }
+                continue; // Skip to the next item
+            }
 
+            // Continue with update or insert as before
             if (salePrice && quantity) {
                 let query, queryParams;
                 if (listingId) {
@@ -304,8 +318,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
                     query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
                     queryParams = [cardId, gradeId, salePrice, sellerId, quantity];
                 }
-
-                const queryResult = await db.query(query, queryParams);
+                await db.query(query, queryParams);
             }
         }
 
@@ -315,6 +328,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Error processing inventory');
     }
 });
+
 
 
 module.exports = router;

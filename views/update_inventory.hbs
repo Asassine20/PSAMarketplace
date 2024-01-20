@@ -68,6 +68,7 @@
     <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
     <input type="hidden" name="listingId" value="{{existingInventory.ListingID}}">
     <div class="button-container">
+        <button type="submit" name="clearInventory" value="true" class="clear-inventory-button">Clear Inventory</button>
         <button style="border-radius: 4px;" type="submit">{{#if existingInventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
     </div>
 </form>
