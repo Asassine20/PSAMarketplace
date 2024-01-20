@@ -16,7 +16,7 @@ server.use(express.static(publicDirectory));
 server.set('view engine', 'hbs');
 
 // Parse URL-encoded bodies (as sent by HTML Forms)
-server.use(express.urlencoded({ extended: false }));
+server.use(express.urlencoded({ extended: true }));
 
 // Parse JSON bodies (as sent by API clients)
 server.use(express.json());

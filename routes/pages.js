@@ -233,35 +233,29 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const sellerId = req.user.id;
 
     try {
-        // Define the inventory query
+        // Fetch inventory item
         const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
         const inventoryItem = await db.query(inventoryQuery, [cardId, sellerId]);
+        let inventoryData = inventoryItem.length > 0 ? inventoryItem[0] : {};
 
-        let inventoryData = {};
-        if (inventoryItem.length > 0) {
-            inventoryData = {
-                ...inventoryItem[0],
-                ListingID: inventoryItem[0].ListingID // assuming ListingID is the column name
-            };
-        }
-
-        // Define the card details query and fetch data
+        // Fetch card details
         const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardImage FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
 
-        // Fetch market price data here (if necessary)
-        const grades = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+        // Fetch grade IDs for the card
+        const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
+        const gradeData = await db.query(gradeQuery, [cardId]);
+        const gradesWithIds = gradeData.map(gradeRow => ({
+            gradeValue: gradeRow.GradeValue,
+            gradeId: gradeRow.GradeID
+        }));
 
         // Render the page with fetched data
         res.render('update_inventory', {
             inventory: inventoryData,
             cardDetails: cardDetails.length > 0 ? cardDetails[0] : {},
-            grades,
-            // Include other necessary data here
+            grades: gradesWithIds
         });
-
-        console.log("Card Details:", cardDetails);
-        console.log("Inventory Item:", inventoryItem);
 
     } catch (error) {
         console.error('Database error:', error);
@@ -269,11 +263,8 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     }
 });
 
-
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], quantities = [] } = req.body;
-    console.log({ cardId, listingId, gradeIds, salePrices, quantities });
-
     const sellerId = req.user.id;
 
     try {
@@ -282,17 +273,17 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
             const salePrice = salePrices[index];
             const quantity = quantities[index];
 
-            // Process only if both salePrice and quantity are provided for a grade
             if (salePrice && quantity) {
+                let query, queryParams;
                 if (listingId) {
-                    // Update existing inventory item
-                    const updateQuery = 'UPDATE Inventory SET GradeID = ?, SalePrice = ?, Quantity = ? WHERE ListingID = ? AND SellerID = ?';
-                    await db.query(updateQuery, [gradeId, salePrice, quantity, listingId, sellerId]);
+                    query = 'UPDATE Inventory SET GradeID = ?, SalePrice = ?, Quantity = ? WHERE ListingID = ? AND SellerID = ?';
+                    queryParams = [gradeId, salePrice, quantity, listingId, sellerId];
                 } else {
-                    // Add new inventory item
-                    const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
-                    await db.query(insertQuery, [cardId, gradeId, salePrice, sellerId, quantity]);
+                    query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
+                    queryParams = [cardId, gradeId, salePrice, sellerId, quantity];
                 }
+
+                const queryResult = await db.query(query, queryParams);
             }
         }
 
@@ -302,6 +293,9 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Error processing inventory');
     }
 });
+
+
+
 
 
 module.exports = router;
