@@ -99,7 +99,7 @@
         </thead>
         <tbody>
             {{#each cards}}
-            <tr>
+            <tr class="{{#if this.isInStock}}in-stock{{/if}}">
                 <td>{{this.Sport}}</td>
                 <td><img src="{{this.CardImage}}" alt="Card Image"></td>
                 <td>{{this.CardName}}</td>
@@ -117,6 +117,7 @@
             {{/each}}
         </tbody>
     </table>
+
 
     <nav aria-label="Page navigation" class="pagination-bottom">
         <ul class="pagination">

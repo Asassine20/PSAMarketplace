@@ -27,6 +27,7 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/inventory', authenticateToken, async (req, res) => {
+    const sellerId = req.user.id; // Assuming the user's ID is stored in req.user
     const page = parseInt(req.query.page) || 1;
     const limit = 25;
     const offset = (page - 1) * limit;
@@ -45,6 +46,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         const countValues = [`%${searchTerm}%`, `%${cardSet}%`, `%${cardYear}%`, `%${sport}%`];
 
         const cards = await db.query(query, values);
+
         const totalResult = await db.query(countQuery, countValues);
         const totalItems = totalResult[0].count; 
         const totalPages = Math.ceil(totalItems / limit);
@@ -56,9 +58,24 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card');
         const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');    
 
+        // Fetch inventory with a flag for in-stock items
+        const inventoryQuery = 'SELECT *, (ListingID IS NOT NULL) AS isInStock FROM Inventory WHERE SellerID = ?';
+        const inventoryItems = await db.query(inventoryQuery, [sellerId]);
+
+        // Create a Set of CardIDs that are in stock
+        const inStockCardIds = new Set(inventoryItems.filter(item => item.isInStock).map(item => item.CardID));
+
+        // Map over the cards to include isInStock property
+        const updatedCards = cards.map(card => ({
+        ...card,
+        isInStock: inStockCardIds.has(card.CardID) // Set isInStock to true if CardID is in the inStockCardIds set
+        }));
+
+
+
         res.render('inventory', { 
             username: req.user.username, 
-            cards,
+            cards: updatedCards,
             searchTerm,
             cardSet, // Use the same name as the query parameter
             cardYear, // Use the same name as the query parameter
@@ -70,7 +87,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             totalPages,
             showPrevious,
             showNext,
-            totalItems
+            totalItems,
+            inventoryItems
     
         });
     } catch (error) {
@@ -252,7 +270,8 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
 
         // Render the page with fetched data
         res.render('update_inventory', {
-            inventory: inventoryData,
+            inventory: inventoryData, // existing inventory data
+            existingInventory: inventoryData, // additional key for pre-populating form
             cardDetails: cardDetails.length > 0 ? cardDetails[0] : {},
             grades: gradesWithIds
         });
@@ -272,6 +291,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
             const gradeId = gradeIds[index];
             const salePrice = salePrices[index];
             const quantity = quantities[index];
+            
 
             if (salePrice && quantity) {
                 let query, queryParams;
@@ -293,9 +313,6 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Error processing inventory');
     }
 });
-
-
-
 
 
 module.exports = router;

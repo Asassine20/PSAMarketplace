@@ -21,55 +21,60 @@
             <li><a href="/dashboard">Reports</a></li>
         </ul>
     </nav>
-    <form action="/submit-inventory" method="post">
-        <!-- Card Details -->
-        <div class="flex-container">
-            <div class="product-info">
-                <h1>Product Info</h1>
-                {{#if cardDetails.CardImage}}
-                <img src="{{cardDetails.CardImage}}" alt="Card Image" class="card-image">
-                {{/if}}
-                <p>Card Name: {{cardDetails.CardName}}</p>
-                <p>Card Set: {{cardDetails.CardSet}}</p>
-                <p>Card Year: {{cardDetails.CardYear}}</p>
-                <p>Card Number: {{cardDetails.CardNumber}}</p>
-            </div>
-            <!-- Grades and Market Prices Chart -->
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Grade</th>
-                            <th>Market Price</th>
-                            <th>Your Sale Price</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each grades}}
-                        <tr>
-                            <td>{{this.gradeValue}}</td>
-                            <td>{{lookup ../marketPrices this}}</td>
-                            <td>
-                                <input type="hidden" name="gradeIds[]" value="{{this.gradeId}}">
-                                <input type="text" name="salePrices[]">
-                            </td>
-                            <td>
-                                <input type="number" name="quantities[]">
-                            </td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
-            </div>
+<form action="/submit-inventory" method="post">
+    <!-- Card Details -->
+    <div class="flex-container">
+        <div class="product-info">
+            <h1>Product Info</h1>
+            {{#if cardDetails.CardImage}}
+            <img src="{{cardDetails.CardImage}}" alt="Card Image" class="card-image">
+            {{/if}}
+            <p>Card Name: {{cardDetails.CardName}}</p>
+            <p>Card Set: {{cardDetails.CardSet}}</p>
+            <p>Card Year: {{cardDetails.CardYear}}</p>
+            <p>Card Number: {{cardDetails.CardNumber}}</p>
         </div>
-        <!-- Hidden Inputs for Card ID and Listing ID -->
-        <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
-        <input type="hidden" name="listingId" value="{{inventory.ListingID}}">
-        <div class="button-container">
-            <button style="border-radius: 4px;" type="submit">{{#if inventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
+        <!-- Grades and Market Prices Chart -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Grade</th>
+                        <th>Market Price</th>
+                        <th>Your Sale Price</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each grades}}
+                    <tr>
+                        <td>{{this.gradeValue}}</td>
+                        <td>{{lookup ../marketPrices this}}</td>
+                        <td>
+                            <input type="hidden" name="gradeIds[]" value="{{this.gradeId}}">
+                            <!-- Check for existing inventory data and set the value if available -->
+                            <input type="text" name="salePrices[]" value="{{#if ../existingInventory}} {{#if (eq this.gradeId ../existingInventory.GradeID)}} {{../existingInventory.SalePrice}} {{/if}} {{/if}}">
+                        </td>
+                        <td>
+                            <!-- Check for existing inventory data and set the value if available -->
+                            <input type="number" name="quantities[]" value="{{#if ../existingInventory}} {{#if (eq this.gradeId ../existingInventory.GradeID)}} {{../existingInventory.Quantity}} {{/if}} {{/if}}">
+                        </td>
+                    </tr>
+                    <p>Debug: Existing Inventory Quantity - {{existingInventory.Quantity}}</p>
+
+                    {{/each}}
+                </tbody>
+            </table>
         </div>
-    </form>
+    </div>
+    <!-- Hidden Inputs for Card ID and Listing ID -->
+    <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
+    <input type="hidden" name="listingId" value="{{existingInventory.ListingID}}">
+    <div class="button-container">
+        <button style="border-radius: 4px;" type="submit">{{#if existingInventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
+    </div>
+</form>
+
 </body>
 
 </html>
