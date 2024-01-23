@@ -20,7 +20,6 @@
         <ul>
             <li><a href="/dashboard">Home</a></li>
             <li><a href="/inventory">Inventory</a></li>
-            <li><a href="/dashboard">Pricing</a></li>
             <li><a href="/dashboard">Orders</a></li>
             <li><a href="/dashboard">Messages</a></li>
             <li><a href="/dashboard">Feedback</a></li>
@@ -63,13 +62,32 @@
                     {{/each}}
                 </select>
             </div>
+            <div>
+                <label for="cardColor">Card Color:</label>
+                <select id="cardColor" name="cardColor" class="filter-input fixed-width-dropdown">
+                    <option value="">All Colors</option>
+                    {{#each cardColors}}
+                    <option value="{{this}}" {{#if (eq this ../cardColor)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <label for="cardVariant">Card Variant:</label>
+                <select id="cardVariant" name="cardVariant" class="filter-input fixed-width-dropdown">
+                    <option value="">All Variants</option>
+                    {{#each cardVariants}}
+                    <option value="{{this}}" {{#if (eq this ../cardVariant)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <button type="submit" class="filter-input fixed-width-dropdown">Search</button>
-                </div>
                 <div>
                     <button id="resetButton" type="reset" class="filter-input fixed-width-dropdown" onclick="resetFilters()">Reset</button>
                 </div>
+                <div>
+                    <button type="submit" class="filter-input fixed-width-dropdown">Search</button>
+                </div>
+
             </div>
         </form>
     </div>
@@ -81,6 +99,17 @@
             <div class="table-header">
                 <h2>Product Catalog</h2>
                 <span>{{totalItems}} Results</span>
+                <div class="page-size-selector">
+                    <label for="pageSize">Items per page:</label>
+                    <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="250">250</option>
+                        <option value="500">500</option>
+                    </select>
+                </div>
             </div>
         </caption>
 
@@ -123,14 +152,14 @@
         <ul class="pagination">
             {{#if showPrevious}}
             <li class="page-item">
-                <a class="page-link" href="?page={{minus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}">
+                <a class="page-link" href="?page={{minus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}&cardColor={{cardColor}}&cardVariant={{cardVariant}}">
                     Previous
                 </a>
             </li>
             {{/if}}
             {{#if showNext}}
             <li class="page-item">
-                <a class="page-link" href="?page={{plus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}">
+                <a class="page-link" href="?page={{plus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}&cardColor={{cardColor}}&cardVariant={{cardVariant}}">
                     Next
                 </a>
             </li>
@@ -147,6 +176,8 @@
         document.getElementById('sport').disabled = true;
         document.getElementById('cardSet').disabled = true;
         document.getElementById('cardYear').disabled = true;
+        document.getElementById('cardVariant').disabled = true;
+        document.getElementById('cardColor').disabled = true;
 
         // Displays spinner while loading
         document.getElementById('spinner').style.display = 'flex';
@@ -156,10 +187,12 @@
         const sport = document.getElementById('sport').value;
         const cardSet = document.getElementById('cardSet').value;
         const year = document.getElementById('cardYear').value;
+        const cardColor = document.getElementById('cardColor').value;
+        const cardVariant = document.getElementById('cardVariant').value;
 
         // Fetch sports based on card set and year
         // Sends a HTTP GET request to server endpoint '/sports' with parameters cardSet and year
-        fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}`)
+        fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             // Converts the response from JSON to a JavaScript object
             .then(response => response.json())
             .then(sports => {
@@ -182,7 +215,7 @@
 
         // Fetch card sets based on sport and year
         // Sends a HTTP GET request to server endpoint '/cardsets' with parameters sport and year
-        fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}`)
+        fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             .then(response => response.json())
             .then(sets => {
                 const setSelect = document.getElementById('cardSet');
@@ -201,7 +234,7 @@
 
         // Fetch years based on sport and card set
         // Sends a HTTP GET request to server endpoint '/years' with parameters sport and cardset
-        fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}`)
+        fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             .then(response => response.json())
             .then(years => {
                 const yearSelect = document.getElementById('cardYear');
@@ -222,6 +255,9 @@
                 document.getElementById('sport').disabled = false;
                 document.getElementById('cardSet').disabled = false;
                 document.getElementById('cardYear').disabled = false;
+                document.getElementById('cardColor').disabled = false;
+                document.getElementById('cardVariant').disabled = false;
+
                 // Removes the display of the spinner after fetching is complete
                 document.getElementById('spinner').style.display = 'none';
             });
@@ -341,6 +377,9 @@
         document.getElementById('sport').selectedIndex = 0;
         document.getElementById('cardSet').selectedIndex = 0;
         document.getElementById('cardYear').selectedIndex = 0;
+        document.getElementById('cardColor').selectedIndex = 0;
+        document.getElementById('cardVariant').selectedIndex = 0;
+        
 
         // If you need to fetch initial data for sports and years dropdowns, call the loadSetsAndYears function
         // with null or a proper identifier if required by your implementation
@@ -352,6 +391,21 @@
     document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
     document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
     document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
+    document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
+    document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
+
+    function changePageSize() {
+        var pageSize = document.getElementById('pageSize').value;
+        var currentUrl = new URL(window.location.href);
+        var searchParams = new URLSearchParams(currentUrl.search);
+
+        // Update pageSize parameter or add it if not present
+        searchParams.set('pageSize', pageSize);
+
+        // Build the new URL with the existing parameters and the updated pageSize
+        window.location.href = `/inventory?${searchParams.toString()}`;
+    }
+
 
 </script>
 

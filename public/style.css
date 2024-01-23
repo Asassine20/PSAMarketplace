@@ -73,7 +73,26 @@ nav li a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
+
+.table-header > h2 {
+    flex-grow: 1;
+}
+
+.page-size-selector {
+    display: flex;
+    align-items: center;
+    padding-left: 20px; /* Adjust as needed */
+    margin: 5px;     /* Uniform margin */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px;
+}
+
+.page-size-selector label {
+    margin-right: 5px; /* Adjust as needed */
+}
+
 
 .table-header h2 {
     margin: 0;
@@ -82,7 +101,7 @@ nav li a:hover {
 }
 
 .table-header span {
-    font-size: 1rem;
+    font-size: 16px;
     color: #666;
     /* Other styling as needed */
 }

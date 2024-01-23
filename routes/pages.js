@@ -29,17 +29,35 @@ router.get('/logout', (req, res) => {
 router.get('/inventory', authenticateToken, async (req, res) => {
     const sellerId = req.user.id; // Assuming the user's ID is stored in req.user
     const page = parseInt(req.query.page) || 1;
-    const limit = 25;
+    const limit = parseInt(req.query.pageSize) || 25;
     const offset = (page - 1) * limit;
     const searchTerm = req.query.searchTerm || '';
     const cardSet = req.query.cardSet || '';
     const cardYear = req.query.cardYear || '';
     const sport = req.query.sport || '';
+    const cardColor = req.query.cardColor || '';
+    const cardVariant = req.query.cardVariant || '';
 
     try {
         // Query for search and pagination
-        const query = "SELECT * FROM Card WHERE CardName LIKE ? AND CardSet LIKE ? AND CardYear LIKE ? AND Sport LIKE ? LIMIT ? OFFSET ?";
-        const values = [`%${searchTerm}%`, `%${cardSet}%`, `%${cardYear}%`, `%${sport}%`, limit, offset];
+        const query = `
+            SELECT * FROM Card 
+            WHERE CardName LIKE ? 
+            AND CardSet LIKE ? 
+            AND CardYear LIKE ? 
+            AND Sport LIKE ? 
+            AND CardColor LIKE ? 
+            AND CardVariant LIKE ? 
+            LIMIT ? OFFSET ?`;
+        const values = [
+            `%${searchTerm}%`, 
+            `%${cardSet}%`, 
+            `%${cardYear}%`, 
+            `%${sport}%`, 
+            `%${cardColor}%`, 
+            `%${cardVariant}%`, 
+            limit, offset
+        ];
 
         // Query for total count with filters
         const countQuery = "SELECT COUNT(*) AS count FROM Card WHERE CardName LIKE ? AND CardSet LIKE ? AND CardYear LIKE ? AND Sport LIKE ?";
@@ -57,7 +75,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         const cardSetsData = await db.query('SELECT DISTINCT CardSet FROM Card');
         const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card');
         const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');    
-
+        const cardColorsData = await db.query('SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL AND CardColor != \'\'');
+        const cardVariantsData = await db.query('SELECT DISTINCT CardVariant FROM Card WHERE CardVariant IS NOT NULL');
         // Fetch inventory with a flag for in-stock items
         const inventoryQuery = 'SELECT *, (ListingID IS NOT NULL) AS isInStock FROM Inventory WHERE SellerID = ?';
         const inventoryItems = await db.query(inventoryQuery, [sellerId]);
@@ -83,6 +102,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             cardSets: cardSetsData.map(row => row.CardSet),
             cardYears: cardYearsData.map(row => row.CardYear),
             sports: sportsData.map(row => row.Sport),
+            cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
+            cardVariants: cardVariantsData.map(row => row.CardVariant),
             currentPage: page,
             totalPages,
             showPrevious,
@@ -100,6 +121,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
 router.get('/cardsets', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
+    const cardColor = req.query.cardColor || '';
+    const cardVariant = req.query.cardVariant || '';
 
     let query = "SELECT DISTINCT CardSet FROM Card";
     let conditions = [];
@@ -112,6 +135,14 @@ router.get('/cardsets', authenticateToken, async (req, res) => {
     if (year) {
         conditions.push("CardYear = ?");
         values.push(year);
+    }
+    if (cardColor) {
+        conditions.push("CardColor = ?");
+        values.push(cardColor);
+    }
+    if (cardVariant) {
+        conditions.push("CardVariant = ?");
+        values.push(cardVariant);
     }
 
     if (conditions.length) {
@@ -133,6 +164,8 @@ router.get('/cardsets', authenticateToken, async (req, res) => {
 router.get('/years', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
+    const cardColor = req.query.cardColor || '';
+    const cardVariant = req.query.cardVariant || '';
     
     let query = "SELECT DISTINCT CardYear FROM Card";
     let conditions = [];
@@ -146,7 +179,14 @@ router.get('/years', authenticateToken, async (req, res) => {
         conditions.push("CardSet = ?");
         values.push(cardSet); // Use exact match for cardSet
     }
-    
+    if (cardColor) {
+        conditions.push("CardColor = ?");
+        values.push(cardColor);
+    }
+    if (cardVariant) {
+        conditions.push("CardVariant = ?");
+        values.push(cardVariant);
+    }
     if (conditions.length) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -166,6 +206,8 @@ router.get('/years', authenticateToken, async (req, res) => {
 router.get('/sports', authenticateToken, async (req, res) => {
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
+    const cardColor = req.query.cardColor || '';
+    const cardVariant = req.query.cardVariant || '';
 
     let query = "SELECT DISTINCT Sport FROM Card";
     let conditions = [];
@@ -179,7 +221,14 @@ router.get('/sports', authenticateToken, async (req, res) => {
         conditions.push("CardYear = ?");
         values.push(year);
     }
-
+    if (cardColor) {
+        conditions.push("CardColor = ?");
+        values.push(cardColor);
+    }
+    if (cardVariant) {
+        conditions.push("CardVariant = ?");
+        values.push(cardVariant);
+    }
     if (conditions.length) {
         query += " WHERE " + conditions.join(" AND ");
     }
@@ -191,18 +240,6 @@ router.get('/sports', authenticateToken, async (req, res) => {
         res.json(sports.map(row => row.Sport));
     } catch (error) {
         console.error('Error fetching sports:', error);
-        res.status(500).send('Server error');
-    }
-});
-
-
-// Endpoint for initial limited card sets
-router.get('/get-limited-card-sets', authenticateToken, async (req, res) => {
-    try {
-        const query = "SELECT DISTINCT CardSet FROM Card LIMIT 10"; // Adjust the limit as needed
-        const result = await db.query(query);
-        res.json(result.map(row => row.CardSet));
-    } catch (error) {
         res.status(500).send('Server error');
     }
 });
@@ -233,19 +270,6 @@ router.get('/search-card-sets', authenticateToken, async (req, res) => {
     }
 });
 
-
-router.get('/get-all-card-sets', authenticateToken, async (req, res) => {
-    try {
-        const query = "SELECT DISTINCT CardSet FROM Card";
-        const result = await db.query(query);
-        const cardSets = result.map(row => row.CardSet);
-        res.json(cardSets);
-    } catch (error) {
-        console.error('Error fetching all card sets:', error);
-        res.status(500).send('Server error');
-    }
-});
-
 router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const cardId = req.query.cardId;
     const sellerId = req.user.id;
@@ -255,7 +279,6 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
         const inventoryItem = await db.query(inventoryQuery, [cardId, sellerId]);
         let inventoryData = inventoryItem.length > 0 ? inventoryItem[0] : {};
-        console.log("Existing Inventory:", inventoryData);
 
 
         // Fetch card details
