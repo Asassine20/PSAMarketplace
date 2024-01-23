@@ -1,21 +1,15 @@
 const db = require('./db'); // Replace './db' with your database connection module path
 
-async function deleteInBatches(tableName, batchSize) {
+async function clearSpecificCardVariant(variant) {
     try {
-        let deletedRows = 0;
-        let totalRowsDeleted = 0;
-
-        do {
-            const result = await db.query(`DELETE FROM ${tableName} LIMIT ?`, [batchSize]);
-            deletedRows = result.affectedRows;
-            totalRowsDeleted += deletedRows;
-            console.log(`Deleted ${deletedRows} rows. Total deleted: ${totalRowsDeleted}`);
-        } while (deletedRows === batchSize);
-
-        console.log(`Finished deleting rows from ${tableName}.`);
+        // Update CardVariant to NULL where it is equal to the specified variant
+        const result = await db.query(`UPDATE Card SET CardVariant = NULL WHERE CardVariant = ?`, [variant]);
+        const updatedRows = result.affectedRows;
+        
+        console.log(`Updated ${updatedRows} rows where CardVariant was '${variant}'.`);
     } catch (error) {
-        console.error('Error during deletion:', error);
+        console.error('Error updating CardVariant:', error);
     }
 }
 
-deleteInBatches('Grade', 10000);
+clearSpecificCardVariant('base');

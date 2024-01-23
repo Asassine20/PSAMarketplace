@@ -39,29 +39,38 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     const cardVariant = req.query.cardVariant || '';
 
     try {
-        // Query for search and pagination
-        const query = `
-            SELECT * FROM Card 
-            WHERE CardName LIKE ? 
-            AND CardSet LIKE ? 
-            AND CardYear LIKE ? 
-            AND Sport LIKE ? 
-            AND CardColor LIKE ? 
-            AND CardVariant LIKE ? 
-            LIMIT ? OFFSET ?`;
-        const values = [
+        let whereConditions = [
+            "CardName LIKE ?",
+            "CardSet LIKE ?",
+            "CardYear LIKE ?",
+            "Sport LIKE ?"
+        ];
+        let values = [
             `%${searchTerm}%`, 
             `%${cardSet}%`, 
             `%${cardYear}%`, 
-            `%${sport}%`, 
-            `%${cardColor}%`, 
-            `%${cardVariant}%`, 
-            limit, offset
+            `%${sport}%`
         ];
+
+        if (cardColor) {
+            whereConditions.push("(CardColor = ? OR CardColor IS NULL OR CardColor = '')");
+            values.push(cardColor);
+        }
+
+        if (cardVariant) {
+            whereConditions.push("(CardVariant = ? OR CardVariant IS NULL OR CardVariant = '')");
+            values.push(cardVariant);
+        }
+
+        const query = `
+            SELECT * FROM Card 
+            WHERE ${whereConditions.join(" AND ")}
+            LIMIT ? OFFSET ?`;
+        values.push(limit, offset);
 
         // Query for total count with filters
         const countQuery = "SELECT COUNT(*) AS count FROM Card WHERE CardName LIKE ? AND CardSet LIKE ? AND CardYear LIKE ? AND Sport LIKE ?";
-        const countValues = [`%${searchTerm}%`, `%${cardSet}%`, `%${cardYear}%`, `%${sport}%`];
+        const countValues = [`%${searchTerm}%`, `%${cardSet}%`, `%${cardYear}%`, `%${sport}%`, `%${cardColor}%`, `%${cardVariant}%`];
 
         const cards = await db.query(query, values);
 
@@ -282,7 +291,7 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
 
 
         // Fetch card details
-        const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardImage FROM Card WHERE CardID = ?';
+        const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
 
         // Fetch grade IDs for the card

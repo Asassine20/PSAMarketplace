@@ -3,7 +3,7 @@ const db = require('./db'); // Replace './db' with your database connection modu
 async function updateCardVariants() {
     try {
         // Define the variants to search for
-        const variants = ['base', 'serial', 'memorabilia','variation','short print', 'draft picks' , 'parallel', 'insert', 'retail', 'refractor', 'xfractors', 'mini', 
+        const variants = ['base', 'patch', 'serial', 'memorabilia','variation','short print', 'draft picks' , 'parallel', 'insert', 'retail', 'refractor', 'xfractors', 'mini', 
                         'press proof', 'autograph','holo', 'fire burst', 'rookie', 'camo', 'lazer', 'velocity', 'reactive', 'die cut', 
                         'pulsar', 'disco','sticker', 'shock' ];
 
