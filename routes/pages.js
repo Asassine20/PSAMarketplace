@@ -361,6 +361,43 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/orders', async (req, res) => {
+    try {
+        // Query to fetch orders from the database
+        const query = 'SELECT * FROM Orders';
+        const orders = await db.query(query);
+
+        // Render the orders.hbs template with the fetched orders
+        res.render('orders', { orders });
+    } catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+router.get('/order-details', authenticateToken, async (req, res) => {
+    const orderId = req.query.orderId;
+    
+    try {
+        // Fetch the general details of the order
+        const orderDetails = await db.query('SELECT * FROM Orders WHERE OrderID = ?', [orderId]);
+        if (orderDetails.length === 0) {
+            return res.status(404).send('Order not found');
+        }
+
+        // Fetch items in the order
+        const orderItems = await db.query('SELECT * FROM OrderItems WHERE OrderID = ?', [orderId]);
+
+        res.render('order-details', {
+            order: orderDetails[0], 
+            items: orderItems
+        });
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        res.status(500).send('Server error');
+    }
+});
+
 
 
 module.exports = router;

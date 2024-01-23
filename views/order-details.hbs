@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/style.css">
+    <title>Document</title>
+</head>
+<body>
+    <nav>
+        <h4 style="font-size:13px">Logo Placeholder</h4>
+        <ul>
+            <li><a href="/dashboard">Home</a></li>
+            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/orders">Orders</a></li>
+            <li><a href="/dashboard">Messages</a></li>
+            <li><a href="/dashboard">Feedback</a></li>
+            <li><a href="/dashboard">Payments</a></li>
+            <li><a href="/dashboard">Reports</a></li>
+        </ul>
+    </nav>
+    <!-- Order Summary -->
+    <h2>Order Summary</h2>
+    <p>Order ID: {{order.OrderID}}</p>
+    <p>Order Date: {{order.OrderDate}}</p>
+    <p>Total Price: {{order.TotalPrice}}</p>
+    <p>Buyer ID: {{order.BuyerID}}</p>
+
+    <!-- Itemized List -->
+    <h2>Items in Order</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Listing ID</th>
+                <th>Quantity</th>
+                <th>Price per Item</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each items}}
+            <tr>
+                <td>{{ListingID}}</td>
+                <td>{{Quantity}}</td>
+                <td>${{Price}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <!-- Add more content or navigation as needed -->
+</body>
+</html>
