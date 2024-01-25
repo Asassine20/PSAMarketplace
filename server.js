@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const server = express();
 const db = require('./db');
-const port = 3001;
+const port = 3000;
 const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
 const cookieParser = require('cookie-parser');
@@ -42,3 +42,15 @@ hbs.registerHelper('minus', function(value, decrement) {
 hbs.registerHelper('eq', function(arg1, arg2, options) {
     return arg1 === arg2;
 });
+
+hbs.registerHelper('formatDate', function(date) {
+    const options = { 
+      year: 'numeric', 
+      month: 'numeric', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit'
+    };
+    return new Date(date).toLocaleDateString('en-US', options);
+  });
+  

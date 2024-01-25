@@ -239,3 +239,36 @@ caption {
 .in-stock {
     background-color: rgb(0, 255, 140, 0.2);
 }
+
+
+.order-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .order-detail-box {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    flex-basis: calc(33.333% - 10px); /* Adjust the width minus the gap */
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    height: 200px; /* Adjust the height as needed for uniformity */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .order-detail-box h4 {
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    font-size: 1em;
+  }
+
+  .order-detail-box p {
+    margin: 0;
+    font-size: 0.9em;
+  }

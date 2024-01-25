@@ -361,6 +361,26 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
     }
 });
 
+async function updateOrderTotal(orderId) {
+    try {
+        // Calculate the new total price
+        const totalResult = await db.query(
+            'SELECT SUM(SalePrice * Quantity) AS Price FROM OrderItems WHERE OrderID = ?', 
+            [orderId]
+        );
+        const newTotal = totalResult[0].TotalPrice;
+
+        // Update the Orders table
+        await db.query(
+            'UPDATE Orders SET SalePrice = ? WHERE OrderID = ?', 
+            [newTotal, orderId]
+        );
+    } catch (error) {
+        console.error('Error updating order total:', error);
+        // Handle error appropriately
+    }
+}
+
 router.get('/orders', async (req, res) => {
     try {
         // Query to fetch orders from the database
@@ -375,28 +395,32 @@ router.get('/orders', async (req, res) => {
     }
 });
 
-router.get('/order-details', authenticateToken, async (req, res) => {
+router.get('/order-details', async (req, res) => {
     const orderId = req.query.orderId;
-    
     try {
-        // Fetch the general details of the order
+        // Fetch order details
         const orderDetails = await db.query('SELECT * FROM Orders WHERE OrderID = ?', [orderId]);
-        if (orderDetails.length === 0) {
-            return res.status(404).send('Order not found');
-        }
-
-        // Fetch items in the order
         const orderItems = await db.query('SELECT * FROM OrderItems WHERE OrderID = ?', [orderId]);
 
+        // Calculate the total price
+        const totalPriceResult = await db.query(
+            'SELECT SUM(Price * Quantity) AS TotalPrice FROM OrderItems WHERE OrderID = ?',
+            [orderId]
+        );
+        const totalPrice = totalPriceResult[0].TotalPrice;
+
+        // Render the order details page with total price
         res.render('order-details', {
-            order: orderDetails[0], 
-            items: orderItems
+            order: orderDetails[0],
+            items: orderItems,
+            totalPrice: totalPrice
         });
     } catch (error) {
         console.error('Error fetching order details:', error);
-        res.status(500).send('Server error');
+        res.status(500).send('Error fetching order details');
     }
 });
+
 
 
 

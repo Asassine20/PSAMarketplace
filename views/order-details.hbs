@@ -22,10 +22,43 @@
     </nav>
     <!-- Order Summary -->
     <h2>Order Summary</h2>
-    <p>Order ID: {{order.OrderID}}</p>
-    <p>Order Date: {{order.OrderDate}}</p>
-    <p>Total Price: {{order.TotalPrice}}</p>
-    <p>Buyer ID: {{order.BuyerID}}</p>
+    <div class="order-container">
+        <div class="order-detail-box">
+            <h4>Order Info</h4>
+            <p>Order Number: {{order.OrderNumber}}</p>
+            <p>Status: {{order.Status}}</p>
+            <p>Order Date: {{formatDate order.OrderDate}}</p>
+        </div>
+        <div class="order-detail-box">
+            <h4>Shipping Address</h4>
+            <p>{{order.ShippingAddress}}</p>
+        </div>
+        <div class="order-detail-box">
+            <h4>Transaction Details</h4>
+            <p>Product Amount: ${{order.ProductAmount}}</p>
+            <p>Shipping Cost: ${{order.ShippingCost}}</p>
+            <p>Order Amount: ${{order.OrderAmount}}</p>
+            <p>Fee Amount: ${{order.FeeAmount}}</p>
+            <p>Net Amount: ${{order.NetAmount}}</p>
+        </div>
+        <div class="order-detail-box">
+            <h4>Shipping Information</h4>
+            <p>Shipping Method: {{order.ShippingMethod}}</p>
+            <p>Estimated Delivery Date: {{order.EstimatedDeliveryDate}}</p>
+        </div>
+        <div class="order-detail-box">
+            <h4>Feedback</h4>
+            <p>{{order.Feedback}}</p>
+        </div>
+        <div class="order-detail-box">
+           <h4>Refund or Cancel</h4>
+            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Refund</button>
+            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Cancel</button>
+           
+        </div>
+    </div>
+
+
 
     <!-- Itemized List -->
     <h2>Items in Order</h2>
@@ -50,4 +83,28 @@
 
     <!-- Add more content or navigation as needed -->
 </body>
+<script>
+    /*
+// Example function to update an order's total price
+async function updateOrderTotal(orderId) {
+    try {
+        // Calculate the new total price
+        const totalResult = await db.query(
+            'SELECT SUM(SalePrice * Quantity) AS TotalPrice FROM OrderItems WHERE OrderID = ?', 
+            [orderId]
+        );
+        const newTotal = totalResult[0].TotalPrice;
+
+        // Update the Orders table
+        await db.query(
+            'UPDATE Orders SET SalePrice = ? WHERE OrderID = ?', 
+            [newTotal, orderId]
+        );
+    } catch (error) {
+        console.error('Error updating order total:', error);
+        // Handle error appropriately
+    }
+}
+*/
+</script>
 </html>
