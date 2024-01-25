@@ -3,6 +3,8 @@ nav {
     padding: 30px 60px;
     display: flex;
     justify-content: space-between;
+    border-bottom: 1px solid #eee; /* Thin line for each row */
+
 }
 
 nav ul {
@@ -223,6 +225,7 @@ caption {
 .product-info {
     flex-basis: 30%; /* Adjust the width as needed */
     margin-right: 20px; /* Optional spacing between the elements */
+    padding-left: 20px;
 }
 
 .table-container {
@@ -241,34 +244,113 @@ caption {
 }
 
 
+.status-green {
+    color: green;
+}
+
+.status-yellow {
+    color: yellow;
+}
+
+
 .order-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 10px;
-  }
-  
-  .order-detail-box {
+    padding: 20px;
+}
+
+.order-detail-box {
     border: 1px solid #ccc;
-    border-radius: 4px;
     padding: 10px;
-    flex-basis: calc(33.333% - 10px); /* Adjust the width minus the gap */
+    padding-right: 4px; /* Increased right padding */
+    border-radius: 4px;
+    flex: 0 0 33.3333%; 
     box-sizing: border-box;
     margin-bottom: 10px;
-    height: 200px; /* Adjust the height as needed for uniformity */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  .order-detail-box h4 {
+    flex-grow: 1;
+    position: relative;
+}
+
+.order-detail-box h4 {
     margin: 0 0 10px 0;
     padding-bottom: 5px;
     border-bottom: 1px solid #eee;
     font-size: 1em;
-  }
+}
 
-  .order-detail-box p {
+.order-detail-box p {
     margin: 0;
     font-size: 0.9em;
-  }
+}
+
+.order-detail-box:after {
+    content: '';
+    position: absolute;
+    left: calc(40% - 10px); /* Adjust this value as needed */
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #ccc;
+}
+
+.info-row {
+    display: flex;
+    border-bottom: 1px solid #eee; /* Thin line for each row */
+    padding: 5px 0;
+}
+
+.order-detail-box .info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    flex-basis: 40%; 
+    padding-right: 10px;
+}
+
+.info-data {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.refund-cancel-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    flex: 0 0 33.3333%; 
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.shipping-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    flex: 0 0 33.3333%; 
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.shipping-box  h4 {
+    /* Add any specific styles for the header if needed */
+    font-size: 1.2em; /* Example to make the header text larger */
+}
+
+.shipping-box  .info-row {
+    border-bottom: none; /* Removes the line */
+}
+
+.shipping-box  .info-row div {
+    font-size: 1.1em; /* Makes the text inside larger */
+    text-align: center;
+}

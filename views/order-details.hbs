@@ -21,47 +21,112 @@
         </ul>
     </nav>
     <!-- Order Summary -->
-    <h2>Order Summary</h2>
-    <div class="order-container">
-        <div class="order-detail-box">
-            <h4>Order Info</h4>
-            <p>Order Number: {{order.OrderNumber}}</p>
-            <p>Status: {{order.Status}}</p>
-            <p>Order Date: {{formatDate order.OrderDate}}</p>
+<div class="order-container">
+    <div class="order-detail-box">
+        <h4>Order Info</h4>
+        <div class="info-row">
+            <div class="info-label">Order Number:</div>
+            <div class="info-data">{{order.OrderNumber}}</div>
         </div>
-        <div class="order-detail-box">
-            <h4>Shipping Address</h4>
-            <p>{{order.ShippingAddress}}</p>
+        <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-data">{{order.Status}}</div>
         </div>
-        <div class="order-detail-box">
-            <h4>Transaction Details</h4>
-            <p>Product Amount: ${{order.ProductAmount}}</p>
-            <p>Shipping Cost: ${{order.ShippingCost}}</p>
-            <p>Order Amount: ${{order.OrderAmount}}</p>
-            <p>Fee Amount: ${{order.FeeAmount}}</p>
-            <p>Net Amount: ${{order.NetAmount}}</p>
-        </div>
-        <div class="order-detail-box">
-            <h4>Shipping Information</h4>
-            <p>Shipping Method: {{order.ShippingMethod}}</p>
-            <p>Estimated Delivery Date: {{order.EstimatedDeliveryDate}}</p>
-        </div>
-        <div class="order-detail-box">
-            <h4>Feedback</h4>
-            <p>{{order.Feedback}}</p>
-        </div>
-        <div class="order-detail-box">
-           <h4>Refund or Cancel</h4>
-            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Refund</button>
-            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Cancel</button>
-           
+        <div class="info-row">
+            <div class="info-label">Order Date:</div>
+            <div class="info-data">{{formatDate order.OrderDate}}</div>
         </div>
     </div>
 
+    <div class="shipping-box">
+        <h4>Shipping Address</h4>
+        <div class="info-row">
+            <div>
+                {{address.Street}}<br>
+                {{address.City}}, {{address.State}} {{address.Zip}}<br>
+                {{address.Country}}
+            </div>
+        </div>
+    </div>
+    <div class="order-detail-box">
+        <h4>Transaction Details</h4>
+        <div class="info-row">
+            <div class="info-label">Product Amount:</div>
+            <div class="info-data">${{order.ProductAmount}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Shipping Cost:</div>
+            <div class="info-data">${{order.ShippingCost}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Order Amount:</div>
+            <div class="info-data">${{order.OrderAmount}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Fee Amount:</div>
+            <div class="info-data">${{order.FeeAmount}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Net Amount:</div>
+            <div class="info-data">${{order.NetAmount}}</div>
+        </div>
+    </div>
+
+    <div class="order-detail-box">
+        <h4>Shipping Information</h4>
+        <div class="info-row">
+            <div class="info-label">Shipping Method:</div>
+            <div class="info-data">{{displayShippingMethod shipping.ShippedWithTracking}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Tracking Number:</div>
+            <div class="info-data"><a href="{{shipping.CarrierTrackingURL}}" target="_blank">{{shipping.TrackingNumber}}</a></div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Shipment Date:</div>
+            <div class="info-data">{{formatDate shipping.ShipmentDate}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Estimated Delivery Date:</div>
+            <div class="info-data">{{formatDate shipping.EstimatedDeliveryDate}}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Status:</div>
+            <div class="info-data"><span class="{{statusColor shipping.ShipmentStatus}}">{{shipping.ShipmentStatus}}</span></div>
+        </div>
+    </div>
+
+    <div class="order-detail-box">
+        <h4>Feedback</h4>
+        {{#if feedback}}
+            <div class="info-row">
+                <div class="info-label">Rating:</div>
+                <div class="info-data">{{feedback.Rating}}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Feedback:</div>
+                <div class="info-data">{{feedback.FeedbackText}}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Date:</div>
+                <div class="info-data">{{formatDate feedback.FeedbackDate}}</div>
+            </div>
+        {{else}}
+            <div class="info-data">The buyer has not left feedback</div>
+        {{/if}}
+    </div>
+
+    <div class="refund-cancel-box">
+        <h4>Refund or Cancel</h4>
+        <div style="text-align: center;">
+            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Refund</button>
+            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Cancel</button>
+        </div>
+    </div>
+</div>
 
 
     <!-- Itemized List -->
-    <h2>Items in Order</h2>
     <table>
         <thead>
             <tr>
@@ -83,28 +148,4 @@
 
     <!-- Add more content or navigation as needed -->
 </body>
-<script>
-    /*
-// Example function to update an order's total price
-async function updateOrderTotal(orderId) {
-    try {
-        // Calculate the new total price
-        const totalResult = await db.query(
-            'SELECT SUM(SalePrice * Quantity) AS TotalPrice FROM OrderItems WHERE OrderID = ?', 
-            [orderId]
-        );
-        const newTotal = totalResult[0].TotalPrice;
-
-        // Update the Orders table
-        await db.query(
-            'UPDATE Orders SET SalePrice = ? WHERE OrderID = ?', 
-            [newTotal, orderId]
-        );
-    } catch (error) {
-        console.error('Error updating order total:', error);
-        // Handle error appropriately
-    }
-}
-*/
-</script>
 </html>

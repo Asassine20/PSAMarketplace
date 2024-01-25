@@ -54,3 +54,16 @@ hbs.registerHelper('formatDate', function(date) {
     return new Date(date).toLocaleDateString('en-US', options);
   });
   
+hbs.registerHelper('displayShippingMethod', function(shippedWithTracking) {
+    return shippedWithTracking ? "Shipped with tracking" : "Shipped without tracking";
+});
+
+hbs.registerHelper('statusColor', function(status) {
+    if (status === 'Delivered') {
+        return 'status-green';
+    } else if (status === 'In Transit') {
+        return 'status-yellow';
+    } else {
+        return '';
+    }
+});

@@ -401,6 +401,10 @@ router.get('/order-details', async (req, res) => {
         // Fetch order details
         const orderDetails = await db.query('SELECT * FROM Orders WHERE OrderID = ?', [orderId]);
         const orderItems = await db.query('SELECT * FROM OrderItems WHERE OrderID = ?', [orderId]);
+        const feedback = await db.query('SELECT * FROM Feedback WHERE OrderID = ?', [orderId]);
+        const shipping = await db.query('SELECT * FROM Shipping WHERE OrderID = ?', [orderId]);
+        const addressId = orderDetails[0].AddressID;
+        const address = await db.query('SELECT * FROM Addresses WHERE AddressID = ?', [addressId]);
 
         // Calculate the total price
         const totalPriceResult = await db.query(
@@ -413,7 +417,10 @@ router.get('/order-details', async (req, res) => {
         res.render('order-details', {
             order: orderDetails[0],
             items: orderItems,
-            totalPrice: totalPrice
+            totalPrice: totalPrice,
+            feedback: feedback.length > 0 ? feedback[0] : null,
+            shipping: shipping[0],
+            address: address[0]
         });
     } catch (error) {
         console.error('Error fetching order details:', error);
