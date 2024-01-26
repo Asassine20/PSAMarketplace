@@ -27,34 +27,47 @@
             <li><a href="/dashboard">Reports</a></li>
         </ul>
     </nav>
-    <h1>Orders</h1>
-    <table>
+    <div class="table-container">
+    <div class="table-controls">
+        <div class="pagination-controls">
+            <label for="pageSize">Orders per page:</label>
+            <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
+                <option value="25" {{#if (eq limit 25)}}selected{{/if}}>25 per page</option>
+                <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50 per page</option>
+                <option value="100" {{#if (eq limit 100)}}selected{{/if}}>100 per page</option>
+                <option value="250" {{#if (eq limit 250)}}selected{{/if}}>250 per page</option>
+            </select>
+
+            <div class="pagination-links">
+                {{#if (gt page 1)}}
+                    <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
+                {{/if}}
+                Page {{page}} of {{totalPages}}
+                {{#if (lt page totalPages)}}
+                    <a href="?page={{inc page}}&limit={{limit}}">Next</a>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    <table style="margin-top: 20px;">
         <thead>
             <tr>
-                <th>Order ID</th>
-                <th>Grade ID</th>
-                <th>Card ID</th>
-                <th>Listing ID</th>
-                <th>Address ID</th>
+                <th>Order #</th>
+                <th>Buyer Name</th>
                 <th>Sale Price</th>
                 <th>Order Date</th>
-                <th>Buyer ID</th>
-                <th>Seller ID</th>
+                <th>Status</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {{#each orders}}
-            <tr>
+            <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
                 <td>{{OrderID}}</td>
-                <td>{{GradeID}}</td>
-                <td>{{CardID}}</td>
-                <td>{{ListingID}}</td>
-                <td>{{AddressID}}</td>
+                <td>{{Username}}</td>
                 <td>{{SalePrice}}</td>
                 <td>{{formatDate OrderDate}}</td>
-                <td>{{BuyerID}}</td>
-                <td>{{SellerID}}</td>
+                <td>{{ShipmentStatus}}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Manage</button>
                 </td>
@@ -62,5 +75,11 @@
             {{/each}}
         </tbody>
     </table>
+
 </body>
+<script>
+    function changeLimit(limit) {
+        window.location.href = `?page=1&limit=${limit}`;
+    }
+</script>
 </html>

@@ -238,9 +238,8 @@ caption {
     padding-right: 35px;
 }
 
-/* style.css */
 .in-stock {
-    background-color: rgb(0, 255, 140, 0.2);
+    background-color: rgb(0, 255, 140, 0.2) !important;
 }
 
 
@@ -353,4 +352,19 @@ caption {
 .shipping-box  .info-row div {
     font-size: 1.1em; /* Makes the text inside larger */
     text-align: center;
+}
+.table-controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px; /* Adjust as needed */
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+}
+
+.pagination-links {
+    margin-left: 20px; /* Space between dropdown and pagination links */
+    margin-right: 60px;
 }

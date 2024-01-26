@@ -39,7 +39,7 @@
                 <select id="sport" name="sport" class="filter-input fixed-width-dropdown">
                     <option value="">All Sports</option>
                     {{#each sports}}
-                    <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}" {{#if (eq this ../sport)}}selected{{/if}}>{{this}}</option>
                     {{/each}}
                 </select>
             </div>
@@ -102,13 +102,14 @@
                 <div class="page-size-selector">
                     <label for="pageSize">Items per page:</label>
                     <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="250">250</option>
-                        <option value="500">500</option>
+                        <option value="10" {{#if (eq pageSize '10')}}selected{{/if}}>10</option>
+                        <option value="25" {{#if (eq pageSize '25')}}selected{{/if}}>25</option>
+                        <option value="50" {{#if (eq pageSize '50')}}selected{{/if}}>50</option>
+                        <option value="100" {{#if (eq pageSize '100')}}selected{{/if}}>100</option>
+                        <option value="250" {{#if (eq pageSize '250')}}selected{{/if}}>250</option>
+                        <option value="500" {{#if (eq pageSize '500')}}selected{{/if}}>500</option>
                     </select>
+
                 </div>
             </div>
         </caption>

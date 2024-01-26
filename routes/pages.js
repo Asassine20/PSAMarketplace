@@ -382,18 +382,45 @@ async function updateOrderTotal(orderId) {
 }
 
 router.get('/orders', async (req, res) => {
-    try {
-        // Query to fetch orders from the database
-        const query = 'SELECT * FROM Orders';
-        const orders = await db.query(query);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 25;
+    const offset = (page - 1) * limit;
 
-        // Render the orders.hbs template with the fetched orders
-        res.render('orders', { orders });
+    try {
+        const query = `
+            SELECT Orders.OrderID, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
+            FROM Orders
+            LEFT JOIN Users ON Orders.BuyerID = Users.UserID
+            LEFT JOIN Shipping ON Orders.OrderID = Shipping.OrderID
+            ORDER BY 
+                CASE 
+                    WHEN Shipping.ShipmentStatus = 'Awaiting shipment' THEN 1
+                    ELSE 2
+                END,
+                Orders.OrderDate DESC
+            LIMIT ? OFFSET ?
+        `;
+        const orders = await db.query(query, [limit, offset]);
+
+        // Additional query to get the total count of orders
+        const countQuery = 'SELECT COUNT(*) AS totalOrders FROM Orders';
+        const totalResult = await db.query(countQuery);
+        const totalOrders = totalResult[0].totalOrders;
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        res.render('orders', {
+            orders,
+            page,
+            totalPages,
+            limit
+        });
     } catch (error) {
         console.error('Error fetching orders:', error);
         res.status(500).send('Server error');
     }
 });
+
+
 
 router.get('/order-details', async (req, res) => {
     const orderId = req.query.orderId;

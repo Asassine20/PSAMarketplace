@@ -67,3 +67,11 @@ hbs.registerHelper('statusColor', function(status) {
         return '';
     }
 });
+
+hbs.registerHelper('gt', function(value1, value2) {
+    return value1 > value2;
+});
+
+hbs.registerHelper('lt', function(value1, value2) {
+    return value1 < value2;
+});
