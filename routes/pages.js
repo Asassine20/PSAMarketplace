@@ -43,7 +43,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             "CardName LIKE ?",
             "CardSet LIKE ?",
             "CardYear LIKE ?",
-            "Sport LIKE ?"
+            "Sport LIKE ?",
         ];
         let values = [
             `%${searchTerm}%`, 
@@ -249,6 +249,88 @@ router.get('/sports', authenticateToken, async (req, res) => {
         res.json(sports.map(row => row.Sport));
     } catch (error) {
         console.error('Error fetching sports:', error);
+        res.status(500).send('Server error');
+    }
+});
+router.get('/cardcolors', authenticateToken, async (req, res) => {
+    const sport = req.query.sport || '';
+    const cardSet = req.query.cardSet || '';
+    const year = req.query.year || '';
+    const cardVariant = req.query.cardVariant || '';
+
+    let query = "SELECT DISTINCT CardColor FROM Card WHERE CardColor <> ''";
+    let conditions = [];
+    let values = [];
+
+    if (sport) {
+        conditions.push("Sport = ?");
+        values.push(sport);
+    }
+    if (cardSet) {
+        conditions.push("CardSet = ?");
+        values.push(cardSet);
+    }
+    if (year) {
+        conditions.push("CardYear = ?");
+        values.push(year);
+    }
+    if (cardVariant) {
+        conditions.push("CardVariant = ?");
+        values.push(cardVariant);
+    }
+
+    if (conditions.length) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY CardColor";
+
+    try {
+        const cardColors = await db.query(query, values);
+        res.json(cardColors.map(row => row.CardColor));
+    } catch (error) {
+        console.error('Error fetching card colors:', error);
+        res.status(500).send('Server error');
+    }
+});
+router.get('/cardvariants', authenticateToken, async (req, res) => {
+    const sport = req.query.sport || '';
+    const cardSet = req.query.cardSet || '';
+    const year = req.query.year || '';
+    const cardColor = req.query.cardColor || '';
+
+    let query = "SELECT DISTINCT CardVariant FROM Card WHERE CardVariant <> ''";
+    let conditions = [];
+    let values = [];
+
+    if (sport) {
+        conditions.push("Sport = ?");
+        values.push(sport);
+    }
+    if (cardSet) {
+        conditions.push("CardSet = ?");
+        values.push(cardSet);
+    }
+    if (year) {
+        conditions.push("CardYear = ?");
+        values.push(year);
+    }
+    if (cardColor) {
+        conditions.push("CardColor = ?");
+        values.push(cardColor);
+    }
+
+    if (conditions.length) {
+        query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY CardVariant";
+
+    try {
+        const cardVariants = await db.query(query, values);
+        res.json(cardVariants.map(row => row.CardVariant));
+    } catch (error) {
+        console.error('Error fetching card variants:', error);
         res.status(500).send('Server error');
     }
 });
