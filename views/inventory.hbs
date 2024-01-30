@@ -448,16 +448,47 @@
 
     function changePageSize() {
         var pageSize = document.getElementById('pageSize').value;
+        var currentTime = new Date().getTime();
+
+        // Store page size along with the current timestamp
+        localStorage.setItem('pageSize', JSON.stringify({ value: pageSize, timestamp: currentTime }));
+
+        updateSearchParametersAndReload('pageSize', pageSize);
+    }
+
+    function updateSearchParametersAndReload(parameterKey, parameterValue) {
         var currentUrl = new URL(window.location.href);
         var searchParams = new URLSearchParams(currentUrl.search);
 
-        // Update pageSize parameter or add it if not present
-        searchParams.set('pageSize', pageSize);
+        // Update the specified parameter or add it if not present
+        searchParams.set(parameterKey, parameterValue);
 
-        // Build the new URL with the existing parameters and the updated pageSize
-        window.location.href = `/inventory?${searchParams.toString()}`;
+        // Redirect to the updated URL
+        window.location.href = `${currentUrl.pathname}?${searchParams.toString()}`;
     }
 
+
+    function setPageSizeFromLocalStorage() {
+        var pageSizeData = localStorage.getItem('pageSize');
+        pageSizeData = pageSizeData ? JSON.parse(pageSizeData) : null;
+
+        var expirationTime = 24 * 60 * 60 * 1000; // e.g., 24 hours
+
+        if (pageSizeData && new Date().getTime() - pageSizeData.timestamp < expirationTime) {
+            document.getElementById('pageSize').value = pageSizeData.value;
+        } else {
+            localStorage.removeItem('pageSize');
+        }
+    }
+
+    setPageSizeFromLocalStorage();
+    function triggerSearch() {
+    var pageSize = document.getElementById('pageSize').value;
+    updateSearchParametersAndReload('pageSize', pageSize);
+
+    // Include additional logic for other search parameters
+    // ...
+}
 
 </script>
 

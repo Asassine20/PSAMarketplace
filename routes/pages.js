@@ -39,38 +39,47 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     const cardVariant = req.query.cardVariant || '';
 
     try {
-        let whereConditions = [
-            "CardName LIKE ?",
-            "CardSet = ?",
-            "CardYear = ?",
-            "Sport = ?",
-        ];
-        let values = [
-            `%${searchTerm}%`, 
-            cardSet, 
-            cardYear, 
-            sport
-        ];
+        let whereConditions = [];
+        let values = [];
 
+        if (searchTerm) {
+            whereConditions.push("CardName LIKE ?");
+            values.push(`%${searchTerm}%`);
+        }
+        if (cardSet) {
+            whereConditions.push("CardSet = ?");
+            values.push(cardSet);
+        }
+        if (cardYear) {
+            whereConditions.push("CardYear = ?");
+            values.push(cardYear);
+        }
+        if (sport) {
+            whereConditions.push("Sport = ?");
+            values.push(sport);
+        }
         if (cardColor) {
             whereConditions.push("(CardColor = ? OR CardColor IS NULL OR CardColor = '')");
             values.push(cardColor);
         }
-
         if (cardVariant) {
             whereConditions.push("(CardVariant = ? OR CardVariant IS NULL OR CardVariant = '')");
             values.push(cardVariant);
         }
 
-        const query = `
-            SELECT * FROM Card 
-            WHERE ${whereConditions.join(" AND ")}
-            LIMIT ? OFFSET ?`;
+        let query = "SELECT * FROM Card";
+        if (whereConditions.length) {
+            query += " WHERE " + whereConditions.join(" AND ");
+        }
+        query += " LIMIT ? OFFSET ?";
         values.push(limit, offset);
 
-        // Query for total count with filters
-        const countQuery = "SELECT COUNT(*) AS count FROM Card WHERE " + whereConditions.join(" AND ");
-        const countValues = values.slice(0, -2);
+        // Similar logic for the countQuery
+        let countQuery = "SELECT COUNT(*) AS count FROM Card";
+        if (whereConditions.length) {
+            countQuery += " WHERE " + whereConditions.join(" AND ");
+        }
+        const countValues = [...values].slice(0, -2);
         const cards = await db.query(query, values);
 
         const totalResult = await db.query(countQuery, countValues);
