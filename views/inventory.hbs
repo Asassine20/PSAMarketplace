@@ -255,23 +255,37 @@
                 });
             })
             .catch(error => console.error('Error loading years:', error))
-    // Fetch card colors based on other filters
-    fetch(`/cardcolors?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-        .then(response => response.json())
-        .then(colors => {
-            const colorSelect = document.getElementById('cardColor');
-            colorSelect.innerHTML = '<option value="">All Colors</option>';
-            colors.forEach(colorItem => {
-                const option = document.createElement('option');
-                option.value = colorItem;
-                option.textContent = colorItem;
-                if (colorItem === cardColor) {
-                    option.selected = true;
+        // Fetch card colors based on other filters
+        fetch(`/cardcolors?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardVariant=${encodeURIComponent(cardVariant)}`)
+            .then(response => response.json())
+            .then(colors => {
+                const colorSelect = document.getElementById('cardColor');
+                colorSelect.innerHTML = ''; // Clear existing options
+
+                // Add 'All Colors' placeholder option
+                const allColorsOption = document.createElement('option');
+                allColorsOption.value = '';
+                allColorsOption.textContent = 'All Colors';
+                colorSelect.appendChild(allColorsOption);
+
+                colors.forEach(colorItem => {
+                    if (colorItem) { // Ensure the colorItem is not null or empty
+                        const option = document.createElement('option');
+                        option.value = colorItem;
+                        option.textContent = colorItem;
+                        if (colorItem === cardColor) {
+                            option.selected = true;
+                        }
+                        colorSelect.appendChild(option);
+                    }
+                });
+
+                // If no specific color is selected, set the placeholder as selected
+                if (!cardColor) {
+                    allColorsOption.selected = true;
                 }
-                colorSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error loading card colors:', error));
+            })
+            .catch(error => console.error('Error loading card colors:', error));
 
         // Fetch card variants based on other filters
         fetch(`/cardvariants?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}`)

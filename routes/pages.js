@@ -41,15 +41,15 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     try {
         let whereConditions = [
             "CardName LIKE ?",
-            "CardSet LIKE ?",
-            "CardYear LIKE ?",
-            "Sport LIKE ?",
+            "CardSet = ?",
+            "CardYear = ?",
+            "Sport = ?",
         ];
         let values = [
             `%${searchTerm}%`, 
-            `%${cardSet}%`, 
-            `%${cardYear}%`, 
-            `%${sport}%`
+            cardSet, 
+            cardYear, 
+            sport
         ];
 
         if (cardColor) {
@@ -69,9 +69,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         values.push(limit, offset);
 
         // Query for total count with filters
-        const countQuery = "SELECT COUNT(*) AS count FROM Card WHERE CardName LIKE ? AND CardSet LIKE ? AND CardYear LIKE ? AND Sport LIKE ?";
-        const countValues = [`%${searchTerm}%`, `%${cardSet}%`, `%${cardYear}%`, `%${sport}%`, `%${cardColor}%`, `%${cardVariant}%`];
-
+        const countQuery = "SELECT COUNT(*) AS count FROM Card WHERE " + whereConditions.join(" AND ");
+        const countValues = values.slice(0, -2);
         const cards = await db.query(query, values);
 
         const totalResult = await db.query(countQuery, countValues);
@@ -258,7 +257,7 @@ router.get('/cardcolors', authenticateToken, async (req, res) => {
     const year = req.query.year || '';
     const cardVariant = req.query.cardVariant || '';
 
-    let query = "SELECT DISTINCT CardColor FROM Card WHERE CardColor <> ''";
+    let query = "SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL";
     let conditions = [];
     let values = [];
 
@@ -279,8 +278,10 @@ router.get('/cardcolors', authenticateToken, async (req, res) => {
         values.push(cardVariant);
     }
 
+    // Add additional conditions to the query
     if (conditions.length) {
-        query += " WHERE " + conditions.join(" AND ");
+        // If there are additional conditions, append them with 'AND'
+        query += " AND " + conditions.join(" AND ");
     }
 
     query += " ORDER BY CardColor";
@@ -293,13 +294,14 @@ router.get('/cardcolors', authenticateToken, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 router.get('/cardvariants', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
 
-    let query = "SELECT DISTINCT CardVariant FROM Card WHERE CardVariant <> ''";
+    let query = "SELECT DISTINCT CardVariant FROM Card";
     let conditions = [];
     let values = [];
 
