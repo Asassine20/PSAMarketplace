@@ -450,13 +450,17 @@
         var pageSize = document.getElementById('pageSize').value;
         // Store the selected page size in local storage to keep it selected
         localStorage.setItem('pageSize', pageSize);
-
         // Perform an AJAX request to fetch data with the new page size without reloading the page
         loadDataWithFilters();
     }
 
+    let isLoadingData = false;
+
     function loadDataWithFilters() {
+        if (isLoadingData) return; // Prevent new calls if already loading data
+        isLoadingData = true;
         document.getElementById('loadingIndicator').style.display = 'block';
+
         const pageSize = localStorage.getItem('pageSize') || '25'; // Default to 25 if not set
         const page = new URLSearchParams(window.location.search).get('page') || 1;
         const searchTerm = document.getElementById('searchTerm').value;
@@ -466,25 +470,29 @@
         const cardColor = document.getElementById('cardColor').value;
         const cardVariant = document.getElementById('cardVariant').value;
 
-        // Construct the URL with current filters
         let url = `/inventory?page=${page}&pageSize=${pageSize}&searchTerm=${encodeURIComponent(searchTerm)}&sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardYear=${encodeURIComponent(cardYear)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`;
+        console.log("URL:", url);
+        console.log("Page Size:", pageSize);
+        // Log other variables as needed
 
         fetch(url, {
-            method: 'GET', // Optional, as GET is the default method
+            method: 'GET',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('loadingIndicator').style.display = 'none';
-            // Update the DOM with the new data
             updateTableAndTotalItemsWithData(data.cards, data.totalItems);
         })
-        .catch(error => console.error('Error loading data:', error));        
-        document.getElementById('loadingIndicator').style.display = 'none';
+        .catch(error => {
+            console.error('Error loading data:', error);
+        })
+        .finally(() => {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            isLoadingData = false;
+        });
     }
-
 
     // On page load, set the page size dropdown based on the stored value
     document.addEventListener('DOMContentLoaded', function() {
@@ -510,7 +518,7 @@
                 <td>${card.CardYear}</td>
                 <td>${card.CardNumber}</td>
                 <td>${card.CardColor}</td>
-                <td>${card.CardVariant}</td>
+                <td>${card.CardVariant || ''}</td> <!-- Use || '' to display empty string if CardVariant is null -->
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
@@ -521,8 +529,6 @@
         // Update total items count
         document.getElementById('totalItems').textContent = `${totalItems} Results`;
     }
-
-
 </script>
 
 </body>

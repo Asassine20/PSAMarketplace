@@ -155,6 +155,7 @@ router.get('/cardsets', authenticateToken, async (req, res) => {
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
+    
 
     let query = "SELECT DISTINCT CardSet FROM Card";
     let conditions = [];
