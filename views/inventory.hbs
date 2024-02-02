@@ -94,14 +94,14 @@
             </div>
         </form>
     </div>
-
+<div id="loadingIndicator" style="display: none;">Loading...</div>
 <div class="table-container">
     <table>
         <!-- Table Title and Results as Caption -->
         <caption>
             <div class="table-header">
                 <h2>Product Catalog</h2>
-                <span>{{totalItems}} Results</span>
+                <span id="totalItems">{{totalItems}} Results</span>
                 <div class="page-size-selector">
                     <label for="pageSize">Items per page:</label>
                     <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
@@ -448,47 +448,80 @@
 
     function changePageSize() {
         var pageSize = document.getElementById('pageSize').value;
-        var currentTime = new Date().getTime();
+        // Store the selected page size in local storage to keep it selected
+        localStorage.setItem('pageSize', pageSize);
 
-        // Store page size along with the current timestamp
-        localStorage.setItem('pageSize', JSON.stringify({ value: pageSize, timestamp: currentTime }));
-
-        updateSearchParametersAndReload('pageSize', pageSize);
+        // Perform an AJAX request to fetch data with the new page size without reloading the page
+        loadDataWithFilters();
     }
 
-    function updateSearchParametersAndReload(parameterKey, parameterValue) {
-        var currentUrl = new URL(window.location.href);
-        var searchParams = new URLSearchParams(currentUrl.search);
+    function loadDataWithFilters() {
+        document.getElementById('loadingIndicator').style.display = 'block';
+        const pageSize = localStorage.getItem('pageSize') || '25'; // Default to 25 if not set
+        const page = new URLSearchParams(window.location.search).get('page') || 1;
+        const searchTerm = document.getElementById('searchTerm').value;
+        const sport = document.getElementById('sport').value;
+        const cardSet = document.getElementById('cardSet').value;
+        const cardYear = document.getElementById('cardYear').value;
+        const cardColor = document.getElementById('cardColor').value;
+        const cardVariant = document.getElementById('cardVariant').value;
 
-        // Update the specified parameter or add it if not present
-        searchParams.set(parameterKey, parameterValue);
+        // Construct the URL with current filters
+        let url = `/inventory?page=${page}&pageSize=${pageSize}&searchTerm=${encodeURIComponent(searchTerm)}&sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardYear=${encodeURIComponent(cardYear)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`;
 
-        // Redirect to the updated URL
-        window.location.href = `${currentUrl.pathname}?${searchParams.toString()}`;
+        fetch(url, {
+            method: 'GET', // Optional, as GET is the default method
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            // Update the DOM with the new data
+            updateTableAndTotalItemsWithData(data.cards, data.totalItems);
+        })
+        .catch(error => console.error('Error loading data:', error));        
+        document.getElementById('loadingIndicator').style.display = 'none';
     }
 
 
-    function setPageSizeFromLocalStorage() {
-        var pageSizeData = localStorage.getItem('pageSize');
-        pageSizeData = pageSizeData ? JSON.parse(pageSizeData) : null;
-
-        var expirationTime = 24 * 60 * 60 * 1000; // e.g., 24 hours
-
-        if (pageSizeData && new Date().getTime() - pageSizeData.timestamp < expirationTime) {
-            document.getElementById('pageSize').value = pageSizeData.value;
-        } else {
-            localStorage.removeItem('pageSize');
+    // On page load, set the page size dropdown based on the stored value
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedPageSize = localStorage.getItem('pageSize');
+        if(savedPageSize) {
+            document.getElementById('pageSize').value = savedPageSize;
         }
+        // Optionally, load data with filters when the page loads if you're implementing the entire page fetch via AJAX
+        loadDataWithFilters();
+    });
+    function updateTableAndTotalItemsWithData(cards, totalItems) {
+        const tableBody = document.querySelector('.table-container table tbody');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        cards.forEach(card => {
+            const row = document.createElement('tr');
+            row.className = card.isInStock ? 'in-stock' : ''; // Adjust based on your data structure
+            row.innerHTML = `
+                <td>${card.Sport}</td>
+                <td><img src="${card.CardImage}" alt="Card Image"></td>
+                <td>${card.CardName}</td>
+                <td>${card.CardSet}</td>
+                <td>${card.CardYear}</td>
+                <td>${card.CardNumber}</td>
+                <td>${card.CardColor}</td>
+                <td>${card.CardVariant}</td>
+                <td class="button-cell">
+                    <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Update total items count
+        document.getElementById('totalItems').textContent = `${totalItems} Results`;
     }
 
-    setPageSizeFromLocalStorage();
-    function triggerSearch() {
-    var pageSize = document.getElementById('pageSize').value;
-    updateSearchParametersAndReload('pageSize', pageSize);
-
-    // Include additional logic for other search parameters
-    // ...
-}
 
 </script>
 

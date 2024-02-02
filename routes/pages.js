@@ -107,7 +107,21 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         isInStock: inStockCardIds.has(card.CardID) // Set isInStock to true if CardID is in the inStockCardIds set
         }));
 
+        console.log("AJAX Request Detected:", req.headers['x-requested-with'] === 'XMLHttpRequest');
 
+        if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            // Respond with JSON for AJAX requests
+            res.json({
+                cards: updatedCards,
+                currentPage: page,
+                totalPages: totalPages,
+                showPrevious: showPrevious,
+                showNext: showNext,
+                totalItems: totalItems,
+                // Any other data needed for client-side rendering
+            });
+        } else {
+        console.log("Rendering HTML page");
 
         res.render('inventory', { 
             username: req.user.username, 
@@ -129,6 +143,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             inventoryItems
     
         });
+    }
     } catch (error) {
         console.error('Error fetching cards:', error);
         res.status(500).send('Server error');
