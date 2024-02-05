@@ -509,7 +509,7 @@
 
         cards.forEach(card => {
             const row = document.createElement('tr');
-            row.className = card.isInStock ? 'in-stock' : ''; // Adjust based on your data structure
+            //row.className = card.isInStock ? 'in-stock' : ''; // Adjust based on your data structure
             row.innerHTML = `
                 <td>${card.Sport}</td>
                 <td><img src="${card.CardImage}" alt="Card Image"></td>
@@ -517,8 +517,8 @@
                 <td>${card.CardSet}</td>
                 <td>${card.CardYear}</td>
                 <td>${card.CardNumber}</td>
-                <td>${card.CardColor}</td>
-                <td>${card.CardVariant || ''}</td> <!-- Use || '' to display empty string if CardVariant is null -->
+                <td>${card.CardColor || 'N/A'}</td>
+                <td>${card.CardVariant || 'N/A'}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>

@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/middleware.js');
 const db = require('../db');
+const redis = require('redis');
+const redisClient = redis.createClient();
+
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.connect();
 
 router.use(express.urlencoded({ extended: true }));
 
@@ -37,6 +42,9 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
+    const cacheKey = `inventory:${sellerId}:${page}:${limit}:${searchTerm}:${cardSet}:${cardYear}:${sport}:${cardColor}:${cardVariant}`;
+
+
 
     try {
         let whereConditions = [];
@@ -109,43 +117,47 @@ router.get('/inventory', authenticateToken, async (req, res) => {
 
         console.log("AJAX Request Detected:", req.headers['x-requested-with'] === 'XMLHttpRequest');
 
-        if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
-            // Respond with JSON for AJAX requests
-            res.json({
+        const cacheData = {
+            ajaxData: {
                 cards: updatedCards,
                 currentPage: page,
                 totalPages: totalPages,
                 showPrevious: showPrevious,
                 showNext: showNext,
                 totalItems: totalItems,
-                // Any other data needed for client-side rendering
-            });
-        } else {
-        console.log("Rendering HTML page");
+            },
+            pageData: {
+                username: req.user.username,
+                cards: updatedCards,
+                searchTerm,
+                cardSet,
+                cardYear,
+                sport,
+                cardSets: cardSetsData.map(row => row.CardSet),
+                cardYears: cardYearsData.map(row => row.CardYear),
+                sports: sportsData.map(row => row.Sport),
+                cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
+                cardVariants: cardVariantsData.map(row => row.CardVariant),
+                currentPage: page,
+                totalPages,
+                showPrevious,
+                showNext,
+                totalItems,
+                inventoryItems
+            }
+        };
 
-        res.render('inventory', { 
-            username: req.user.username, 
-            cards: updatedCards,
-            searchTerm,
-            cardSet, // Use the same name as the query parameter
-            cardYear, // Use the same name as the query parameter
-            sport, // Use the same name as the query parameter
-            cardSets: cardSetsData.map(row => row.CardSet),
-            cardYears: cardYearsData.map(row => row.CardYear),
-            sports: sportsData.map(row => row.Sport),
-            cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
-            cardVariants: cardVariantsData.map(row => row.CardVariant),
-            currentPage: page,
-            totalPages,
-            showPrevious,
-            showNext,
-            totalItems,
-            inventoryItems
-    
-        });
-    }
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(cacheData)); // Cache for 1 hour
+        console.log(`Caching result for key: ${cacheKey}`);
+
+        // Then send the response...
+        if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            res.json(cacheData.ajaxData);
+        } else {
+            res.render('inventory', cacheData.pageData);
+        }
     } catch (error) {
-        console.error('Error fetching cards:', error);
+        console.error('Error fetching inventory:', error);
         res.status(500).send('Server error');
     }
 });
@@ -155,79 +167,105 @@ router.get('/cardsets', authenticateToken, async (req, res) => {
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
-    
+    const cacheKey = `cardsets:${sport}:${cardColor}:${year}:${cardVariant}`;
 
-    let query = "SELECT DISTINCT CardSet FROM Card";
-    let conditions = [];
-    let values = [];
-
-    if (sport) {
-        conditions.push("Sport = ?");
-        values.push(sport);
-    }
-    if (year) {
-        conditions.push("CardYear = ?");
-        values.push(year);
-    }
-    if (cardColor) {
-        conditions.push("CardColor = ?");
-        values.push(cardColor);
-    }
-    if (cardVariant) {
-        conditions.push("CardVariant = ?");
-        values.push(cardVariant);
-    }
-
-    if (conditions.length) {
-        query += " WHERE " + conditions.join(" AND ");
-    }
-
-    query += " ORDER BY CardSet";
 
     try {
+        // Try to fetch the data from cache first
+        const cachedData = await redisClient.get(cacheKey);
+        if (cachedData) {
+            console.log(`Serving from cache for key: ${cacheKey}`);
+            return res.json(JSON.parse(cachedData));
+        }
+
+        let query = "SELECT DISTINCT CardSet FROM Card";
+        let conditions = [];
+        let values = [];
+
+        if (sport) {
+            conditions.push("Sport = ?");
+            values.push(sport);
+        }
+        if (year) {
+            conditions.push("CardYear = ?");
+            values.push(year);
+        }
+        if (cardColor) {
+            conditions.push("CardColor = ?");
+            values.push(cardColor);
+        }
+        if (cardVariant) {
+            conditions.push("CardVariant = ?");
+            values.push(cardVariant);
+        }
+
+        if (conditions.length) {
+            query += " WHERE " + conditions.join(" AND ");
+        }
+
+        query += " ORDER BY CardSet";
+
+        // Execute query if not in cache
         const cardSets = await db.query(query, values);
-        res.json(cardSets.map(row => row.CardSet));
+        const cardSetResults = cardSets.map(row => row.CardSet);
+
+        // Cache the result for future requests
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(cardSetResults)); // Cache for 1 hour
+
+        res.json(cardSetResults);
     } catch (error) {
         console.error('Error fetching card sets:', error);
         res.status(500).send('Server error');
     }
 });
 
-
 router.get('/years', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
-    
-    let query = "SELECT DISTINCT CardYear FROM Card";
-    let conditions = [];
-    let values = [];
-
-    if (sport) {
-        conditions.push("Sport = ?");
-        values.push(sport); // Use exact match for sport
-    }
-    if (cardSet) {
-        conditions.push("CardSet = ?");
-        values.push(cardSet); // Use exact match for cardSet
-    }
-    if (cardColor) {
-        conditions.push("CardColor = ?");
-        values.push(cardColor);
-    }
-    if (cardVariant) {
-        conditions.push("CardVariant = ?");
-        values.push(cardVariant);
-    }
-    if (conditions.length) {
-        query += " WHERE " + conditions.join(" AND ");
-    }
-
-    query += " ORDER BY CardYear DESC";
+    const cacheKey = `years:${sport}:${cardSet}:${cardColor}:${cardVariant}`;
 
     try {
+        // Check if data is in cache
+        const cachedYears = await redisClient.get(cacheKey);
+        if (cachedYears) {
+            return res.json(JSON.parse(cachedYears));
+        }
+
+        // Database query if not in cache
+        let query = "SELECT DISTINCT CardYear FROM Card";
+        let conditions = [];
+        let values = [];
+
+        // Building conditions based on query parameters
+        if (sport) {
+            conditions.push("Sport = ?");
+            values.push(sport);
+        }
+        if (cardSet) {
+            conditions.push("CardSet = ?");
+            values.push(cardSet);
+        }
+        if (cardColor) {
+            conditions.push("CardColor = ?");
+            values.push(cardColor);
+        }
+        if (cardVariant) {
+            conditions.push("CardVariant = ?");
+            values.push(cardVariant);
+        }
+
+        if (conditions.length) {
+            query += " WHERE " + conditions.join(" AND ");
+        }
+        query += " ORDER BY CardYear DESC";
+
         const years = await db.query(query, values);
+
+        // Cache the result before sending response
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(years.map(row => row.CardYear))); // Cache for 1 hour
+
         res.json(years.map(row => row.CardYear));
     } catch (error) {
         console.error('Error fetching years:', error);
@@ -235,84 +273,80 @@ router.get('/years', authenticateToken, async (req, res) => {
     }
 });
 
-
 router.get('/sports', authenticateToken, async (req, res) => {
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
-
-    let query = "SELECT DISTINCT Sport FROM Card";
-    let conditions = [];
-    let values = [];
-
-    if (cardSet) {
-        conditions.push("CardSet = ?");
-        values.push(cardSet);
-    }
-    if (year) {
-        conditions.push("CardYear = ?");
-        values.push(year);
-    }
-    if (cardColor) {
-        conditions.push("CardColor = ?");
-        values.push(cardColor);
-    }
-    if (cardVariant) {
-        conditions.push("CardVariant = ?");
-        values.push(cardVariant);
-    }
-    if (conditions.length) {
-        query += " WHERE " + conditions.join(" AND ");
-    }
-
-    query += " ORDER BY Sport";
+    const cacheKey = `sports:${cardSet}:${year}:${cardColor}:${cardVariant}`;
 
     try {
+        const cachedData = await redisClient.get(cacheKey);
+        if (cachedData) {
+            console.log(`Serving from cache for key: ${cacheKey}`);
+            return res.json(JSON.parse(cachedData));
+        }
+
+        let query = "SELECT DISTINCT Sport FROM Card";
+        let conditions = [];
+        let values = [cardSet, year, cardColor, cardVariant].filter(value => value);
+
+        if (cardSet) conditions.push("CardSet = ?");
+        if (year) conditions.push("CardYear = ?");
+        if (cardColor) conditions.push("CardColor = ?");
+        if (cardVariant) conditions.push("CardVariant = ?");
+
+        if (conditions.length) query += " WHERE " + conditions.join(" AND ");
+        query += " ORDER BY Sport";
+
         const sports = await db.query(query, values);
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(sports.map(row => row.Sport)));
+
         res.json(sports.map(row => row.Sport));
     } catch (error) {
-        console.error('Error fetching sports:', error);
+        console.error(`Error fetching sports:`, error);
         res.status(500).send('Server error');
     }
 });
+
+
 router.get('/cardcolors', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
     const cardVariant = req.query.cardVariant || '';
+    const cacheKey = `cardcolors:${sport}:${cardSet}:${year}:${cardVariant}`;
 
-    let query = "SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL";
-    let conditions = [];
-    let values = [];
-
-    if (sport) {
-        conditions.push("Sport = ?");
-        values.push(sport);
-    }
-    if (cardSet) {
-        conditions.push("CardSet = ?");
-        values.push(cardSet);
-    }
-    if (year) {
-        conditions.push("CardYear = ?");
-        values.push(year);
-    }
-    if (cardVariant) {
-        conditions.push("CardVariant = ?");
-        values.push(cardVariant);
-    }
-
-    // Add additional conditions to the query
-    if (conditions.length) {
-        // If there are additional conditions, append them with 'AND'
-        query += " AND " + conditions.join(" AND ");
-    }
-
-    query += " ORDER BY CardColor";
 
     try {
+        // Check if data is in cache
+        const cachedCardColors = await redisClient.get(cacheKey);
+        if (cachedCardColors) {
+            return res.json(JSON.parse(cachedCardColors));
+        }
+
+        let query = "SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL";
+        let conditions = [];
+        let values = [];
+
+        if (sport) conditions.push("Sport = ?");
+        if (cardSet) conditions.push("CardSet = ?");
+        if (year) conditions.push("CardYear = ?");
+        if (cardVariant) conditions.push("CardVariant = ?");
+
+        values = [sport, cardSet, year, cardVariant].filter(value => value !== '');
+
+        if (values.length) {
+            query += " AND " + conditions.join(" AND ");
+        }
+
+        query += " ORDER BY CardColor";
+
         const cardColors = await db.query(query, values);
+
+        // Cache the result before sending response
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(cardColors.map(row => row.CardColor)));
+
         res.json(cardColors.map(row => row.CardColor));
     } catch (error) {
         console.error('Error fetching card colors:', error);
@@ -325,36 +359,38 @@ router.get('/cardvariants', authenticateToken, async (req, res) => {
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
-
-    let query = "SELECT DISTINCT CardVariant FROM Card";
-    let conditions = [];
-    let values = [];
-
-    if (sport) {
-        conditions.push("Sport = ?");
-        values.push(sport);
-    }
-    if (cardSet) {
-        conditions.push("CardSet = ?");
-        values.push(cardSet);
-    }
-    if (year) {
-        conditions.push("CardYear = ?");
-        values.push(year);
-    }
-    if (cardColor) {
-        conditions.push("CardColor = ?");
-        values.push(cardColor);
-    }
-
-    if (conditions.length) {
-        query += " WHERE " + conditions.join(" AND ");
-    }
-
-    query += " ORDER BY CardVariant";
+    const cacheKey = `cardvariants:${sport}:${cardSet}:${year}:${cardColor}`;
+ 
 
     try {
+        // Check if data is in cache
+        const cachedCardVariants = await redisClient.get(cacheKey);
+        if (cachedCardVariants) {
+            return res.json(JSON.parse(cachedCardVariants));
+        }
+
+        let query = "SELECT DISTINCT CardVariant FROM Card";
+        let conditions = [];
+        let values = [];
+
+        if (sport) conditions.push("Sport = ?");
+        if (cardSet) conditions.push("CardSet = ?");
+        if (year) conditions.push("CardYear = ?");
+        if (cardColor) conditions.push("CardColor = ?");
+
+        values = [sport, cardSet, year, cardColor].filter(value => value !== '');
+
+        if (values.length) {
+            query += " WHERE " + conditions.join(" AND ");
+        }
+
+        query += " ORDER BY CardVariant";
+
         const cardVariants = await db.query(query, values);
+
+        // Cache the result before sending response
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(cardVariants.map(row => row.CardVariant)));
+
         res.json(cardVariants.map(row => row.CardVariant));
     } catch (error) {
         console.error('Error fetching card variants:', error);
@@ -469,7 +505,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Error processing inventory');
     }
 });
-
+/*
 async function updateOrderTotal(orderId) {
     try {
         // Calculate the new total price
@@ -489,7 +525,7 @@ async function updateOrderTotal(orderId) {
         // Handle error appropriately
     }
 }
-
+*/
 router.get('/orders', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;

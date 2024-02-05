@@ -18,7 +18,8 @@
     "express-handlebars": "^7.1.2",
     "hbs": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "redis": "^4.6.12"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
