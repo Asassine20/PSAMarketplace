@@ -509,10 +509,13 @@
 
         cards.forEach(card => {
             const row = document.createElement('tr');
-            //row.className = card.isInStock ? 'in-stock' : ''; // Adjust based on your data structure
+            // Ensure the 'in-stock' class is applied if card.isInStock is true
+            if (card.isInStock) {
+                row.classList.add('in-stock');
+            }
             row.innerHTML = `
                 <td>${card.Sport}</td>
-                <td><img src="${card.CardImage}" alt="Card Image"></td>
+                <td><img src="${card.CardImage ? card.CardImage : ''}" alt="Card Image"></td>
                 <td>${card.CardName}</td>
                 <td>${card.CardSet}</td>
                 <td>${card.CardYear}</td>
@@ -529,6 +532,7 @@
         // Update total items count
         document.getElementById('totalItems').textContent = `${totalItems} Results`;
     }
+
 </script>
 
 </body>
