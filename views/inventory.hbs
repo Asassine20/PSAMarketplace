@@ -174,154 +174,123 @@
 </div>
 
 <script>
-    // Populates the dropdown menus based on user selections
-    function loadSetsAndYears(caller) {
-        // Disable the dropdowns while loading
+    // Disables dropdowns
+    function disableDropdowns() {
         document.getElementById('sport').disabled = true;
         document.getElementById('cardSet').disabled = true;
         document.getElementById('cardYear').disabled = true;
         document.getElementById('cardVariant').disabled = true;
         document.getElementById('cardColor').disabled = true;
+    }
 
-        // Displays spinner while loading
+    // Shows loading spinner
+    function showSpinner() {
         document.getElementById('spinner').style.display = 'flex';
+    }
 
-        // Retrieves the value of the element (sport, cardSet, cardYear) from the user input on the dropdown,
-        // and stores it in the const variable
+    // Fetches and updates sports options
+    function fetchSports(sport, cardSet, year, cardColor, cardVariant) {
+        fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
+            .then(response => response.json())
+            .then(sports => updateDropdown('sport', sports, sport))
+            .catch(error => console.error('Error loading sports:', error));
+    }
+
+    // Fetches and updates card sets options
+    function fetchCardSets(sport, cardSet, year, cardColor, cardVariant) {
+        fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
+            .then(response => response.json())
+            .then(sets => updateDropdown('cardSet', sets, cardSet))
+            .catch(error => console.error('Error loading card sets:', error));
+    }
+
+    // Fetches and updates years options
+    function fetchYears(sport, cardSet, year, cardColor, cardVariant) {
+        fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
+            .then(response => response.json())
+            .then(years => updateDropdown('cardYear', years, year))
+            .catch(error => console.error('Error loading years:', error));
+    }
+
+    // Fetches and updates card colors options
+    function fetchCardColors(sport, cardSet, year, cardColor, cardVariant) {
+        fetch(`/cardcolors?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardVariant=${encodeURIComponent(cardVariant)}`)
+            .then(response => response.json())
+            .then(colors => updateDropdown('cardColor', colors, cardColor))
+            .catch(error => console.error('Error loading card colors:', error));
+    }
+
+    // Fetches and updates card variants options
+    function fetchCardVariants(sport, cardSet, year, cardColor, cardVariant) {
+        fetch(`/cardvariants?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}`)
+            .then(response => response.json())
+            .then(variants => updateDropdown('cardVariant', variants, cardVariant))
+            .catch(error => console.error('Error loading card variants:', error));
+    }
+
+    // Updates dropdown options
+    function updateDropdown(dropdownId, items, selectedItem) {
+        const select = document.getElementById(dropdownId);
+        select.innerHTML = `<option value="">All ${dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)}</option>`;
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item;
+            option.textContent = item;
+            if (item === selectedItem) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    }
+
+    // Re-enables dropdowns and hides spinner
+    function finalizeLoading() {
+        document.getElementById('sport').disabled = false;
+        document.getElementById('cardSet').disabled = false;
+        document.getElementById('cardYear').disabled = false;
+        document.getElementById('cardVariant').disabled = false;
+        document.getElementById('cardColor').disabled = false;
+        document.getElementById('spinner').style.display = 'none';
+    }
+
+    function loadSetsAndYears(caller) {
+        disableDropdowns();
+        showSpinner();
+
         const sport = document.getElementById('sport').value;
         const cardSet = document.getElementById('cardSet').value;
         const year = document.getElementById('cardYear').value;
         const cardColor = document.getElementById('cardColor').value;
         const cardVariant = document.getElementById('cardVariant').value;
 
-        // Fetch sports based on card set and year
-        // Sends a HTTP GET request to server endpoint '/sports' with parameters cardSet and year
-        fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            // Converts the response from JSON to a JavaScript object
-            .then(response => response.json())
-            .then(sports => {
-                // Resets the content for the sport dropdown menu
-                const sportSelect = document.getElementById('sport');
-                // Starts the sport dropdown menu with 'All Sports' initially
-                sportSelect.innerHTML = '<option value="">All Sports</option>';
-                // Iterates over each item in the sports array and creates a new option element for each sport
-                sports.forEach(sportItem => {
-                    const option = document.createElement('option');
-                    option.value = sportItem;
-                    option.textContent = sportItem;
-                    if (sportItem === sport) {
-                        option.selected = true;
-                    }
-                    sportSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error loading sports:', error));
+        fetchSports(sport, cardSet, year, cardColor, cardVariant);
+        fetchCardSets(sport, cardSet, year, cardColor, cardVariant);
+        fetchYears(sport, cardSet, year, cardColor, cardVariant);
+        fetchCardColors(sport, cardSet, year, cardColor, cardVariant);
+        fetchCardVariants(sport, cardSet, year, cardColor, cardVariant);
 
-        // Fetch card sets based on sport and year
-        // Sends a HTTP GET request to server endpoint '/cardsets' with parameters sport and year
-        fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(sets => {
-                const setSelect = document.getElementById('cardSet');
-                setSelect.innerHTML = '<option value="">All Sets</option>';
-                sets.forEach(setItem => {
-                    const option = document.createElement('option');
-                    option.value = setItem;
-                    option.textContent = setItem;
-                    if (setItem === cardSet) {
-                        option.selected = true;
-                    }
-                    setSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error loading card sets:', error));
-
-        // Fetch years based on sport and card set
-        // Sends a HTTP GET request to server endpoint '/years' with parameters sport and cardset
-        fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(years => {
-                const yearSelect = document.getElementById('cardYear');
-                yearSelect.innerHTML = '<option value="">All Years</option>';
-                years.forEach(yearItem => {
-                    const option = document.createElement('option');
-                    option.value = yearItem;
-                    option.textContent = yearItem;
-                    if (yearItem === year) {
-                        option.selected = true;
-                    }
-                    yearSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error loading years:', error))
-        // Fetch card colors based on other filters
-        fetch(`/cardcolors?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(colors => {
-                const colorSelect = document.getElementById('cardColor');
-                colorSelect.innerHTML = '<option value="">All Colors</option>';
-                colors.forEach(colorItem => {
-                    const option = document.createElement('option');
-                    option.value = colorItem;
-                    option.textContent = colorItem;
-                    if (colorItem === cardColor) {
-                        option.selected = true;
-                    }
-                    colorSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error loading card colors:', error));
-
-        // Adjusted logic for cardVariant
-        fetch(`/cardvariants?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}`)
-            .then(response => response.json())
-            .then(variants => {
-                const variantSelect = document.getElementById('cardVariant');
-                variantSelect.innerHTML = '<option value="">All Variants</option>';
-                variants.forEach(variantItem => {
-                    const option = document.createElement('option');
-                    option.value = variantItem;
-                    option.textContent = variantItem;
-                    if (variantItem === cardVariant) {
-                        option.selected = true;
-                    }
-                    variantSelect.appendChild(option);
-                });
-            })
-            .catch(error => console.error('Error loading card variants:', error))
-            .finally(() => {
-                // Re-enable dropdowns and hide spinner after fetching is complete
-                document.getElementById('sport').disabled = false;
-                document.getElementById('cardSet').disabled = false;
-                document.getElementById('cardYear').disabled = false;
-                document.getElementById('cardColor').disabled = false;
-                document.getElementById('cardVariant').disabled = false;
-                document.getElementById('spinner').style.display = 'none';
-            });
+        finalizeLoading();
     }
+
+    document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
+    document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
+    document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
+    document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
+    document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
+
 
     // JavaScript function to filter card set options
     function filterCardSets() {
-        // Declares variables input, filter, ul, li, a, and i
         var input, filter, ul, li, a, i;
-        // Assigns the value of the cardSetSearch to input variable
         input = document.getElementById('cardSetSearch');
-        // Converts the value of input to upper case
         filter = input.value.toUpperCase();
-        // Stores the cardSet dropdown menu in the select variable
         var select = document.getElementById("cardSet");
-        // Gets all of the option elements within the select element and stores them in the options variable as a collection
         var options = select.getElementsByTagName('option');
-        // Iterates through each option in the dropdown menu
-        for (i = 1; i < options.length; i++) { // Start from 1 to skip the placeholder option
-            // Extracts the text content from each option in the dropdown menu (the select element)
+        for (i = 1; i < options.length; i++) { 
             txtValue = options[i].textContent;
-            // Searches the filter string within the txtValue and returns the index of the first occurrence of a specified value in a string
             if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                // If the option contains the search term, it remains in the dropdown menu
                 options[i].style.display = "";
             } else {
-                // If the option doesn't contain the search term, it gets hidden from the dropdown menu
                 options[i].style.display = "none";
             }
         }
@@ -329,7 +298,6 @@
     
     // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
     function searchCardSets(searchTerm) {
-        // Stores the values selected
         const sport = document.getElementById('sport').value;
         const year = document.getElementById('cardYear').value;
         const cardColor = document.getElementById('cardColor').value;
@@ -337,11 +305,9 @@
 
         // Starts constructing the URL for the API call and appends the search term as a query
         let url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
-        // Checks if a sport has been selected and appends it to the URL
         if (sport) {
             url += `&sport=${encodeURIComponent(sport)}`;
         }
-        // Checks if a year has been selected and appends it to the URL
         if (year) {
             url += `&year=${encodeURIComponent(year)}`;
         }
@@ -362,19 +328,12 @@
 
     // This function populates the dropdown with the results from the set search 
     function populateDropdown(sets) {
-        // Accesses the dropdown element with the ID cardSet amd assigns it to variable setSelect
         const setSelect = document.getElementById('cardSet');
-        // Clears any existing options in the dropdown and adds a default option of 'All Sets' to serve as a placeholder
         setSelect.innerHTML = '<option value="">All Sets</option>'; 
-        // Loops through the sets 
         sets.forEach(set => {
-            // Creates an option element for the dropdown 
             const option = document.createElement('option');
-            // Makes the set as the value of the option
             option.value = set;
-            // Makes the set as the text content for the option
             option.textContent = set;
-            // Appends the newly created option to the dropdown
             setSelect.appendChild(option);
         });
     }
@@ -422,13 +381,6 @@
     }
     document.getElementById('resetButton').addEventListener('click', resetFilters);
 
-    // Modify event listeners to include the caller (sport or set)
-    document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
-    document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
-    document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
-    document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
-    document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
-
     function changePageSize() {
         var pageSize = document.getElementById('pageSize').value;
         // Store the selected page size in local storage to keep it selected
@@ -442,7 +394,7 @@
     function loadDataWithFilters() {
         if (isLoadingData) return;
         isLoadingData = true;
-        document.getElementById('loadingIndicator').style.display = 'block';
+        showSpinner();
 
         // Include cardColor and cardVariant in the fetch URL
         const sport = document.getElementById('sport').value;
@@ -472,7 +424,7 @@
             console.error('Error loading data:', error);
         })
         .finally(() => {
-            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('spinner').style.display = 'none';
             isLoadingData = false;
         });
 
