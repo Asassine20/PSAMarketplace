@@ -67,11 +67,11 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             values.push(sport);
         }
         if (cardColor) {
-            whereConditions.push("(CardColor = ? OR CardColor IS NULL OR CardColor = '')");
+            whereConditions.push("CardColor = ?");
             values.push(cardColor);
         }
         if (cardVariant) {
-            whereConditions.push("(CardVariant = ? OR CardVariant IS NULL OR CardVariant = '')");
+            whereConditions.push("CardVariant = ?");
             values.push(cardVariant);
         }
 
@@ -400,7 +400,7 @@ router.get('/cardvariants', authenticateToken, async (req, res) => {
 
 // Endpoint for full search
 router.get('/search-card-sets', authenticateToken, async (req, res) => {
-    const { term, sport, year } = req.query;
+    const { term, sport, year, cardColor, cardVariant } = req.query;
     let query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
     let values = [`%${term}%`];
 
@@ -412,6 +412,14 @@ router.get('/search-card-sets', authenticateToken, async (req, res) => {
     if (year) {
         query += " AND CardYear = ?";
         values.push(year); 
+    }
+    if (cardColor) {
+        query += " AND CardColor = ?";
+        values.push(cardColor); 
+    }
+    if (cardVariant) {
+        query += " AND CardVariant = ?";
+        values.push(cardVariant); 
     }
 
     try {

@@ -174,7 +174,6 @@
 </div>
 
 <script>
-    loadSetsAndYears(null);
     // Populates the dropdown menus based on user selections
     function loadSetsAndYears(caller) {
         // Disable the dropdowns while loading
@@ -260,34 +259,20 @@
             .then(response => response.json())
             .then(colors => {
                 const colorSelect = document.getElementById('cardColor');
-                colorSelect.innerHTML = ''; // Clear existing options
-
-                // Add 'All Colors' placeholder option
-                const allColorsOption = document.createElement('option');
-                allColorsOption.value = '';
-                allColorsOption.textContent = 'All Colors';
-                colorSelect.appendChild(allColorsOption);
-
+                colorSelect.innerHTML = '<option value="">All Colors</option>';
                 colors.forEach(colorItem => {
-                    if (colorItem) { // Ensure the colorItem is not null or empty
-                        const option = document.createElement('option');
-                        option.value = colorItem;
-                        option.textContent = colorItem;
-                        if (colorItem === cardColor) {
-                            option.selected = true;
-                        }
-                        colorSelect.appendChild(option);
+                    const option = document.createElement('option');
+                    option.value = colorItem;
+                    option.textContent = colorItem;
+                    if (colorItem === cardColor) {
+                        option.selected = true;
                     }
+                    colorSelect.appendChild(option);
                 });
-
-                // If no specific color is selected, set the placeholder as selected
-                if (!cardColor) {
-                    allColorsOption.selected = true;
-                }
             })
             .catch(error => console.error('Error loading card colors:', error));
 
-        // Fetch card variants based on other filters
+        // Adjusted logic for cardVariant
         fetch(`/cardvariants?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}`)
             .then(response => response.json())
             .then(variants => {
@@ -344,10 +329,12 @@
     
     // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
     function searchCardSets(searchTerm) {
-        // Stores the value of the sport selected into the sport variable
+        // Stores the values selected
         const sport = document.getElementById('sport').value;
-        // Stores the value of the year selected into the year variable
         const year = document.getElementById('cardYear').value;
+        const cardColor = document.getElementById('cardColor').value;
+        const cardVariant = document.getElementById('cardVariant').value;
+
         // Starts constructing the URL for the API call and appends the search term as a query
         let url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
         // Checks if a sport has been selected and appends it to the URL
@@ -358,6 +345,12 @@
         if (year) {
             url += `&year=${encodeURIComponent(year)}`;
         }
+        if (cardColor) {
+            url += `&cardColor=${encodeURIComponent(cardColor)}`;
+        }
+        if (cardVariant) {
+            url += `&cardVariant=${encodeURIComponent(cardVariant)}`;
+        }
         // Sends a request to the server at the constructed URL
         fetch(url)
             // Processes the response by converting it to JSON
@@ -367,17 +360,7 @@
             .catch(error => console.error('Error:', error));
     }
 
-    // Selects the element with the ID sport and updates the CardSet dropdown based on the current selection
-    document.getElementById('sport').addEventListener('change', () => {
-        searchCardSets(document.getElementById('cardSetSearch').value);
-    });
-
-    // Selects the element with the ID cardYear and updates the CardSet dropdown based on the current selection
-    document.getElementById('cardYear').addEventListener('change', () => {
-        searchCardSets(document.getElementById('cardSetSearch').value);
-    });
-
-    // This function populates the dropdown with the results
+    // This function populates the dropdown with the results from the set search 
     function populateDropdown(sets) {
         // Accesses the dropdown element with the ID cardSet amd assigns it to variable setSelect
         const setSelect = document.getElementById('cardSet');
@@ -473,7 +456,6 @@
         let url = `/inventory?page=${page}&pageSize=${pageSize}&searchTerm=${encodeURIComponent(searchTerm)}&sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardYear=${encodeURIComponent(cardYear)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`;
         console.log("URL:", url);
         console.log("Page Size:", pageSize);
-        // Log other variables as needed
 
         fetch(url, {
             method: 'GET',
@@ -520,8 +502,8 @@
                 <td>${card.CardSet}</td>
                 <td>${card.CardYear}</td>
                 <td>${card.CardNumber}</td>
-                <td>${card.CardColor || 'N/A'}</td>
-                <td>${card.CardVariant || 'N/A'}</td>
+                <td>${card.CardColor}</td>
+                <td>${card.CardVariant}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
