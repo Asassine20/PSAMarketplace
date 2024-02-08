@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <link rel="stylesheet" href="/style.css">
     <title>Document</title>
@@ -28,7 +29,7 @@
         </ul>
     </nav>
     <h4>{{username}} Inventory</h4>
-    <div class="inventorySearch" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="inventorySearch" id="inventorySearchForm" style="display: flex; justify-content: space-between; align-items: center;">
         <form action="/inventory" method="get" style="flex-grow 1">
             <div>
                 <label for="searchTerm">Player:</label>
@@ -151,26 +152,21 @@
         </tbody>
     </table>
 
-
     <nav aria-label="Page navigation" class="pagination-bottom">
         <ul class="pagination">
             {{#if showPrevious}}
             <li class="page-item">
-                <a class="page-link" href="?page={{minus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}&cardColor={{cardColor}}&cardVariant={{cardVariant}}">
-                    Previous
-                </a>
+                <button class="page-link" onclick="changePage({{minus currentPage 1}})">Previous</button>
             </li>
             {{/if}}
             {{#if showNext}}
             <li class="page-item">
-                <a class="page-link" href="?page={{plus currentPage 1}}&searchTerm={{searchTerm}}&cardSet={{cardSet}}&cardYear={{cardYear}}&sport={{sport}}&cardColor={{cardColor}}&cardVariant={{cardVariant}}">
-                    Next
-                </a>
+                <button class="page-link" onclick="changePage({{plus currentPage 1}})">Next</button>
             </li>
             {{/if}}
         </ul>
-
     </nav>
+
 </div>
 
 <script>
@@ -190,63 +186,126 @@
 
     // Fetches and updates sports options
     function fetchSports(sport, cardSet, year, cardColor, cardVariant) {
-        fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(sports => {
+        $.ajax({
+            url: '/sports',
+            type: 'GET',
+            data: {
+                cardSet: cardSet,
+                year: year,
+                cardColor: cardColor,
+                cardVariant: cardVariant
+            },
+            dataType: 'json',
+            success: function(sports) {
                 const select = document.getElementById('sport');
                 select.innerHTML = '<option value="">All Sports</option>';
                 updateDropdown('sport', sports, sport);
-            })
-            .catch(error => console.error('Error loading sports:', error));
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading sports:', error);
+            }
+        });
     }
 
     // Fetches and updates card sets options
     function fetchCardSets(sport, cardSet, year, cardColor, cardVariant) {
-        fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(sets => {
+        $.ajax({
+            url: '/cardsets',
+            type: 'GET',
+            data: {
+                sport: sport,
+                cardSet: cardSet,
+                year: year,
+                cardColor: cardColor,
+                cardVariant: cardVariant
+            },
+            dataType: 'json',
+            success: function(sets) {
                 const select = document.getElementById('cardSet');
                 select.innerHTML = '<option value="">All Sets</option>';
                 updateDropdown('cardSet', sets, cardSet);
-            })
-            .catch(error => console.error('Error loading card sets:', error));
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading card sets:', error);
+            }
+        });
     }
+
 
     // Fetches and updates years options
     function fetchYears(sport, cardSet, year, cardColor, cardVariant) {
-        fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(years => {
+        $.ajax({
+            url: '/years',
+            type: 'GET',
+            data: {
+                sport: sport,
+                cardSet: cardSet,
+                year: year,
+                cardColor: cardColor,
+                cardVariant: cardVariant
+            },
+            dataType: 'json',
+            success: function(years) {
                 const select = document.getElementById('cardYear');
                 select.innerHTML = '<option value="">All Years</option>';
                 updateDropdown('cardYear', years, year);
-            })
-            .catch(error => console.error('Error loading years:', error));
-    }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading years:', error);
+            }
+        });
+}
+
 
     // Fetches and updates card colors options
     function fetchCardColors(sport, cardSet, year, cardColor, cardVariant) {
-        fetch(`/cardcolors?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardVariant=${encodeURIComponent(cardVariant)}`)
-            .then(response => response.json())
-            .then(colors => {
+        $.ajax({
+            url: '/cardcolors',
+            type: 'GET',
+            data: {
+                sport: sport,
+                cardSet: cardSet,
+                year: year,
+                cardColor: cardColor,
+                cardVariant: cardVariant
+            },
+            dataType: 'json',
+            success: function(colors) {
                 const select = document.getElementById('cardColor');
                 select.innerHTML = '<option value="">All Colors</option>';
                 updateDropdown('cardColor', colors, cardColor);
-            })
-            .catch(error => console.error('Error loading card colors:', error));
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading card colors:', error);
+            }
+        });
     }
+
 
     // Fetches and updates card variants options
     function fetchCardVariants(sport, cardSet, year, cardColor, cardVariant) {
-        fetch(`/cardvariants?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}`)
-            .then(response => response.json())
-            .then(variants => {
+        $.ajax({
+            url: '/cardvariants',
+            type: 'GET',
+            data: {
+                sport: sport,
+                cardSet: cardSet,
+                year: year,
+                cardColor: cardColor,
+                cardVariant: cardVariant
+            },
+            dataType: 'json',
+            success: function(variants) {
                 const select = document.getElementById('cardVariant');
                 select.innerHTML = '<option value="">All Variants</option>';
                 updateDropdown('cardVariant', variants, cardVariant);
-            })
-            .catch(error => console.error('Error loading card variants:', error));
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading card variants:', error);
+            }
+        });
     }
+
 
     // Updates dropdown options
     function updateDropdown(dropdownId, items, selectedItem) {
@@ -299,18 +358,13 @@
     }
 
 
-    /*document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
+    document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
     document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
     document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
     document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
     document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
-*/
+
     // Assuming the event listeners are correctly set up as shown in your code snippet:
-    document.getElementById('sport').addEventListener('change', loadDataWithFilters);
-    document.getElementById('cardSet').addEventListener('change', loadDataWithFilters);
-    document.getElementById('cardYear').addEventListener('change', loadDataWithFilters);
-    document.getElementById('cardColor').addEventListener('change', loadDataWithFilters);
-    document.getElementById('cardVariant').addEventListener('change', loadDataWithFilters);
 
     // JavaScript function to filter card set options
     function filterCardSets() {
@@ -395,9 +449,8 @@
     document.getElementById('cardSetSearch').addEventListener('keyup', function(e) {
         debouncedSearchCardSets(e.target.value);
     });
-    document.getElementById('searchTerm').addEventListener('input', function() {
-        debounce(loadDataWithFilters, 400)();
-    });
+    var debouncedLoadDataWithFilters = debounce(loadDataWithFilters, 400);
+    document.getElementById('searchTerm').addEventListener('input', debouncedLoadDataWithFilters);
 
 
     function resetFilters() {
@@ -420,49 +473,104 @@
 
     function changePageSize() {
         var pageSize = document.getElementById('pageSize').value;
-        // Store the selected page size in local storage to keep it selected
         localStorage.setItem('pageSize', pageSize);
-        // Perform an AJAX request to fetch data with the new page size without reloading the page
-        loadDataWithFilters();
+        loadDataWithFilters(); // This will now use the updated pageSize
     }
 
     let isLoadingData = false;
+
+    let currentPage = 1; // Initial page
+    const pageSize = localStorage.getItem('pageSize') || '25'; // Default page size
+
+    function changePage(page) {
+        currentPage = page;
+        loadDataWithFilters();
+    }
 
     function loadDataWithFilters() {
         if (isLoadingData) return;
         isLoadingData = true;
         showSpinner();
 
-        // Collect filter and search parameters
+        // Update to fetch pageSize from the dropdown or localStorage every time
+        let pageSize = document.getElementById('pageSize').value || localStorage.getItem('pageSize') || '25';
+
         const sport = document.getElementById('sport').value;
         const cardSet = document.getElementById('cardSet').value;
-        const cardYear = document.getElementById('cardYear').value;
+        const year = document.getElementById('cardYear').value;
         const cardColor = document.getElementById('cardColor').value;
         const cardVariant = document.getElementById('cardVariant').value;
-        const pageSize = localStorage.getItem('pageSize') || '25';
-        const page = new URLSearchParams(window.location.search).get('page') || 1;
-        const searchTerm = document.getElementById('searchTerm').value; // Assuming this is your player name search input
+        const searchTerm = document.getElementById('searchTerm').value;
 
-        let url = `/inventory?page=${page}&pageSize=${pageSize}&searchTerm=${encodeURIComponent(searchTerm)}&sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardYear=${encodeURIComponent(cardYear)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`;
+        const data = {
+            page: currentPage,
+            pageSize,
+            searchTerm,
+            sport,
+            cardSet,
+            cardYear: year,
+            cardColor,
+            cardVariant
+        };
 
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+        fetchInventoryData(data);
+    }
+
+    function fetchInventoryData(data) {
+        $.ajax({
+            url: `/inventory`,
+            type: 'GET',
+            data: data, // Automatically converts data object to query string
+            dataType: 'json',
+            success: function(response) {
+                updateTableAndTotalItemsWithData(response.cards, response.totalItems);
+                updatePaginationControls(response.showPrevious, response.showNext);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading data:', error);
+            },
+            complete: function() {
+                document.getElementById('spinner').style.display = 'none';
+                isLoadingData = false;
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            updateTableAndTotalItemsWithData(data.cards, data.totalItems);
-        })
-        .catch(error => {
-            console.error('Error loading data:', error);
-        })
-        .finally(() => {
-            document.getElementById('spinner').style.display = 'none';
-            isLoadingData = false;
         });
     }
+
+    function updatePaginationControls(showPrevious, showNext) {
+        document.querySelector('.pagination').innerHTML = `
+            ${showPrevious ? `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage - 1})">Previous</button></li>` : ''}
+            ${showNext ? `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage + 1})">Next</button></li>` : ''}
+        `;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load initial data
+        loadDataWithFilters();
+
+        // Attach event listeners to filter elements
+        document.getElementById('sport').addEventListener('change', loadDataWithFilters);
+        document.getElementById('cardSet').addEventListener('change', loadDataWithFilters);
+        document.getElementById('cardYear').addEventListener('change', loadDataWithFilters);
+        document.getElementById('cardColor').addEventListener('change', loadDataWithFilters);
+        document.getElementById('cardVariant').addEventListener('change', loadDataWithFilters);
+        document.getElementById('searchTerm').addEventListener('input', loadDataWithFilters); 
+
+        // Event listener for intercepting the form submission
+        document.getElementById('inventorySearchForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevents the default form submission
+            loadDataWithFilters(); // Triggers the AJAX call
+        });
+
+        // If you have a pageSize selector or similar
+        const pageSizeSelector = document.getElementById('pageSize');
+        if (pageSizeSelector) {
+            pageSizeSelector.addEventListener('change', function() {
+                localStorage.setItem('pageSize', this.value);
+                loadDataWithFilters();
+            });
+        }
+    });
+
 
     // On page load, set the page size dropdown based on the stored value
     document.addEventListener('DOMContentLoaded', function() {
@@ -473,6 +581,7 @@
         // Optionally, load data with filters when the page loads if you're implementing the entire page fetch via AJAX
         loadDataWithFilters();
     });
+    
     function updateTableAndTotalItemsWithData(cards, totalItems) {
         const tableBody = document.querySelector('.table-container table tbody');
         tableBody.innerHTML = ''; // Clear existing rows
