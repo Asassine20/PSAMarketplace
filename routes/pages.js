@@ -606,7 +606,12 @@ router.get('/order-details', async (req, res) => {
     }
 });
 
-
+router.get('/messages', authenticateToken, async(req, res) => {
+    const sellerId = req.user.id;
+    res.render('messages', {
+        sellerId: sellerId
+    })
+})
 
 
 module.exports = router;

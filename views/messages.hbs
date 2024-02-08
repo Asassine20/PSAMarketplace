@@ -9,12 +9,6 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="spinner" style="display:none;">
-        <div class="spinner-border" role="status">
-            <span class="sr-only"></span>
-        </div>
-    </div>
-
     <nav>
         <h4 style="font-size:13px">Logo Placeholder</h4>
         <ul>
@@ -31,7 +25,7 @@
     <div class="table-container">
     <div class="table-controls">
         <div class="pagination-controls">
-            <label for="pageSize">Orders per page:</label>
+            <label for="pageSize">Messages per page:</label>
             <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
                 <option value="25" {{#if (eq limit 25)}}selected{{/if}}>25 per page</option>
                 <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50 per page</option>
@@ -55,7 +49,6 @@
             <tr>
                 <th>Order #</th>
                 <th>Buyer Name</th>
-                <th>Sale Price</th>
                 <th>Order Date</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -66,7 +59,6 @@
             <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
                 <td>{{OrderID}}</td>
                 <td>{{Username}}</td>
-                <td>{{SalePrice}}</td>
                 <td>{{formatDate OrderDate}}</td>
                 <td>{{ShipmentStatus}}</td>
                 <td class="button-cell">
