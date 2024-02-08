@@ -284,21 +284,33 @@
         const cardColor = document.getElementById('cardColor').value;
         const cardVariant = document.getElementById('cardVariant').value;
 
-        fetchSports(sport, cardSet, year, cardColor, cardVariant);
-        fetchCardSets(sport, cardSet, year, cardColor, cardVariant);
-        fetchYears(sport, cardSet, year, cardColor, cardVariant);
-        fetchCardColors(sport, cardSet, year, cardColor, cardVariant);
-        fetchCardVariants(sport, cardSet, year, cardColor, cardVariant);
-
-        finalizeLoading();
+        Promise.all([
+            fetchSports(sport, cardSet, year, cardColor, cardVariant),
+            fetchCardSets(sport, cardSet, year, cardColor, cardVariant),
+            fetchYears(sport, cardSet, year, cardColor, cardVariant),
+            fetchCardColors(sport, cardSet, year, cardColor, cardVariant),
+            fetchCardVariants(sport, cardSet, year, cardColor, cardVariant)
+        ]).then(() => {
+            finalizeLoading();
+        }).catch(error => {
+            console.error('Error with one of the fetch calls:', error);
+            finalizeLoading(); // Consider how to handle partial failures
+        });
     }
 
-    document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
+
+    /*document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
     document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
     document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
     document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
     document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
-
+*/
+    // Assuming the event listeners are correctly set up as shown in your code snippet:
+    document.getElementById('sport').addEventListener('change', loadDataWithFilters);
+    document.getElementById('cardSet').addEventListener('change', loadDataWithFilters);
+    document.getElementById('cardYear').addEventListener('change', loadDataWithFilters);
+    document.getElementById('cardColor').addEventListener('change', loadDataWithFilters);
+    document.getElementById('cardVariant').addEventListener('change', loadDataWithFilters);
 
     // JavaScript function to filter card set options
     function filterCardSets() {
@@ -383,6 +395,10 @@
     document.getElementById('cardSetSearch').addEventListener('keyup', function(e) {
         debouncedSearchCardSets(e.target.value);
     });
+    document.getElementById('searchTerm').addEventListener('input', function() {
+        debounce(loadDataWithFilters, 400)();
+    });
+
 
     function resetFilters() {
         // Clear the player search term
@@ -417,7 +433,7 @@
         isLoadingData = true;
         showSpinner();
 
-        // Include cardColor and cardVariant in the fetch URL
+        // Collect filter and search parameters
         const sport = document.getElementById('sport').value;
         const cardSet = document.getElementById('cardSet').value;
         const cardYear = document.getElementById('cardYear').value;
@@ -425,11 +441,9 @@
         const cardVariant = document.getElementById('cardVariant').value;
         const pageSize = localStorage.getItem('pageSize') || '25';
         const page = new URLSearchParams(window.location.search).get('page') || 1;
-        const searchTerm = document.getElementById('searchTerm').value;
+        const searchTerm = document.getElementById('searchTerm').value; // Assuming this is your player name search input
 
         let url = `/inventory?page=${page}&pageSize=${pageSize}&searchTerm=${encodeURIComponent(searchTerm)}&sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardYear=${encodeURIComponent(cardYear)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`;
-        console.log("URL:", url);
-        console.log("Page Size:", pageSize);
 
         fetch(url, {
             method: 'GET',
@@ -448,9 +462,7 @@
             document.getElementById('spinner').style.display = 'none';
             isLoadingData = false;
         });
-
     }
-    
 
     // On page load, set the page size dropdown based on the stored value
     document.addEventListener('DOMContentLoaded', function() {
