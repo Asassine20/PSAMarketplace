@@ -89,7 +89,7 @@
                     <button id="resetButton" type="reset" class="filter-input fixed-width-dropdown" onclick="resetFilters()">Reset</button>
                 </div>
                 <div>
-                    <button type="submit" class="filter-input fixed-width-dropdown">Search</button>
+                    <button type="submit" id="searchButton" class="filter-input fixed-width-dropdown">Search</button>
                 </div>
 
             </div>
@@ -450,8 +450,6 @@
         debouncedSearchCardSets(e.target.value);
     });
     var debouncedLoadDataWithFilters = debounce(loadDataWithFilters, 400);
-    document.getElementById('searchTerm').addEventListener('input', debouncedLoadDataWithFilters);
-
 
     function resetFilters() {
         // Clear the player search term
@@ -512,6 +510,8 @@
             cardColor,
             cardVariant
         };
+        console.log('Sending AJAX request with data:', data); // Log the data being sent
+
 
         fetchInventoryData(data);
     }
@@ -553,12 +553,18 @@
         document.getElementById('cardYear').addEventListener('change', loadDataWithFilters);
         document.getElementById('cardColor').addEventListener('change', loadDataWithFilters);
         document.getElementById('cardVariant').addEventListener('change', loadDataWithFilters);
-        document.getElementById('searchTerm').addEventListener('input', loadDataWithFilters); 
 
         // Event listener for intercepting the form submission
         document.getElementById('inventorySearchForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevents the default form submission
-            loadDataWithFilters(); // Triggers the AJAX call
+            e.preventDefault();
+            console.log('Form submission intercepted');
+            loadDataWithFilters();
+        });
+
+        document.getElementById('searchButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Search button clicked');
+            loadDataWithFilters();
         });
 
         // If you have a pageSize selector or similar
@@ -600,7 +606,7 @@
                 <td>${card.CardYear}</td>
                 <td>${card.CardNumber}</td>
                 <td>${card.CardColor}</td>
-                <td>${card.CardVariant}</td>
+                <td>${card.CardVariant ? card.CardVariant : ''}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
