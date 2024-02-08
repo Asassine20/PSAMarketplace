@@ -50,9 +50,6 @@
                 <div class="dropdown-content consistent-width-dropdown">
                     <select id="cardSet" name="cardSet" class="filter-input fixed-width-dropdown">
                         <option value="">All Sets</option>
-                        {{#each cardSets}}
-                        <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
-                        {{/each}}
                     </select>
                 </div>
             </div>
