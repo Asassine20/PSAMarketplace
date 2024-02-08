@@ -44,8 +44,6 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     const cardVariant = req.query.cardVariant || '';
     const cacheKey = `inventory:${sellerId}:${page}:${limit}:${searchTerm}:${cardSet}:${cardYear}:${sport}:${cardColor}:${cardVariant}`;
 
-
-
     try {
         let whereConditions = [];
         let values = [];

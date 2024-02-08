@@ -192,7 +192,11 @@
     function fetchSports(sport, cardSet, year, cardColor, cardVariant) {
         fetch(`/sports?cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             .then(response => response.json())
-            .then(sports => updateDropdown('sport', sports, sport))
+            .then(sports => {
+                const select = document.getElementById('sport');
+                select.innerHTML = '<option value="">All Sports</option>';
+                updateDropdown('sport', sports, sport);
+            })
             .catch(error => console.error('Error loading sports:', error));
     }
 
@@ -200,7 +204,11 @@
     function fetchCardSets(sport, cardSet, year, cardColor, cardVariant) {
         fetch(`/cardsets?sport=${encodeURIComponent(sport)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             .then(response => response.json())
-            .then(sets => updateDropdown('cardSet', sets, cardSet))
+            .then(sets => {
+                const select = document.getElementById('cardSet');
+                select.innerHTML = '<option value="">All Sets</option>';
+                updateDropdown('cardSet', sets, cardSet);
+            })
             .catch(error => console.error('Error loading card sets:', error));
     }
 
@@ -208,7 +216,11 @@
     function fetchYears(sport, cardSet, year, cardColor, cardVariant) {
         fetch(`/years?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&cardColor=${encodeURIComponent(cardColor)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             .then(response => response.json())
-            .then(years => updateDropdown('cardYear', years, year))
+            .then(years => {
+                const select = document.getElementById('cardYear');
+                select.innerHTML = '<option value="">All Years</option>';
+                updateDropdown('cardYear', years, year);
+            })
             .catch(error => console.error('Error loading years:', error));
     }
 
@@ -216,7 +228,11 @@
     function fetchCardColors(sport, cardSet, year, cardColor, cardVariant) {
         fetch(`/cardcolors?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardVariant=${encodeURIComponent(cardVariant)}`)
             .then(response => response.json())
-            .then(colors => updateDropdown('cardColor', colors, cardColor))
+            .then(colors => {
+                const select = document.getElementById('cardColor');
+                select.innerHTML = '<option value="">All Colors</option>';
+                updateDropdown('cardColor', colors, cardColor);
+            })
             .catch(error => console.error('Error loading card colors:', error));
     }
 
@@ -224,22 +240,27 @@
     function fetchCardVariants(sport, cardSet, year, cardColor, cardVariant) {
         fetch(`/cardvariants?sport=${encodeURIComponent(sport)}&cardSet=${encodeURIComponent(cardSet)}&year=${encodeURIComponent(year)}&cardColor=${encodeURIComponent(cardColor)}`)
             .then(response => response.json())
-            .then(variants => updateDropdown('cardVariant', variants, cardVariant))
+            .then(variants => {
+                const select = document.getElementById('cardVariant');
+                select.innerHTML = '<option value="">All Variants</option>';
+                updateDropdown('cardVariant', variants, cardVariant);
+            })
             .catch(error => console.error('Error loading card variants:', error));
     }
 
     // Updates dropdown options
     function updateDropdown(dropdownId, items, selectedItem) {
         const select = document.getElementById(dropdownId);
-        select.innerHTML = `<option value="">All ${dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)}</option>`;
         items.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item;
-            option.textContent = item;
-            if (item === selectedItem) {
-                option.selected = true;
+            if (item && item.trim() !== '') {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                if (item === selectedItem) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
             }
-            select.appendChild(option);
         });
     }
 
