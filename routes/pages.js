@@ -532,7 +532,7 @@ async function updateOrderTotal(orderId) {
     }
 }
 */
-router.get('/orders', async (req, res) => {
+router.get('/orders', authenticateToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
     const offset = (page - 1) * limit;
@@ -561,6 +561,7 @@ router.get('/orders', async (req, res) => {
 
         res.render('orders', {
             orders,
+            totalOrders,
             page,
             totalPages,
             limit
@@ -573,7 +574,7 @@ router.get('/orders', async (req, res) => {
 
 
 
-router.get('/order-details', async (req, res) => {
+router.get('/order-details', authenticateToken, async (req, res) => {
     const orderId = req.query.orderId;
     try {
         // Fetch order details
@@ -606,12 +607,79 @@ router.get('/order-details', async (req, res) => {
     }
 });
 
-router.get('/messages', authenticateToken, async(req, res) => {
-    const sellerId = req.user.id;
-    res.render('messages', {
-        sellerId: sellerId
-    })
-})
+router.get('/messages', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 25;
+    const offset = (page - 1) * limit;
+
+    try {
+        const latestMessagesQuery = `
+            SELECT 
+                c.ConversationID,
+                c.Subject,
+                lm.LatestMessageID,
+                m.SenderID,
+                u.Username AS SenderName,
+                m.MessageText,
+                m.Timestamp,
+                m.IsRead
+            FROM Conversations c
+            INNER JOIN (
+                SELECT 
+                    ConversationID, 
+                    MAX(MessageID) AS LatestMessageID
+                FROM Messages
+                GROUP BY ConversationID
+            ) lm ON c.ConversationID = lm.ConversationID
+            INNER JOIN Messages m ON lm.LatestMessageID = m.MessageID
+            INNER JOIN Users u ON m.SenderID = u.UserID
+            WHERE c.SellerID = ? OR c.BuyerID = ?
+            ORDER BY m.Timestamp DESC
+            LIMIT ? OFFSET ?`;
+
+        const conversations = await db.query(latestMessagesQuery, [userId, userId, limit, offset]);
+        console.log(conversations);
+
+        res.render('messages', {
+            conversationsWithMessages: conversations,
+            page: page,
+            limit: limit
+        });
+    } catch (error) {
+        console.error('Error fetching conversations with latest messages:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+
+router.get('/message-details/:conversationId', authenticateToken, async (req, res) => {
+    const conversationId = req.params.conversationId;
+
+    try {
+        // Fetch all messages within the specified conversation
+        const messagesQuery = `
+            SELECT MessageID, SenderID, MessageText, Timestamp
+            FROM Messages
+            WHERE ConversationID = ?
+            ORDER BY Timestamp ASC`;
+
+        const messages = await db.query(messagesQuery, [conversationId]);
+
+        // Optionally, fetch conversation subject for display
+        const conversationQuery = `SELECT Subject FROM Conversations WHERE ConversationID = ?`;
+        const [conversation] = await db.query(conversationQuery, [conversationId]);
+
+        res.render('message-details', {
+            conversationId,
+            messages
+        });
+    } catch (error) {
+        console.error('Error fetching conversation details:', error);
+        res.status(500).send('Server error');
+    }
+});
+
 
 
 module.exports = router;

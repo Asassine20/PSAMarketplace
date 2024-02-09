@@ -23,56 +23,89 @@
         </ul>
     </nav>
     <div class="table-container">
-    <div class="table-controls">
-        <div class="pagination-controls">
-            <label for="pageSize">Messages per page:</label>
-            <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
-                <option value="25" {{#if (eq limit 25)}}selected{{/if}}>25 per page</option>
-                <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50 per page</option>
-                <option value="100" {{#if (eq limit 100)}}selected{{/if}}>100 per page</option>
-                <option value="250" {{#if (eq limit 250)}}selected{{/if}}>250 per page</option>
-            </select>
+        <div class="table-controls">
+            <div class="pagination-controls">
+                <label for="pageSize">Messages per page:</label>
+                <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
+                    <option value="25" {{#if (eq limit 25)}}selected{{/if}}>25 per page</option>
+                    <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50 per page</option>
+                    <option value="100" {{#if (eq limit 100)}}selected{{/if}}>100 per page</option>
+                    <option value="250" {{#if (eq limit 250)}}selected{{/if}}>250 per page</option>
+                </select>
 
-            <div class="pagination-links">
-                {{#if (gt page 1)}}
-                    <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
-                {{/if}}
-                Page {{page}} of {{totalPages}}
-                {{#if (lt page totalPages)}}
-                    <a href="?page={{inc page}}&limit={{limit}}">Next</a>
-                {{/if}}
+                <div class="pagination-links">
+                    {{#if (gt page 1)}}
+                        <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
+                    {{/if}}
+                    Page {{page}} of {{totalPages}}
+                    {{#if (lt page totalPages)}}
+                        <a href="?page={{inc page}}&limit={{limit}}">Next</a>
+                    {{/if}}
+                </div>
             </div>
         </div>
+        <h4>Total Messages</h4> <!-- Adjust as needed -->
+        <table style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>Message ID</th>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each conversationsWithMessages as |conversation|}}
+                <tr class="{{#if (eq conversation.IsRead 0)}}in-stock{{/if}}">
+                    <td>{{conversation.LatestMessageID}}</td>
+                    <td>{{conversation.SenderName}}</td>
+                    <td>{{conversation.Subject}}</td>
+                    <td>{{formatDate conversation.Timestamp}}</td>
+                    <td class="button-cell">
+                        <button type="button" onclick="window.location.href='/message-details/{{conversation.ConversationID}}'" class="table-button">View Conversation</button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
     </div>
-    <table style="margin-top: 20px;">
-        <thead>
-            <tr>
-                <th>Order #</th>
-                <th>Buyer Name</th>
-                <th>Order Date</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each orders}}
-            <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
-                <td>{{OrderID}}</td>
-                <td>{{Username}}</td>
-                <td>{{formatDate OrderDate}}</td>
-                <td>{{ShipmentStatus}}</td>
-                <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Manage</button>
-                </td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
 
 </body>
 <script>
     function changeLimit(limit) {
         window.location.href = `?page=1&limit=${limit}`;
     }
+    document.getElementById('sendMessageForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const orderId = {{orderId}};
+        const messageText = document.getElementById('messageText').value;
+
+        // Adjust the endpoint as necessary
+        try {
+            const response = await fetch('/api/messages/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId,
+                    messageText,
+                    // Include senderId if necessary, or handle server-side based on authenticated user
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Message sent:', data);
+                // Optionally, refresh the messages list or append the new message directly to the DOM
+                document.getElementById('messageText').value = ''; 
+            } else {
+                console.error('Failed to send message');
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    });
 </script>
 </html>
