@@ -697,23 +697,34 @@ router.get('/messages', authenticateToken, async (req, res) => {
 
 router.get('/message-details/:conversationId', authenticateToken, async (req, res) => {
     const conversationId = req.params.conversationId;
+    const sellerId = req.user.id; // Corrected typo from req.user,id to req.user.id
 
     try {
         // Fetch all messages within the specified conversation
         const messagesQuery = `
-            SELECT MessageID, SenderID, MessageText, Timestamp
+            SELECT Messages.MessageID, Messages.SenderID, Messages.MessageText, Messages.Timestamp, Users.Username AS SenderName
             FROM Messages
-            WHERE ConversationID = ?
-            ORDER BY Timestamp ASC`;
+            JOIN Users ON Messages.SenderID = Users.UserID
+            WHERE Messages.ConversationID = ?
+            ORDER BY Messages.Timestamp ASC`;
+    
+        let messages = await db.query(messagesQuery, [conversationId]);
 
-        const messages = await db.query(messagesQuery, [conversationId]);
+        // Mark messages if they are from the seller
+        messages = messages.map(message => ({
+            ...message,
+            isFromSeller: message.SenderID === sellerId,
+        }));
 
         // Optionally, fetch conversation subject for display
         const conversationQuery = `SELECT Subject FROM Conversations WHERE ConversationID = ?`;
         const [conversation] = await db.query(conversationQuery, [conversationId]);
 
+        // Pass the modified messages array to the template
         res.render('message-details', {
+            sellerId,
             conversationId,
+            conversation,
             messages
         });
     } catch (error) {
@@ -721,6 +732,35 @@ router.get('/message-details/:conversationId', authenticateToken, async (req, re
         res.status(500).send('Server error');
     }
 });
+
+router.post('/send-message', authenticateToken, async (req, res) => {
+    const { conversationId, messageText } = req.body;
+    const sellerId = req.user.id; // Assuming this is your seller's ID
+
+    try {
+        // Assume BuyerID needs to be fetched based on the conversationId
+        const { BuyerID } = await fetchBuyerIdFromConversation(conversationId);
+
+        const insertMessageQuery = `
+            INSERT INTO Messages (ConversationID, SenderID, MessageText, Timestamp, ResponseNeeded)
+            VALUES (?, ?, ?, NOW(), FALSE)`;
+        await db.query(insertMessageQuery, [conversationId, sellerId, messageText]);
+    
+
+        // Redirect back to the message-details page or handle as needed
+        res.redirect(`/message-details/${conversationId}`);
+    } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).send('Error sending message');
+    }
+});
+
+// Helper function to fetch BuyerID based on conversationId
+async function fetchBuyerIdFromConversation(conversationId) {
+    const query = `SELECT BuyerID FROM Conversations WHERE ConversationID = ?`;
+    const results = await db.query(query, [conversationId]);
+    return results[0]; // Assuming there's always a valid result
+}
 
 
 

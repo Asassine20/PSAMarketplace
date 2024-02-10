@@ -368,3 +368,91 @@ caption {
     margin-left: 20px; /* Space between dropdown and pagination links */
     margin-right: 60px;
 }
+.messages-list {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.message {
+    max-width: 60%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 20px;
+    font-family: Arial, sans-serif;
+    word-wrap: break-word;
+}
+
+.seller-message {
+    align-self: flex-end;
+    background-color: #007bff; /* Blue for seller's messages */
+    color: white;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+.buyer-message {
+    align-self: flex-start;
+    background-color: #e5e5ea; /* Grey for buyer's messages */
+    color: black;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+.message p {
+    margin: 0;
+}
+/* Container for your form */
+.form-container {
+    position: fixed;
+    bottom: 0;
+    left: 0; /* Added for centering */
+    right: 0; /* Added for centering */
+    width: 95%;
+    margin: 0 auto; /* Centers the container */
+    background: #f0f0f5;
+    padding: 10px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adds space between the textarea and the button */
+}
+
+#messageText {
+    flex: 1;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    resize: none;
+}
+
+#sendMessageForm button {
+    padding: 10px 20px;
+    background-color: #007bff; /* iOS Message Blue */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.back-to-messages {
+    display: inline-block; /* Adjust to inline-block for content width */
+    margin-bottom: 20px; /* Adjust as needed */
+    background-color: #007bff; /* iOS Message Blue */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    text-decoration: none;
+    text-align: center;
+    margin-left: auto; /* Aligns the button to the right */
+    margin-right: auto; /* Centers the button when used with margin-left: auto */
+}
+
+
+

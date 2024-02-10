@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Details</title>
+    <link rel="stylesheet" href="/style.css"> <!-- Make sure to link to your CSS file for styling -->
+</head>
+<body>
+    <nav>
+        <h4 style="font-size:13px">Logo Placeholder</h4>
+        <ul>
+            <li><a href="/dashboard">Home</a></li>
+            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/orders">Orders</a></li>
+            <li><a href="/messages">Messages</a></li>
+            <li><a href="/dashboard">Feedback</a></li>
+            <li><a href="/dashboard">Payments</a></li>
+            <li><a href="/dashboard">Reports</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    <header>
+        <h1>Conversation Details</h1>
+    </header>
+
+    <a href="/messages" class="back-to-messages">Back to All Messages</a>
+
+    <section class="conversation-subject">
+        <h2>Subject: {{conversation.Subject}}</h2>
+    </section>
+
+    <section class="messages-list">
+        {{#each messages}}
+            <article class="message {{#if this.isFromSeller}}seller-message{{else}}buyer-message{{/if}}">
+                <p>{{this.MessageText}}</p>
+            </article>
+
+        {{else}}
+            <p>No messages found in this conversation.</p>
+        {{/each}}
+    </section>
+    <div class="form-container">
+        <form id="sendMessageForm" action="/send-message" method="POST" class="message-form">
+            <input type="hidden" name="conversationId" value="{{conversationId}}">
+            <div class="input-group">
+                <textarea name="messageText" id="messageText" placeholder="Type your message here..." rows="1"></textarea>
+                <button type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+
+<script>
+    document.getElementById('sendMessageForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const conversationId = document.querySelector('input[name="conversationId"]').value;
+        const messageText = document.getElementById('messageText').value;
+
+        try {
+            const response = await fetch('/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversationId, messageText })
+            });
+
+            if (response.ok) {
+                console.log('Message sent successfully');
+                window.location.reload(); // Refresh the page to display the new message
+            } else {
+                console.error('Failed to send message');
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    });
+
+</script>
+
+</body>
+</html>
