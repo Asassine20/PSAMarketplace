@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const path = require('path');
 const server = express();
 const db = require('./db');
@@ -10,6 +11,8 @@ const inventoryRoutes = require('./routes/pages');
 const hbs = require('hbs');
 
 server.use(cookieParser());
+
+server.use(compression());
 
 server.use(express.static(publicDirectory));
 

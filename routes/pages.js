@@ -159,7 +159,49 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+async function preWarmCache() {
+    // Define common queries or parameters based on dropdown filters
+    const commonQueries = [
+        { searchTerm: '', cardSet: '', cardYear: '', sport: '', cardColor: '', cardVariant: '' }, // General query example
+        // Add specific queries as needed based on common dropdown selections
+        // Example: { searchTerm: 'Pikachu', cardSet: 'Base Set', cardYear: '1999', sport: '', cardColor: '', cardVariant: '' },
+    ];
 
+    for (const query of commonQueries) {
+        const cacheKey = `inventory:prewarm:${JSON.stringify(query)}`;
+        const data = await fetchInventoryData(query);
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
+    }
+
+    console.log('Cache pre-warming complete.');
+}
+
+async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardColor, cardVariant }) {
+    let whereConditions = [];
+    let values = [];
+
+    if (searchTerm) whereConditions.push("CardName = ?"), values.push(searchTerm);
+    if (cardSet) whereConditions.push("CardSet = ?"), values.push(cardSet);
+    if (cardYear) whereConditions.push("CardYear = ?"), values.push(cardYear);
+    if (sport) whereConditions.push("Sport = ?"), values.push(sport);
+    if (cardColor) whereConditions.push("CardColor = ?"), values.push(cardColor);
+    if (cardVariant) whereConditions.push("CardVariant = ?"), values.push(cardVariant);
+
+    let query = "SELECT * FROM Card";
+    if (whereConditions.length) query += " WHERE " + whereConditions.join(" AND ");
+    query += " LIMIT 100"; // Adjust limit based on your needs for pre-warming
+
+    try {
+        const cards = await db.query(query, values);
+        return cards; // Assuming db.query returns the result set
+    } catch (error) {
+        console.error('Error fetching inventory for pre-warming:', error);
+        return [];
+    }
+}
+
+// Assuming you want to call preWarmCache at application startup
+preWarmCache().catch(console.error);
 router.get('/cardsets', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
