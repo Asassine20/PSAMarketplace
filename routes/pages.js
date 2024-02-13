@@ -485,7 +485,6 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         const inventoryItems = await db.query(inventoryQuery, [cardId, sellerId]);
         
         // Assuming you might have multiple inventory items for a card, you'll need to handle how you select/display these
-        // For simplicity, this example will proceed with the first inventory item if available
         let inventoryData = inventoryItems.length > 0 ? inventoryItems[0] : {};
         
         // Now, if there's inventory data, proceed to fetch the card details
@@ -500,64 +499,59 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
             gradeId: gradeRow.GradeID
         }));
 
-        // If inventory data has a CertNumber, use it to scrape the image
-        let cardImage = cardDetails.length > 0 ? cardDetails[0].CardImage : null;
-        if (inventoryData.CertNumber) {
-            const scrapedImageUrl = await scrapeImages(`https://www.psacard.com/cert/${inventoryData.CertNumber}`);
-            cardImage = scrapedImageUrl || cardImage; // Use scraped image URL if available
-        }
-
         // Render the page with fetched data
         res.render('update_inventory', {
             inventory: inventoryData, // existing inventory data
             existingInventory: inventoryData, // additional key for pre-populating form
-            cardDetails: cardDetails.length > 0 ? {...cardDetails[0], CardImage: cardImage} : {}, // Updated to include potentially scraped image
+            cardDetails: cardDetails.length > 0 ? {...cardDetails[0]} : {}, // Updated to include card details without scraped image
             grades: gradesWithIds,
         });
 
     } catch (error) {
-
         console.error('Database error:', error);
         res.status(500).send('Server error');
     }
 });
-async function scrapeImages(certNumber) {
-    const url = `https://www.psacard.com/cert/${certNumber}`;
+
+// Function to get images by cert number from PSA Card API
+async function getImagesByCertNumber(certNumber, apiKey, accessToken) {
+    const endpoint = `https://api.psacard.com/publicapi/cert/GetImagesByCertNumber/${certNumber}`;
     try {
-        const response = await axios.get(url);
-        const html = response.data;
-        const $ = cheerio.load(html);
-        // Example selectors, adjust based on actual HTML structure
-        const frontImageUrl = $('selector-for-front-image').attr('src');
-        const backImageUrl = $('selector-for-back-image').attr('src');
-        return { frontImageUrl, backImageUrl };
-    } catch (error) {
-        console.error('Error scraping images:', error);
-        return { frontImageUrl: null, backImageUrl: null };
-    }
-}
-scrapeImages('80226909').then(result => {
-    console.log(result); // Should log the URLs if successful
-}).catch(console.error);
-
-
-// Example of updating an inventory item with scraped images
-async function updateInventoryImagesWithScrapedData(inventoryId, certNumber) {
-    const { frontImageUrl, backImageUrl } = await scrapeImages(certNumber);
-
-    if (frontImageUrl && backImageUrl) {
-        const updateQuery = 'UPDATE Inventory SET FrontImageURL = ?, BackImageURL = ? WHERE InventoryID = ?';
-        try {
-            await db.query(updateQuery, [frontImageUrl, backImageUrl, inventoryId]);
-            console.log('Inventory images updated successfully for InventoryID:', inventoryId);
-        } catch (error) {
-            console.error('Error updating inventory images:', error);
+      const response = await axios.get(endpoint, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${accessToken}` // Replace with actual access token
         }
-    } else {
-        console.log('No images scraped for CertNumber:', certNumber);
+      });
+  
+      // Check if the response contains images
+      if (response.data && response.data.length > 0) {
+        // Extract the image URLs
+        const frontImage = response.data.find(image => image.IsFrontImage)?.ImageURL;
+        const backImage = response.data.find(image => !image.IsFrontImage)?.ImageURL;
+        return { frontImageUrl: frontImage, backImageUrl: backImage };
+      }
+  
+      return { frontImageUrl: null, backImageUrl: null };
+    } catch (error) {
+      console.error('Error fetching images from PSA Card API:', error);
+      throw error; // Or handle this error as appropriate for your application
     }
 }
 
+async function updateCardImageIfNull(cardId, newImageUrl) {
+    const query = 'UPDATE Card SET CardImage = IF(CardImage IS NULL, ?, CardImage) WHERE CardID = ?';
+    const values = [newImageUrl, cardId];
+
+    try {
+        const result = await db.query(query, values);
+        console.log(result); // Log to see the structure
+        console.log('Update result:', result);
+    } catch (error) {
+        console.error('Error updating card image:', error);
+        throw error;
+    }
+}
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
@@ -569,15 +563,29 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
             const gradeId = gradeIds[index];
             const salePrice = salePrices[index];
             const certNumber = certNumbers[index];
+
+            // Initialize imageURLs to null
+            let frontImageUrl = null;
+            let backImageUrl = null;
+
+            // If certNumber exists, fetch images
+            if (certNumber) {
+                const images = await getImagesByCertNumber(certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
+                frontImageUrl = images.frontImageUrl;
+                backImageUrl = images.backImageUrl;
             
-            // Insert or update logic here, incorporating certNumber handling
+                // Assuming you want to update the CardImage with frontImageUrl if it's null
+                await updateCardImageIfNull(cardId, frontImageUrl);
+            }
+
+            // Insert or update logic here, incorporating certNumber and image URLs handling
             let query, queryParams;
             if (listingId) {
-                // Update logic, if applicable. You may need to adjust or add a unique identifier for each row.
+                // Update logic, if applicable. Adjust as needed.
             } else {
-                // Insert new inventory item
-                query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, SellerID) VALUES (?, ?, ?, ?, ?)';
-                queryParams = [cardId, gradeId, salePrice, certNumber, sellerId];
+                // Insert new inventory item with image URLs
+                query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                queryParams = [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId];
                 await db.query(query, queryParams);
             }
         }
@@ -589,27 +597,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
     }
 });
 
-/*
-async function updateOrderTotal(orderId) {
-    try {
-        // Calculate the new total price
-        const totalResult = await db.query(
-            'SELECT SUM(SalePrice * Quantity) AS Price FROM OrderItems WHERE OrderID = ?', 
-            [orderId]
-        );
-        const newTotal = totalResult[0].TotalPrice;
 
-        // Update the Orders table
-        await db.query(
-            'UPDATE Orders SET SalePrice = ? WHERE OrderID = ?', 
-            [newTotal, orderId]
-        );
-    } catch (error) {
-        console.error('Error updating order total:', error);
-        // Handle error appropriately
-    }
-}
-*/
 router.get('/orders', authenticateToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
