@@ -22,7 +22,6 @@
         </ul>
     </nav>
 <form action="/submit-inventory" method="post">
-    <!-- Card Details -->
     <div class="flex-container">
         <div class="product-info">
             <h2>Product Info</h2>
@@ -36,44 +35,86 @@
             <p>Card Color: {{cardDetails.CardColor}}</p>
             <p>Card Variant: {{cardDetails.CardVariant}}</p>
         </div>
-        <!-- Grades and Market Prices Chart -->
-        <div class="table-container">
+
+        <div class="table-container" id="grades-table">
             <table>
                 <thead>
                     <tr>
                         <th>Grade</th>
                         <th>Market Price</th>
                         <th>Your Sale Price</th>
-                        <th>Quantity</th>
+                        <th>Cert Number</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{#each grades}}
-                        <tr>
-                            <td>{{this.gradeValue}}</td>
-                            <td>{{lookup ../marketPrices this}}</td>
-                            <td>
-                                <input type="hidden" name="gradeIds[]" value="{{this.gradeId}}">
-                                <input type="text" name="salePrices[]" value="{{#if ../existingInventory}}{{#if (eq this.gradeId ../existingInventory.GradeID)}}{{../existingInventory.SalePrice}}{{/if}}{{/if}}">
-                            </td>
-                            <td>
-                                <input type="number" name="quantities[]" value="{{#if ../existingInventory}}{{#if (eq this.gradeId ../existingInventory.GradeID)}}{{../existingInventory.Quantity}}{{/if}}{{/if}}">
-                            </td>
-                        </tr>
-                        {{/each}}
-
+                    <!-- Existing inventory or first row -->
+                    <tr>
+                        <td>
+                            <select name="gradeIds[]">
+                                {{#each grades}}
+                                <option value="{{this.gradeId}}">{{this.gradeValue}}</option>
+                                {{/each}}
+                            </select>
+                        </td>
+                        <td>
+                            <!-- Dynamically filled based on selected grade, implement via JS -->
+                        </td>
+                        <td>
+                            <input type="text" name="salePrices[]" value="">
+                        </td>
+                        <td>
+                            <input type="text" name="certNumbers[]" value="">
+                        </td>
+                        <td>
+                            <button type="button" onclick="addRow()">+</button>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <!-- Hidden Inputs for Card ID and Listing ID -->
+
     <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
     <input type="hidden" name="listingId" value="{{existingInventory.ListingID}}">
+    
     <div class="button-container">
         <button style="border-radius: 4px;" type="submit" name="clearInventory" value="true" class="clear-inventory-button">Clear Inventory</button>
         <button style="border-radius: 4px;" type="submit">{{#if existingInventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
     </div>
 </form>
+<script>
+    function addRow() {
+        const tableBody = document.querySelector("#grades-table tbody");
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = `
+            <td>
+                <select name="gradeIds[]">
+                    // Populate options dynamically or replicate from the first row
+                </select>
+            </td>
+            <td>
+                <!-- Market Price can be dynamically filled if needed -->
+            </td>
+            <td>
+                <input type="text" name="salePrices[]" value="">
+            </td>
+            <td>
+                <input type="text" name="certNumbers[]" value="">
+            </td>
+            <td>
+                <button type="button" onclick="removeRow(this)">-</button>
+            </td>
+        `;
+        tableBody.appendChild(newRow);
+    }
+
+    function removeRow(button) {
+        button.parentElement.parentElement.remove();
+    }
+
+</script>
+
 
 </body>
 

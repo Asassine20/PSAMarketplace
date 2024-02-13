@@ -510,39 +510,24 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
 });
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
-    const { cardId, listingId, gradeIds = [], salePrices = [], quantities = [], clearInventory } = req.body;
+    const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
     const sellerId = req.user.id;
 
     try {
-        // Check if the "Clear Inventory" button was pressed
-        if (clearInventory && listingId) {
-            await db.query('DELETE FROM Inventory WHERE ListingID = ? AND SellerID = ?', [listingId, sellerId]);
-            return res.redirect('/inventory');
-        }
-
+        // Iterate over each row submitted
         for (let index = 0; index < gradeIds.length; index++) {
             const gradeId = gradeIds[index];
             const salePrice = salePrices[index];
-            const quantity = quantities[index];
+            const certNumber = certNumbers[index];
             
-            // If the quantity is 0, remove the item from inventory if it exists
-            if (quantity === '0') {
-                if (listingId) {
-                    await db.query('DELETE FROM Inventory WHERE ListingID = ? AND SellerID = ?', [listingId, sellerId]);
-                }
-                continue; // Skip to the next item
-            }
-
-            // Continue with update or insert as before
-            if (salePrice && quantity) {
-                let query, queryParams;
-                if (listingId) {
-                    query = 'UPDATE Inventory SET GradeID = ?, SalePrice = ?, Quantity = ? WHERE ListingID = ? AND SellerID = ?';
-                    queryParams = [gradeId, salePrice, quantity, listingId, sellerId];
-                } else {
-                    query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, SellerID, Quantity) VALUES (?, ?, ?, ?, ?)';
-                    queryParams = [cardId, gradeId, salePrice, sellerId, quantity];
-                }
+            // Insert or update logic here, incorporating certNumber handling
+            let query, queryParams;
+            if (listingId) {
+                // Update logic, if applicable. You may need to adjust or add a unique identifier for each row.
+            } else {
+                // Insert new inventory item
+                query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, SellerID) VALUES (?, ?, ?, ?, ?)';
+                queryParams = [cardId, gradeId, salePrice, certNumber, sellerId];
                 await db.query(query, queryParams);
             }
         }
@@ -553,6 +538,7 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Error processing inventory');
     }
 });
+
 /*
 async function updateOrderTotal(orderId) {
     try {
