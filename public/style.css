@@ -452,5 +452,29 @@ caption {
     margin-right: auto; /* Centers the button when used with margin-left: auto */
 }
 
+.card-image {
+    transition: transform 0.3s ease; /* Smooth transition for the transform property */
+    max-height: 80px; /* Set a max-height to ensure the image fits well in the table */
+    max-width: 80px; /* Set a max-width for the same reason */
+    display: block; /* This makes the transform origin work as expected */
+    margin: 0 auto; /* Center the image if it's smaller than the max dimensions */
+}
 
+#image-preview {
+    position: fixed; /* Stay in place regardless of scrolling */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the div */
+    z-index: 1000; /* Above other content */
+    display: none; /* Start hidden */
+    /* Optional styling */
+    border-radius: 10px;
+    padding: 10px;
+   }
 
+#image-preview img {
+    max-width: 80vw; /* Adjust width to viewport */
+    max-height: 80vh; /* Adjust height to viewport */
+    display: block; /* Remove any default inline styles */
+    margin: 0 auto; /* Center the image if it's smaller than the preview box */
+}

@@ -4,6 +4,8 @@ const { authenticateToken } = require('../middleware/middleware.js');
 const db = require('../db');
 const redis = require('redis');
 const redisClient = redis.createClient();
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 redisClient.connect();
@@ -202,6 +204,7 @@ async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardCo
 
 // Assuming you want to call preWarmCache at application startup
 preWarmCache().catch(console.error);
+
 router.get('/cardsets', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
@@ -477,16 +480,18 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const sellerId = req.user.id;
 
     try {
-        // Fetch inventory item
+        // Fetch inventory items for the given CardID and SellerID
         const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
-        const inventoryItem = await db.query(inventoryQuery, [cardId, sellerId]);
-        let inventoryData = inventoryItem.length > 0 ? inventoryItem[0] : {};
-
-
-        // Fetch card details
+        const inventoryItems = await db.query(inventoryQuery, [cardId, sellerId]);
+        
+        // Assuming you might have multiple inventory items for a card, you'll need to handle how you select/display these
+        // For simplicity, this example will proceed with the first inventory item if available
+        let inventoryData = inventoryItems.length > 0 ? inventoryItems[0] : {};
+        
+        // Now, if there's inventory data, proceed to fetch the card details
         const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
-
+        
         // Fetch grade IDs for the card
         const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
         const gradeData = await db.query(gradeQuery, [cardId]);
@@ -495,19 +500,64 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
             gradeId: gradeRow.GradeID
         }));
 
+        // If inventory data has a CertNumber, use it to scrape the image
+        let cardImage = cardDetails.length > 0 ? cardDetails[0].CardImage : null;
+        if (inventoryData.CertNumber) {
+            const scrapedImageUrl = await scrapeImages(`https://www.psacard.com/cert/${inventoryData.CertNumber}`);
+            cardImage = scrapedImageUrl || cardImage; // Use scraped image URL if available
+        }
+
         // Render the page with fetched data
         res.render('update_inventory', {
             inventory: inventoryData, // existing inventory data
             existingInventory: inventoryData, // additional key for pre-populating form
-            cardDetails: cardDetails.length > 0 ? cardDetails[0] : {},
-            grades: gradesWithIds
+            cardDetails: cardDetails.length > 0 ? {...cardDetails[0], CardImage: cardImage} : {}, // Updated to include potentially scraped image
+            grades: gradesWithIds,
         });
 
     } catch (error) {
+
         console.error('Database error:', error);
         res.status(500).send('Server error');
     }
 });
+async function scrapeImages(certNumber) {
+    const url = `https://www.psacard.com/cert/${certNumber}`;
+    try {
+        const response = await axios.get(url);
+        const html = response.data;
+        const $ = cheerio.load(html);
+        // Example selectors, adjust based on actual HTML structure
+        const frontImageUrl = $('selector-for-front-image').attr('src');
+        const backImageUrl = $('selector-for-back-image').attr('src');
+        return { frontImageUrl, backImageUrl };
+    } catch (error) {
+        console.error('Error scraping images:', error);
+        return { frontImageUrl: null, backImageUrl: null };
+    }
+}
+scrapeImages('80226909').then(result => {
+    console.log(result); // Should log the URLs if successful
+}).catch(console.error);
+
+
+// Example of updating an inventory item with scraped images
+async function updateInventoryImagesWithScrapedData(inventoryId, certNumber) {
+    const { frontImageUrl, backImageUrl } = await scrapeImages(certNumber);
+
+    if (frontImageUrl && backImageUrl) {
+        const updateQuery = 'UPDATE Inventory SET FrontImageURL = ?, BackImageURL = ? WHERE InventoryID = ?';
+        try {
+            await db.query(updateQuery, [frontImageUrl, backImageUrl, inventoryId]);
+            console.log('Inventory images updated successfully for InventoryID:', inventoryId);
+        } catch (error) {
+            console.error('Error updating inventory images:', error);
+        }
+    } else {
+        console.log('No images scraped for CertNumber:', certNumber);
+    }
+}
+
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;

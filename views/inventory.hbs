@@ -133,7 +133,7 @@
             {{#each cards}}
             <tr class="{{#if this.isInStock}}in-stock{{/if}}">
                 <td>{{this.Sport}}</td>
-                <td><img src="{{this.CardImage}}" alt="Card Image"></td>
+                <td><img src="{{this.CardImage}}" class="card-image" alt="Card Image"></td>
                 <td>{{this.CardName}}</td>
                 <td>{{this.CardSet}}</td>
                 <td>{{this.CardYear}}</td>
@@ -149,6 +149,10 @@
             {{/each}}
         </tbody>
     </table>
+    <!-- Placeholder for the hovered image -->
+    <div id="image-preview">
+        <img id="preview-img" src="" alt="Preview">
+    </div>
 
     <nav aria-label="Page navigation" class="pagination-bottom">
         <ul class="pagination">
@@ -598,7 +602,7 @@
             }
             row.innerHTML = `
                 <td>${card.Sport}</td>
-                <td><img src="${card.CardImage ? card.CardImage : ''}" alt="Card Image"></td>
+                <td><img src="${card.CardImage ? card.CardImage : ''}" class="card-image" alt="Card Image"></td>
                 <td>${card.CardName}</td>
                 <td>${card.CardSet}</td>
                 <td>${card.CardYear}</td>
@@ -615,6 +619,24 @@
         // Update total items count
         document.getElementById('totalItems').textContent = `${totalItems} Results`;
     }
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('.table-container table').addEventListener('mouseenter', function(event) {
+            if (event.target.classList.contains('card-image')) {
+                const previewDiv = document.getElementById('image-preview');
+                const previewImg = document.getElementById('preview-img');
+                previewImg.src = event.target.getAttribute('src'); // Set src for preview image
+                previewDiv.style.display = 'block'; // Show the preview
+            }
+        }, true); // Using event capturing
+
+        document.querySelector('.table-container table').addEventListener('mouseleave', function(event) {
+            if (event.target.classList.contains('card-image')) {
+                document.getElementById('image-preview').style.display = 'none'; // Hide the preview
+            }
+        }, true); // Using event capturing
+    });
+
+
 
 </script>
 
