@@ -490,9 +490,10 @@
     document.getElementById('resetButton').addEventListener('click', resetFilters);
 
     function changePageSize() {
+        currentPage = 1; // Reset to page 1 whenever page size changes
         var pageSize = document.getElementById('pageSize').value;
         localStorage.setItem('pageSize', pageSize);
-        loadDataWithFilters(); // This will now use the updated pageSize
+        loadDataWithFilters(); // This will now use the updated pageSize and reset currentPage
     }
 
     let isLoadingData = false;
@@ -504,6 +505,8 @@
         currentPage = page;
         loadDataWithFilters();
     }
+
+    document.getElementById('pageSize').addEventListener('change', changePageSize);
 
     function loadDataWithFilters() {
         if (isLoadingData) return;
