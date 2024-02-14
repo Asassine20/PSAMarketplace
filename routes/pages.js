@@ -163,8 +163,10 @@ async function preWarmCache() {
     // Define common queries or parameters based on dropdown filters
     const commonQueries = [
         { searchTerm: '', cardSet: '', cardYear: '', sport: '', cardColor: '', cardVariant: '' }, // General query example
-        // Add specific queries as needed based on common dropdown selections
-        // Example: { searchTerm: 'Pikachu', cardSet: 'Base Set', cardYear: '1999', sport: '', cardColor: '', cardVariant: '' },
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Football', cardColor: '', cardVariant: '' },
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Basketball', cardColor: '', cardVariant: '' },
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Baseball', cardColor: '', cardVariant: '' },
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Hockey', cardColor: '', cardVariant: '' }
     ];
 
     for (const query of commonQueries) {
@@ -437,38 +439,57 @@ router.get('/cardvariants', authenticateToken, async (req, res) => {
 });
 
 // Endpoint for full search
+// Endpoint for full search with Redis caching
 router.get('/search-card-sets', authenticateToken, async (req, res) => {
     const { term, sport, year, cardColor, cardVariant } = req.query;
-    let query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
-    let values = [`${term}%`]; // Search term at the beginning
-
-    // Use exact matches for sport and year
-    if (sport) {
-        query += " AND Sport = ?";
-        values.push(sport); 
-    }
-    if (year) {
-        query += " AND CardYear = ?";
-        values.push(year); 
-    }
-    if (cardColor) {
-        query += " AND CardColor = ?";
-        values.push(cardColor); 
-    }
-    if (cardVariant) {
-        query += " AND CardVariant = ?";
-        values.push(cardVariant); 
-    }
+    // Generate a unique cache key based on the search parameters
+    const cacheKey = `search:cardsets:${term}:${sport}:${year}:${cardColor}:${cardVariant}`;
 
     try {
+        // Attempt to fetch the result from cache first
+        const cachedData = await redisClient.get(cacheKey);
+        if (cachedData) {
+            // If data is found in cache, parse it and return
+            return res.json(JSON.parse(cachedData));
+        }
+
+        // If no data in cache, proceed with the database query
+        let query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
+        let values = [`${term}%`]; // Search term at the beginning
+
+        // Append conditions for each filter
+        if (sport) {
+            query += " AND Sport = ?";
+            values.push(sport);
+        }
+        if (year) {
+            query += " AND CardYear = ?";
+            values.push(year);
+        }
+        if (cardColor) {
+            query += " AND CardColor = ?";
+            values.push(cardColor);
+        }
+        if (cardVariant) {
+            query += " AND CardVariant = ?";
+            values.push(cardVariant);
+        }
+
+        // Execute the database query
         const result = await db.query(query, values);
         const cardSets = result.map(row => row.CardSet);
+
+        // Cache the result for future requests
+        await redisClient.setEx(cacheKey, 3600, JSON.stringify(cardSets)); // Cache for 1 hour
+
+        // Return the query result
         res.json(cardSets);
     } catch (error) {
         console.error('Error searching card sets:', error);
         res.status(500).send('Server error');
     }
 });
+
 
 router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const cardId = req.query.cardId;
