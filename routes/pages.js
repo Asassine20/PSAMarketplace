@@ -5,9 +5,6 @@ const db = require('../db');
 const redis = require('redis');
 const redisClient = redis.createClient();
 const axios = require('axios');
-const cheerio = require('cheerio');
-
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
 redisClient.connect();
 
 router.use(express.urlencoded({ extended: true }));
@@ -75,19 +72,22 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             values.push(cardVariant);
         }
 
+        // Build the main query
         let query = "SELECT * FROM Card";
         if (whereConditions.length) {
             query += " WHERE " + whereConditions.join(" AND ");
         }
+        // Add ORDER BY clause to sort by CardSet alphabetically
+        query += " ORDER BY CardSet ASC";
         query += " LIMIT ? OFFSET ?";
         values.push(limit, offset);
 
-        // Similar logic for the countQuery
+        // Similar logic for the countQuery (without ORDER BY and LIMIT/OFFSET)
         let countQuery = "SELECT COUNT(*) AS count FROM Card";
         if (whereConditions.length) {
             countQuery += " WHERE " + whereConditions.join(" AND ");
         }
-        const countValues = [...values].slice(0, -2);
+        const countValues = [...values].slice(0, -2); // Exclude limit and offset for count query
         const cards = await db.query(query, values);
 
         const totalResult = await db.query(countQuery, countValues);
@@ -115,7 +115,6 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         isInStock: inStockCardIds.has(card.CardID) // Set isInStock to true if CardID is in the inStockCardIds set
         }));
 
-        console.log("AJAX Request Detected:", req.headers['x-requested-with'] === 'XMLHttpRequest');
 
         const cacheData = {
             ajaxData: {
@@ -148,7 +147,6 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         };
 
         await redisClient.setEx(cacheKey, 3600, JSON.stringify(cacheData)); // Cache for 1 hour
-        console.log(`Caching result for key: ${cacheKey}`);
 
         // Then send the response...
         if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
@@ -175,7 +173,6 @@ async function preWarmCache() {
         await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
     }
 
-    console.log('Cache pre-warming complete.');
 }
 
 async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardColor, cardVariant }) {
@@ -217,7 +214,6 @@ router.get('/cardsets', authenticateToken, async (req, res) => {
         // Try to fetch the data from cache first
         const cachedData = await redisClient.get(cacheKey);
         if (cachedData) {
-            console.log(`Serving from cache for key: ${cacheKey}`);
             return res.json(JSON.parse(cachedData));
         }
 
@@ -326,7 +322,6 @@ router.get('/sports', authenticateToken, async (req, res) => {
     try {
         const cachedData = await redisClient.get(cacheKey);
         if (cachedData) {
-            console.log(`Serving from cache for key: ${cacheKey}`);
             return res.json(JSON.parse(cachedData));
         }
 
@@ -445,7 +440,7 @@ router.get('/cardvariants', authenticateToken, async (req, res) => {
 router.get('/search-card-sets', authenticateToken, async (req, res) => {
     const { term, sport, year, cardColor, cardVariant } = req.query;
     let query = "SELECT DISTINCT CardSet FROM Card WHERE CardSet LIKE ?";
-    let values = [`%${term}%`];
+    let values = [`${term}%`]; // Search term at the beginning
 
     // Use exact matches for sport and year
     if (sport) {
@@ -551,7 +546,6 @@ async function updateCardImage(cardId, newImageUrl) {
 
     try {
         const result = await db.query(query, values);
-        console.log('CardImage updated for CardID:', cardId, 'Affected rows:', result.affectedRows);
         return result.affectedRows > 0; // Returns true if the image was updated, false otherwise
     } catch (error) {
         console.error('Error updating CardImage:', error);
@@ -714,7 +708,6 @@ router.get('/messages', authenticateToken, async (req, res) => {
             LIMIT ? OFFSET ?`;
 
         const conversations = await db.query(latestMessagesQuery, [userId, userId, limit, offset]);
-        console.log(conversations);
 
         res.render('messages', {
             conversationsWithMessages: conversations,

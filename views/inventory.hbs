@@ -30,7 +30,7 @@
         </ul>
     </nav>
     <h4>{{username}} Inventory</h4>
-    <div class="inventorySearch" id="inventorySearchForm" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="inventorySearch" id="inventorySearchForm">
         <form action="/inventory" method="get" style="flex-grow 1">
             <div>
                 <label for="searchTerm">Player:</label>
@@ -84,10 +84,10 @@
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <button id="resetButton" type="reset" class="filter-input fixed-width-dropdown" onclick="resetFilters()">Reset</button>
+                    <button id="resetButton" type="reset" class="table-button" onclick="resetFilters()">Reset</button>
                 </div>
-                <div>
-                    <button type="submit" id="searchButton" class="filter-input fixed-width-dropdown">Search</button>
+                <div style="padding-right: 12px;">
+                    <button type="submit" id="searchButton" class="table-button">Search</button>
                 </div>
 
             </div>
