@@ -78,3 +78,24 @@ hbs.registerHelper('gt', function(value1, value2) {
 hbs.registerHelper('lt', function(value1, value2) {
     return value1 < value2;
 });
+
+hbs.registerHelper('surroundingPages', function(currentPage, options) {
+    const totalPages = options.hash.totalPages;
+    let startPage = Math.max(currentPage - 2, 1);
+    let endPage = Math.min(currentPage + 2, totalPages);
+
+    // Adjust the start and end page if near the beginning or end
+    if (currentPage <= 3) {
+        endPage = Math.min(5, totalPages);
+    }
+    if (currentPage > totalPages - 3) {
+        startPage = Math.max(totalPages - 4, 1);
+    }
+
+    let pages = [];
+    for (let page = startPage; page <= endPage; page++) {
+        pages.push(page);
+    }
+    return pages;
+});
+

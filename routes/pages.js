@@ -30,6 +30,18 @@ router.get('/logout', (req, res) => {
     res.redirect('login');
 });
 
+function getSurroundingPages(currentPage, totalPages) {
+    const range = 2; // Determines how many pages to show around the current page
+    let startPage = Math.max(1, currentPage - range);
+    let endPage = Math.min(totalPages, currentPage + range);
+
+    let pages = [];
+    for (let page = startPage; page <= endPage; page++) {
+        pages.push(page);
+    }
+    return pages;
+}
+
 router.get('/inventory', authenticateToken, async (req, res) => {
     const sellerId = req.user.id; // Assuming the user's ID is stored in req.user
     const page = parseInt(req.query.page) || 1;
@@ -78,7 +90,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             query += " WHERE " + whereConditions.join(" AND ");
         }
         // Add ORDER BY clause to sort by CardSet alphabetically
-        query += " ORDER BY CardSet ASC";
+        query += " ORDER BY CardSet";
         query += " LIMIT ? OFFSET ?";
         values.push(limit, offset);
 
@@ -93,7 +105,11 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         const totalResult = await db.query(countQuery, countValues);
         const totalItems = totalResult[0].count; 
         const totalPages = Math.ceil(totalItems / limit);
-
+        const startPage = Math.max(1, page - 2); // Show 2 pages before the current page
+        const endPage = Math.min(totalPages, page + 2); // Show 2 pages after the current page
+        
+        // Generate page numbers for the pagination
+        let pages = Array.from({ length: (endPage - startPage) + 1 }, (_, i) => startPage + i);
         const showPrevious = page > 1;
         const showNext = page < totalPages;
 
@@ -121,8 +137,11 @@ router.get('/inventory', authenticateToken, async (req, res) => {
                 cards: updatedCards,
                 currentPage: page,
                 totalPages: totalPages,
-                showPrevious: showPrevious,
-                showNext: showNext,
+                pages: pages,
+                showPrevious: page > 1,
+                showNext: page < totalPages,
+                showFirst: page > 1,
+                showLast: page < totalPages,
                 totalItems: totalItems,
             },
             pageData: {
@@ -137,10 +156,13 @@ router.get('/inventory', authenticateToken, async (req, res) => {
                 sports: sportsData.map(row => row.Sport),
                 cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
                 cardVariants: cardVariantsData.map(row => row.CardVariant),
+                pages: pages,
                 currentPage: page,
                 totalPages,
-                showPrevious,
-                showNext,
+                showPrevious: page > 1,
+                showNext: page < totalPages,
+                showFirst: page > 1,
+                showLast: page < totalPages,
                 totalItems,
                 inventoryItems
             }
@@ -169,12 +191,28 @@ async function preWarmCache() {
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Hockey', cardColor: '', cardVariant: '' }
     ];
 
-    for (const query of commonQueries) {
-        const cacheKey = `inventory:prewarm:${JSON.stringify(query)}`;
-        const data = await fetchInventoryData(query);
-        await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
-    }
+    // Wrap each query in a function that catches and handles its errors
+    const prewarmPromises = commonQueries.map(query => {
+        return fetchInventoryData(query)
+            .then(data => {
+                const cacheKey = `inventory:prewarm:${JSON.stringify(query)}`;
+                return redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
+            })
+            .catch(error => {
+                console.error(`Error pre-warming cache for query ${JSON.stringify(query)}:`, error);
+                // Optionally, return null or some indication of failure that won't disrupt Promise.all
+                return null;
+            });
+    });
 
+    // Use Promise.all to execute all pre-warm operations in parallel
+    try {
+        await Promise.all(prewarmPromises);
+        console.log('Cache pre-warming complete.');
+    } catch (error) {
+        // This catch block will now only catch unexpected errors, not individual promise rejections
+        console.error('Unexpected error during cache pre-warming:', error);
+    }
 }
 
 async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardColor, cardVariant }) {
@@ -439,7 +477,6 @@ router.get('/cardvariants', authenticateToken, async (req, res) => {
 });
 
 // Endpoint for full search
-// Endpoint for full search with Redis caching
 router.get('/search-card-sets', authenticateToken, async (req, res) => {
     const { term, sport, year, cardColor, cardVariant } = req.query;
     // Generate a unique cache key based on the search parameters
@@ -475,6 +512,9 @@ router.get('/search-card-sets', authenticateToken, async (req, res) => {
             values.push(cardVariant);
         }
 
+        // Add ORDER BY clause here to sort the results alphabetically by CardSet
+        query += " ORDER BY CardSet ASC";
+
         // Execute the database query
         const result = await db.query(query, values);
         const cardSets = result.map(row => row.CardSet);
@@ -489,6 +529,7 @@ router.get('/search-card-sets', authenticateToken, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 
 
 router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {

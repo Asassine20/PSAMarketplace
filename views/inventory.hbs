@@ -156,18 +156,36 @@
 
     <nav aria-label="Page navigation" class="pagination-bottom">
         <ul class="pagination">
+            {{#if showFirst}}
+            <li class="page-item">
+                <button class="page-link" onclick="changePage(1)">First</button>
+            </li>
+            {{/if}}
             {{#if showPrevious}}
             <li class="page-item">
                 <button class="page-link" onclick="changePage({{minus currentPage 1}})">Previous</button>
             </li>
             {{/if}}
+
+            {{#each pages}}
+            <li class="page-item {{#if (eq ../currentPage this)}}active{{/if}}">
+                <button class="page-link" onclick="changePage({{this}})">{{this}}</button>
+            </li>
+            {{/each}}
+
             {{#if showNext}}
             <li class="page-item">
                 <button class="page-link" onclick="changePage({{plus currentPage 1}})">Next</button>
             </li>
             {{/if}}
+            {{#if showLast}}
+            <li class="page-item">
+                <button class="page-link" onclick="changePage({{totalPages}})">Last</button>
+            </li>
+            {{/if}}
         </ul>
     </nav>
+
 
 </div>
 
@@ -526,7 +544,7 @@
             dataType: 'json',
             success: function(response) {
                 updateTableAndTotalItemsWithData(response.cards, response.totalItems);
-                updatePaginationControls(response.showPrevious, response.showNext);
+                updatePaginationControls(response.showPrevious, response.showNext, response.currentPage, response.totalPages);
             },
             error: function(xhr, status, error) {
                 console.error('Error loading data:', error);
@@ -538,23 +556,75 @@
         });
     }
 
-    function updatePaginationControls(showPrevious, showNext) {
-        document.querySelector('.pagination').innerHTML = `
-            ${showPrevious ? `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage - 1})">Previous</button></li>` : ''}
-            ${showNext ? `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage + 1})">Next</button></li>` : ''}
-        `;
+    function updatePaginationControls(showPrevious, showNext, currentPage, totalPages) {
+        // Calculate start and end page numbers for surrounding pages
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(currentPage + 2, totalPages);
+        let paginationHtml = '';
+
+        // Add "First" button
+        if (currentPage > 1) {
+            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(1)">First</button></li>`;
+        }
+
+        // Add "Previous" button
+        if (showPrevious) {
+            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage - 1})">Previous</button></li>`;
+        }
+
+        // Generate direct page number buttons
+        for (let page = startPage; page <= endPage; page++) {
+            paginationHtml += `
+                <li class="page-item ${page === currentPage ? 'active' : ''}">
+                    <button class="page-link" onclick="changePage(${page})">${page}</button>
+                </li>
+            `;
+        }
+
+        // Add "Next" button
+        if (showNext) {
+            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage + 1})">Next</button></li>`;
+        }
+
+        // Add "Last" button
+        if (currentPage < totalPages) {
+            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${totalPages})">Last</button></li>`;
+        }
+
+        // Update the pagination container with the new HTML
+        document.querySelector('.pagination').innerHTML = paginationHtml;
     }
+
 
     document.addEventListener('DOMContentLoaded', function() {
         // Load initial data
         loadDataWithFilters();
 
         // Attach event listeners to filter elements
-        document.getElementById('sport').addEventListener('change', loadDataWithFilters);
-        document.getElementById('cardSet').addEventListener('change', loadDataWithFilters);
-        document.getElementById('cardYear').addEventListener('change', loadDataWithFilters);
-        document.getElementById('cardColor').addEventListener('change', loadDataWithFilters);
-        document.getElementById('cardVariant').addEventListener('change', loadDataWithFilters);
+        document.getElementById('sport').addEventListener('change', function() {
+            currentPage = 1;
+            if (this.value === '') { // Adjust this condition as needed
+                resetFilters();
+            } else {
+                loadDataWithFilters();
+            }
+        });        
+        document.getElementById('cardSet').addEventListener('change', function() {
+            currentPage = 1; // Reset to page 1
+            loadDataWithFilters();
+        });
+        document.getElementById('cardYear').addEventListener('change', function() {
+            currentPage = 1; // Reset to page 1
+            loadDataWithFilters();
+        });        
+        document.getElementById('cardColor').addEventListener('change', function() {
+            currentPage = 1; // Reset to page 1
+            loadDataWithFilters();
+        });        
+        document.getElementById('cardVariant').addEventListener('change', function() {
+            currentPage = 1; // Reset to page 1
+            loadDataWithFilters();
+        });                
 
         // Event listener for intercepting the form submission
         document.getElementById('inventorySearchForm').addEventListener('submit', function(e) {
