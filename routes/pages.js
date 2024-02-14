@@ -539,16 +539,22 @@ async function getImagesByCertNumber(certNumber, apiKey, accessToken) {
     }
 }
 
-async function updateCardImageIfNull(cardId, newImageUrl) {
-    const query = 'UPDATE Card SET CardImage = IF(CardImage IS NULL, ?, CardImage) WHERE CardID = ?';
+async function updateCardImage(cardId, newImageUrl) {
+    // This query updates the CardImage only if it's currently the default image
+    const query = `
+        UPDATE Card
+        SET CardImage = ?
+        WHERE CardID = ?
+        AND CardImage = '/images/defaultPSAImage.png'
+    `;
     const values = [newImageUrl, cardId];
 
     try {
         const result = await db.query(query, values);
-        console.log(result); // Log to see the structure
-        console.log('Update result:', result);
+        console.log('CardImage updated for CardID:', cardId, 'Affected rows:', result.affectedRows);
+        return result.affectedRows > 0; // Returns true if the image was updated, false otherwise
     } catch (error) {
-        console.error('Error updating card image:', error);
+        console.error('Error updating CardImage:', error);
         throw error;
     }
 }
@@ -556,6 +562,7 @@ async function updateCardImageIfNull(cardId, newImageUrl) {
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
     const sellerId = req.user.id;
+    const defaultImageUrl = '/images/defaultPSAImage.png'; // The default image URL set in the database
 
     try {
         // Iterate over each row submitted
@@ -574,8 +581,10 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
                 frontImageUrl = images.frontImageUrl;
                 backImageUrl = images.backImageUrl;
             
-                // Assuming you want to update the CardImage with frontImageUrl if it's null
-                await updateCardImageIfNull(cardId, frontImageUrl);
+                // Update the CardImage only if it's the default image
+                if (frontImageUrl && frontImageUrl !== defaultImageUrl) {
+                    await updateCardImage(cardId, frontImageUrl); // updated function call
+                }
             }
 
             // Insert or update logic here, incorporating certNumber and image URLs handling
