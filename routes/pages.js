@@ -53,6 +53,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
+    const sortColumn = req.query.sortColumn; 
+    const sortOrder = req.query.sortOrder; 
     const cacheKey = `inventory:${sellerId}:${page}:${limit}:${searchTerm}:${cardSet}:${cardYear}:${sport}:${cardColor}:${cardVariant}`;
 
     try {
@@ -84,13 +86,24 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             values.push(cardVariant);
         }
 
-        // Build the main query
+        let orderByClause = '';
+        if (sortColumn && sortOrder) {
+            // Ensure the sort column and order are valid to prevent SQL injection
+            const validSortColumns = ['Sport', 'CardName', 'CardSet', 'CardYear', 'CardNumber', 'CardColor', 'CardVariant'];
+            const validSortOrder = ['asc', 'desc'];
+            if (validSortColumns.includes(sortColumn) && validSortOrder.includes(sortOrder)) {
+                orderByClause = ` ORDER BY ${sortColumn} ${sortOrder}`;
+            } else {
+                return res.status(400).send('Invalid sort parameters');
+            }
+        }
+
         let query = "SELECT * FROM Card";
         if (whereConditions.length) {
             query += " WHERE " + whereConditions.join(" AND ");
         }
-        // Add ORDER BY clause to sort by CardSet alphabetically
-        query += " ORDER BY CardSet";
+
+        query += orderByClause; // Apply the dynamic ORDER BY clause
         query += " LIMIT ? OFFSET ?";
         values.push(limit, offset);
 
@@ -597,18 +610,13 @@ async function getImagesByCertNumber(certNumber, apiKey, accessToken) {
 }
 
 async function updateCardImage(cardId, newImageUrl) {
-    // This query updates the CardImage only if it's currently the default image
-    const query = `
-        UPDATE Card
-        SET CardImage = ?
-        WHERE CardID = ?
-        AND CardImage = '/images/defaultPSAImage.png'
-    `;
+    const query = "UPDATE Card SET CardImage = ? WHERE CardID = ?";
     const values = [newImageUrl, cardId];
 
     try {
         const result = await db.query(query, values);
-        return result.affectedRows > 0; // Returns true if the image was updated, false otherwise
+        console.log(`Update result: ${result.affectedRows} rows affected.`);
+        return result.affectedRows > 0;
     } catch (error) {
         console.error('Error updating CardImage:', error);
         throw error;

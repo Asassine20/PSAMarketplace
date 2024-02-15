@@ -118,14 +118,14 @@
 
         <thead>
             <tr>
-                <th>Sport</th>
+                <th onclick="sortInventory('Sport')">Sport</th>
                 <th>Image</th>
-                <th>Name</th>
-                <th>Set</th>
-                <th>Year</th>
-                <th>Number</th>
-                <th>Color</th>
-                <th>Variant</th>
+                <th onclick="sortInventory('CardName')">Name</th>
+                <th onclick="sortInventory('CardSet')">Set</th>
+                <th onclick="sortInventory('CardYear')">Year</th>
+                <th onclick="sortInventory('CardNumber')">Number</th>
+                <th onclick="sortInventory('CardColor')">Color</th>
+                <th onclick="sortInventory('CardVariant')">Variant</th>
                 <th style="width:100px;"></th>
             </tr>
         </thead>
@@ -384,7 +384,6 @@
     document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
     document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
 
-    // Assuming the event listeners are correctly set up as shown in your code snippet:
 
     // JavaScript function to filter card set options
     function filterCardSets() {
@@ -402,6 +401,7 @@
             }
         }
     }
+
     
     // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
     function searchCardSets(searchTerm) {
@@ -486,6 +486,7 @@
         // If you need to fetch initial data for sports and years dropdowns, call the loadSetsAndYears function
         // with null or a proper identifier if required by your implementation
         loadSetsAndYears(null);
+        loadDataWithFilters(); 
     }
     document.getElementById('resetButton').addEventListener('click', resetFilters);
 
@@ -531,7 +532,9 @@
             cardSet,
             cardYear: year,
             cardColor,
-            cardVariant
+            cardVariant,
+            sortColumn: currentSortColumn, 
+            sortOrder: currentSortOrder
         };
         console.log('Sending AJAX request with data:', data); // Log the data being sent
 
@@ -708,6 +711,19 @@
             }
         }, true); // Using event capturing
     });
+
+    let currentSortColumn = 'CardSet'; // Default sort column
+    let currentSortOrder = 'asc'; // Default sort order
+    function sortInventory(sortColumn) {
+        // Toggle sort order if the same column is clicked again, otherwise set to 'asc'
+        if (currentSortColumn === sortColumn) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortOrder = 'asc';
+        }
+        currentSortColumn = sortColumn;
+        loadDataWithFilters(); // Reload data with new sort settings
+    }
 
 
 
