@@ -30,6 +30,7 @@ router.get('/logout', (req, res) => {
     res.redirect('login');
 });
 
+
 function getSurroundingPages(currentPage, totalPages) {
     const range = 2; // Determines how many pages to show around the current page
     let startPage = Math.max(1, currentPage - range);
@@ -194,10 +195,10 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 async function preWarmCache() {
     // Define common queries or parameters based on dropdown filters
     const commonQueries = [
-        //{ searchTerm: '', cardSet: '', cardYear: '', sport: '', cardColor: '', cardVariant: '' }, // General query example
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Football', cardColor: '', cardVariant: '' },
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Basketball', cardColor: '', cardVariant: '' },
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Baseball', cardColor: '', cardVariant: '' },
@@ -212,11 +213,10 @@ async function preWarmCache() {
         return fetchInventoryData(query)
             .then(data => {
                 const cacheKey = `inventory:prewarm:${JSON.stringify(query)}`;
-                return redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
+                return redisClient.setEx(cacheKey, 3600, JSON.stringify(data))
             })
             .catch(error => {
                 console.error(`Error pre-warming cache for query ${JSON.stringify(query)}:`, error);
-                // Optionally, return null or some indication of failure that won't disrupt Promise.all
                 return null;
             });
     });

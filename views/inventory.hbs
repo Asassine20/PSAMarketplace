@@ -473,6 +473,7 @@
     var debouncedLoadDataWithFilters = debounce(loadDataWithFilters, 400);
 
     function resetFilters() {
+        showSpinner();
         // Clear the player search term
         document.getElementById('searchTerm').value = '';
 
@@ -483,9 +484,6 @@
         document.getElementById('cardColor').selectedIndex = 0;
         document.getElementById('cardVariant').selectedIndex = 0;
         
-
-        // If you need to fetch initial data for sports and years dropdowns, call the loadSetsAndYears function
-        // with null or a proper identifier if required by your implementation
         loadSetsAndYears(null);
         loadDataWithFilters(); 
     }
