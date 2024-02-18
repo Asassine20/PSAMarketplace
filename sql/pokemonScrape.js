@@ -7,7 +7,7 @@ Make sure to use it in reverse order (alakazam blastoise chansey ...)
 
 const axios = require('axios');
 const cheerio = require('cheerio');
-const db = require('./db'); // Ensure this is your promise-based connection module
+const db = require('../db'); // Ensure this is your promise-based connection module
 
 async function scrapePage(pageNumber) {
     const url = `https://pkmncards.com/page/${pageNumber}/?s&sort=date&ord=rev&display=list`;

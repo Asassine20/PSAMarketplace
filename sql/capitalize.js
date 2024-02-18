@@ -1,4 +1,4 @@
-const db = require('./db'); // Replace './db' with your database connection module path
+const db = require('../db'); // Replace './db' with your database connection module path
 
 // Function to capitalize the first letter of each word
 function capitalizeFirstLetter(string) {

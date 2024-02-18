@@ -1,4 +1,4 @@
-const db = require('./db'); // Replace './db' with your database connection module path
+const db = require('../db'); // Replace './db' with your database connection module path
 
 async function setDefaultImageForCards() {
     const query = "UPDATE Card SET CardImage = '/images/defaultPSAImage.png'";
