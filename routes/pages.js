@@ -62,7 +62,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
         let values = [];
 
         if (searchTerm) {
-            whereConditions.push("CardName = ?");
+            whereConditions.push("CardName LIKE ?");
             values.push(searchTerm.trim());
         }
         if (cardSet) {
@@ -197,11 +197,14 @@ router.get('/inventory', authenticateToken, async (req, res) => {
 async function preWarmCache() {
     // Define common queries or parameters based on dropdown filters
     const commonQueries = [
-        { searchTerm: '', cardSet: '', cardYear: '', sport: '', cardColor: '', cardVariant: '' }, // General query example
+        //{ searchTerm: '', cardSet: '', cardYear: '', sport: '', cardColor: '', cardVariant: '' }, // General query example
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Football', cardColor: '', cardVariant: '' },
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Basketball', cardColor: '', cardVariant: '' },
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Baseball', cardColor: '', cardVariant: '' },
-        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Hockey', cardColor: '', cardVariant: '' }
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Hockey', cardColor: '', cardVariant: '' },
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Pokemon (Japan)', cardColor: '', cardVariant: '' },
+        { searchTerm: '', cardSet: '', cardYear: '', sport: 'Pokemon (English)', cardColor: '', cardVariant: '' }
+
     ];
 
     // Wrap each query in a function that catches and handles its errors
@@ -609,19 +612,21 @@ async function getImagesByCertNumber(certNumber, apiKey, accessToken) {
     }
 }
 
-async function updateCardImage(cardId, newImageUrl) {
-    const query = "UPDATE Card SET CardImage = ? WHERE CardID = ?";
-    const values = [newImageUrl, cardId];
+async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
+    // Include a condition to check if the current CardImage is the default one
+    const query = "UPDATE Card SET CardImage = ? WHERE CardID = ? AND CardImage = ?";
+    const values = [newImageUrl, cardId, defaultImageUrl]; // Include the default image URL in the values
 
     try {
         const result = await db.query(query, values);
         console.log(`Update result: ${result.affectedRows} rows affected.`);
-        return result.affectedRows > 0;
+        return result.affectedRows > 0; // Returns true if the row was updated, false otherwise
     } catch (error) {
         console.error('Error updating CardImage:', error);
-        throw error;
+        throw error; // Rethrow the error to handle it further up the call stack
     }
 }
+
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
@@ -644,31 +649,52 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
                 const images = await getImagesByCertNumber(certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
                 frontImageUrl = images.frontImageUrl;
                 backImageUrl = images.backImageUrl;
-            
-                // Update the CardImage only if it's the default image
+
+                // Update the CardImage in the Card table only if it's the default image
                 if (frontImageUrl && frontImageUrl !== defaultImageUrl) {
-                    await updateCardImage(cardId, frontImageUrl); // updated function call
+                    await updateCardImage(cardId, frontImageUrl, defaultImageUrl); // Ensure this function is correctly implemented to only update if default
                 }
             }
 
-            // Insert or update logic here, incorporating certNumber and image URLs handling
-            let query, queryParams;
+            // Always update the Inventory item with the new image URLs, regardless of the current value
             if (listingId) {
-                // Update logic, if applicable. Adjust as needed.
+                // Assuming listingId is an existing entry's identifier, update it
+                const updateQuery = 'UPDATE Inventory SET FrontImageUrl = ?, BackImageUrl = ? WHERE ListingID = ? AND CardID = ?';
+                await db.query(updateQuery, [frontImageUrl, backImageUrl, listingId, cardId]);
             } else {
                 // Insert new inventory item with image URLs
-                query = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
-                queryParams = [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId];
-                await db.query(query, queryParams);
+                const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                await db.query(insertQuery, [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId]);
             }
         }
 
         res.redirect('/inventory');
     } catch (err) {
-        console.error('Error processing inventory:', err);
+        console.error('Error processing inventory submission:', err);
         res.status(500).send('Error processing inventory');
     }
 });
+
+// Add this endpoint to your server
+router.get('/fetch-card-image', authenticateToken, async (req, res) => {
+    const { certNumber } = req.query;
+    if (!certNumber) {
+        return res.status(400).send({ error: 'Cert number is required.' });
+    }
+
+    try {
+        const images = await getImagesByCertNumber(certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
+        if (images.frontImageUrl || images.backImageUrl) {
+            res.json(images);
+        } else {
+            res.status(404).send({ error: 'Images not found.' });
+        }
+    } catch (error) {
+        console.error('Error fetching card images:', error);
+        res.status(500).send({ error: 'Server error fetching images.' });
+    }
+});
+
 
 
 router.get('/orders', authenticateToken, async (req, res) => {

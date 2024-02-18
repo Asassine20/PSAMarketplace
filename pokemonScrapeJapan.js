@@ -1,66 +1,58 @@
+/*
+use this link to scrape from
+https://www.tcgcollector.com/cards/jp?releaseDateOrder=oldToNew&cardsPerPage=120&displayAs=list&sortBy=cardNumber
+*/
+
 const axios = require('axios');
 const cheerio = require('cheerio');
 const db = require('./db'); // Ensure this is your promise-based connection module
 
-async function scrapeCardDataFromLink(link) {
+const baseUrl = 'https://www.tcgcollector.com/cards/jp?releaseDateOrder=oldToNew&cardsPerPage=120&displayAs=list&sortBy=cardNumber';
+
+async function scrapePage(pageNumber) {
+    if (pageNumber > 177) { // Stop condition
+        console.log("Finished scraping at page 177.");
+        return;
+    }
+
+    const url = `${baseUrl}&page=${pageNumber}`;
     try {
-        const { data } = await axios.get(link);
+        const { data } = await axios.get(url);
         const $ = cheerio.load(data);
-        const cards = [];
-
-        $('tr').each((i, element) => {
-            const cardNumber = $(element).find('td:nth-child(1)').text().trim() || null;
-            const cardName = $(element).find('td:nth-child(3) a').attr('title') || null;
-            const cardType = $(element).find('th a').attr('title') || null;
-            const cardRarity = $(element).find('td:nth-child(5) a').attr('title') || null;
-            const cardVariant = $(element).find('td[style="display:none; background:#FFFFFF"]').text().trim() || 'Regular';
-
-            if (cardName) {
-                cards.push({
-                    CardNumber: cardNumber,
-                    CardName: cardName,
-                    CardType: cardType,
-                    CardRarity: cardRarity.charAt(0), // Assuming the rarity is indicated by a single letter (e.g., 'C' for Common)
-                    CardVariant: cardVariant,
-                });
-            }
+        let cards = [];
+        $('.card-search-result-item').each((i, element) => {
+            let cardName = $(element).find('.card-list-item-card-name a').attr('title').trim();
+            // Remove text within parentheses and trim
+            cardName = cardName.replace(/\(.*?\)/g, '').trim();
+            const cardNumber = $(element).find('.card-list-item-card-number .card-list-item-entry-text').text().trim().replace('No. ', '');
+            const expansion = $(element).find('.card-list-item-expansion .card-list-item-expansion-name').text().trim();
+            const cardType = $(element).find('.card-list-item-card-type img').attr('alt');
+            const cardRarity = $(element).find('.card-list-item-rarity img').attr('alt');
+            cards.push([cardName, cardNumber, expansion, cardType, cardRarity, 'Pokemon (Japan)', null, null]); // Adjusted for parameterized query
         });
 
-        // Here you would insert the `cards` array data into your database
-        console.log(cards);
-
-        // Insert data into the database
-        const query = 'INSERT INTO PokemonCard (CardName, CardNumber, CardColor, CardVariant, Sport, CardYear, CardImage, CardSet) VALUES ?';
-        const values = cards.map(card => [card.CardName, card.CardNumber, card.CardType, card.CardVariant, 'Pokemon', null, null, 'Derived or Default Card Set']);
-        
-        await db.query(query, [values]);
-        console.log(`Page scraped and data inserted successfully from ${link}`);
-        } catch (error) {
-            console.error(`Error inserting data into database from ${link}:`, error);
+        // Prepare data for insertion into the Card table
+        if (cards.length > 0) {
+            const query = 'INSERT INTO Card (CardName, CardNumber, CardSet, CardColor, CardVariant, Sport, CardYear, CardImage) VALUES ?';
+            // Use parameterized query to safely insert data
+            await db.query(query, [cards]).then(() => {
+                console.log(`Inserted ${cards.length} cards from page ${pageNumber} into the Card table`);
+            }).catch(error => {
+                console.error(`Error inserting data into the Card table from page ${pageNumber}:`, error);
+            });
         }
-    }
-
-async function scrapeAllLinks() {
-    // Assume you have a function to load links from links.txt
-    const links = await loadLinksFromFile();
-
-    for (const link of links) {
-        console.log(`Scraping: ${link}`);
-        await scrapeCardDataFromLink(link);
-        // Add a slight delay to prevent hitting the server too rapidly
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
-    }
-}
-
-scrapeAllLinks();
-
-async function loadLinksFromFile() {
-    const filePath = path.join(__dirname, 'links.txt'); // Ensure path is correct
-    try {
-        const data = await fs.readFile(filePath, { encoding: 'utf8' });
-        return data.split('\n').filter(link => link.trim() !== ''); // Filter out empty lines
     } catch (error) {
-        console.error('Error reading links file:', error);
-        return [];
+        console.error(`Error scraping page ${pageNumber}:`, error);
     }
 }
+
+async function scrapeAllPages() {
+    for (let currentPage = 1; currentPage <= 177; currentPage++) { // Set a fixed end for loop
+        console.log(`Scraping page ${currentPage}...`);
+        await scrapePage(currentPage);
+        // Optionally, add a delay here if needed
+    }
+    console.log("Completed scraping all pages.");
+}
+
+scrapeAllPages();

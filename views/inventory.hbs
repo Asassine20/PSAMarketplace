@@ -118,17 +118,18 @@
 
         <thead>
             <tr>
-                <th onclick="sortInventory('Sport')">Sport</th>
+                <th class="sortable" onclick="sortInventory('Sport')">Sport<span class="sort-icon">▼</span></th>
                 <th>Image</th>
-                <th onclick="sortInventory('CardName')">Name</th>
-                <th onclick="sortInventory('CardSet')">Set</th>
-                <th onclick="sortInventory('CardYear')">Year</th>
-                <th onclick="sortInventory('CardNumber')">Number</th>
-                <th onclick="sortInventory('CardColor')">Color</th>
-                <th onclick="sortInventory('CardVariant')">Variant</th>
+                <th class="sortable" onclick="sortInventory('CardName')">Name<span class="sort-icon">▼</span></th>
+                <th class="sortable" onclick="sortInventory('CardSet')">Set<span class="sort-icon">▼</span></th>
+                <th class="sortable" onclick="sortInventory('CardYear')">Year<span class="sort-icon">▼</span></th>
+                <th class="sortable" onclick="sortInventory('CardNumber')">Number<span class="sort-icon">▼</span></th>
+                <th class="sortable" onclick="sortInventory('CardColor')">Color<span class="sort-icon">▼</span></th>
+                <th class="sortable" onclick="sortInventory('CardVariant')">Variant<span class="sort-icon">▼</span></th>
                 <th style="width:100px;"></th>
             </tr>
         </thead>
+
         <tbody>
             {{#each cards}}
             <tr class="{{#if this.isInStock}}in-stock{{/if}}">
@@ -605,6 +606,10 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Load initial data
         loadDataWithFilters();
+        document.getElementById('cardSet').addEventListener('change', function() {
+            currentPage = 1; // Reset to page 1
+            loadDataWithFilters();
+        });
 
         // Attach event listeners to filter elements
         document.getElementById('sport').addEventListener('change', function() {
@@ -615,7 +620,7 @@
                 loadDataWithFilters();
             }
         });        
-        document.getElementById('cardSet').addEventListener('change', function() {
+        document.getElementById('searchTerm').addEventListener('change', function() {
             currentPage = 1; // Reset to page 1
             loadDataWithFilters();
         });
@@ -679,11 +684,11 @@
             row.innerHTML = `
                 <td>${card.Sport}</td>
                 <td><img src="${card.CardImage ? card.CardImage : ''}" class="card-image" alt="Card Image"></td>
-                <td>${card.CardName}</td>
-                <td>${card.CardSet}</td>
-                <td>${card.CardYear}</td>
-                <td>${card.CardNumber}</td>
-                <td>${card.CardColor}</td>
+                <td>${card.CardName || ''}</td>
+                <td>${card.CardSet || ''}</td>
+                <td>${card.CardYear || ''}</td>
+                <td>${card.CardNumber || ''}</td>
+                <td>${card.CardColor || ''}</td>
                 <td>${card.CardVariant ? card.CardVariant : ''}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>

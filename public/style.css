@@ -219,6 +219,16 @@ caption {
     border-radius: 4px;
 }
 
+th.sortable:hover {
+    cursor: pointer;
+    text-decoration: underline; /* Optional: adds underline on hover */
+}
+
+/* Icon styles */
+.sort-icon {
+    margin-left: 5px; /* Space between header text and icon */
+}
+
 .flex-container {
     display: flex;
     align-items: flex-start; /* Align items at the top */

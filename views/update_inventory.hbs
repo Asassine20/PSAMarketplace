@@ -48,7 +48,32 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Existing inventory or first row -->
+                    <!-- Check if there's existing inventory to pre-fill the form -->
+                    {{#if existingInventory}}
+                    <tr>
+                        <td>
+                            <select name="gradeIds[]">
+                                {{#each grades}}
+                                <option value="{{this.gradeId}}" {{#if (eq this.gradeId ../existingInventory.GradeId)}}selected{{/if}}>{{this.gradeValue}}</option>
+                                {{/each}}
+                            </select>
+                        </td>
+                        <td>
+                            <!-- This cell is for Market Price, which you mentioned would be dynamically filled (presumably with JavaScript) -->
+                            <!-- Ensure this cell either has content or a placeholder/comment indicating its purpose -->
+                        </td>
+                        <td>
+                            <input type="text" name="salePrices[]" value="{{existingInventory.SalePrice}}">
+                        </td>
+                        <td>
+                            <input type="text" name="certNumbers[]" value="{{existingInventory.CertNumber}}">
+                        </td>
+                        <td>
+                            <button type="button" onclick="addRow()">+</button>
+                        </td>
+                    </tr>
+                    {{else}}
+                    <!-- You might want to include a default row structure here for when there's no existing inventory -->
                     <tr>
                         <td>
                             <select name="gradeIds[]">
@@ -58,7 +83,7 @@
                             </select>
                         </td>
                         <td>
-                            <!-- Dynamically filled based on selected grade, implement via JS -->
+                            <!-- Market Price placeholder or dynamic content -->
                         </td>
                         <td>
                             <input type="text" name="salePrices[]" value="">
@@ -70,8 +95,10 @@
                             <button type="button" onclick="addRow()">+</button>
                         </td>
                     </tr>
+                    {{/if}}
                 </tbody>
             </table>
+
         </div>
     </div>
 
@@ -100,7 +127,7 @@
                 <input type="text" name="salePrices[]" value="">
             </td>
             <td>
-                <input type="text" name="certNumbers[]" value="">
+                <input type="text" name="certNumbers[]" onchange="fetchAndDisplayImage(this.value)">
             </td>
             <td>
                 <button type="button" onclick="removeRow(this)">-</button>
@@ -112,10 +139,45 @@
     function removeRow(button) {
         button.parentElement.parentElement.remove();
     }
+    async function fetchAndDisplayImage(certNumber) {
+        if (!certNumber) return; // Skip if certNumber is empty
+        try {
+            const response = await fetch(`/api/fetch-image?certNumber=${certNumber}`);
+            const data = await response.json();
+            if (data.frontImageUrl) {
+                // Assuming you have a dedicated place to show the image
+                document.querySelector(".update-inventory-card-image").src = data.frontImageUrl;
+                document.querySelector(".update-inventory-card-image").alt = "Fetched Card Image";
+            }
+        } catch (error) {
+            console.error('Error fetching image:', error);
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+    // Add event listener to cert number input fields
+    document.querySelectorAll('input[name="certNumbers[]"]').forEach(input => {
+        input.addEventListener('change', async function() {
+            const certNumber = this.value;
+            if (!certNumber) return; // Skip if certNumber is empty
 
+            try {
+                const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
+                const data = await response.json();
+                if (data.frontImageUrl) {
+                    // Update the src of the image element to show the fetched image
+                    const imgElement = document.querySelector(".update-inventory-card-image");
+                    if (imgElement) {
+                        imgElement.src = data.frontImageUrl;
+                        imgElement.style.display = 'block'; // Make sure to display the image if it was hidden
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching image:', error);
+            }
+        });
+    });
+});
 </script>
-
-
 </body>
 
 </html>

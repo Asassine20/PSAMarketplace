@@ -1,31 +1,18 @@
-const db = require('./db'); // Replace './db' with your database connection module path
+const db = require('./db'); // Ensure this is your promise-based connection module
 
-async function updateCardColors() {
-    try {
-        // Define the colors to search for
-        const colors = ['red white & blue', 'red white and blue', 'sky blue', 'black and white', 'lime green', 'gold', 'blue', 'silver', 'green', 
-                        'red', 'chrome', 'glossy', 'rainbow', 'purple', 'pink', 'black', 'bronze', 'tiffany', 'orange', 
-                        'yellow', 'copper', 'emerald', 'sepia', 'platinum', 'ruby', 'teal', 'sapphire', 'white', 'wood', 'grey', 'neon', 'aqua',
-                        ''  ];
+async function deleteAllGrades() {
+  try {
+    await db.query('SET SESSION innodb_lock_wait_timeout = 120');
+    const deleteQuery = 'DELETE FROM Grade';
 
-        // Fetch all cards
-        const cards = await db.query('SELECT CardID, CardSet FROM Card');
+    // Execute the query
+    await db.query(deleteQuery);
 
-        // Iterate through each card and update the color if it matches
-        for (const card of cards) {
-            for (const color of colors) {
-                if (card.CardSet.toLowerCase().includes(color)) {
-                    await db.query('UPDATE Card SET CardColor = ? WHERE CardID = ?', [color, card.CardID]);
-                    break; // Break out of the color loop once a match is found
-                }
-            }
-        }
-
-        console.log('Card colors updated successfully.');
-    } catch (error) {
-        console.error('Error updating card colors:', error);
-    }
+    console.log('All records deleted from the Grade table successfully.');
+  } catch (error) {
+    console.error('Failed to delete records from the Grade table:', error);
+  }
 }
 
-// Run the function
-updateCardColors();
+// Run the delete function
+deleteAllGrades();
