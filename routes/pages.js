@@ -64,8 +64,9 @@ router.get('/inventory', authenticateToken, async (req, res) => {
 
         if (searchTerm) {
             whereConditions.push("CardName LIKE ?");
-            values.push(searchTerm.trim());
+            values.push(`${searchTerm.trim()}%`);
         }
+        
         if (cardSet) {
             whereConditions.push("CardSet = ?");
             values.push(cardSet);

@@ -1,18 +1,23 @@
-const db = require('../db'); // Adjust the path to your actual db module
+const db = require('../db'); // Ensure this is your promise-based connection module
 
-async function updateCardSetIDs() {
-    const query = `
-        UPDATE Card C
-        JOIN CardSetTest CST ON C.CardSet = CST.Name
-        SET C.CardSetID = CST.CardSetID;
-    `;
+async function copyAndCleanCardTable() {
+  try {
+    // Create a copy of the Card table
+    await db.query('CREATE TABLE CardCopy AS SELECT * FROM Card');
+    console.log('Copy of Card table created successfully.');
 
-    try {
-        const result = await db.query(query);
-        console.log('Number of records updated:', result.affectedRows);
-    } catch (error) {
-        console.error('Error updating CardSetIDs:', error);
-    }
+    // Assuming CardColor and CardVariant are straightforward substrings of CardSet,
+    // the following query attempts to remove these substrings from CardSet names.
+    // Note: This approach has limitations and might not perfectly handle all cases.
+    await db.query(`
+      UPDATE CardCopy
+      SET CardSet = TRIM(REPLACE(REPLACE(CardSet, IFNULL(CardColor, ''), ''), IFNULL(CardVariant, ''), ''))
+    `);
+
+    console.log('CardSet names in CardCopy table updated successfully.');
+  } catch (error) {
+    console.error('Failed to copy and update the Card table:', error);
+  }
 }
 
-updateCardSetIDs();
+copyAndCleanCardTable();

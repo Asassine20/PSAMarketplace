@@ -354,7 +354,7 @@
         document.getElementById('spinner').style.display = 'none';
     }
 
-    function loadSetsAndYears(caller) {
+    async function loadSetsAndYears(caller) {
         disableDropdowns();
         showSpinner();
 
@@ -364,19 +364,22 @@
         const cardColor = document.getElementById('cardColor').value;
         const cardVariant = document.getElementById('cardVariant').value;
 
-        Promise.all([
-            fetchSports(sport, cardSet, year, cardColor, cardVariant),
-            fetchCardSets(sport, cardSet, year, cardColor, cardVariant),
-            fetchYears(sport, cardSet, year, cardColor, cardVariant),
-            fetchCardColors(sport, cardSet, year, cardColor, cardVariant),
-            fetchCardVariants(sport, cardSet, year, cardColor, cardVariant)
-        ]).then(() => {
-            finalizeLoading();
-        }).catch(error => {
+        try {
+            await Promise.all([
+                fetchSports(sport, cardSet, year, cardColor, cardVariant),
+                fetchCardSets(sport, cardSet, year, cardColor, cardVariant),
+                fetchYears(sport, cardSet, year, cardColor, cardVariant),
+                fetchCardColors(sport, cardSet, year, cardColor, cardVariant),
+                fetchCardVariants(sport, cardSet, year, cardColor, cardVariant)
+            ]);
+        } catch (error) {
             console.error('Error with one of the fetch calls:', error);
-            finalizeLoading(); // Consider how to handle partial failures
-        });
+            // Consider how to handle partial failures
+        } finally {
+            finalizeLoading();
+        }
     }
+
 
 
     document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
@@ -508,37 +511,34 @@
 
     document.getElementById('pageSize').addEventListener('change', changePageSize);
 
-    function loadDataWithFilters() {
+    async function loadDataWithFilters() {
         if (isLoadingData) return;
         isLoadingData = true;
         showSpinner();
 
-        // Update to fetch pageSize from the dropdown or localStorage every time
         let pageSize = document.getElementById('pageSize').value || localStorage.getItem('pageSize') || '25';
-
-        const sport = document.getElementById('sport').value;
-        const cardSet = document.getElementById('cardSet').value;
-        const year = document.getElementById('cardYear').value;
-        const cardColor = document.getElementById('cardColor').value;
-        const cardVariant = document.getElementById('cardVariant').value;
-        const searchTerm = document.getElementById('searchTerm').value;
 
         const data = {
             page: currentPage,
             pageSize,
-            searchTerm,
-            sport,
-            cardSet,
-            cardYear: year,
-            cardColor,
-            cardVariant,
-            sortColumn: currentSortColumn, 
+            searchTerm: document.getElementById('searchTerm').value,
+            sport: document.getElementById('sport').value,
+            cardSet: document.getElementById('cardSet').value,
+            cardYear: document.getElementById('cardYear').value,
+            cardColor: document.getElementById('cardColor').value,
+            cardVariant: document.getElementById('cardVariant').value,
+            sortColumn: currentSortColumn,
             sortOrder: currentSortOrder
         };
-        console.log('Sending AJAX request with data:', data); // Log the data being sent
+        console.log('Sending AJAX request with data:', data);
 
-
-        fetchInventoryData(data);
+        try {
+            await fetchInventoryData(data);
+        } catch (error) {
+            console.error('Error loading data with filters:', error);
+        } finally {
+            isLoadingData = false;
+        }
     }
 
     function fetchInventoryData(data) {
