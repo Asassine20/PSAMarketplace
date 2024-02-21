@@ -724,7 +724,7 @@ router.get('/api/fetch-card-data', authenticateToken, async (req, res) => {
 
     try {
         console.log("Cert number:", req.query.certNumber);
-        const cardData = await getCardDataByCertNumber(req.query.certNumber, process.env.API_KEY, process.env.ACCESS_TOKEN);
+        const cardData = await getCardDataByCertNumber(req.query.certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
         console.log("Card data:", cardData);        if (cardData) {
             res.json(cardData);
         } else {

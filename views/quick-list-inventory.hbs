@@ -67,7 +67,7 @@
                     <!-- Placeholder for a new row structure -->
                     <tr>
                         <td>
-                            <img src="" alt="Card Image" class="update-inventory-card-image"> <!-- Placeholder image element -->
+                            <img src="" alt="Card Image" class="card-image"> <!-- Placeholder image element -->
                         </td>
                         <td>
                             <select name="gradeIds[]">
@@ -112,7 +112,7 @@
                 <input type="text" name="certNumbers[]" placeholder="Enter Cert Number" onchange="fetchAndPopulateCardData(this)">
             </td>
             <td>
-                <img src="" alt="Card Image" class="update-inventory-card-image">
+                <img src="" alt="Card Image" class="card-image">
             </td>
             <td>
                 <select name="gradeIds[]">
@@ -145,11 +145,11 @@
             const row = inputElement.closest("tr");
             
             // Assuming cardData contains the card image URL under a property like cardData.cardImage
-            const imgElement = row.querySelector("img.update-inventory-card-image");
+            const imgElement = row.querySelector("img.card-image");
             if (imgElement && cardData.cardImage) {
                 imgElement.src = cardData.cardImage;
                 imgElement.alt = "Card Image";
-                imgElement.classList.replace("update-inventory-card-image", "update-inventory-card-image");
+                imgElement.classList.replace("card-image", "card-image");
             }
             // Log card data to the console (optional, for debugging purposes)
             console.log(cardData);
@@ -171,8 +171,8 @@
             const data = await response.json();
             if (data.frontImageUrl) {
                 // Assuming you have a dedicated place to show the image
-                document.querySelector(".update-inventory-card-image").src = data.frontImageUrl;
-                document.querySelector(".update-inventory-card-image").alt = "Fetched Card Image";
+                document.querySelector(".card-image").src = data.frontImageUrl;
+                document.querySelector(".card-image").alt = "Fetched Card Image";
             }
         } catch (error) {
             console.error('Error fetching image:', error);
@@ -190,7 +190,7 @@
                 const data = await response.json();
                 if (data.frontImageUrl) {
                     // Update the src of the image element to show the fetched image
-                    const imgElement = document.querySelector(".update-inventory-card-image");
+                    const imgElement = document.querySelector(".card-image");
                     if (imgElement) {
                         imgElement.src = data.frontImageUrl;
                         imgElement.style.display = 'block'; // Make sure to display the image if it was hidden
@@ -204,7 +204,8 @@
 });
 async function fetchCardDataByCertNumber(certNumber) {
     try {
-        const response = await fetch(`/cert/GetByCertNumber/${certNumber}`);
+        // Adjusted to call your backend endpoint, which then calls the PSA Card API
+        const response = await fetch(`/api/fetch-card-data?certNumber=${certNumber}`);
         if (!response.ok) {
             throw new Error(`Error fetching card data: ${response.statusText}`);
         }
