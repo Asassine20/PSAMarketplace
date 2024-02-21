@@ -24,23 +24,11 @@
     </nav>
 <form action="/submit-inventory" method="post">
     <div class="flex-container">
-        <div class="product-info">
-            <h2>Product Info</h2>
-            {{#if cardDetails.CardImage}}
-            <img src="{{cardDetails.CardImage}}" alt="Card Image" class="update-inventory-card-image">
-            {{/if}}
-            <p>Card Name: {{cardDetails.CardName}}</p>
-            <p>Card Set: {{cardDetails.CardSet}}</p>
-            <p>Card Year: {{cardDetails.CardYear}}</p>
-            <p>Card Number: {{cardDetails.CardNumber}}</p>
-            <p>Card Color: {{cardDetails.CardColor}}</p>
-            <p>Card Variant: {{cardDetails.CardVariant}}</p>
-        </div>
-
         <div class="table-container" id="grades-table">
             <table>
                 <thead>
                     <tr>
+                        <th>Card Image</th>
                         <th>Grade</th>
                         <th>Market Price</th>
                         <th>Your Sale Price</th>
@@ -49,9 +37,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Check if there's existing inventory to pre-fill the form -->
+                    <!-- Example row with dynamic content for illustration -->
                     {{#if existingInventory}}
                     <tr>
+                        <td>
+                            <img src="{{existingInventory.CardImage}}" alt="Card Image" class="card-image"> <!-- Assuming existingInventory.CardImage contains the URL -->
+                        </td>
                         <td>
                             <select name="gradeIds[]">
                                 {{#each grades}}
@@ -60,8 +51,7 @@
                             </select>
                         </td>
                         <td>
-                            <!-- This cell is for Market Price, which you mentioned would be dynamically filled (presumably with JavaScript) -->
-                            <!-- Ensure this cell either has content or a placeholder/comment indicating its purpose -->
+                            <!-- Market Price can be dynamically filled if needed -->
                         </td>
                         <td>
                             <input type="text" name="salePrices[]" value="{{existingInventory.SalePrice}}">
@@ -74,8 +64,11 @@
                         </td>
                     </tr>
                     {{else}}
-                    <!-- You might want to include a default row structure here for when there's no existing inventory -->
+                    <!-- Placeholder for a new row structure -->
                     <tr>
+                        <td>
+                            <img src="" alt="Card Image" class="update-inventory-card-image"> <!-- Placeholder image element -->
+                        </td>
                         <td>
                             <select name="gradeIds[]">
                                 {{#each grades}}
@@ -84,13 +77,13 @@
                             </select>
                         </td>
                         <td>
-                            <!-- Market Price placeholder or dynamic content -->
+                            <!-- Market Price placeholder -->
                         </td>
                         <td>
                             <input type="text" name="salePrices[]" value="">
                         </td>
                         <td>
-                            <input type="text" name="certNumbers[]" value="">
+                            <input type="text" name="certNumbers[]" onchange="fetchAndPopulateCardData(this)">
                         </td>
                         <td>
                             <button type="button" onclick="addRow()">+</button>
@@ -99,54 +92,78 @@
                     {{/if}}
                 </tbody>
             </table>
-
         </div>
+
     </div>
 
     <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
     <input type="hidden" name="listingId" value="{{existingInventory.ListingID}}">
     
     <div class="button-container">
-        <button style="border-radius: 4px;" type="submit" name="clearInventory" value="true" class="clear-inventory-button">Clear Inventory</button>
-        <button style="border-radius: 4px;" type="submit">{{#if existingInventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
+        <button style="border-radius: 4px;" type="submit">{{#if existingInventory.ListingID}}Update{{else}}Submit{{/if}}</button>
     </div>
 </form>
 <script>
-    function addRow() {
+    async function addRow() {
         const tableBody = document.querySelector("#grades-table tbody");
         const newRow = document.createElement("tr");
-        const existingSelect = document.querySelector('select[name="gradeIds[]"]');
-        
-        // Clone the options from the existing select
-        const options = existingSelect ? existingSelect.innerHTML : '';
-
         newRow.innerHTML = `
             <td>
+                <input type="text" name="certNumbers[]" placeholder="Enter Cert Number" onchange="fetchAndPopulateCardData(this)">
+            </td>
+            <td>
+                <img src="" alt="Card Image" class="update-inventory-card-image">
+            </td>
+            <td>
                 <select name="gradeIds[]">
-                    ${options}
+                    <!-- Grades dropdown populated dynamically based on API or predefined list -->
                 </select>
             </td>
             <td>
-                <!-- Market Price can be dynamically filled if needed -->
-            </td>
-            <td>
-                <input type="text" name="salePrices[]" value="">
-            </td>
-            <td>
-                <input type="text" name="certNumbers[]" value="">
-            </td>
-            <td>
-                <button type="button" onclick="removeRow(this)">-</button>
+                <input type="text" name="salePrices[]" value="" placeholder="Sale Price">
             </td>
         `;
         tableBody.appendChild(newRow);
     }
 
+    async function fetchAndPopulateCardData(inputElement) {
+        const certNumber = inputElement.value;
+        if (!certNumber) return;
 
-    function removeRow(button) {
-        button.parentElement.parentElement.remove();
+        // Define the URL for the fetch request using the correct endpoint
+        const url = `/api/fetch-card-data?certNumber=${certNumber}`; // Adjusted to match the correct server-side endpoint
+
+        try {
+            const response = await fetch(url);
+            // Check if the response is OK (status in the range 200-299)
+            if (!response.ok) {
+                throw new Error(`Error fetching card data: ${response.statusText}`);
+            }
+            const cardData = await response.json();
+
+            // Now populate the row based on fetched cardData
+            const row = inputElement.closest("tr");
+            
+            // Assuming cardData contains the card image URL under a property like cardData.cardImage
+            const imgElement = row.querySelector("img.update-inventory-card-image");
+            if (imgElement && cardData.cardImage) {
+                imgElement.src = cardData.cardImage;
+                imgElement.alt = "Card Image";
+                imgElement.classList.replace("update-inventory-card-image", "update-inventory-card-image");
+            }
+            // Log card data to the console (optional, for debugging purposes)
+            console.log(cardData);
+
+            // You can also populate other fields if necessary, similar to how you handle the image
+            // Example:
+            // row.querySelector('.card-year').value = cardData.year;
+            // Populate other card details in the row as needed...
+
+        } catch (error) {
+            console.error('Error fetching card data:', error);
+            // Handle the error, e.g., show an error message to the user
+        }
     }
-/*
     async function fetchAndDisplayImage(certNumber) {
         if (!certNumber) return; // Skip if certNumber is empty
         try {
@@ -185,7 +202,53 @@
         });
     });
 });
-*/
+async function fetchCardDataByCertNumber(certNumber) {
+    try {
+        const response = await fetch(`/cert/GetByCertNumber/${certNumber}`);
+        if (!response.ok) {
+            throw new Error(`Error fetching card data: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        // Extracting the required card data from the response
+        const cardData = {
+            year: data.PSACert.Year,
+            brand: data.PSACert.Brand,
+            cardNumber: data.PSACert.CardNumber,
+            cardGrade: data.PSACert.CardGrade,
+            subject: data.PSACert.Subject,
+            variety: data.PSACert.Variety
+        };
+
+        return cardData;
+    } catch (error) {
+        console.error('Error in fetchCardDataByCertNumber:', error);
+        throw error; // Rethrow or handle as needed
+    }
+}
+async function populateCardDataFromCert(certInput) {
+    const certNumber = certInput.value;
+    if (!certNumber) return;
+
+    try {
+        const cardData = await fetchCardDataByCertNumber(certNumber);
+
+        // Assuming you have a way to reference the specific row's fields you want to populate
+        const row = certInput.closest('tr'); // Or some other way to target the specific row
+        row.querySelector('.card-year').value = cardData.year;
+        row.querySelector('.card-brand').value = cardData.brand;
+        row.querySelector('.card-number').value = cardData.cardNumber;
+        row.querySelector('.card-grade').value = cardData.cardGrade;
+        row.querySelector('.card-subject').value = cardData.subject;
+        row.querySelector('.card-variety').value = cardData.variety;
+
+        // Update other UI elements as needed based on fetched data
+    } catch (error) {
+        console.error('Failed to populate card data from cert:', error);
+        // Handle error, e.g., show an error message to the user
+    }
+}
+
 </script>
 </body>
 

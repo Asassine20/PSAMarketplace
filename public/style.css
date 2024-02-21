@@ -492,6 +492,6 @@ th.sortable:hover {
 }
 
 .update-inventory-card-image {
-    max-height: 2400px;
-    max-width: 1425px;
+    max-height: 800px;
+    max-width: 425px;
 }

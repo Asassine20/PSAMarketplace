@@ -545,8 +545,6 @@ router.get('/search-card-sets', authenticateToken, async (req, res) => {
     }
 });
 
-
-
 router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const cardId = req.query.cardId;
     const sellerId = req.user.id;
@@ -584,6 +582,37 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+// Function to get card data by cert number from the API
+async function getCardDataByCertNumber(certNumber, apiKey, accessToken) {
+    const url = `https://api.psacard.com/publicapi/cert/GetByCertNumber/${certNumber}`; // Correct variable is 'url'
+    try {
+        const response = await axios.get(url, { // This should be 'url', not 'endpoint'
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${accessToken}` // Assuming accessToken is the correct way to authenticate
+            }
+        });
+
+        if (response.data && response.data.PSACert) {
+            const { PSACert } = response.data;
+            return {
+                year: PSACert.Year,
+                brand: PSACert.Brand,
+                cardNumber: PSACert.CardNumber,
+                cardGrade: PSACert.CardGrade,
+                subject: PSACert.Subject,
+                variety: PSACert.Variety
+            };
+        }
+
+        return null; // Or handle as appropriate if no data found
+    } catch (error) {
+        console.error('Error fetching card data from API:', error);
+        throw error;
+    }
+}
+
 
 // Function to get images by cert number from PSA Card API
 async function getImagesByCertNumber(certNumber, apiKey, accessToken) {
@@ -625,7 +654,6 @@ async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
         throw error; // Rethrow the error to handle it further up the call stack
     }
 }
-
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
     const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
@@ -673,6 +701,41 @@ router.post('/submit-inventory', authenticateToken, async (req, res) => {
         res.status(500).send('Error processing inventory');
     }
 });
+
+router.get('/quick-list-inventory', authenticateToken, async (req, res) => {
+    try {
+        // Example: sending user info or configurations
+        res.render('quick-list-inventory', {
+            userInfo: req.user, // Assuming req.user is available and contains user info
+            config: { /* some configuration data if needed */ }
+        });
+    } catch (error) {
+        console.error('Error loading add multiple inventory page:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+
+router.get('/api/fetch-card-data', authenticateToken, async (req, res) => {
+    const { certNumber } = req.query;
+    if (!certNumber) {
+        return res.status(400).send({ error: 'Cert number is required.' });
+    }
+
+    try {
+        console.log("Cert number:", req.query.certNumber);
+        const cardData = await getCardDataByCertNumber(req.query.certNumber, process.env.API_KEY, process.env.ACCESS_TOKEN);
+        console.log("Card data:", cardData);        if (cardData) {
+            res.json(cardData);
+        } else {
+            res.status(404).send({ error: 'Card data not found.' });
+        }
+    } catch (error) {
+        console.error('Error fetching card data:', error);
+        res.status(500).send({ error: 'Server error fetching card data.' });
+    }
+});
+
 
 // Add this endpoint to your server
 router.get('/fetch-card-image', authenticateToken, async (req, res) => {
