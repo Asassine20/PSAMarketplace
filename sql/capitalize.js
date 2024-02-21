@@ -11,7 +11,7 @@ function capitalizeFirstLetter(string) {
 // Function to process a batch of rows
 async function processBatch(offset, limit) {
     try {
-        const results = await db.query('SELECT CardID, CardVariant FROM Card LIMIT ? OFFSET ?', [limit, offset]);
+        const results = await db.query('SELECT CardID, CardVariant FROM CardCopy LIMIT ? OFFSET ?', [limit, offset]);
 
         for (const row of results) {
             if (row.CardVariant) { // Check if CardVariant is not null

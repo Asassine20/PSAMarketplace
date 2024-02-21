@@ -1,4 +1,4 @@
-const db = require('./db'); // Assuming 'db' is your database connection module
+const db = require('../db'); // Assuming 'db' is your database connection module
 
 async function populateGrades() {
     try {

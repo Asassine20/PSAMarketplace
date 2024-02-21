@@ -206,7 +206,6 @@ async function preWarmCache() {
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Hockey', cardColor: '', cardVariant: '' },
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Pokemon (Japan)', cardColor: '', cardVariant: '' },
         { searchTerm: '', cardSet: '', cardYear: '', sport: 'Pokemon (English)', cardColor: '', cardVariant: '' }
-
     ];
 
     // Wrap each query in a function that catches and handles its errors
@@ -245,7 +244,7 @@ async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardCo
 
     let query = "SELECT * FROM Card";
     if (whereConditions.length) query += " WHERE " + whereConditions.join(" AND ");
-    query += " LIMIT 100"; // Adjust limit based on your needs for pre-warming
+    query += " LIMIT 1000000"; // Adjust limit based on your needs for pre-warming
 
     try {
         const cards = await db.query(query, values);
