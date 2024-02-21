@@ -374,7 +374,6 @@
             ]);
         } catch (error) {
             console.error('Error with one of the fetch calls:', error);
-            // Consider how to handle partial failures
         } finally {
             finalizeLoading();
         }
@@ -409,6 +408,7 @@
     
     // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
     function searchCardSets(searchTerm) {
+        showSpinner();
         const sport = document.getElementById('sport').value;
         const year = document.getElementById('cardYear').value;
         const cardColor = document.getElementById('cardColor').value;
@@ -433,7 +433,10 @@
             // Processes the response by converting it to JSON
             .then(response => response.json())
             // Takes the data (array of card sets) and calls the populateDropdown function to update the dropdown with the values
-            .then(sets => populateDropdown(sets))
+            .then(sets => {
+                populateDropdown(sets);
+                document.getElementById('spinner').style.display = 'none';
+            })
             .catch(error => console.error('Error:', error));
     }
 
@@ -486,9 +489,11 @@
         document.getElementById('cardYear').selectedIndex = 0;
         document.getElementById('cardColor').selectedIndex = 0;
         document.getElementById('cardVariant').selectedIndex = 0;
-        
+        document.getElementById('spinner').style.display = 'none';
+
         loadSetsAndYears(null);
         loadDataWithFilters(); 
+
     }
     document.getElementById('resetButton').addEventListener('click', resetFilters);
 
@@ -599,75 +604,6 @@
         // Update the pagination container with the new HTML
         document.querySelector('.pagination').innerHTML = paginationHtml;
     }
-
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Load initial data
-        loadDataWithFilters();
-        document.getElementById('cardSet').addEventListener('change', function() {
-            currentPage = 1; // Reset to page 1
-            loadDataWithFilters();
-        });
-
-        // Attach event listeners to filter elements
-        document.getElementById('sport').addEventListener('change', function() {
-            currentPage = 1;
-            if (this.value === '') { // Adjust this condition as needed
-                resetFilters();
-            } else {
-                loadDataWithFilters();
-            }
-        });        
-        document.getElementById('searchTerm').addEventListener('change', function() {
-            currentPage = 1; // Reset to page 1
-            loadDataWithFilters();
-        });
-        document.getElementById('cardYear').addEventListener('change', function() {
-            currentPage = 1; // Reset to page 1
-            loadDataWithFilters();
-        });        
-        document.getElementById('cardColor').addEventListener('change', function() {
-            currentPage = 1; // Reset to page 1
-            loadDataWithFilters();
-        });        
-        document.getElementById('cardVariant').addEventListener('change', function() {
-            currentPage = 1; // Reset to page 1
-            loadDataWithFilters();
-        });                
-
-        // Event listener for intercepting the form submission
-        document.getElementById('inventorySearchForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Form submission intercepted');
-            loadDataWithFilters();
-        });
-
-        document.getElementById('searchButton').addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Search button clicked');
-            loadDataWithFilters();
-        });
-
-        // If you have a pageSize selector or similar
-        const pageSizeSelector = document.getElementById('pageSize');
-        if (pageSizeSelector) {
-            pageSizeSelector.addEventListener('change', function() {
-                localStorage.setItem('pageSize', this.value);
-                loadDataWithFilters();
-            });
-        }
-    });
-
-
-    // On page load, set the page size dropdown based on the stored value
-    document.addEventListener('DOMContentLoaded', function() {
-        const savedPageSize = localStorage.getItem('pageSize');
-        if(savedPageSize) {
-            document.getElementById('pageSize').value = savedPageSize;
-        }
-        // Optionally, load data with filters when the page loads if you're implementing the entire page fetch via AJAX
-        loadDataWithFilters();
-    });
     
     function updateTableAndTotalItemsWithData(cards, totalItems) {
         const tableBody = document.querySelector('.table-container table tbody');
@@ -698,7 +634,82 @@
         // Update total items count
         document.getElementById('totalItems').textContent = `${totalItems} Results`;
     }
-    document.addEventListener('DOMContentLoaded', () => {
+
+    let currentSortColumn = 'CardSet'; // Default sort column
+    let currentSortOrder = 'asc'; // Default sort order
+    function sortInventory(sortColumn) {
+        // Toggle sort order if the same column is clicked again, otherwise set to 'asc'
+        if (currentSortColumn === sortColumn) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortOrder = 'asc';
+        }
+        currentSortColumn = sortColumn;
+        loadDataWithFilters(); // Reload data with new sort settings
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load initial data
+        loadDataWithFilters();
+
+        // Event listeners for filter changes, resetting currentPage as needed
+        document.getElementById('cardSet').addEventListener('change', function() {
+            currentPage = 1;
+            loadDataWithFilters();
+        });
+
+        document.getElementById('sport').addEventListener('change', function() {
+            currentPage = 1;
+            if (this.value === '') {
+                resetFilters();
+            } else {
+                loadDataWithFilters();
+            }
+        });
+
+        document.getElementById('searchTerm').addEventListener('change', function() {
+            currentPage = 1;
+            loadDataWithFilters();
+        });
+
+        document.getElementById('cardYear').addEventListener('change', function() {
+            currentPage = 1;
+            loadDataWithFilters();
+        });
+
+        document.getElementById('cardColor').addEventListener('change', function() {
+            currentPage = 1;
+            loadDataWithFilters();
+        });
+
+        document.getElementById('cardVariant').addEventListener('change', function() {
+            currentPage = 1;
+            loadDataWithFilters();
+        });
+
+        // Handling form submission to prevent default behavior and manually handle data loading
+        document.getElementById('inventorySearchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            loadDataWithFilters();
+        });
+
+        document.getElementById('searchButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            loadDataWithFilters();
+        });
+
+        // Set the page size dropdown based on the stored value and attach change event listener
+        const pageSizeSelector = document.getElementById('pageSize');
+        const savedPageSize = localStorage.getItem('pageSize');
+        if(savedPageSize) {
+            pageSizeSelector.value = savedPageSize;
+        }
+        pageSizeSelector.addEventListener('change', function() {
+            localStorage.setItem('pageSize', this.value);
+            loadDataWithFilters();
+        });
+
+        // Adding mouseenter and mouseleave event listeners for card image preview functionality
         document.querySelector('.table-container table').addEventListener('mouseenter', function(event) {
             if (event.target.classList.contains('card-image')) {
                 const previewDiv = document.getElementById('image-preview');
@@ -714,21 +725,6 @@
             }
         }, true); // Using event capturing
     });
-
-    let currentSortColumn = 'CardSet'; // Default sort column
-    let currentSortOrder = 'asc'; // Default sort order
-    function sortInventory(sortColumn) {
-        // Toggle sort order if the same column is clicked again, otherwise set to 'asc'
-        if (currentSortColumn === sortColumn) {
-            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSortOrder = 'asc';
-        }
-        currentSortColumn = sortColumn;
-        loadDataWithFilters(); // Reload data with new sort settings
-    }
-
-
 
 </script>
 

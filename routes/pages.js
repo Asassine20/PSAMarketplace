@@ -244,8 +244,7 @@ async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardCo
 
     let query = "SELECT * FROM Card";
     if (whereConditions.length) query += " WHERE " + whereConditions.join(" AND ");
-    query += " LIMIT 1000000"; // Adjust limit based on your needs for pre-warming
-
+    //query += " LIMIT 10000000"; removing limit makes it much faster
     try {
         const cards = await db.query(query, values);
         return cards; // Assuming db.query returns the result set
