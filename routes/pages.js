@@ -54,8 +54,8 @@ router.get('/inventory', authenticateToken, async (req, res) => {
     const sport = req.query.sport || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
-    const sortColumn = req.query.sortColumn; 
-    const sortOrder = req.query.sortOrder; 
+    //const sortColumn = req.query.sortColumn; 
+    //const sortOrder = req.query.sortOrder; 
     const cacheKey = `inventory:${sellerId}:${page}:${limit}:${searchTerm}:${cardSet}:${cardYear}:${sport}:${cardColor}:${cardVariant}`;
 
     try {
@@ -88,7 +88,7 @@ router.get('/inventory', authenticateToken, async (req, res) => {
             values.push(cardVariant);
         }
 
-        let orderByClause = '';
+        /*let orderByClause = '';
         if (sortColumn && sortOrder) {
             // Ensure the sort column and order are valid to prevent SQL injection
             const validSortColumns = ['Sport', 'CardName', 'CardSet', 'CardYear', 'CardNumber', 'CardColor', 'CardVariant'];
@@ -99,13 +99,13 @@ router.get('/inventory', authenticateToken, async (req, res) => {
                 return res.status(400).send('Invalid sort parameters');
             }
         }
-
+*/
         let query = "SELECT * FROM Card";
         if (whereConditions.length) {
             query += " WHERE " + whereConditions.join(" AND ");
         }
 
-        query += orderByClause; // Apply the dynamic ORDER BY clause
+        //query += orderByClause; // Apply the dynamic ORDER BY clause
         query += " LIMIT ? OFFSET ?";
         values.push(limit, offset);
 

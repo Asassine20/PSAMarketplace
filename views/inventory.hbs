@@ -119,14 +119,14 @@
 
         <thead>
             <tr>
-                <th class="sortable" onclick="sortInventory('Sport')">Sport<span class="sort-icon">▼</span></th>
+                <th >Sport</th>
                 <th>Image</th>
-                <th class="sortable" onclick="sortInventory('CardName')">Name<span class="sort-icon">▼</span></th>
-                <th class="sortable" onclick="sortInventory('CardSet')">Set<span class="sort-icon">▼</span></th>
-                <th class="sortable" onclick="sortInventory('CardYear')">Year<span class="sort-icon">▼</span></th>
-                <th class="sortable" onclick="sortInventory('CardNumber')">Number<span class="sort-icon">▼</span></th>
-                <th class="sortable" onclick="sortInventory('CardColor')">Color<span class="sort-icon">▼</span></th>
-                <th class="sortable" onclick="sortInventory('CardVariant')">Variant<span class="sort-icon">▼</span></th>
+                <th >Name</th>
+                <th >Set</th>
+                <th >Year</th>
+                <th >Number</th>
+                <th >Color</th>
+                <th >Variant</th>
                 <th style="width:100px;"></th>
             </tr>
         </thead>
@@ -533,8 +533,8 @@
             cardYear: document.getElementById('cardYear').value,
             cardColor: document.getElementById('cardColor').value,
             cardVariant: document.getElementById('cardVariant').value,
-            sortColumn: currentSortColumn,
-            sortOrder: currentSortOrder
+            //sortColumn: currentSortColumn,
+            //sortOrder: currentSortOrder
         };
         console.log('Sending AJAX request with data:', data);
 
@@ -635,7 +635,7 @@
         // Update total items count
         document.getElementById('totalItems').textContent = `${totalItems} Results`;
     }
-
+/*
     let currentSortColumn = 'CardSet'; // Default sort column
     let currentSortOrder = 'asc'; // Default sort order
     function sortInventory(sortColumn) {
@@ -648,7 +648,7 @@
         currentSortColumn = sortColumn;
         loadDataWithFilters(); // Reload data with new sort settings
     }
-
+*/
     document.addEventListener('DOMContentLoaded', function() {
         // Load initial data
         loadDataWithFilters();
