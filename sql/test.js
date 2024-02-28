@@ -2,15 +2,13 @@ const db = require('../db'); // Ensure this is your promise-based connection mod
 
 async function cleanCardSetNames() {
     try {
-        // Fetch all CardCopy entries
+        // Set the lock wait timeout for the current session
+        await db.query("SET SESSION innodb_lock_wait_timeout = 120;"); // Sets timeout to 120 seconds
+
+        // Now, proceed with your DELETE operation
         const cards = await db.query(`
-        ALTER TABLE Card 
-        MODIFY Sport VARCHAR(20),
-        MODIFY CardSet VARCHAR(120),
-        MODIFY CardYear VARCHAR(7),
-        MODIFY CardColor VARCHAR(25),
-        MODIFY CardVariant VARCHAR(100);
-    `);
+            DELETE FROM Grade;
+        `);
         console.log('CardSet names in CardCopy table cleaned successfully.');
     } catch (error) {
         console.error('Failed to clean CardSet names in the CardCopy table:', error);
