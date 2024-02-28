@@ -50,55 +50,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Check if there's existing inventory to pre-fill the form -->
-                    {{#if existingInventory}}
+                    {{#each existingInventory}}
                     <tr>
                         <td>
-                            <img src="" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: none;">
+                            <img src="{{this.CardImage}}" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: block;">
                         </td>
                         <td>
                             <select name="gradeIds[]">
-                                {{#each grades}}
-                                <option value="{{this.gradeId}}">{{this.gradeValue}}</option>
+                                {{#each ../grades}}
+                                <option value="{{this.GradeID}}" {{#if (eq this.GradeID ../this.GradeID)}}selected{{/if}}>{{this.GradeValue}}</option>
                                 {{/each}}
                             </select>
                         </td>
                         <td>
-                            <!-- Market Price placeholder or dynamic content -->
+                            <!-- Market Price can be dynamically filled or left for manual entry -->
                         </td>
                         <td>
-                            <input type="text" name="salePrices[]" value="">
+                            <input type="text" name="salePrices[]" value="{{this.SalePrice}}">
                         </td>
                         <td>
-                            <input type="text" name="certNumbers[]" class="certNumberInput" value="">
+                            <input type="text" name="certNumbers[]" value="{{this.CertNumber}}">
                         </td>
                         <td>
-                            <button type="button" onclick="addRow()">+</button>
+                            <button type="button" onclick="removeRow(this)">-</button>
                         </td>
+                        <!-- Include hidden input for listingId/InventoryID -->
+                        <input type="hidden" name="listingIds[]" value="{{this.InventoryID}}">
                     </tr>
-                    {{else}}
-                        <td>
-                            <select name="gradeIds[]">
-                                {{#each grades}}
-                                <option value="{{this.gradeId}}">{{this.gradeValue}}</option>
-                                {{/each}}
-                            </select>
-                        </td>
-                        <td>
-                            <!-- Market Price placeholder or dynamic content -->
-                        </td>
-                        <td>
-                            <input type="text" name="salePrices[]" value="">
-                        </td>
-                        <td>
-                            <input type="text" name="certNumbers[]" value="">
-                        </td>
-                        <td>
-                            <button type="button" onclick="addRow()">+</button>
-                        </td>
-                    </tr>
-                    {{/if}}
+                    {{/each}}
+
                 </tbody>
+
             </table>
 
         </div>

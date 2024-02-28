@@ -550,31 +550,24 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     const sellerId = req.user.id;
 
     try {
-        // Fetch inventory items for the given CardID and SellerID
+        // Fetch all inventory items for the given CardID and SellerID
         const inventoryQuery = 'SELECT * FROM Inventory WHERE CardID = ? AND SellerID = ?';
         const inventoryItems = await db.query(inventoryQuery, [cardId, sellerId]);
-        
-        // Assuming you might have multiple inventory items for a card, you'll need to handle how you select/display these
-        let inventoryData = inventoryItems.length > 0 ? inventoryItems[0] : {};
-        
-        // Now, if there's inventory data, proceed to fetch the card details
+
+        // Fetch the card details
         const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
-        
-        // Fetch grade IDs for the card
+
+        // Fetch grade options
         const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
-        const gradeData = await db.query(gradeQuery, [cardId]);
-        const gradesWithIds = gradeData.map(gradeRow => ({
-            gradeValue: gradeRow.GradeValue,
-            gradeId: gradeRow.GradeID
-        }));
+        const grades = await db.query(gradeQuery, [cardId]);
+
 
         // Render the page with fetched data
         res.render('update_inventory', {
-            inventory: inventoryData, // existing inventory data
-            existingInventory: inventoryData, // additional key for pre-populating form
-            cardDetails: cardDetails.length > 0 ? {...cardDetails[0]} : {}, // Updated to include card details without scraped image
-            grades: gradesWithIds,
+            existingInventory: inventoryItems, // Pass the entire array of items
+            cardDetails: cardDetails.length > 0 ? cardDetails[0] : {},
+            grades: grades,
         });
 
     } catch (error) {
@@ -582,6 +575,7 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 
 // Function to get card data by cert number from the API
 async function getCardDataByCertNumber(certNumber, apiKey, accessToken) {
@@ -656,16 +650,17 @@ async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
 }
 
 router.post('/submit-inventory', authenticateToken, async (req, res) => {
-    const { cardId, listingId, gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
+    const { cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
     const sellerId = req.user.id;
-    const defaultImageUrl = '/images/defaultPSAImage.png'; // The default image URL set in the database
+    const defaultImageUrl = '/images/defaultPSAImage.png'; 
+
 
     try {
-        // Iterate over each row submitted
-        for (let index = 0; index < gradeIds.length; index++) {
-            const gradeId = gradeIds[index];
-            const salePrice = salePrices[index];
-            const certNumber = certNumbers[index];
+        for (let i = 0; i < gradeIds.length; i++) {
+            const listingId = listingIds[i];
+            const gradeId = gradeIds[i];
+            const salePrice = salePrices[i];
+            const certNumber = certNumbers[i];
 
             // Initialize imageURLs to null
             let frontImageUrl = null;
