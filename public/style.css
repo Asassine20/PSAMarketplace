@@ -361,7 +361,8 @@ th.sortable:hover {
 
 .shipping-box  .info-row div {
     font-size: 1.1em; /* Makes the text inside larger */
-    text-align: center;
+    text-align: left;
+    text-transform: uppercase;
 }
 .table-controls {
     display: flex;

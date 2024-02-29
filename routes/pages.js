@@ -808,27 +808,32 @@ router.get('/orders', authenticateToken, async (req, res) => {
 
 
 router.get('/order-details', authenticateToken, async (req, res) => {
-    const orderId = req.query.orderId;
+    const orderNumber = req.query.orderNumber; // Use ordernumber from query parameters
     try {
-        // Fetch order details
-        const orderDetails = await db.query('SELECT * FROM Orders WHERE OrderID = ?', [orderId]);
-        const orderItems = await db.query('SELECT * FROM OrderItems WHERE OrderID = ?', [orderId]);
-        const feedback = await db.query('SELECT * FROM Feedback WHERE OrderID = ?', [orderId]);
-        const shipping = await db.query('SELECT * FROM Shipping WHERE OrderID = ?', [orderId]);
+        // Adjust the query to fetch order details based on OrderNumber
+        const orderDetailsQuery = `
+            SELECT Orders.*, Users.Username
+            FROM Orders
+            JOIN Users ON Orders.BuyerID = Users.UserID
+            WHERE Orders.OrderNumber = ?  -- Use OrderNumber to match the order
+        `;
+        const orderDetails = await db.query(orderDetailsQuery, [orderNumber]); // Pass orderNumber to the query
+        const feedback = await db.query('SELECT * FROM Feedback WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
+        const shipping = await db.query('SELECT * FROM Shipping WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
+        // For Address, assuming you still need to fetch it based on OrderDetails as before
         const addressId = orderDetails[0].AddressID;
         const address = await db.query('SELECT * FROM Addresses WHERE AddressID = ?', [addressId]);
 
-        // Calculate the total price
+        // Adjust totalPrice query if necessary. This assumes OrderItems are still related by OrderID or equivalent
         const totalPriceResult = await db.query(
-            'SELECT SUM(Price * Quantity) AS TotalPrice FROM OrderItems WHERE OrderID = ?',
-            [orderId]
+            'SELECT SUM(Price * Quantity) AS TotalPrice FROM OrderItems WHERE OrderNumber = ?', // Adjust if necessary
+            [orderNumber]
         );
         const totalPrice = totalPriceResult[0].TotalPrice;
 
-        // Render the order details page with total price
+        // Render the order details page
         res.render('order-details', {
             order: orderDetails[0],
-            items: orderItems,
             totalPrice: totalPrice,
             feedback: feedback.length > 0 ? feedback[0] : null,
             shipping: shipping[0],

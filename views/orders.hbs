@@ -72,7 +72,7 @@
                 <td>{{formatDate OrderDate}}</td>
                 <td>{{ShipmentStatus}}</td>
                 <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Manage</button>
+                    <button type="button" onclick="window.location.href='/order-details?orderNumber=' + encodeURIComponent('{{OrderNumber}}')" class="table-button">Manage</button>
                 </td>
             </tr>
             {{/each}}

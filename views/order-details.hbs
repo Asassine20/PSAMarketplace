@@ -44,9 +44,9 @@
         <h4>Shipping Address</h4>
         <div class="info-row">
             <div>
+                {{order.Username}}<br>
                 {{address.Street}}<br>
-                {{address.City}}, {{address.State}} {{address.Zip}}<br>
-                {{address.Country}}
+                {{address.City}}, {{address.State}} {{address.ZipCode}}<br>
             </div>
         </div>
     </div>
@@ -121,8 +121,8 @@
     <div class="refund-cancel-box">
         <h4>Refund or Cancel</h4>
         <div style="text-align: center;">
-            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Refund</button>
-            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?orderId={{OrderID}}'" class="table-button">Cancel</button>
+            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Refund</button>
+            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Cancel</button>
         </div>
     </div>
 </div>
