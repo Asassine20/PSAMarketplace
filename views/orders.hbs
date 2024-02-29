@@ -68,7 +68,7 @@
             <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
                 <td>{{OrderNumber}}</td>
                 <td>{{Username}}</td>
-                <td>{{SalePrice}}</td>
+                <td>${{formatCurrency SalePrice}}</td>
                 <td>{{formatDate OrderDate}}</td>
                 <td>{{ShipmentStatus}}</td>
                 <td class="button-cell">

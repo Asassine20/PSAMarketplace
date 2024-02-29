@@ -51,10 +51,10 @@
         </div>
     </div>
     <div class="order-detail-box">
-        <h4>Transaction Details</h4>
+        <h4>Payment Details</h4>
         <div class="info-row">
             <div class="info-label">Product Amount:</div>
-            <div class="info-data">${{order.ProductAmount}}</div>
+            <div class="info-data">${{order.SalePrice}}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Shipping Cost:</div>
@@ -75,7 +75,7 @@
     </div>
 
     <div class="order-detail-box">
-        <h4>Shipping Information</h4>
+        <h4>Shipping Info</h4>
         <div class="info-row">
             <div class="info-label">Shipping Method:</div>
             <div class="info-data">{{displayShippingMethod shipping.ShippedWithTracking}}</div>

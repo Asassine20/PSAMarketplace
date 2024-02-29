@@ -102,3 +102,7 @@ hbs.registerHelper('surroundingPages', function(currentPage, options) {
 hbs.registerHelper('json', function(context) {
     return JSON.stringify(context);
 });
+
+hbs.registerHelper('formatCurrency', function(value) {
+    return value.toFixed(2);
+});

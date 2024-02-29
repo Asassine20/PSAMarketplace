@@ -763,20 +763,20 @@ router.get('/fetch-card-image', authenticateToken, async (req, res) => {
     }
 });
 
-
-
 router.get('/orders', authenticateToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
     const offset = (page - 1) * limit;
+    const sellerId = req.user.id;
 
     try {
-        // Updated query to include Orders.OrderNumber
+        // Updated query to filter orders by the authenticated user's SellerID
         const query = `
             SELECT Orders.OrderID, Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
             FROM Orders
             LEFT JOIN Users ON Orders.BuyerID = Users.UserID
             LEFT JOIN Shipping ON Orders.OrderID = Shipping.OrderID
+            WHERE Orders.SellerID = ?
             ORDER BY 
                 CASE 
                     WHEN Shipping.ShipmentStatus = 'Awaiting shipment' THEN 1
@@ -785,15 +785,16 @@ router.get('/orders', authenticateToken, async (req, res) => {
                 Orders.OrderDate DESC
             LIMIT ? OFFSET ?
         `;
-        const orders = await db.query(query, [limit, offset]);
+        // Include sellerId in the query parameters
+        const orders = await db.query(query, [sellerId, limit, offset]);
 
-        // Additional query to get the total count of orders remains the same
-        const countQuery = 'SELECT COUNT(*) AS totalOrders FROM Orders';
-        const totalResult = await db.query(countQuery);
+        // Update the count query to also filter by SellerID
+        const countQuery = 'SELECT COUNT(*) AS totalOrders FROM Orders WHERE SellerID = ?';
+        const totalResult = await db.query(countQuery, [sellerId]);
         const totalOrders = totalResult[0].totalOrders;
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Pass the orders data including OrderNumber to the template
+        // Pass the filtered orders data including OrderNumber to the template
         res.render('orders', {
             orders,
             totalOrders,
@@ -819,13 +820,6 @@ router.get('/order-details', authenticateToken, async (req, res) => {
             WHERE Orders.OrderNumber = ? 
         `;
         const orderDetails = await db.query(orderDetailsQuery, [orderNumber]); // Pass orderNumber to the query
-        console.log("OrderNumber:", orderNumber);
-        console.log("Order Details Result:", orderDetails);
-        if (orderDetails.length === 0) {
-            // No matching order found, handle accordingly
-            console.log(`No order found for OrderNumber: ${orderNumber}`);
-            return res.status(404).send('Order not found.');
-        }
 
         const feedback = await db.query('SELECT * FROM Feedback WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
         const shipping = await db.query('SELECT * FROM Shipping WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
@@ -845,42 +839,6 @@ router.get('/order-details', authenticateToken, async (req, res) => {
         res.status(500).send('Error fetching order details');
     }
 });
-
-async function updateOrderSalePrice(orderId, itemIds) {
-    try {
-        // Dynamically construct the placeholders for the IN clause based on the number of itemIds
-        const placeholders = itemIds.map(() => '?').join(', ');
-        
-        // Calculate the total price of specified items in the OrderItems table for the given OrderID
-        const query = `
-            SELECT SUM(Price * Quantity) AS TotalPrice 
-            FROM OrderItems 
-            WHERE OrderID = ? AND OrderItemID IN (${placeholders})
-        `;
-        
-        // Combine orderId and itemIds into a single array for query parameters
-        const queryParams = [orderId, ...itemIds];
-
-        const totalPriceResult = await db.query(query, queryParams);
-        const totalPrice = totalPriceResult[0].TotalPrice || 0; // Default to 0 if null
-
-        // Update the SalePrice in the Orders table
-        await db.query(
-            'UPDATE Orders SET SalePrice = ? WHERE OrderID = ?',
-            [totalPrice, orderId]
-        );
-        await updateOrderSalePrice(123, [4, 8, 9]);
-
-    } catch (error) {
-        console.error('Error updating order sale price for specific items:', error);
-        throw error;
-    }
-}
-// Update the sale price for OrderID 123 based on the total price of items with OrderItemID 4, 8, and 9
-
-
-
-
 
 router.get('/messages', authenticateToken, async (req, res) => {
     const userId = req.user.id;
