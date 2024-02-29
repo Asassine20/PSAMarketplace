@@ -57,8 +57,8 @@
                         </td>
                         <td>
                             <select name="gradeIds[]">
-                                {{#each ../grades}}
-                                <option value="{{this.GradeID}}" {{#if (eq this.GradeID ../this.GradeID)}}selected{{/if}}>{{this.GradeValue}}</option>
+                                {{#each grades}}
+                                <option value="{{this.GradeID}}">{{this.GradeValue}}</option>
                                 {{/each}}
                             </select>
                         </td>
@@ -78,22 +78,24 @@
                         <input type="hidden" name="listingIds[]" value="{{this.InventoryID}}">
                     </tr>
                     {{/each}}
-
                 </tbody>
-
             </table>
-
         </div>
     </div>
 
     <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
-    <input type="hidden" name="listingId" value="{{existingInventory.ListingID}}">
-    
+    <!-- Adjusted logic to avoid using array index directly -->
+    {{#with existingInventory.[0]}}
+    <input type="hidden" name="listingId" value="{{this.ListingID}}">
+    {{/with}}
+
     <div class="button-container">
         <button style="border-radius: 4px;" type="submit" name="clearInventory" value="true" class="clear-inventory-button">Clear Inventory</button>
-        <button style="border-radius: 4px;" type="submit">{{#if existingInventory.ListingID}}Update{{else}}Add{{/if}} Inventory</button>
+        <!-- Adjusted condition to check for any existingInventory -->
+        <button style="border-radius: 4px;" type="submit">{{#if existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
     </div>
 </form>
+
 <script>
     function addRow() {
         const tableBody = document.querySelector("#grades-table tbody");
@@ -147,6 +149,11 @@
         }
     }
     document.addEventListener("DOMContentLoaded", function() {
+        const hasRows = document.querySelector("#grades-table tbody").childElementCount > 0;
+        if (!hasRows) {
+            // Call addRow() function if no rows exist
+            addRow();
+        }
     // Listen for changes on the grades table to update card images in rows
     document.querySelector("#grades-table").addEventListener('change', async function(event) {
         if (event.target.classList.contains('certNumberInput')) {
@@ -199,10 +206,8 @@
         });
     });
 });
-
-
-
 </script>
+
 </body>
 
 </html>

@@ -561,6 +561,8 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         // Fetch grade options
         const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
         const grades = await db.query(gradeQuery, [cardId]);
+        console.log(grades); // This should log the grades array to verify its structure
+
 
 
         // Render the page with fetched data
