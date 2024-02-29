@@ -83,9 +83,8 @@
 
             </table>
             <div class="button-container">
-                <button style="border-radius: 4px;" type="submit" name="clearInventory" value="true" class="clear-inventory-button">Clear Inventory</button>
-                <!-- Adjusted condition to check for any existingInventory -->
-                <button style="border-radius: 4px;" type="submit">{{#if existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
+                <button type="submit" name="action" value="clearInventory" style="border-radius: 4px;" class="clear-inventory-button">Clear Inventory</button>
+                <button type="submit" name="action" value="updateInventory" style="border-radius: 4px;">{{#if existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
             </div>
         </div>
     </div>
