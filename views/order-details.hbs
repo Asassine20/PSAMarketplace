@@ -32,7 +32,7 @@
         </div>
         <div class="info-row">
             <div class="info-label">Status:</div>
-            <div class="info-data">{{order.Status}}</div>
+            <div class="info-data">{{shipping.ShipmentStatus}}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Order Date:</div>
@@ -58,11 +58,11 @@
         </div>
         <div class="info-row">
             <div class="info-label">Shipping Cost:</div>
-            <div class="info-data">${{order.ShippingCost}}</div>
+            <div class="info-data">${{order.ShippingPrice}}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Order Amount:</div>
-            <div class="info-data">${{order.OrderAmount}}</div>
+            <div class="info-data" style="font-weight: bold;">${{order.OrderAmount}}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Fee Amount:</div>
@@ -129,23 +129,27 @@
 
 
     <!-- Itemized List -->
-    <table>
+    <table >
         <thead>
             <tr>
-                <th>Listing ID</th>
+                <th>Card Details</th>
                 <th>Quantity</th>
                 <th>Price per Item</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody >
             {{#each items}}
             <tr>
-                <td>{{ListingID}}</td>
+                <td class="card-details">{{CardDetails}}</td>
                 <td>{{Quantity}}</td>
                 <td>${{Price}}</td>
             </tr>
             {{/each}}
         </tbody>
+        <tfoot>
+            <th colspan="2"> Total Price</th>
+            <th>${{order.SalePrice}}</th>
+        </tfoot>
     </table>
 
     <!-- Add more content or navigation as needed -->

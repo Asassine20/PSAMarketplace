@@ -25,7 +25,7 @@ nav li a {
 }
 
 nav li a:hover {
-    color: #0050a2;
+    color: #007bff;
     text-decoration: none;
 }
 
@@ -496,4 +496,8 @@ th.sortable:hover {
 .update-inventory-card-image {
     max-height: 800px;
     max-width: 425px;
+}
+
+.card-details {
+    color: #007bff;
 }

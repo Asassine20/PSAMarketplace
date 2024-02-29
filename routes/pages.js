@@ -820,6 +820,42 @@ router.get('/order-details', authenticateToken, async (req, res) => {
             WHERE Orders.OrderNumber = ? 
         `;
         const orderDetails = await db.query(orderDetailsQuery, [orderNumber]); // Pass orderNumber to the query
+        const orderItemsQuery = `
+            SELECT 
+                OrderItems.ListingID, 
+                OrderItems.Quantity, 
+                OrderItems.Price,
+                Card.Sport, 
+                Card.CardSet, 
+                Card.CardYear, 
+                Card.CardName, 
+                Card.CardColor, 
+                Card.CardVariant
+            FROM OrderItems
+            JOIN Orders ON OrderItems.OrderID = Orders.OrderID
+            LEFT JOIN Card ON OrderItems.CardID = Card.CardID
+            WHERE Orders.OrderNumber = ?
+        `;
+    
+    
+        const items = await db.query(orderItemsQuery, [orderNumber]);
+        console.log(items);
+        // Process each item to concatenate non-null card details
+        const processedItems = items.map(item => {
+            const cardDetailsParts = [
+                item.Sport,
+                item.CardSet,
+                item.CardYear,
+                item.CardName,
+                item.CardColor,
+                item.CardVariant
+            ].filter(part => part).join(' - '); // Join non-null parts with separator
+
+            return {
+                ...item, // Spread the existing item properties
+                CardDetails: cardDetailsParts // Override or add the CardDetails property
+            };
+        });
 
         const feedback = await db.query('SELECT * FROM Feedback WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
         const shipping = await db.query('SELECT * FROM Shipping WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
@@ -830,6 +866,7 @@ router.get('/order-details', authenticateToken, async (req, res) => {
         // Render the order details page
         res.render('order-details', {
             order: orderDetails[0],
+            items: processedItems,
             feedback: feedback.length > 0 ? feedback[0] : null,
             shipping: shipping[0],
             address: address[0]
