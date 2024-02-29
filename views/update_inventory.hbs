@@ -51,14 +51,15 @@
                 </thead>
                 <tbody>
                     {{#each existingInventory}}
-                    <tr>
+                    <tr data-listing-id="{{this.ListingID}}" data-front-image-url="{{this.FrontImageUrl}}">
                         <td>
-                            <img src="{{this.CardImage}}" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: block;">
+                            <!-- Use the CardImage if available, otherwise hide the image -->
+                            <img src="{{this.FrontImageURL}}" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: block;">
                         </td>
                         <td>
                             <select name="gradeIds[]">
-                                {{#each grades}}
-                                <option value="{{this.GradeID}}">{{this.GradeValue}}</option>
+                                {{#each ../grades}}
+                                <option value="{{this.GradeID}}" {{#if (eq this.GradeID ../this.GradeID)}}selected{{/if}}>{{this.GradeValue}}</option>
                                 {{/each}}
                             </select>
                         </td>
@@ -79,6 +80,7 @@
                     </tr>
                     {{/each}}
                 </tbody>
+
             </table>
             <div class="button-container">
                 <button style="border-radius: 4px;" type="submit" name="clearInventory" value="true" class="clear-inventory-button">Clear Inventory</button>
@@ -87,6 +89,9 @@
             </div>
         </div>
     </div>
+    <script>
+        var existingInventory = {{{json existingInventory}}};
+    </script>
 
     <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
     <!-- Adjusted logic to avoid using array index directly -->
@@ -96,6 +101,8 @@
 </form>
 
 <script>
+    console.log(existingInventory); // Temporarily log to verify structure
+
     function addRow() {
         const tableBody = document.querySelector("#grades-table tbody");
         const newRow = document.createElement("tr");
@@ -161,21 +168,32 @@
             const certNumber = event.target.value;
             const row = event.target.closest('tr');
             const imgElement = row.querySelector('.card-image');
-            
+            const frontImageUrl = row.getAttribute('data-front-image-url'); // Get embedded front image URL
+
+            // Hide image if certNumber is empty
             if (!certNumber) {
-                imgElement.style.display = 'none'; // Hide if certNumber is empty
+                imgElement.style.display = 'none';
                 return;
             }
 
+            // Use the existing FrontImageUrl if available and certNumber hasn't changed
+            if (frontImageUrl && frontImageUrl !== 'undefined') {
+                imgElement.src = frontImageUrl;
+                imgElement.alt = "Card Image";
+                imgElement.style.display = 'block';
+                return; // Skip the fetch if we already have an image URL
+            }
+
+            // Fetch new image from API if no existing FrontImageUrl
             try {
                 const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
                 const data = await response.json();
                 if (data.frontImageUrl) {
                     imgElement.src = data.frontImageUrl;
                     imgElement.alt = "Card Image";
-                    imgElement.style.display = 'block'; // Display the image
+                    imgElement.style.display = 'block';
                 } else {
-                    imgElement.style.display = 'none'; // Hide if no image is found
+                    imgElement.style.display = 'none';
                 }
             } catch (error) {
                 console.error('Error fetching image:', error);
@@ -183,6 +201,7 @@
             }
         }
     });
+
 
     // Add event listener to cert number input fields for the main card image
     document.querySelectorAll('input[name="certNumbers[]"]').forEach(input => {
