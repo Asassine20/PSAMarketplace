@@ -66,13 +66,13 @@
         <tbody>
             {{#each orders}}
             <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
-                <td>{{OrderID}}</td>
+                <td>{{OrderNumber}}</td>
                 <td>{{Username}}</td>
                 <td>{{SalePrice}}</td>
                 <td>{{formatDate OrderDate}}</td>
                 <td>{{ShipmentStatus}}</td>
                 <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/order-details?orderNumber=' + encodeURIComponent('{{OrderNumber}}')" class="table-button">Manage</button>
+                    <button type="button" onclick="window.location.href='/order-details?orderNumber=' + encodeURIComponent('{{this.OrderNumber}}')" class="table-button">Manage</button>
                 </td>
             </tr>
             {{/each}}

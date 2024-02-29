@@ -771,8 +771,9 @@ router.get('/orders', authenticateToken, async (req, res) => {
     const offset = (page - 1) * limit;
 
     try {
+        // Updated query to include Orders.OrderNumber
         const query = `
-            SELECT Orders.OrderID, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
+            SELECT Orders.OrderID, Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
             FROM Orders
             LEFT JOIN Users ON Orders.BuyerID = Users.UserID
             LEFT JOIN Shipping ON Orders.OrderID = Shipping.OrderID
@@ -786,12 +787,13 @@ router.get('/orders', authenticateToken, async (req, res) => {
         `;
         const orders = await db.query(query, [limit, offset]);
 
-        // Additional query to get the total count of orders
+        // Additional query to get the total count of orders remains the same
         const countQuery = 'SELECT COUNT(*) AS totalOrders FROM Orders';
         const totalResult = await db.query(countQuery);
         const totalOrders = totalResult[0].totalOrders;
         const totalPages = Math.ceil(totalOrders / limit);
 
+        // Pass the orders data including OrderNumber to the template
         res.render('orders', {
             orders,
             totalOrders,
@@ -806,35 +808,34 @@ router.get('/orders', authenticateToken, async (req, res) => {
 });
 
 
-
 router.get('/order-details', authenticateToken, async (req, res) => {
-    const orderNumber = req.query.orderNumber; // Use ordernumber from query parameters
+    const orderNumber = req.query.orderNumber; 
     try {
         // Adjust the query to fetch order details based on OrderNumber
         const orderDetailsQuery = `
             SELECT Orders.*, Users.Username
             FROM Orders
             JOIN Users ON Orders.BuyerID = Users.UserID
-            WHERE Orders.OrderNumber = ?  -- Use OrderNumber to match the order
+            WHERE Orders.OrderNumber = ? 
         `;
         const orderDetails = await db.query(orderDetailsQuery, [orderNumber]); // Pass orderNumber to the query
+        console.log("OrderNumber:", orderNumber);
+        console.log("Order Details Result:", orderDetails);
+        if (orderDetails.length === 0) {
+            // No matching order found, handle accordingly
+            console.log(`No order found for OrderNumber: ${orderNumber}`);
+            return res.status(404).send('Order not found.');
+        }
+
         const feedback = await db.query('SELECT * FROM Feedback WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
         const shipping = await db.query('SELECT * FROM Shipping WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
         // For Address, assuming you still need to fetch it based on OrderDetails as before
         const addressId = orderDetails[0].AddressID;
         const address = await db.query('SELECT * FROM Addresses WHERE AddressID = ?', [addressId]);
 
-        // Adjust totalPrice query if necessary. This assumes OrderItems are still related by OrderID or equivalent
-        const totalPriceResult = await db.query(
-            'SELECT SUM(Price * Quantity) AS TotalPrice FROM OrderItems WHERE OrderNumber = ?', // Adjust if necessary
-            [orderNumber]
-        );
-        const totalPrice = totalPriceResult[0].TotalPrice;
-
         // Render the order details page
         res.render('order-details', {
             order: orderDetails[0],
-            totalPrice: totalPrice,
             feedback: feedback.length > 0 ? feedback[0] : null,
             shipping: shipping[0],
             address: address[0]
@@ -844,6 +845,42 @@ router.get('/order-details', authenticateToken, async (req, res) => {
         res.status(500).send('Error fetching order details');
     }
 });
+
+async function updateOrderSalePrice(orderId, itemIds) {
+    try {
+        // Dynamically construct the placeholders for the IN clause based on the number of itemIds
+        const placeholders = itemIds.map(() => '?').join(', ');
+        
+        // Calculate the total price of specified items in the OrderItems table for the given OrderID
+        const query = `
+            SELECT SUM(Price * Quantity) AS TotalPrice 
+            FROM OrderItems 
+            WHERE OrderID = ? AND OrderItemID IN (${placeholders})
+        `;
+        
+        // Combine orderId and itemIds into a single array for query parameters
+        const queryParams = [orderId, ...itemIds];
+
+        const totalPriceResult = await db.query(query, queryParams);
+        const totalPrice = totalPriceResult[0].TotalPrice || 0; // Default to 0 if null
+
+        // Update the SalePrice in the Orders table
+        await db.query(
+            'UPDATE Orders SET SalePrice = ? WHERE OrderID = ?',
+            [totalPrice, orderId]
+        );
+        await updateOrderSalePrice(123, [4, 8, 9]);
+
+    } catch (error) {
+        console.error('Error updating order sale price for specific items:', error);
+        throw error;
+    }
+}
+// Update the sale price for OrderID 123 based on the total price of items with OrderItemID 4, 8, and 9
+
+
+
+
 
 router.get('/messages', authenticateToken, async (req, res) => {
     const userId = req.user.id;
