@@ -99,3 +99,6 @@ hbs.registerHelper('surroundingPages', function(currentPage, options) {
     return pages;
 });
 
+hbs.registerHelper('json', function(context) {
+    return JSON.stringify(context);
+});

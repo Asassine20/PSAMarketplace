@@ -578,6 +578,54 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
     }
 });
 
+router.post('/submit-inventory', authenticateToken, async (req, res) => {
+    const { cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
+    const sellerId = req.user.id;
+    const defaultImageUrl = '/images/defaultPSAImage.png'; 
+
+
+    try {
+        for (let i = 0; i < gradeIds.length; i++) {
+            const listingId = listingIds[i];
+            const gradeId = gradeIds[i];
+            const salePrice = salePrices[i];
+            const certNumber = certNumbers[i];
+
+            // Initialize imageURLs to null
+            let frontImageUrl = null;
+            let backImageUrl = null;
+
+            // If certNumber exists, fetch images
+            if (certNumber) {
+                const images = await getImagesByCertNumber(certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
+                frontImageUrl = images.frontImageUrl;
+                backImageUrl = images.backImageUrl;
+
+                // Update the CardImage in the Card table only if it's the default image
+                if (frontImageUrl && frontImageUrl !== defaultImageUrl) {
+                    await updateCardImage(cardId, frontImageUrl, defaultImageUrl); // Ensure this function is correctly implemented to only update if default
+                }
+            }
+
+            // Always update the Inventory item with the new image URLs, regardless of the current value
+            if (listingId) {
+                // Assuming listingId is an existing entry's identifier, update it
+                const updateQuery = 'UPDATE Inventory SET FrontImageUrl = ?, BackImageUrl = ? WHERE ListingID = ? AND CardID = ?';
+                await db.query(updateQuery, [frontImageUrl, backImageUrl, listingId, cardId]);
+            } else {
+                // Insert new inventory item with image URLs
+                const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
+                await db.query(insertQuery, [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId]);
+            }
+        }
+
+        res.redirect('/inventory');
+    } catch (err) {
+        console.error('Error processing inventory submission:', err);
+        res.status(500).send('Error processing inventory');
+    }
+});
+
 
 // Function to get card data by cert number from the API
 async function getCardDataByCertNumber(certNumber, apiKey, accessToken) {
@@ -650,54 +698,6 @@ async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
         throw error; // Rethrow the error to handle it further up the call stack
     }
 }
-
-router.post('/submit-inventory', authenticateToken, async (req, res) => {
-    const { cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
-    const sellerId = req.user.id;
-    const defaultImageUrl = '/images/defaultPSAImage.png'; 
-
-
-    try {
-        for (let i = 0; i < gradeIds.length; i++) {
-            const listingId = listingIds[i];
-            const gradeId = gradeIds[i];
-            const salePrice = salePrices[i];
-            const certNumber = certNumbers[i];
-
-            // Initialize imageURLs to null
-            let frontImageUrl = null;
-            let backImageUrl = null;
-
-            // If certNumber exists, fetch images
-            if (certNumber) {
-                const images = await getImagesByCertNumber(certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
-                frontImageUrl = images.frontImageUrl;
-                backImageUrl = images.backImageUrl;
-
-                // Update the CardImage in the Card table only if it's the default image
-                if (frontImageUrl && frontImageUrl !== defaultImageUrl) {
-                    await updateCardImage(cardId, frontImageUrl, defaultImageUrl); // Ensure this function is correctly implemented to only update if default
-                }
-            }
-
-            // Always update the Inventory item with the new image URLs, regardless of the current value
-            if (listingId) {
-                // Assuming listingId is an existing entry's identifier, update it
-                const updateQuery = 'UPDATE Inventory SET FrontImageUrl = ?, BackImageUrl = ? WHERE ListingID = ? AND CardID = ?';
-                await db.query(updateQuery, [frontImageUrl, backImageUrl, listingId, cardId]);
-            } else {
-                // Insert new inventory item with image URLs
-                const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
-                await db.query(insertQuery, [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId]);
-            }
-        }
-
-        res.redirect('/inventory');
-    } catch (err) {
-        console.error('Error processing inventory submission:', err);
-        res.status(500).send('Error processing inventory');
-    }
-});
 
 router.get('/quick-list-inventory', authenticateToken, async (req, res) => {
     try {
