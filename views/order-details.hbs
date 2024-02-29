@@ -78,11 +78,16 @@
         <h4>Shipping Info</h4>
         <div class="info-row">
             <div class="info-label">Shipping Method:</div>
-            <div class="info-data">{{displayShippingMethod shipping.ShippedWithTracking}}</div>
+            <div class="info-data">
+                <button id="shipWithoutTrackingBtn">Ship Without Tracking</button>
+            </div>
         </div>
-        <div class="info-row">
-            <div class="info-label">Tracking Number:</div>
-            <div class="info-data"><a href="{{shipping.CarrierTrackingURL}}" target="_blank">{{shipping.TrackingNumber}}</a></div>
+        <div class="info-row" id="trackingNumberInputRow">
+            <div class="info-label">Tracking Number</div>
+            <div class="info-data">
+                <input type="text" id="trackingNumberInput" placeholder="Tracking Number">
+                <button id="submitTrackingBtn">Save</button>
+            </div>
         </div>
         <div class="info-row">
             <div class="info-label">Shipment Date:</div>
@@ -119,10 +124,10 @@
     </div>
 
     <div class="refund-cancel-box">
-        <h4>Refund or Cancel</h4>
+        <h4>Refunds</h4>
         <div style="text-align: center;">
-            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Refund</button>
-            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Cancel</button>
+            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Partial Refund</button>
+            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Full Refund</button>
         </div>
     </div>
 </div>
@@ -152,6 +157,110 @@
         </tfoot>
     </table>
 
-    <!-- Add more content or navigation as needed -->
 </body>
+<script>
+    function detectCarrierAndGenerateTrackingInfo(trackingNumber) {
+        const uspsRegex = /^((94|93|92|94|95)\d{20}|(70|14|23|03)\d{14}|(M0|82)\d{8})$/;
+        const upsRegex = /^1Z[0-9A-Z]{16}$/;
+        const fedExRegex = /^[0-9]{12,14}$/;
+
+        let trackingInfo = {
+            carrier: "",
+            url: ""
+        };
+
+        if (uspsRegex.test(trackingNumber)) {
+            trackingInfo.carrier = "USPS";
+            trackingInfo.url = `https://tools.usps.com/go/TrackConfirmAction.action?tLabels=${trackingNumber}`;
+        } else if (upsRegex.test(trackingNumber)) {
+            trackingInfo.carrier = "UPS";
+            trackingInfo.url = `https://www.ups.com/track?tracknum=${trackingNumber}`;
+        } else if (fedExRegex.test(trackingNumber)) {
+            trackingInfo.carrier = "FedEx";
+            trackingInfo.url = `https://www.fedex.com/fedextrack/?tracknumbers=${trackingNumber}`;
+        } else {
+            console.log("Carrier not detected or unsupported tracking number format.");
+        }
+
+        return trackingInfo;
+    }
+
+
+    document.getElementById('shipWithoutTrackingBtn').addEventListener('click', function() {
+        const estimatedDeliveryDate = new Date();
+        estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 12); // Example: 12-15 days from now for no tracking
+
+        const data = {
+            orderNumber: window.location.search.split('=')[1], // Extract orderNumber from URL
+            ShippedWithTracking: false,
+            TrackingNumber: null,
+            EstimatedDeliveryDate: estimatedDeliveryDate.toISOString().split('T')[0],
+            Carrier: null,
+            CarrierTrackingURL: null,
+            ShipmentStatus: 'Shipped'
+        };
+
+        updateOrder(data);
+    });
+
+    document.getElementById('submitTrackingBtn').addEventListener('click', function() {
+        const trackingNumber = document.getElementById('trackingNumberInput').value;
+        if (!trackingNumber) {
+            alert('Please enter a tracking number or use "Ship Without Tracking".');
+            return;
+        }
+
+        const trackingInfo = detectCarrierAndGenerateTrackingInfo(trackingNumber);
+        const estimatedDeliveryDate = new Date();
+        estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 3); // Example: 3-7 days from now for tracking
+
+        const data = {
+            orderNumber: window.location.search.split('=')[1],
+            ShippedWithTracking: true,
+            TrackingNumber: trackingNumber,
+            EstimatedDeliveryDate: estimatedDeliveryDate.toISOString().split('T')[0],
+            Carrier: trackingInfo.carrier,
+            CarrierTrackingURL: trackingInfo.url,
+            ShipmentStatus: 'Shipped'
+        };
+
+        updateOrder(data);
+    });
+
+
+
+    // Function to send data to server
+    function updateOrder(data) {
+        // Inside your updateOrder function
+        fetch('/update-shipping-details', { // Updated path to match server-side
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+    // On page load or when the form is initialized
+    document.addEventListener('DOMContentLoaded', () => {
+        const trackingNumber = localStorage.getItem('trackingNumber');
+        if (trackingNumber) {
+            document.getElementById('trackingNumberInput').value = trackingNumber;
+            // Optionally, display the tracking number section
+            document.getElementById('trackingNumberRow').style.display = 'block';
+            document.getElementById('trackingNumberLink').textContent = trackingNumber;
+            // Update the tracking URL based on the stored tracking number
+            const trackingInfo = detectCarrierAndGenerateTrackingInfo(trackingNumber);
+            document.getElementById('trackingNumberLink').href = trackingInfo.url;
+        }
+    });
+
+
+</script>
 </html>

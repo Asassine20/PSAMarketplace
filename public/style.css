@@ -1,3 +1,6 @@
+body {
+    font-family: Arial, sans-serif;
+}
 nav {
     color: #9BA0AA;
     padding: 30px 60px;
@@ -501,3 +504,4 @@ th.sortable:hover {
 .card-details {
     color: #007bff;
 }
+

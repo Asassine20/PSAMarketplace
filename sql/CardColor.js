@@ -1,18 +1,34 @@
-const db = require('./db'); // Ensure this is your promise-based connection module
+const db = require('../db'); // Replace './db' with your database connection module path
 
-async function deleteAllGrades() {
-  try {
-    await db.query('SET SESSION innodb_lock_wait_timeout = 120');
-    const deleteQuery = 'DELETE FROM Grade';
+async function updateCardColors() {
+    try {
+        // Define the colors to search for
+        const colors = ['Gold', 'Red', 'Blue', 'Black', 'Cyan', 'Green', 'Purple', 'Silver', 'Orange', 'Platinum', 'Pink',
+      'Emerald', 'Bronze', 'Yellow', 'Ruby', 'Sapphire', 'Rainbow', 'Copper', 'White', 'Tiffany', 'Magenta', 'Aqua', 'Sepia', 'Black and White',
+    'Red White & Blue', 'Wood', 'Onyx', 'Clear', 'Cosmic', 'Neon', 'Diamond', 'Padparadscha', 'Tie-Dye', 'Lava', 'Nebula', 'Asia', 'Galactic' ];
 
-    // Execute the query
-    await db.query(deleteQuery);
+        // Fetch all cards excluding specific CardSport values
+        const cards = await db.query("SELECT CardID, CardSet FROM Card WHERE Sport NOT IN ('Pokemon (English)', 'Pokemon (Japan)')");
 
-    console.log('All records deleted from the Grade table successfully.');
-  } catch (error) {
-    console.error('Failed to delete records from the Grade table:', error);
-  }
+        // Iterate through each card and update the color if it matches
+        for (const card of cards) {
+            if (card.CardSet && colors.some(color => card.CardSet.toLowerCase().includes(color.toLowerCase()))) {
+                // If CardSet is not null and includes any color
+                for (const color of colors) {
+                    if (card.CardSet.toLowerCase().includes(color.toLowerCase())) {
+                        await db.query('UPDATE Card SET CardColor = ? WHERE CardID = ?', [color, card.CardID]);
+                        break; // Break out of the color loop once a match is found
+                    }
+                }
+            }
+        }
+
+        console.log('Card colors updated successfully.');
+    } catch (error) {
+        console.error('Error updating card colors:', error);
+    }
 }
 
-// Run the delete function
-deleteAllGrades();
+// Run the function
+updateCardColors();
+

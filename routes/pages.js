@@ -6,6 +6,8 @@ const redis = require('redis');
 const redisClient = redis.createClient();
 const axios = require('axios');
 redisClient.connect();
+router.use(express.json()); // This line is crucial
+
 
 router.use(express.urlencoded({ extended: true }));
 
@@ -876,6 +878,38 @@ router.get('/order-details', authenticateToken, async (req, res) => {
         res.status(500).send('Error fetching order details');
     }
 });
+
+router.post('/update-shipping-details', authenticateToken, async (req, res) => {
+    const { orderNumber, ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus } = req.body;
+
+    try {
+        // Correctly update the Shipping table based on the provided OrderNumber
+        const updateShippingQuery = `
+            UPDATE Shipping
+            JOIN Orders ON Shipping.OrderID = Orders.OrderID
+            SET 
+                Shipping.ShippedWithTracking = ?, 
+                Shipping.TrackingNumber = ?, 
+                Shipping.EstimatedDeliveryDate = ?, 
+                Shipping.Carrier = ?, 
+                Shipping.CarrierTrackingURL = ?, 
+                Shipping.ShipmentStatus = ?
+            WHERE Orders.OrderNumber = ?
+        `;
+        
+        // Execute the update query
+        const result = await db.query(updateShippingQuery, [ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus, orderNumber]);
+        console.log(result); // Log the result to see if the update was successful
+        
+        // Send a success response back to the client
+        res.json({ message: 'Shipping details updated successfully' });
+    } catch (error) {
+        console.error('Error updating shipping details:', error);
+        res.status(500).send('Error updating shipping details');
+    }
+});
+
+
 
 router.get('/messages', authenticateToken, async (req, res) => {
     const userId = req.user.id;
