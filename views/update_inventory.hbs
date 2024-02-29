@@ -82,6 +82,9 @@
                 </tbody>
 
             </table>
+            <div class="add-row-button-container">
+                <button type="button" onclick="addRow()" style="border-radius: 4px;">+ Add More</button>
+            </div>
             <div class="button-container">
                 <button type="submit" name="action" value="clearInventory" style="border-radius: 4px;" class="clear-inventory-button">Clear Inventory</button>
                 <button type="submit" name="action" value="updateInventory" style="border-radius: 4px;">{{#if existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
