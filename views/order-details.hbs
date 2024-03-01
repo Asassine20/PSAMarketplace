@@ -38,6 +38,13 @@
             <div class="info-label">Order Date:</div>
             <div class="info-data">{{formatDate order.OrderDate}}</div>
         </div>
+        <div class="info-row">
+            <div class="info-label">Contact Buyer:</div>
+            <div class="info-data">
+                <button class="table-button" id="contactBuyerBtn">Contact Buyer</button>
+            </div>
+        </div>
+
     </div>
 
     <div class="shipping-box">
@@ -79,14 +86,14 @@
         <div class="info-row">
             <div class="info-label">Shipping Method:</div>
             <div class="info-data">
-                <button id="shipWithoutTrackingBtn">Ship Without Tracking</button>
+                <button class="table-button" id="shipWithoutTrackingBtn">Ship Without Tracking</button>
             </div>
         </div>
         <div class="info-row" id="trackingNumberInputRow">
             <div class="info-label">Tracking Number</div>
             <div class="info-data">
                 <input type="text" id="trackingNumberInput" placeholder="Tracking Number">
-                <button id="submitTrackingBtn">Save</button>
+                <button class="table-button" id="submitTrackingBtn">Save</button>
             </div>
         </div>
         <div class="info-row">
@@ -200,8 +207,19 @@
             ShipmentStatus: 'Shipped'
         };
 
+        // Change the button color to indicate selection
+        this.style.backgroundColor = "#4CAF50"; // Example: green color for "active" or "selected"
+        this.style.color = "white"; // Change text color for better readability
+        this.disabled = true; // Optional: disable the button after selection
+
+        // Reset the tracking input field and button styles if they were previously used
+        document.getElementById('trackingNumberInput').value = '';
+        document.getElementById('submitTrackingBtn').style.backgroundColor = ""; // Reset to default style
+        document.getElementById('submitTrackingBtn').style.color = ""; // Reset to default text color
+
         updateOrder(data);
     });
+
 
     document.getElementById('submitTrackingBtn').addEventListener('click', function() {
         const trackingNumber = document.getElementById('trackingNumberInput').value;
@@ -259,6 +277,29 @@
             const trackingInfo = detectCarrierAndGenerateTrackingInfo(trackingNumber);
             document.getElementById('trackingNumberLink').href = trackingInfo.url;
         }
+    });
+
+    document.getElementById('contactBuyerBtn').addEventListener('click', function() {
+        const orderId = '{{order.OrderNumber}}'; // Make sure you have the order ID available
+        const buyerId = '{{order.BuyerID}}'; // Assume you have buyer ID
+        const sellerId = '{{user.id}}'; // Assume you have seller ID
+
+        fetch('/create-or-find-conversation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId, buyerId, sellerId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.conversationId) {
+                window.location.href = `/message-details/${data.conversationId}`; // Redirect to the conversation details page
+            } else {
+                alert('Failed to create or find conversation');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     });
 
 

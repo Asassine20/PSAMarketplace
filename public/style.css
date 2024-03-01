@@ -459,7 +459,7 @@ th.sortable:hover {
 .back-to-messages {
     display: inline-block; /* Adjust to inline-block for content width */
     margin-bottom: 20px; /* Adjust as needed */
-    background-color: #007bff; /* iOS Message Blue */
+    background-color: #eb1c2d; /* iOS Message Blue */
     color: white;
     padding: 10px 20px;
     border-radius: 20px;
@@ -467,6 +467,7 @@ th.sortable:hover {
     text-align: center;
     margin-left: auto; /* Aligns the button to the right */
     margin-right: auto; /* Centers the button when used with margin-left: auto */
+    margin-top: 10px;
 }
 
 .card-image {
@@ -505,3 +506,9 @@ th.sortable:hover {
     color: #007bff;
 }
 
+
+hr {
+    border-bottom: 1px solid #eee;
+    margin-top: 10px; /* Space above the line */
+    margin-bottom: 20px; /* Space below the line */
+}

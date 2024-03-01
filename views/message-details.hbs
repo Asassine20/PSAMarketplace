@@ -21,14 +21,12 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    <header>
-        <h1>Conversation Details</h1>
-    </header>
-
-    <a href="/messages" class="back-to-messages">Back to All Messages</a>
-
     <section class="conversation-subject">
         <h2>Subject: {{conversation.Subject}}</h2>
+        {{#if orderNumber}}
+            <h2>Order Number: <a href="/order-details?orderNumber={{orderNumber}}">{{orderNumber}}</a></h2>
+            <hr>
+        {{/if}}
     </section>
 
     <section class="messages-list">
@@ -36,11 +34,10 @@
             <article class="message {{#if this.isFromSeller}}seller-message{{else}}buyer-message{{/if}}">
                 <p>{{this.MessageText}}</p>
             </article>
-
-        {{else}}
-            <p>No messages found in this conversation.</p>
         {{/each}}
     </section>
+
+
     <div class="form-container">
         <form id="sendMessageForm" action="/send-message" method="POST" class="message-form">
             <input type="hidden" name="conversationId" value="{{conversationId}}">

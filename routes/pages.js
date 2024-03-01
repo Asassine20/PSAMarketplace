@@ -909,8 +909,6 @@ router.post('/update-shipping-details', authenticateToken, async (req, res) => {
     }
 });
 
-
-
 router.get('/messages', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
@@ -918,6 +916,12 @@ router.get('/messages', authenticateToken, async (req, res) => {
     const offset = (page - 1) * limit;
 
     try {
+        // Query to get the conversations count for the active user as a seller
+        const countQuery = `SELECT COUNT(*) AS conversationCount FROM Conversations WHERE SellerID = ?`;
+        const [countResult] = await db.query(countQuery, [userId]);
+        const conversationCount = Array.isArray(countResult) ? countResult[0].conversationCount : countResult.conversationCount;
+
+        // Query to get the latest messages and related data
         const latestMessagesQuery = `
             SELECT 
                 c.ConversationID,
@@ -944,8 +948,10 @@ router.get('/messages', authenticateToken, async (req, res) => {
 
         const conversations = await db.query(latestMessagesQuery, [userId, userId, limit, offset]);
 
+        // Pass the conversations count along with other data to the template
         res.render('messages', {
             conversationsWithMessages: conversations,
+            conversationCount: conversationCount,
             page: page,
             limit: limit
         });
@@ -958,41 +964,51 @@ router.get('/messages', authenticateToken, async (req, res) => {
 
 router.get('/message-details/:conversationId', authenticateToken, async (req, res) => {
     const conversationId = req.params.conversationId;
-    const sellerId = req.user.id; // Corrected typo from req.user,id to req.user.id
+    const userId = req.user.id;
 
     try {
-        // Fetch all messages within the specified conversation
-        const messagesQuery = `
-            SELECT Messages.MessageID, Messages.SenderID, Messages.MessageText, Messages.Timestamp, Users.Username AS SenderName
-            FROM Messages
-            JOIN Users ON Messages.SenderID = Users.UserID
-            WHERE Messages.ConversationID = ?
-            ORDER BY Messages.Timestamp ASC`;
-    
-        let messages = await db.query(messagesQuery, [conversationId]);
+        // Update the IsRead status for messages in the conversation
+        const updateQuery = `UPDATE Messages SET IsRead = 1 WHERE ConversationID = ? AND SenderID != ?`;
+        await db.query(updateQuery, [conversationId, userId]);
 
-        // Mark messages if they are from the seller
-        messages = messages.map(message => ({
-            ...message,
-            isFromSeller: message.SenderID === sellerId,
-        }));
+        // Fetch messages and conversation details, including OrderNumber, without inline comments
+        const conversationAndMessagesQuery = `
+            SELECT m.MessageID, m.SenderID, m.MessageText, m.Timestamp, u.Username AS SenderName,
+                   c.Subject, o.OrderNumber
+            FROM Messages m
+            JOIN Users u ON m.SenderID = u.UserID
+            JOIN Conversations c ON m.ConversationID = c.ConversationID
+            LEFT JOIN Orders o ON c.OrderID = o.OrderID
+            WHERE m.ConversationID = ?
+            ORDER BY m.Timestamp ASC`;
+
+        let messages = await db.query(conversationAndMessagesQuery, [conversationId]);
+
+        // Assuming OrderNumber is the same for all messages in a conversation
+        const orderNumber = messages.length > 0 ? messages[0].OrderNumber : null;
 
         // Optionally, fetch conversation subject for display
-        const conversationQuery = `SELECT Subject FROM Conversations WHERE ConversationID = ?`;
-        const [conversation] = await db.query(conversationQuery, [conversationId]);
+        const [conversation] = messages.length > 0 ? [{ Subject: messages[0].Subject }] : [{}];
 
-        // Pass the modified messages array to the template
+        // Pass the modified messages array and conversation details to the template
         res.render('message-details', {
-            sellerId,
+            userId,
             conversationId,
-            conversation,
-            messages
+            conversation: conversation,
+            orderNumber,
+            messages: messages.map(message => ({
+                ...message,
+                isFromSeller: message.SenderID === userId,
+            }))
         });
     } catch (error) {
         console.error('Error fetching conversation details:', error);
         res.status(500).send('Server error');
     }
 });
+
+
+
 
 router.post('/send-message', authenticateToken, async (req, res) => {
     const { conversationId, messageText } = req.body;
@@ -1022,6 +1038,39 @@ async function fetchBuyerIdFromConversation(conversationId) {
     const results = await db.query(query, [conversationId]);
     return results[0]; // Assuming there's always a valid result
 }
+
+router.post('/create-or-find-conversation', authenticateToken, async (req, res) => {
+    const { orderId, buyerId, subject: receivedSubject } = req.body;
+    const sellerId = req.user.id; // Assuming req.user is correctly populated from the token
+
+    // Validate or set the subject
+    // Assuming 'Item Never Arrived' as a default subject for demonstration
+    // Ensure receivedSubject is one of the ENUM values or fallback to a default
+    const allowedSubjects = ['General Message', 'Request To Cancel', 'Condition Issue', 'Item Never Arrived', 'Change Address', 'Items Missing', 'Received Wrong Item(s)'];
+    const subject = allowedSubjects.includes(receivedSubject) ? receivedSubject : 'General Message';
+
+    try {
+        // Check if a conversation already exists
+        let query = `SELECT ConversationID FROM Conversations WHERE OrderID = ? AND BuyerID = ? AND SellerID = ? LIMIT 1`;
+        let [existingConversation] = await db.query(query, [orderId, buyerId, sellerId]);
+
+        if (!existingConversation) {
+            // If no existing conversation, create a new one
+            query = `INSERT INTO Conversations (OrderNumber, SellerID, BuyerID, Subject) VALUES (?, ?, ?, ?)`;
+            const result = await db.query(query, [orderId, sellerId, buyerId, subject]);
+            const newConversationId = result.insertId;
+
+            res.json({ conversationId: newConversationId });
+        } else {
+            res.json({ conversationId: existingConversation.ConversationID });
+        }
+    } catch (error) {
+        console.error('Error creating or finding conversation:', error);
+        res.status(500).send('Error processing request');
+    }
+});
+
+
 
 
 
