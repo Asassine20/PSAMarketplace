@@ -27,12 +27,14 @@
     <div class="order-detail-box">
         <h4>Order Info</h4>
         <div class="info-row">
-            <div class="info-label">Order Number:</div>
-            <div class="info-data">{{order.OrderNumber}}</div>
+            <div class="info-label">Packing Slip:</div>
+            <div class="info-data">
+                <button class="table-button" id="downloadPackingSlipBtn" onclick="downloadPackingSlip()">Download Packing Slip</button>
+            </div>
         </div>
         <div class="info-row">
-            <div class="info-label">Status:</div>
-            <div class="info-data">{{shipping.ShipmentStatus}}</div>
+            <div class="info-label">Order Number:</div>
+            <div class="info-data">{{order.OrderNumber}}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Order Date:</div>
@@ -140,10 +142,8 @@
         </div>
     </div>
 </div>
-
-
-    <!-- Itemized List -->
-    <table >
+<!-- Itemized List -->
+    <table>
         <thead>
             <tr>
                 <th>Card Details</th>
@@ -202,7 +202,7 @@
             const shipWithoutTrackingBtn = document.getElementById('shipWithoutTrackingBtn');
             // Explicitly check for null or undefined to distinguish from false
             if (shipping && typeof shipping.ShippedWithTracking !== 'undefined' && shipping.ShippedWithTracking === false) {
-                shipWithoutTrackingBtn.style.backgroundColor = "#4CAF50";
+                shipWithoutTrackingBtn.style.backgroundColor = "#007bff";
                 shipWithoutTrackingBtn.style.color = "white";
                 shipWithoutTrackingBtn.disabled = true;
             } else {
@@ -262,7 +262,7 @@
             document.getElementById('shipWithoutTrackingBtn').style.backgroundColor = "";
             document.getElementById('shipWithoutTrackingBtn').disabled = false;
         } else {
-            document.getElementById('shipWithoutTrackingBtn').style.backgroundColor = "#4CAF50";
+            document.getElementById('shipWithoutTrackingBtn').style.backgroundColor = "#0056b3";
             document.getElementById('shipWithoutTrackingBtn').disabled = true;
             document.getElementById('trackingNumberInput').value = '';
         }

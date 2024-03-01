@@ -28,7 +28,7 @@ nav li a {
 }
 
 nav li a:hover {
-    color: #007bff;
+    color: #0056b3;
     text-decoration: none;
 }
 
@@ -215,12 +215,26 @@ caption {
 .table-button {
     background-color: #141414;
     color: white;
+    border: none;
     width: 100%; /* Makes the button expand to the full width of the cell */
     height: 30px; /* Sets a fixed height for the button */
     display: block; /* Allows margin: auto to center the button horizontally */
     margin: auto; /* Centers the button within the cell */
-    border-radius: 4px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
 }
+
+.table-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Styling for disabled buttons */
+.table-button:disabled {
+    background-color: #6c757d; /* Grayer color to look "disabled" */
+    color: #ccc; /* Dimmed text color */
+    box-shadow: none; /* No shadow to flatten the button visually */
+}
+
 
 th.sortable:hover {
     cursor: pointer;
@@ -277,7 +291,9 @@ th.sortable:hover {
     border: 1px solid #ccc;
     padding: 10px;
     padding-right: 4px; /* Increased right padding */
-    border-radius: 4px;
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 8px; /* Rounded corners for the bubble effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     flex: 0 0 33.3333%; 
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -292,6 +308,7 @@ th.sortable:hover {
     padding-bottom: 5px;
     border-bottom: 1px solid #eee;
     font-size: 1.2em;
+    font-weight: bold;
 }
 
 .order-detail-box p {
@@ -322,6 +339,7 @@ th.sortable:hover {
 .info-label {
     flex-basis: 40%; 
     padding-right: 10px;
+    font-weight: bold;
 }
 
 .info-data {
@@ -329,17 +347,30 @@ th.sortable:hover {
     text-align: left;
     padding-left: 5px;
 }
-
+/*
 .info-data input[type="text"] {
-    width: calc(100% - 100px); /* Adjust 100px based on the button width to leave space for the button */
-    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
-    margin-right: 10px; /* Optional: Adjust based on your layout to give some space between the input and button */
+    width: calc(100% - 100px);
+    box-sizing: border-box; 
+    margin-right: 10px;
+}
+*/
+
+/* Input field styling */
+input[type="text"]#trackingNumberInput {
+    padding: 5px; /* Input padding for better readability */
+    border-radius: 5px; /* Rounded corners for input fields */
+    border: 1px solid #ccc; /* Light border for inputs */
+    width: calc(100% - 20px); /* Full width taking padding and border into account */
+    margin-bottom: 5px;
+    box-sizing: border-box; /* Box sizing to ensure padding doesn't affect width */
 }
 
 .refund-cancel-box {
     border: 1px solid #ccc;
     padding: 10px;
-    border-radius: 4px;
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 8px; /* Rounded corners for the bubble effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);    
     flex: 0 0 33.3333%; 
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -347,11 +378,18 @@ th.sortable:hover {
     flex-direction: column;
     flex-grow: 1;
 }
+.refund-cancel-box h4 {
+    font-size: 1.2em; /* Example to make the header text larger */
+    font-weight: bold;
+}
+
 
 .shipping-box {
     border: 1px solid #ccc;
     padding: 10px;
-    border-radius: 4px;
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 8px; /* Rounded corners for the bubble effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);    
     flex: 0 0 33.3333%; 
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -363,6 +401,7 @@ th.sortable:hover {
 .shipping-box  h4 {
     /* Add any specific styles for the header if needed */
     font-size: 1.2em; /* Example to make the header text larger */
+    font-weight: bold;
 }
 
 .shipping-box  .info-row {
@@ -509,7 +548,7 @@ th.sortable:hover {
 }
 
 .card-details {
-    color: #007bff;
+    color: #0056b3;
 }
 
 
