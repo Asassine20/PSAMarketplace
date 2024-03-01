@@ -5,6 +5,7 @@ const db = require('../db');
 const redis = require('redis');
 const redisClient = redis.createClient();
 const axios = require('axios');
+const PDFDocument = require('pdfkit');
 redisClient.connect();
 router.use(express.json()); // This line is crucial
 
@@ -1040,6 +1041,53 @@ router.post('/create-or-find-conversation', authenticateToken, async (req, res) 
         console.error('Error creating or finding conversation:', error);
         res.status(500).send('Error processing request');
     }
+});
+
+async function getOrderDetails(orderNumber) {
+    // Simplified data structure for demonstration
+    return {
+        orderNumber: orderNumber,
+        date: new Date().toLocaleDateString(),
+        shippingAddress: '1234 Main St, Anytown, AN 12345',
+        items: [
+            { description: 'Item 1', quantity: 1, price: '10.00' },
+            { description: 'Item 2', quantity: 2, price: '20.00' }
+        ],
+        total: '50.00'
+    };
+}
+
+router.get('/generatePackingSlip', authenticateToken, async (req, res) => {
+    console.log('Start PDF generation:', new Date());
+
+    const { orderNumber } = req.query;
+
+    const orderDetails = await getOrderDetails(orderNumber);
+    if (!orderDetails) {
+        return res.status(404).send('Order not found');
+    }
+
+    const doc = new PDFDocument();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=packingSlip-${orderNumber}.pdf`);
+
+    // Simplified document content
+    doc.fontSize(16).text('Packing Slip', { align: 'center' });
+    doc.fontSize(12).moveDown();
+    doc.text(`Order Number: ${orderDetails.orderNumber}`);
+    doc.text(`Date: ${orderDetails.date}`);
+    doc.text(`Shipping Address: ${orderDetails.shippingAddress}`, { lineBreak: true });
+
+    // Simplify item listing without explicit table structure
+    orderDetails.items.forEach(item => {
+        doc.moveDown().text(`${item.description} - Quantity: ${item.quantity} - Price: $${item.price}`);
+    });
+
+    doc.moveDown().text(`Total: $${orderDetails.total}`, { align: 'right' });
+
+    doc.end();
+    console.log('End PDF generation:', new Date());
+
 });
 
 module.exports = router;

@@ -22,6 +22,7 @@
     "hbs": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
+    "pdfkit": "^0.14.0",
     "redis": "^4.6.12"
   },
   "devDependencies": {
