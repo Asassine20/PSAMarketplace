@@ -563,7 +563,6 @@ router.get('/update-inventory-pricing', authenticateToken, async (req, res) => {
         // Fetch grade options
         const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
         const grades = await db.query(gradeQuery, [cardId]);
-        console.log(grades); // This should log the grades array to verify its structure
 
 
 
@@ -702,7 +701,6 @@ async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
 
     try {
         const result = await db.query(query, values);
-        console.log(`Update result: ${result.affectedRows} rows affected.`);
         return result.affectedRows > 0; // Returns true if the row was updated, false otherwise
     } catch (error) {
         console.error('Error updating CardImage:', error);
@@ -731,9 +729,8 @@ router.get('/api/fetch-card-data', authenticateToken, async (req, res) => {
     }
 
     try {
-        console.log("Cert number:", req.query.certNumber);
         const cardData = await getCardDataByCertNumber(req.query.certNumber, process.env.PSA_API_KEY, process.env.PSA_ACCESS_TOKEN);
-        console.log("Card data:", cardData);        if (cardData) {
+        if (cardData) {
             res.json(cardData);
         } else {
             res.status(404).send({ error: 'Card data not found.' });
@@ -772,12 +769,11 @@ router.get('/orders', authenticateToken, async (req, res) => {
     const sellerId = req.user.id;
 
     try {
-        // Updated query to filter orders by the authenticated user's SellerID
         const query = `
-            SELECT Orders.OrderID, Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
+            SELECT Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
             FROM Orders
             LEFT JOIN Users ON Orders.BuyerID = Users.UserID
-            LEFT JOIN Shipping ON Orders.OrderID = Shipping.OrderID
+            LEFT JOIN Shipping ON Orders.OrderNumber = Shipping.OrderNumber
             WHERE Orders.SellerID = ?
             ORDER BY 
                 CASE 
@@ -787,16 +783,13 @@ router.get('/orders', authenticateToken, async (req, res) => {
                 Orders.OrderDate DESC
             LIMIT ? OFFSET ?
         `;
-        // Include sellerId in the query parameters
         const orders = await db.query(query, [sellerId, limit, offset]);
 
-        // Update the count query to also filter by SellerID
         const countQuery = 'SELECT COUNT(*) AS totalOrders FROM Orders WHERE SellerID = ?';
         const totalResult = await db.query(countQuery, [sellerId]);
         const totalOrders = totalResult[0].totalOrders;
         const totalPages = Math.ceil(totalOrders / limit);
 
-        // Pass the filtered orders data including OrderNumber to the template
         res.render('orders', {
             orders,
             totalOrders,
@@ -810,18 +803,17 @@ router.get('/orders', authenticateToken, async (req, res) => {
     }
 });
 
-
 router.get('/order-details', authenticateToken, async (req, res) => {
-    const orderNumber = req.query.orderNumber; 
+    const orderNumber = req.query.orderNumber;
     try {
-        // Adjust the query to fetch order details based on OrderNumber
         const orderDetailsQuery = `
             SELECT Orders.*, Users.Username
             FROM Orders
             JOIN Users ON Orders.BuyerID = Users.UserID
             WHERE Orders.OrderNumber = ? 
         `;
-        const orderDetails = await db.query(orderDetailsQuery, [orderNumber]); // Pass orderNumber to the query
+        const orderDetails = await db.query(orderDetailsQuery, [orderNumber]);
+
         const orderItemsQuery = `
             SELECT 
                 OrderItems.ListingID, 
@@ -834,15 +826,11 @@ router.get('/order-details', authenticateToken, async (req, res) => {
                 Card.CardColor, 
                 Card.CardVariant
             FROM OrderItems
-            JOIN Orders ON OrderItems.OrderID = Orders.OrderID
+            JOIN Orders ON OrderItems.OrderNumber = Orders.OrderNumber
             LEFT JOIN Card ON OrderItems.CardID = Card.CardID
             WHERE Orders.OrderNumber = ?
         `;
-    
-    
         const items = await db.query(orderItemsQuery, [orderNumber]);
-        console.log(items);
-        // Process each item to concatenate non-null card details
         const processedItems = items.map(item => {
             const cardDetailsParts = [
                 item.Sport,
@@ -851,27 +839,26 @@ router.get('/order-details', authenticateToken, async (req, res) => {
                 item.CardName,
                 item.CardColor,
                 item.CardVariant
-            ].filter(part => part).join(' - '); // Join non-null parts with separator
-
-            return {
-                ...item, // Spread the existing item properties
-                CardDetails: cardDetailsParts // Override or add the CardDetails property
-            };
+            ].filter(part => part).join(' - ');
+            return { ...item, CardDetails: cardDetailsParts };
         });
 
-        const feedback = await db.query('SELECT * FROM Feedback WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
-        const shipping = await db.query('SELECT * FROM Shipping WHERE OrderNumber = ?', [orderNumber]); // Adjust if necessary
-        // For Address, assuming you still need to fetch it based on OrderDetails as before
-        const addressId = orderDetails[0].AddressID;
-        const address = await db.query('SELECT * FROM Addresses WHERE AddressID = ?', [addressId]);
+        const feedbackQuery = 'SELECT * FROM Feedback WHERE OrderNumber = ?';
+        const feedback = await db.query(feedbackQuery, [orderNumber]);
 
-        // Render the order details page
+        const shippingQuery = 'SELECT * FROM Shipping WHERE OrderNumber = ?';
+        const shipping = await db.query(shippingQuery, [orderNumber]);
+
+        const addressId = orderDetails[0].AddressID;
+        const addressQuery = 'SELECT * FROM Addresses WHERE AddressID = ?';
+        const address = await db.query(addressQuery, [addressId]);
+
         res.render('order-details', {
             order: orderDetails[0],
             items: processedItems,
-            feedback: feedback.length > 0 ? feedback[0] : null,
-            shipping: shipping[0],
-            address: address[0]
+            feedback: feedback[0] ? feedback[0] : null,
+            shipping: shipping[0] ? shipping[0] : null,
+            address: address[0] ? address[0] : null
         });
     } catch (error) {
         console.error('Error fetching order details:', error);
@@ -883,10 +870,8 @@ router.post('/update-shipping-details', authenticateToken, async (req, res) => {
     const { orderNumber, ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus } = req.body;
 
     try {
-        // Correctly update the Shipping table based on the provided OrderNumber
         const updateShippingQuery = `
             UPDATE Shipping
-            JOIN Orders ON Shipping.OrderID = Orders.OrderID
             SET 
                 Shipping.ShippedWithTracking = ?, 
                 Shipping.TrackingNumber = ?, 
@@ -894,20 +879,19 @@ router.post('/update-shipping-details', authenticateToken, async (req, res) => {
                 Shipping.Carrier = ?, 
                 Shipping.CarrierTrackingURL = ?, 
                 Shipping.ShipmentStatus = ?
-            WHERE Orders.OrderNumber = ?
+            WHERE Shipping.OrderNumber = ?
         `;
         
-        // Execute the update query
         const result = await db.query(updateShippingQuery, [ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus, orderNumber]);
-        console.log(result); // Log the result to see if the update was successful
+        console.log(result);
         
-        // Send a success response back to the client
         res.json({ message: 'Shipping details updated successfully' });
     } catch (error) {
         console.error('Error updating shipping details:', error);
         res.status(500).send('Error updating shipping details');
     }
 });
+
 
 router.get('/messages', authenticateToken, async (req, res) => {
     const userId = req.user.id;
@@ -961,7 +945,6 @@ router.get('/messages', authenticateToken, async (req, res) => {
     }
 });
 
-
 router.get('/message-details/:conversationId', authenticateToken, async (req, res) => {
     const conversationId = req.params.conversationId;
     const userId = req.user.id;
@@ -971,26 +954,23 @@ router.get('/message-details/:conversationId', authenticateToken, async (req, re
         const updateQuery = `UPDATE Messages SET IsRead = 1 WHERE ConversationID = ? AND SenderID != ?`;
         await db.query(updateQuery, [conversationId, userId]);
 
-        // Fetch messages and conversation details, including OrderNumber, without inline comments
+        // Fetch messages and conversation details, including OrderNumber directly
         const conversationAndMessagesQuery = `
             SELECT m.MessageID, m.SenderID, m.MessageText, m.Timestamp, u.Username AS SenderName,
                    c.Subject, o.OrderNumber
             FROM Messages m
             JOIN Users u ON m.SenderID = u.UserID
             JOIN Conversations c ON m.ConversationID = c.ConversationID
-            LEFT JOIN Orders o ON c.OrderID = o.OrderID
+            LEFT JOIN Orders o ON c.OrderNumber = o.OrderNumber
             WHERE m.ConversationID = ?
             ORDER BY m.Timestamp ASC`;
 
         let messages = await db.query(conversationAndMessagesQuery, [conversationId]);
 
-        // Assuming OrderNumber is the same for all messages in a conversation
         const orderNumber = messages.length > 0 ? messages[0].OrderNumber : null;
 
-        // Optionally, fetch conversation subject for display
         const [conversation] = messages.length > 0 ? [{ Subject: messages[0].Subject }] : [{}];
 
-        // Pass the modified messages array and conversation details to the template
         res.render('message-details', {
             userId,
             conversationId,
@@ -1006,9 +986,6 @@ router.get('/message-details/:conversationId', authenticateToken, async (req, re
         res.status(500).send('Server error');
     }
 });
-
-
-
 
 router.post('/send-message', authenticateToken, async (req, res) => {
     const { conversationId, messageText } = req.body;
@@ -1040,24 +1017,19 @@ async function fetchBuyerIdFromConversation(conversationId) {
 }
 
 router.post('/create-or-find-conversation', authenticateToken, async (req, res) => {
-    const { orderId, buyerId, subject: receivedSubject } = req.body;
-    const sellerId = req.user.id; // Assuming req.user is correctly populated from the token
+    const { orderNumber, buyerId, subject: receivedSubject } = req.body;
+    const sellerId = req.user.id;
 
-    // Validate or set the subject
-    // Assuming 'Item Never Arrived' as a default subject for demonstration
-    // Ensure receivedSubject is one of the ENUM values or fallback to a default
     const allowedSubjects = ['General Message', 'Request To Cancel', 'Condition Issue', 'Item Never Arrived', 'Change Address', 'Items Missing', 'Received Wrong Item(s)'];
     const subject = allowedSubjects.includes(receivedSubject) ? receivedSubject : 'General Message';
 
     try {
-        // Check if a conversation already exists
-        let query = `SELECT ConversationID FROM Conversations WHERE OrderID = ? AND BuyerID = ? AND SellerID = ? LIMIT 1`;
-        let [existingConversation] = await db.query(query, [orderId, buyerId, sellerId]);
+        let query = `SELECT ConversationID FROM Conversations WHERE OrderNumber = ? AND BuyerID = ? AND SellerID = ? LIMIT 1`;
+        let [existingConversation] = await db.query(query, [orderNumber, buyerId, sellerId]);
 
         if (!existingConversation) {
-            // If no existing conversation, create a new one
             query = `INSERT INTO Conversations (OrderNumber, SellerID, BuyerID, Subject) VALUES (?, ?, ?, ?)`;
-            const result = await db.query(query, [orderId, sellerId, buyerId, subject]);
+            const result = await db.query(query, [orderNumber, sellerId, buyerId, subject]);
             const newConversationId = result.insertId;
 
             res.json({ conversationId: newConversationId });
@@ -1069,9 +1041,5 @@ router.post('/create-or-find-conversation', authenticateToken, async (req, res) 
         res.status(500).send('Error processing request');
     }
 });
-
-
-
-
 
 module.exports = router;

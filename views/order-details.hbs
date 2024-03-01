@@ -86,16 +86,18 @@
         <div class="info-row">
             <div class="info-label">Shipping Method:</div>
             <div class="info-data">
-                <button class="table-button" id="shipWithoutTrackingBtn">Ship Without Tracking</button>
+                <button class="table-button" id="shipWithoutTrackingBtn" {{#if shipping.ShippedWithTrackingIsDefined}} {{#unless shipping.ShippedWithTracking}}style="background-color: #4CAF50; color: white;" disabled{{/unless}} {{/if}}>Ship Without Tracking</button>
             </div>
         </div>
         <div class="info-row" id="trackingNumberInputRow">
             <div class="info-label">Tracking Number</div>
             <div class="info-data">
-                <input type="text" id="trackingNumberInput" placeholder="Tracking Number">
+                <input type="text" id="trackingNumberInput" placeholder="Tracking Number" value="{{shipping.TrackingNumber}}">
                 <button class="table-button" id="submitTrackingBtn">Save</button>
             </div>
         </div>
+
+
         <div class="info-row">
             <div class="info-label">Shipment Date:</div>
             <div class="info-data">{{formatDate shipping.ShipmentDate}}</div>
@@ -192,92 +194,80 @@
         return trackingInfo;
     }
 
+    document.addEventListener('DOMContentLoaded', () => {
+        const shippingDataElement = document.getElementById('shipping-data');
+        if (shippingDataElement) {
+            const shipping = JSON.parse(shippingDataElement.textContent);
+
+            const shipWithoutTrackingBtn = document.getElementById('shipWithoutTrackingBtn');
+            // Explicitly check for null or undefined to distinguish from false
+            if (shipping && typeof shipping.ShippedWithTracking !== 'undefined' && shipping.ShippedWithTracking === false) {
+                shipWithoutTrackingBtn.style.backgroundColor = "#4CAF50";
+                shipWithoutTrackingBtn.style.color = "white";
+                shipWithoutTrackingBtn.disabled = true;
+            } else {
+                // Ensure these settings are only reset if ShippedWithTracking is true, not if it's undefined or null
+                if (shipping && shipping.ShippedWithTracking === true) {
+                    shipWithoutTrackingBtn.style.backgroundColor = ""; // Reset to default style
+                    shipWithoutTrackingBtn.style.color = ""; // Reset to default color
+                    shipWithoutTrackingBtn.disabled = false; // Ensure button is enabled if not previously selected
+                }
+            }
+
+            if (shipping && shipping.TrackingNumber) {
+                document.getElementById('trackingNumberInput').value = shipping.TrackingNumber;
+                document.getElementById('trackingNumberInputRow').style.display = 'block';
+            } else {
+                document.getElementById('trackingNumberInputRow').style.display = 'none'; // Hide if no tracking number is set
+            }
+        }
+    });
+
+
 
     document.getElementById('shipWithoutTrackingBtn').addEventListener('click', function() {
-        const estimatedDeliveryDate = new Date();
-        estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 12); // Example: 12-15 days from now for no tracking
-
-        const data = {
-            orderNumber: window.location.search.split('=')[1], // Extract orderNumber from URL
-            ShippedWithTracking: false,
-            TrackingNumber: null,
-            EstimatedDeliveryDate: estimatedDeliveryDate.toISOString().split('T')[0],
-            Carrier: null,
-            CarrierTrackingURL: null,
-            ShipmentStatus: 'Shipped'
-        };
-
-        // Change the button color to indicate selection
-        this.style.backgroundColor = "#4CAF50"; // Example: green color for "active" or "selected"
-        this.style.color = "white"; // Change text color for better readability
-        this.disabled = true; // Optional: disable the button after selection
-
-        // Reset the tracking input field and button styles if they were previously used
-        document.getElementById('trackingNumberInput').value = '';
-        document.getElementById('submitTrackingBtn').style.backgroundColor = ""; // Reset to default style
-        document.getElementById('submitTrackingBtn').style.color = ""; // Reset to default text color
-
-        updateOrder(data);
+        updateShippingSelection(false);
     });
-
 
     document.getElementById('submitTrackingBtn').addEventListener('click', function() {
-        const trackingNumber = document.getElementById('trackingNumberInput').value;
-        if (!trackingNumber) {
-            alert('Please enter a tracking number or use "Ship Without Tracking".');
+        const trackingNumber = document.getElementById('trackingNumberInput').value.trim();
+        if (trackingNumber === '') {
+            alert('Please enter a tracking number.');
             return;
         }
-
-        const trackingInfo = detectCarrierAndGenerateTrackingInfo(trackingNumber);
-        const estimatedDeliveryDate = new Date();
-        estimatedDeliveryDate.setDate(estimatedDeliveryDate.getDate() + 3); // Example: 3-7 days from now for tracking
-
-        const data = {
-            orderNumber: window.location.search.split('=')[1],
-            ShippedWithTracking: true,
-            TrackingNumber: trackingNumber,
-            EstimatedDeliveryDate: estimatedDeliveryDate.toISOString().split('T')[0],
-            Carrier: trackingInfo.carrier,
-            CarrierTrackingURL: trackingInfo.url,
-            ShipmentStatus: 'Shipped'
-        };
-
-        updateOrder(data);
+        updateShippingSelection(true, trackingNumber);
     });
 
-
-
-    // Function to send data to server
     function updateOrder(data) {
-        // Inside your updateOrder function
-        fetch('/update-shipping-details', { // Updated path to match server-side
+        fetch('/update-shipping-details', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         })
         .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+        .then(data => console.log('Success:', data))
+        .catch((error) => console.error('Error:', error));
     }
-    // On page load or when the form is initialized
-    document.addEventListener('DOMContentLoaded', () => {
-        const trackingNumber = localStorage.getItem('trackingNumber');
-        if (trackingNumber) {
-            document.getElementById('trackingNumberInput').value = trackingNumber;
-            // Optionally, display the tracking number section
-            document.getElementById('trackingNumberRow').style.display = 'block';
-            document.getElementById('trackingNumberLink').textContent = trackingNumber;
-            // Update the tracking URL based on the stored tracking number
-            const trackingInfo = detectCarrierAndGenerateTrackingInfo(trackingNumber);
-            document.getElementById('trackingNumberLink').href = trackingInfo.url;
+
+    function updateShippingSelection(shippedWithTracking, trackingNumber = '') {
+        const data = {
+            orderNumber: window.location.search.split('=')[1],
+            ShippedWithTracking: shippedWithTracking,
+            TrackingNumber: trackingNumber,
+        };
+
+        updateOrder(data);
+
+        if (shippedWithTracking) {
+            document.getElementById('shipWithoutTrackingBtn').style.backgroundColor = "";
+            document.getElementById('shipWithoutTrackingBtn').disabled = false;
+        } else {
+            document.getElementById('shipWithoutTrackingBtn').style.backgroundColor = "#4CAF50";
+            document.getElementById('shipWithoutTrackingBtn').disabled = true;
+            document.getElementById('trackingNumberInput').value = '';
         }
-    });
+    }
+
 
     document.getElementById('contactBuyerBtn').addEventListener('click', function() {
         const orderId = '{{order.OrderNumber}}'; // Make sure you have the order ID available
