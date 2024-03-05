@@ -1098,7 +1098,7 @@ async function getOrderDetails(orderNumber) {
     }
 }
 
-router.get('/download-order', async (req, res) => {
+router.get('/download-order', authenticateToken, async (req, res) => {
     const orderNumber = req.query.orderNumber;
 
     try {
@@ -1185,9 +1185,79 @@ router.get('/download-order', async (req, res) => {
     }
 });
 
+router.get('/feedback', authenticateToken, async (req, res) => {
+    const userId = req.user.id; // Assuming `req.user` is set up by `authenticateToken` middleware
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 25;
+    const offset = (page - 1) * limit;
 
+    try {
+        // Count total feedback for pagination
+        const countQuery = `SELECT COUNT(*) AS feedbackCount FROM Feedback WHERE SellerID = ?`;
+        const [countResult] = await db.query(countQuery, [userId]);
+        const feedbackCount = Array.isArray(countResult) ? countResult[0].feedbackCount : countResult.feedbackCount;
 
+        // Fetch feedback details
+        const feedbackQuery = `
+            SELECT 
+                f.FeedbackID, 
+                f.SellerID, 
+                f.BuyerID, 
+                u.Username AS BuyerUsername, 
+                f.FeedbackText, 
+                f.Rating, 
+                f.FeedbackDate, 
+                f.OrderNumber,
+                o.OrderDate
+            FROM Feedback f
+            INNER JOIN Orders o ON f.OrderNumber = o.OrderNumber
+            INNER JOIN Users u ON f.BuyerID = u.UserID
+            WHERE f.SellerID = ?
+            ORDER BY f.FeedbackDate DESC
+            LIMIT ? OFFSET ?`;
+        const feedback = await db.query(feedbackQuery, [userId, limit, offset]);
 
+        // Now fetch feedback stats
+        const feedbackStats = await getFeedbackStats(userId);
+        console.log(JSON.stringify(feedbackStats, null, 2)); // Log feedbackStats to see its structure
 
+        // Render the feedback page with both feedback details and stats
+        res.render('feedback', {
+            feedback: feedback,
+            feedbackCount: feedbackCount,
+            currentPage: page,
+            limit: limit,
+            feedbackStats: feedbackStats // Include the feedback stats in the rendered page
+        });
+    } catch (error) {
+        console.error('Error fetching feedback:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+// Function to get feedback statistics with more readable intervals
+async function getFeedbackStats(sellerId) {
+    const intervals = [
+        { key: '30 Days', value: '30 DAY' },
+        { key: '90 Days', value: '90 DAY' },
+        { key: '365 Days', value: '365 DAY' },
+        { key: 'Lifetime', value: '10000 DAY' } // Using 'lifetime' as a more readable label
+    ];
+    const stats = {};
+
+    for (let interval of intervals) {
+        const query = `
+            SELECT
+                SUM(CASE WHEN Rating IN (4, 5) THEN 1 ELSE 0 END) AS Positive,
+                SUM(CASE WHEN Rating = 3 THEN 1 ELSE 0 END) AS Neutral,
+                SUM(CASE WHEN Rating IN (1, 2) THEN 1 ELSE 0 END) AS Negative
+            FROM Feedback
+            WHERE SellerID = ? AND FeedbackDate >= CURDATE() - INTERVAL ${interval.value}`;
+        const [result] = await db.query(query, [sellerId]);
+        stats[interval.key] = result[0]; // Using the more readable 'key' for intervals
+    }
+    return stats;
+
+}
 
 module.exports = router;
