@@ -292,35 +292,9 @@
         .catch(error => console.error('Error:', error));
     });
     function downloadPackingSlip(orderNumber) {
-        // Fetch the PDF as a blob
-        fetch(`/generatePackingSlip?orderNumber=${orderNumber}`, {
-            headers: {
-                'Accept': 'application/pdf'
-            }
-        })
-        .then(response => response.blob()) // Convert the response to a blob
-        .then(blob => {
-            // Create a URL for the blob
-            const url = window.URL.createObjectURL(blob);
-            // Create a new anchor element
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            // Set the download name
-            a.download = `packingSlip-${orderNumber}.pdf`;
-            // Append the anchor to the body
-            document.body.appendChild(a);
-            // Trigger the download
-            a.click();
-            // Clean up by removing the anchor and revoking the blob URL
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(error => console.error('Error downloading the packing slip:', error));
+        const url = `/download-order?orderNumber=${orderNumber}`;
+        window.location.href = url;
     }
-
-
-
 
 
 </script>

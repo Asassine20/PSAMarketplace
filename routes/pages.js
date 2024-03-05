@@ -1044,50 +1044,150 @@ router.post('/create-or-find-conversation', authenticateToken, async (req, res) 
 });
 
 async function getOrderDetails(orderNumber) {
-    // Simplified data structure for demonstration
-    return {
-        orderNumber: orderNumber,
-        date: new Date().toLocaleDateString(),
-        shippingAddress: '1234 Main St, Anytown, AN 12345',
-        items: [
-            { description: 'Item 1', quantity: 1, price: '10.00' },
-            { description: 'Item 2', quantity: 2, price: '20.00' }
-        ],
-        total: '50.00'
-    };
+    try {
+        // Fetch basic order details, including buyer and seller names
+        let orderSql = `
+            SELECT o.OrderNumber, o.OrderDate, o.SalePrice AS TotalPrice, 
+                   buyer.Username AS BuyerName, seller.Username AS SellerName,
+                   a.Street, a.City, a.State, a.ZipCode, a.Country
+            FROM Orders o
+            JOIN Users buyer ON o.BuyerID = buyer.UserID
+            JOIN Users seller ON o.SellerID = seller.UserID
+            JOIN Addresses a ON o.AddressID = a.AddressID
+            WHERE o.OrderNumber = ? AND a.IsPrimary = 1`;
+
+        const orderDetails = await db.query(orderSql, [orderNumber]);
+        if (orderDetails.length === 0) {
+            return null;
+        }
+
+        // Assuming the first result contains the main order details
+        const mainOrderDetails = orderDetails[0];
+
+        // Fetch details for each item in the order
+        let itemsSql = `
+            SELECT oi.Quantity, oi.Price, c.CardName, c.CardNumber, c.CardColor, 
+                   c.CardVariant, c.Sport, c.CardYear, c.CardSet
+            FROM OrderItems oi
+            JOIN Card c ON oi.CardID = c.CardID
+            WHERE oi.OrderNumber = ?`;
+
+        const itemsDetails = await db.query(itemsSql, [orderNumber]);
+
+        // Combine everything into a single object
+        const finalOrderDetails = {
+            orderNumber: mainOrderDetails.OrderNumber,
+            orderDate: mainOrderDetails.OrderDate,
+            totalPrice: mainOrderDetails.TotalPrice,
+            buyerName: mainOrderDetails.BuyerName,
+            sellerName: mainOrderDetails.SellerName,
+            shippingAddress: {
+                Street: mainOrderDetails.Street,
+                City: mainOrderDetails.City,
+                State: mainOrderDetails.State,
+                ZipCode: mainOrderDetails.ZipCode,
+                Country: mainOrderDetails.Country,
+                },            
+            items: itemsDetails
+        };
+
+        return finalOrderDetails;
+    } catch (error) {
+        console.error('Error fetching order details:', error);
+        throw error; // Rethrow the error or handle it as needed
+    }
 }
 
-router.get('/generatePackingSlip', authenticateToken, async (req, res) => {
-    console.log('Start PDF generation:', new Date());
+router.get('/download-order', async (req, res) => {
+    const orderNumber = req.query.orderNumber;
 
-    const { orderNumber } = req.query;
+    try {
+        const orderDetails = await getOrderDetails(orderNumber);
+        if (!orderDetails) {
+            return res.status(404).send('Order not found');
+        }
 
-    const orderDetails = await getOrderDetails(orderNumber);
-    if (!orderDetails) {
-        return res.status(404).send('Order not found');
+        const doc = new PDFDocument({ margin: 50 });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment;filename=packingSlip-${orderNumber}.pdf`);
+        doc.pipe(res);
+
+        const formatDate = (date) => {
+            return new Date(date).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+        };
+        doc.moveUp(1);
+
+        // Header
+        doc.fontSize(12).font('Helvetica-Bold').text('Ship To:');
+        doc.moveDown(0.5);
+        doc.fontSize(14).text(`${orderDetails.buyerName.toUpperCase()}`);
+        doc.text(`${orderDetails.shippingAddress.Street.toUpperCase()}`);
+        doc.text(`${orderDetails.shippingAddress.City.toUpperCase()}, ${orderDetails.shippingAddress.State.toUpperCase()}, ${orderDetails.shippingAddress.ZipCode.toUpperCase()}`);
+        //doc.text(`${orderDetails.shippingAddress.Country.toUpperCase()}`);
+        doc.moveDown(2);
+
+        // Order Details
+        doc.fontSize(12).font('Helvetica-Bold')
+           .text(`Order Number: ${orderDetails.orderNumber}`, 50)
+           .text(`Order Date: ${formatDate(orderDetails.orderDate)}`)
+           .text(`Seller Name: ${orderDetails.sellerName}`)
+           .moveDown(2);
+
+        // Items Table
+        const startX = doc.x;
+        let startY = doc.y;
+        const pageWidth = doc.page.width - 2 * doc.x; // Calculate page width based on current doc.x position
+        doc.fontSize(10);
+
+        // Define column positions based on your page layout
+        const quantityWidth = 50;
+        const descriptionWidth = pageWidth - 2 * quantityWidth - 2 * startX;
+        const priceWidth = quantityWidth;
+
+        // Table Headers
+        doc.font('Helvetica-Bold');
+        doc.text('Quantity', startX, startY, { width: quantityWidth, align: 'center' });
+        doc.text('Description', startX + quantityWidth, startY, { width: descriptionWidth, align: 'left' });
+        doc.text('Price', startX + quantityWidth + descriptionWidth, startY, { width: priceWidth, align: 'right' });
+        doc.text('Total', startX + quantityWidth + descriptionWidth + priceWidth, startY, { width: priceWidth, align: 'right' });
+        startY += 20;
+
+        // Reset font to normal for table entries
+        doc.font('Helvetica');
+        
+        // Loop through items and add them to the table
+        orderDetails.items.forEach(item => {
+            const itemTotalPrice = (item.Quantity * parseFloat(item.Price)).toFixed(2);
+            const cardDescription = `${item.CardName} ${item.CardNumber} ${item.CardColor || ''} ${item.CardVariant || ''} ${item.Sport} ${item.CardYear} ${item.CardSet}`.trim();
+            
+            // Check if the card description exceeds the description width and wrap it accordingly
+            const wrappedDescription = doc.widthOfString(cardDescription) > descriptionWidth
+                ? doc.splitTextToSize(cardDescription, descriptionWidth)
+                : cardDescription;
+
+            doc.text(item.Quantity, startX, startY, { width: quantityWidth, align: 'center' });
+            doc.text(wrappedDescription, startX + quantityWidth, startY, { width: descriptionWidth, align: 'left' });
+            doc.text(`$${item.Price}`, startX + quantityWidth + descriptionWidth, startY, { width: priceWidth, align: 'right' });
+            doc.text(`$${itemTotalPrice}`, startX + quantityWidth + descriptionWidth + priceWidth, startY, { width: priceWidth, align: 'right' });
+            startY += 20; // Increase Y position for each item
+        });
+
+        // Draw total price below all items
+        startY += 20; // Add a bit of space before the total
+        doc.text(`Total: $${orderDetails.totalPrice}`, startX + quantityWidth + descriptionWidth + priceWidth, startY, { width: priceWidth, align: 'right' });
+
+        doc.end();
+    } catch (error) {
+        console.error('Error during PDF generation:', error);
+        res.status(500).send('Internal Server Error');
     }
-
-    const doc = new PDFDocument();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=packingSlip-${orderNumber}.pdf`);
-
-    // Simplified document content
-    doc.fontSize(16).text('Packing Slip', { align: 'center' });
-    doc.fontSize(12).moveDown();
-    doc.text(`Order Number: ${orderDetails.orderNumber}`);
-    doc.text(`Date: ${orderDetails.date}`);
-    doc.text(`Shipping Address: ${orderDetails.shippingAddress}`, { lineBreak: true });
-
-    // Simplify item listing without explicit table structure
-    orderDetails.items.forEach(item => {
-        doc.moveDown().text(`${item.description} - Quantity: ${item.quantity} - Price: $${item.price}`);
-    });
-
-    doc.moveDown().text(`Total: $${orderDetails.total}`, { align: 'right' });
-
-    doc.end();
-    console.log('End PDF generation:', new Date());
-
 });
+
+
+
+
+
 
 module.exports = router;
