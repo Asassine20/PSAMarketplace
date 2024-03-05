@@ -905,6 +905,7 @@ router.get('/messages', authenticateToken, async (req, res) => {
         const countQuery = `SELECT COUNT(*) AS conversationCount FROM Conversations WHERE SellerID = ?`;
         const [countResult] = await db.query(countQuery, [userId]);
         const conversationCount = Array.isArray(countResult) ? countResult[0].conversationCount : countResult.conversationCount;
+        const totalPages = Math.ceil(conversationCount / limit);
 
         // Query to get the latest messages and related data
         const latestMessagesQuery = `
@@ -938,7 +939,8 @@ router.get('/messages', authenticateToken, async (req, res) => {
             conversationsWithMessages: conversations,
             conversationCount: conversationCount,
             page: page,
-            limit: limit
+            limit: limit,
+            totalPages: totalPages
         });
     } catch (error) {
         console.error('Error fetching conversations with latest messages:', error);
@@ -1186,16 +1188,18 @@ router.get('/download-order', authenticateToken, async (req, res) => {
 });
 
 router.get('/feedback', authenticateToken, async (req, res) => {
-    const userId = req.user.id; // Assuming `req.user` is set up by `authenticateToken` middleware
+    const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
     const offset = (page - 1) * limit;
 
     try {
         // Count total feedback for pagination
+
         const countQuery = `SELECT COUNT(*) AS feedbackCount FROM Feedback WHERE SellerID = ?`;
         const [countResult] = await db.query(countQuery, [userId]);
-        const feedbackCount = Array.isArray(countResult) ? countResult[0].feedbackCount : countResult.feedbackCount;
+        const feedbackCount = countResult.feedbackCount;
+        const totalPages = Math.ceil(feedbackCount / limit);
 
         // Fetch feedback details
         const feedbackQuery = `
@@ -1215,19 +1219,21 @@ router.get('/feedback', authenticateToken, async (req, res) => {
             WHERE f.SellerID = ?
             ORDER BY f.FeedbackDate DESC
             LIMIT ? OFFSET ?`;
-        const feedback = await db.query(feedbackQuery, [userId, limit, offset]);
+        const feedbackResults = await db.query(feedbackQuery, [userId, limit, offset]);
 
-        // Now fetch feedback stats
+        // Properly handling feedbackResults based on the structure it returns
+        // Assuming feedbackResults is structured as [rows, fields] or similar, depending on the library
+        const feedback = Array.isArray(feedbackResults) ? feedbackResults : feedbackResults[0];
+
         const feedbackStats = await getFeedbackStats(userId);
-        console.log(JSON.stringify(feedbackStats, null, 2)); // Log feedbackStats to see its structure
 
-        // Render the feedback page with both feedback details and stats
         res.render('feedback', {
             feedback: feedback,
             feedbackCount: feedbackCount,
-            currentPage: page,
+            page: page,
             limit: limit,
-            feedbackStats: feedbackStats // Include the feedback stats in the rendered page
+            feedbackStats: feedbackStats,
+            totalPages: totalPages
         });
     } catch (error) {
         console.error('Error fetching feedback:', error);
@@ -1235,29 +1241,35 @@ router.get('/feedback', authenticateToken, async (req, res) => {
     }
 });
 
-// Function to get feedback statistics with more readable intervals
-async function getFeedbackStats(sellerId) {
-    const intervals = [
-        { key: '30 Days', value: '30 DAY' },
-        { key: '90 Days', value: '90 DAY' },
-        { key: '365 Days', value: '365 DAY' },
-        { key: 'Lifetime', value: '10000 DAY' } // Using 'lifetime' as a more readable label
-    ];
-    const stats = {};
+const intervals = [
+    { key: '30 Days', value: '30 DAY' },
+    { key: '90 Days', value: '90 DAY' },
+    { key: '365 Days', value: '365 DAY' },
+    { key: 'Lifetime', value: '10000 DAY' } // Using 'lifetime' as a more readable label
+];
 
+async function getFeedbackStats(sellerId) {
+    const stats = {};
     for (let interval of intervals) {
-        const query = `
+        const queryString = `
             SELECT
-                SUM(CASE WHEN Rating IN (4, 5) THEN 1 ELSE 0 END) AS Positive,
-                SUM(CASE WHEN Rating = 3 THEN 1 ELSE 0 END) AS Neutral,
-                SUM(CASE WHEN Rating IN (1, 2) THEN 1 ELSE 0 END) AS Negative
+                SUM(CASE WHEN Rating IN (4, 5) THEN 1 ELSE 0 END) AS 'Positive',
+                SUM(CASE WHEN Rating = 3 THEN 1 ELSE 0 END) AS 'Neutral',
+                SUM(CASE WHEN Rating IN (1, 2) THEN 1 ELSE 0 END) AS 'Negative'
             FROM Feedback
             WHERE SellerID = ? AND FeedbackDate >= CURDATE() - INTERVAL ${interval.value}`;
-        const [result] = await db.query(query, [sellerId]);
-        stats[interval.key] = result[0]; // Using the more readable 'key' for intervals
+        const result = await db.query(queryString, [sellerId]);
+        // Ensuring we handle potentially undefined results correctly
+        const firstRow = result[0] ?? {};
+        stats[interval.key] = {
+            Positive: firstRow.Positive ?? 0,
+            Neutral: firstRow.Neutral ?? 0,
+            Negative: firstRow.Negative ?? 0
+        };
     }
     return stats;
-
 }
+
+
 
 module.exports = router;

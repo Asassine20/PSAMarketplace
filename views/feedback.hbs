@@ -23,26 +23,25 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    <h2>Feedback Statistics</h2>
-        <table>
-        <thead>
-            <tr>
-            <th>Period</th>
-            <th>Positive</th>
-            <th>Neutral</th>
-            <th>Negative</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each feedbackStats}}
-            <tr>
-                <td>{{@key}}</td>
-                <td>{{this.Positive}}</td>
-                <td>{{this.Neutral}}</td>
-                <td>{{this.Negative}}</td>
-            </tr>
-            {{/each}}
-        </tbody>
+        <table style="width: 30%; margin: 20px auto auto 65px;">
+            <thead>
+                <tr>
+                <th>Period</th>
+                <th style="color: green;">Positive</th>
+                <th style="color: grey;">Neutral</th>
+                <th style="color: red;">Negative</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each feedbackStats}}
+                <tr>
+                    <td>{{@key}}</td>
+                    <td>{{this.Positive}}</td>
+                    <td>{{this.Neutral}}</td>
+                    <td>{{this.Negative}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
         </table>
 
     <div class="table-container">
