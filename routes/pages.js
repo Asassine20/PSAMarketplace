@@ -40,23 +40,33 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
 
 
         // Correctly calculate total sales - Ensure this references the correct table
-        const salesSumQuery = `SELECT SUM(SalePrice) AS totalSales FROM Inventory WHERE SellerID = ?`; // Adjusted to 'Sales' table
+        const salesSumQuery = `SELECT SUM(SalePrice) AS totalValue FROM Inventory WHERE SellerID = ?`; // Adjusted to 'Sales' table
         const [salesSumResults] = await db.query(salesSumQuery, [userId]);
-        const totalSales = Number(salesSumResults.totalSales ?? 0);
+        const totalValue = Number(salesSumResults.totalValue ?? 0);
+
+        // New query to calculate total sales from Orders
+        const totalSalesQuery = `SELECT SUM(SalePrice) AS totalSales FROM Orders WHERE SellerID = ?`;
+        const [totalSalesResults] = await db.query(totalSalesQuery, [userId]);
+        const totalSales = Number(totalSalesResults.totalSales ?? 0);
+
+        // New query to fetch the user's DateCreated
+        const userDateCreatedQuery = `SELECT DateCreated FROM Users WHERE UserID = ?`;
+        const [userDateCreatedResults] = await db.query(userDateCreatedQuery, [userId]);
+        const userDateCreated = userDateCreatedResults.DateCreated ?? 'Not available';
 
         // Render the dashboard page with feedback stats, inventory count, and total sales
         res.render('dashboard', {
             feedbackStats: feedbackStats,
             inventoryCount: inventoryCount,
-            totalSales: totalSales
+            totalValue: totalValue,
+            totalSales: totalSales,
+            userDateCreated: userDateCreated
         });
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
         res.status(500).send('Server error');
     }
 });
-
-
 
 router.get('/logout', (req, res) => {
     res.clearCookie('jwt');

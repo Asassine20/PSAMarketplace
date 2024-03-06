@@ -44,14 +44,16 @@
         </div>
         <img src="https://d1htnxwo4o0jhw.cloudfront.net/cert/139361397/0pGBYXhSc0OTF50t_hBqIw.jpg" alt="Right Image" class="banner-image">
     </div>
-
-
     <div class="dashboard-container">
         <div class="inventory-bubble">
             <h2>Inventory Count</h2><hr class="h3-underline">
             <p>Total Inventory: {{inventoryCount}}</p>
             <h2>Total Value</h2><hr class="h3-underline">
-            <p>Total Inventory Value: ${{totalSales}}</p>
+            <p>Total Inventory Value: ${{totalValue}}</p>
+            <h2>Total Sales</h2><hr class="h3-underline">
+            <p>Total Sales Value: ${{totalSales}}</p>
+            <h2>Date Created</h2><hr class="h3-underline">
+            <p>Account Created On {{formatDate userDateCreated}}</p>
         </div>
         <div class="feedback-table">
             <table>
