@@ -14,9 +14,20 @@
         <ul>
             <li><a href="/dashboard">Home</a></li>
             <li><a href="/inventory">Inventory</a></li>
-            <li><a href="/quick-list-inventory">Quick-List</a></li>
-            <li><a href="/orders">Orders</a></li>
-            <li><a href="/messages">Messages</a></li>
+            <li>
+                <a href="/orders">Orders 
+                    {{#if ordersCount}}
+                        <span class="notification-bubble">{{ordersCount}}</span>
+                    {{/if}}
+                </a>
+            </li>
+            <li>
+                <a href="/messages">Messages 
+                    {{#if messagesCount}}
+                        <span class="notification-bubble">{{messagesCount}}</span>
+                    {{/if}}
+                </a>
+            </li>
             <li><a href="/feedback">Feedback</a></li>
             <li><a href="/dashboard">Payments</a></li>
             <li><a href="/dashboard">Reports</a></li>

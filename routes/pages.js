@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/middleware.js');
+const { authenticateToken, notificationCounts } = require('../middleware/middleware.js');
 const db = require('../db');
 const redis = require('redis');
 const redisClient = redis.createClient();
@@ -9,6 +9,7 @@ const PDFDocument = require('pdfkit');
 redisClient.connect();
 router.use(express.json()); // This line is crucial
 
+router.use(notificationCounts);
 
 router.use(express.urlencoded({ extended: true }));
 
