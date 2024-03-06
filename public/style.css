@@ -672,3 +672,34 @@ margin-top: 20px;
     font-size: 22px;
 }
 
+.help-list a {
+    text-decoration: none; /* Optional: removes underline from links */
+}
+
+
+.help-list ul {
+    font-size: 20px;
+}
+
+.help-list h3 {
+    text-align: center;
+}
+
+.help-list {
+    padding-left: 0; /* Removes default padding */
+    list-style-position: inside; /* Positions bullet points inside the list item area */
+}
+
+.help-list li {
+    display: list-item; /* Ensures list item styling is applied */
+    list-style-type: disc; /* Adds disc bullets back if removed by previous styles */
+}
+
+.h3-underline {
+    border: none;
+    height: 2px;
+    background-color: #000; /* Line color */
+    margin-top: 10px; /* Adjusts space above the line */
+    margin-bottom: 20px; /* Adjusts space below the line */
+    width: 100%; /* Adjusts line width, use % or px */
+}

@@ -36,9 +36,9 @@
 
     <div class="dashboard-container">
         <div class="inventory-bubble">
-            <h2>Inventory Count</h2>
+            <h2>Inventory Count</h2><hr class="h3-underline">
             <p>Total Inventory: {{inventoryCount}}</p>
-            <h2>Total Value</h2>
+            <h2>Total Value</h2><hr class="h3-underline">
             <p>Total Inventory Value: ${{totalSales}}</p>
         </div>
         <div class="feedback-table">
@@ -64,18 +64,28 @@
             </table>
         </div>
         <div class="inventory-bubble">
-            <h3>Seller Help</h3>
-            <ul class="help-list">
-                Selling
-                <li><a href="#">How To List Cards</a></li>
-                <li><a href="#">Using Certification Number For Images</a></li>
-                <li><a href="#">How To List Cards</a></li>
-
-            </ul>
-            <ul class="help-list">
-                Orders / Shipping
-
-            </ul>
+            <h3>Seller Help</h3><hr class="h3-underline">
+            <div class="help-section">
+                <h4>Selling</h4>
+                <ul class="help-list">
+                    <li><a href="#">How To List Cards</a></li>
+                    <li><a href="#">Using Certification Number For Images</a></li>
+                </ul>
+            </div>
+            <div class="help-section">
+                <h4>Orders / Shipping</h4>
+                <ul class="help-list">
+                    <li><a href="#">Managing Orders</a></li>
+                    <li><a href="#">Best Shipping Practices</a></li>
+                </ul>
+            </div>
+            <div class="help-section">
+                <h4>Payments / Fees</h4>
+                <ul class="help-list">
+                    <li><a href="#">Payments For Sales</a></li>
+                    <li><a href="#">Seller Fees</a></li>
+                </ul>
+            </div>        
         </div>
         </div>
 </body>

@@ -85,12 +85,6 @@
 
     <div class="order-detail-box">
         <h4>Shipping Info</h4>
-        <div class="info-row">
-            <div class="info-label">Shipping Method:</div>
-            <div class="info-data">
-                <button class="table-button" id="shipWithoutTrackingBtn" {{#if shipping.ShippedWithTrackingIsDefined}} {{#unless shipping.ShippedWithTracking}}style="background-color: #4CAF50; color: white;" disabled{{/unless}} {{/if}}>Ship Without Tracking</button>
-            </div>
-        </div>
         <div class="info-row" id="trackingNumberInputRow">
             <div class="info-label">Tracking Number</div>
             <div class="info-data">
@@ -199,21 +193,6 @@
         if (shippingDataElement) {
             const shipping = JSON.parse(shippingDataElement.textContent);
 
-            const shipWithoutTrackingBtn = document.getElementById('shipWithoutTrackingBtn');
-            // Explicitly check for null or undefined to distinguish from false
-            if (shipping && typeof shipping.ShippedWithTracking !== 'undefined' && shipping.ShippedWithTracking === false) {
-                shipWithoutTrackingBtn.style.backgroundColor = "#007bff";
-                shipWithoutTrackingBtn.style.color = "white";
-                shipWithoutTrackingBtn.disabled = true;
-            } else {
-                // Ensure these settings are only reset if ShippedWithTracking is true, not if it's undefined or null
-                if (shipping && shipping.ShippedWithTracking === true) {
-                    shipWithoutTrackingBtn.style.backgroundColor = ""; // Reset to default style
-                    shipWithoutTrackingBtn.style.color = ""; // Reset to default color
-                    shipWithoutTrackingBtn.disabled = false; // Ensure button is enabled if not previously selected
-                }
-            }
-
             if (shipping && shipping.TrackingNumber) {
                 document.getElementById('trackingNumberInput').value = shipping.TrackingNumber;
                 document.getElementById('trackingNumberInputRow').style.display = 'block';
@@ -221,12 +200,6 @@
                 document.getElementById('trackingNumberInputRow').style.display = 'none'; // Hide if no tracking number is set
             }
         }
-    });
-
-
-
-    document.getElementById('shipWithoutTrackingBtn').addEventListener('click', function() {
-        updateShippingSelection(false);
     });
 
     document.getElementById('submitTrackingBtn').addEventListener('click', function() {
@@ -237,7 +210,6 @@
         }
         updateShippingSelection(true, trackingNumber);
     });
-
     function updateOrder(data) {
         fetch('/update-shipping-details', {
             method: 'POST',
