@@ -33,19 +33,28 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
 
         // Fetch inventory count
         const inventoryQuery = `SELECT COUNT(*) AS inventoryCount FROM Inventory WHERE SellerID = ?`;
-        const [inventoryResult] = await db.query(inventoryQuery, [userId]);
-        const inventoryCount = inventoryResult[0]?.inventoryCount ?? 0;
+        // Assuming db.query returns an array of RowDataPacket objects as is standard
+        const [results] = await db.query(inventoryQuery, [userId]);
+        const inventoryCount = Number(results.inventoryCount ?? 0);
 
-        // Render the dashboard page with feedback stats and inventory count
+
+        // Correctly calculate total sales - Ensure this references the correct table
+        const salesSumQuery = `SELECT SUM(SalePrice) AS totalSales FROM Inventory WHERE SellerID = ?`; // Adjusted to 'Sales' table
+        const [salesSumResults] = await db.query(salesSumQuery, [userId]);
+        const totalSales = Number(salesSumResults.totalSales ?? 0);
+
+        // Render the dashboard page with feedback stats, inventory count, and total sales
         res.render('dashboard', {
             feedbackStats: feedbackStats,
-            inventoryCount: inventoryCount
+            inventoryCount: inventoryCount,
+            totalSales: totalSales
         });
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
         res.status(500).send('Server error');
     }
 });
+
 
 
 router.get('/logout', (req, res) => {
