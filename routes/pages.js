@@ -24,9 +24,29 @@ router.get('/login', (req, res) => {
     res.render('login')
 });
 
-router.get('/dashboard', authenticateToken, (req, res) => {
-    res.render('dashboard', { username: req.user.username });
+router.get('/dashboard', authenticateToken, async (req, res) => {
+    const userId = req.user.id; // Assuming authentication middleware sets req.user.id
+
+    try {
+        // Fetch feedback stats (reuse the getFeedbackStats function)
+        const feedbackStats = await getFeedbackStats(userId);
+
+        // Fetch inventory count
+        const inventoryQuery = `SELECT COUNT(*) AS inventoryCount FROM Inventory WHERE SellerID = ?`;
+        const [inventoryResult] = await db.query(inventoryQuery, [userId]);
+        const inventoryCount = inventoryResult[0]?.inventoryCount ?? 0;
+
+        // Render the dashboard page with feedback stats and inventory count
+        res.render('dashboard', {
+            feedbackStats: feedbackStats,
+            inventoryCount: inventoryCount
+        });
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        res.status(500).send('Server error');
+    }
 });
+
 
 router.get('/logout', (req, res) => {
     res.clearCookie('jwt');

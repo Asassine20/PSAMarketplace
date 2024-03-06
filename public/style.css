@@ -551,9 +551,80 @@ input[type="text"]#trackingNumberInput {
     color: #0056b3;
 }
 
-
 hr {
     border-bottom: 1px solid #eee;
     margin-top: 10px; /* Space above the line */
     margin-bottom: 20px; /* Space below the line */
 }
+
+.dashboard-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+  
+.inventory-bubble {
+padding: 20px;
+margin-right: 20px; /* Adjust spacing between the bubble and the table */
+background-color: #f0f0f0; /* Light grey background, feel free to adjust */
+border-radius: 10px; /* Gives the bubble effect */
+width: 200px; /* Adjust size as needed */
+}
+
+.feedback-table {
+width: 30%; /* Adjust based on your preference */
+margin-top: 20px;
+}
+.banner-container {
+    height: 400px;
+    width: 100%;
+    display: flex;
+    align-items: center; /* Vertically center the content */
+    justify-content: space-around; /* Evenly space the inner elements */
+    background-color: #0050a2; 
+    margin-bottom: 20px;
+    text-align: center; /* Ensure text is centered within its container */
+    color: white; /* Text color */
+}
+
+.banner-image {
+    max-height: 100%; /* Prevent the images from exceeding the banner's height */
+    width: auto; /* Maintain the images' aspect ratios */
+}
+
+.banner-text {
+    text-align: left;
+}
+
+.banner-text h1 {
+    font-size: 40px;
+    font-weight: bold;
+}
+.banner-text h2 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.text-content {
+    /* Styles for the text container if needed; for example: */
+    text-align: left;
+}
+
+
+.start-selling-button {
+    display: inline-block;
+    background-color: white; /* Button color */
+    color: black; /* Text color */
+    padding: 10px 20px; /* Button padding */
+    text-decoration: none; /* Remove underline from the link */
+    border-radius: 5px; /* Rounded corners */
+    font-weight: bold; /* Make the text bold */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    margin-top: 20px; /* Adds some space between the button and the headers above it */
+}
+
+.start-selling-button:hover {
+    background-color: #eb1c2d; /* Darker shade on hover */
+    color: white;
+}
+

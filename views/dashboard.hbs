@@ -23,141 +23,44 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    <h1>Seller Dashboard</h1>
-    <h1>Welcome {{username}}</h1>
-    <div class="charts-container">
-        <canvas id="feedbackChart"></canvas>
-        <canvas id="salesChart"></canvas>
-        <canvas id="inventoryChart"></canvas>
+    <div class="banner-container">
+        <img src="https://d1htnxwo4o0jhw.cloudfront.net/cert/127292720/357028721.jpg" alt="Left Image" class="banner-image">
+        <div class="banner-text">
+            <h1>Welcome To GemTCG</h1>
+            <h2>0 Seller Fees On All Sales</h2>
+            <a href="/inventory" class="start-selling-button">Start Selling</a>
+        </div>
+        <img src="https://d1htnxwo4o0jhw.cloudfront.net/cert/139361397/0pGBYXhSc0OTF50t_hBqIw.jpg" alt="Right Image" class="banner-image">
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        function getLast7Days() {
-            const result = [];
-            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                result.push(weekdays[d.getDay()]); 
-            }
-            return result;
-        }
 
-        const last7Days = getLast7Days();
+    <div class="dashboard-container">
+        <div class="inventory-bubble">
+            <h2>Inventory Count</h2>
+            <p>Total Inventory: {{inventoryCount}}</p>
+        </div>
 
-        const feedbackCtx = document.getElementById('feedbackChart').getContext('2d');
-        const feedbackChart = new Chart(feedbackCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Positive', 'Neutral', 'Negative'],
-                datasets: [{
-                    label: 'Feedback',
-                    data: [5,3,2],
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(54, 54, 54, 0.2)',
-                        'rgba(255, 99, 132, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(54, 54, 54, 1)',
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-        const salesCtx = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(salesCtx, {
-            type: 'bar',
-            data: {
-                labels: last7Days,
-                datasets: [{
-                    label: 'Sales',
-                    data: [5, 3, 2, 10, 8 , 2, 20],
-                    backgroundColor: [
-                        'rgba(0, 80, 162, 0.2)',
-                        'rgba(0, 80, 162, 0.2)',
-                        'rgba(0, 80, 162, 0.2)',
-                        'rgba(0, 80, 162, 0.2)',
-                        'rgba(0, 80, 162, 0.2)',
-                        'rgba(0, 80, 162, 0.2)',
-                    ],
-                    borderColor: [
-                        'rgba(0, 80, 162, 1)',
-                        'rgba(0, 80, 162, 1)',
-                        'rgba(0, 80, 162, 1)',
-                        'rgba(0, 80, 162, 1)',
-                        'rgba(0, 80, 162, 1)',
-                        'rgba(0, 80, 162, 1)',
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value, index, values) {
-                                return '$' + value.toFixed(2);
-                            },
-                        }, 
-                        beginAtZero: true
-                    }
-                },
-                tooltips: { 
-                    callbacks: {
-                        label: function(tooltipItem, data) {
-                            return data.datasets[tooltipItem.datasetIndex].label + ': $' + tooltipItem.yLabel.toFixed(2);
-                        }
-                    }
-                },
-            }
-        });
-
-        const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
-        const inventoryChart = new Chart(inventoryCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Positive', 'Neutral', 'Negative'],
-                datasets: [{
-                    label: 'Inventory',
-                    data: [5,3,2],
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(54, 54, 54, 0.2)',
-                        'rgba(255, 99, 132, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(54, 54, 54, 1)',
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-        
-    </script>
+        <div class="feedback-table">
+            <table>
+            <thead>
+                <tr>
+                <th>Period</th>
+                <th style="color: green;">Positive</th>
+                <th style="color: grey;">Neutral</th>
+                <th style="color: red;">Negative</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each feedbackStats}}
+                <tr>
+                    <td>{{@key}}</td>
+                    <td>{{this.Positive}}</td>
+                    <td>{{this.Neutral}}</td>
+                    <td>{{this.Negative}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+            </table>
+        </div>
+        </div>
 </body>
