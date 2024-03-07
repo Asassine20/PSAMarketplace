@@ -210,7 +210,7 @@ caption {
 }
 
 .table-button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
+    background-color: #9ba0aa;
 }
 
 /* Styling for disabled buttons */
@@ -712,4 +712,8 @@ margin-top: 20px;
     margin-top: 10px; /* Adjusts space above the line */
     margin-bottom: 20px; /* Adjusts space below the line */
     width: 100%; /* Adjusts line width, use % or px */
+}
+
+.orders-orderNumber td a {
+    text-decoration: none;
 }

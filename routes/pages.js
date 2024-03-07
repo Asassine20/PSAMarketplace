@@ -945,12 +945,12 @@ router.get('/admin/messages', authenticateToken, notificationCounts, async (req,
         const conversationCount = Array.isArray(countResult) ? countResult[0].conversationCount : countResult.conversationCount;
         const totalPages = Math.ceil(conversationCount / limit);
 
-        // Query to get the latest messages and related data
+        // Query to get the latest messages and related data, including OrderNumber instead of LatestMessageID
         const latestMessagesQuery = `
             SELECT 
                 c.ConversationID,
                 c.Subject,
-                lm.LatestMessageID,
+                c.OrderNumber,  
                 m.SenderID,
                 u.Username AS SenderName,
                 m.MessageText,
@@ -985,6 +985,7 @@ router.get('/admin/messages', authenticateToken, notificationCounts, async (req,
         res.status(500).send('Server error');
     }
 });
+
 
 router.get('/admin/message-details/:conversationId', authenticateToken, notificationCounts, async (req, res) => {
     const conversationId = req.params.conversationId;
@@ -1314,8 +1315,8 @@ router.get('/admin/payments', authenticateToken, notificationCounts, async (req,
     try {
         const query = `
             SELECT 
-                DATE_FORMAT(MIN(OrderDate), '%Y-%m-%d') AS WeekStartDate,
-                DATE_FORMAT(MAX(OrderDate) + INTERVAL 6 DAY, '%Y-%m-%d') AS WeekEndDate,
+                DATE_FORMAT(MIN(OrderDate), '%m/%d/%Y') AS WeekStartDate,
+                DATE_FORMAT(MAX(OrderDate) + INTERVAL 6 DAY, '%m/%d/%Y') AS WeekEndDate,
                 SUM(SalePrice) AS TotalSalePrice,
                 SUM(ShippingPrice) AS TotalShippingPrice,
                 SUM(OrderAmount) AS TotalOrderAmount,

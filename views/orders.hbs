@@ -66,7 +66,7 @@
     <table style="margin-top: 20px;">
         <thead>
             <tr>
-                <th>Order #</th>
+                <th>Order Number</th>
                 <th>Buyer Name</th>
                 <th>Sale Price</th>
                 <th>Order Date</th>
@@ -74,18 +74,20 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="orders-orderNumber">
             {{#each orders}}
-            <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
-                <td>{{OrderNumber}}</td>
-                <td>{{Username}}</td>
-                <td>${{formatCurrency SalePrice}}</td>
-                <td>{{formatDate OrderDate}}</td>
-                <td>{{ShipmentStatus}}</td>
-                <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{this.OrderNumber}}')" class="table-button">Manage</button>
-                </td>
-            </tr>
+                <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
+                    <td >
+                        <a href="#" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{OrderNumber}}'); return false;" class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">{{OrderNumber}}</a>
+                    </td>
+                    <td>{{Username}}</td>
+                    <td>${{formatCurrency SalePrice}}</td>
+                    <td>{{formatDate OrderDate}}</td>
+                    <td>{{ShipmentStatus}}</td>
+                    <td class="button-cell">
+                        <button type="button" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{this.OrderNumber}}')" class="table-button">Manage</button>
+                    </td>
+                </tr>
             {{/each}}
         </tbody>
     </table>

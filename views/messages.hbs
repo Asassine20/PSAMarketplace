@@ -60,26 +60,29 @@
         <table style="margin-top: 20px;">
             <thead>
                 <tr>
-                    <th>Message ID</th>
-                    <th>Sender</th>
+                    <th>Order Number</th>
+                    <th>Buyer</th>
                     <th>Subject</th>
                     <th>Date</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                {{#each conversationsWithMessages as |conversation|}}
-                <tr class="{{#if (eq conversation.IsRead 0)}}in-stock{{/if}}">
-                    <td>{{conversation.LatestMessageID}}</td>
-                    <td>{{conversation.SenderName}}</td>
-                    <td>{{conversation.Subject}}</td>
-                    <td>{{formatDate conversation.Timestamp}}</td>
-                    <td class="button-cell">
-                        <button type="button" onclick="window.location.href='/admin/message-details/{{conversation.ConversationID}}'" class="table-button">View Conversation</button>
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
+        <tbody class="orders-orderNumber">
+            {{#each conversationsWithMessages as |conversation|}}
+            <tr class="{{#if (eq conversation.IsRead 0)}}in-stock{{/if}}">
+                <td>
+                    <a href="/admin/message-details/{{conversation.ConversationID}}" class="{{#if (eq conversation.IsRead 0)}}in-stock{{/if}}">{{conversation.OrderNumber}}</a>
+                </td>
+                <td>{{conversation.SenderName}}</td>
+                <td>{{conversation.Subject}}</td>
+                <td>{{formatDate conversation.Timestamp}}</td>
+                <td class="button-cell">
+                    <button type="button" onclick="window.location.href='/admin/message-details/{{conversation.ConversationID}}'" class="table-button">View Conversation</button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+
         </table>
     </div>
 

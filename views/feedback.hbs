@@ -78,7 +78,7 @@
             </div>
         </div>
         <h4 style="padding-left: 60px;">{{feedbackCount}} Total Feedback</h4>
-        <table style="margin-top: 20px;">
+        <table class="orders-orderNumber" style="margin-top: 20px;">
             <thead>
                 <tr>
                     <th>Order Number</th>
@@ -86,20 +86,18 @@
                     <th>Rating</th>
                     <th>Feedback</th>
                     <th>Buyer ID</th>
-                    
-                    
                 </tr>
             </thead>
             <tbody>
                 {{#each feedback as |fb|}}
                 <tr>
-                    <td>{{fb.OrderNumber}}</td>
+                    <td>
+                        <a href="/admin/order-details?orderNumber={{fb.OrderNumber}}">{{fb.OrderNumber}}</a>
+                    </td>
                     <td>{{formatDate fb.OrderDate}}</td>
                     <td>{{fb.Rating}}</td>
                     <td>{{fb.FeedbackText}}</td>
                     <td>{{fb.BuyerUsername}}</td>
-                    
-                    
                 </tr>
                 {{/each}}
             </tbody>
