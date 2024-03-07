@@ -23,9 +23,11 @@ server.use(express.urlencoded({ extended: true }));
 
 // Parse JSON bodies (as sent by API clients)
 server.use(express.json());
+server.use(authRoutes);
 
 //Define routes
 server.use('/', require('./routes/pages'));
+
 server.use('/auth', require('./routes/auth'));
 
 server.use('/', inventoryRoutes);
@@ -106,3 +108,5 @@ hbs.registerHelper('json', function(context) {
 hbs.registerHelper('formatCurrency', function(value) {
     return value.toFixed(2);
 });
+
+hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views');

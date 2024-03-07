@@ -19,6 +19,36 @@ router.get('/register', (req, res) => {
     res.render('register')
 });
 
+router.get('/register/seller-info', (req, res) => {
+    res.render('seller-info');
+});
+
+router.post('/check-store-name', async (req, res) => {
+    const { storeName } = req.body;
+
+    if (!storeName) {
+        // If storeName is not provided in the request body, respond accordingly
+        return res.status(400).json({ error: true, message: 'Store name is required.' });
+    }
+
+    try {
+        const query = 'SELECT * FROM Stores WHERE StoreName = ?';
+        const [rows] = await db.query(query, [storeName]);
+        
+        if (rows && rows.length > 0) {
+            // Store name exists
+            res.json({ exists: true, message: 'Store name already exists' });
+        } else {
+            // Store name does not exist or no rows returned
+            res.json({ exists: false });
+        }
+    } catch (error) {
+        console.error("Check Store Name Error: ", error);
+        res.status(500).json({ error: true, message: 'An error occurred' });
+    }
+});
+
+
 router.get('/login', (req, res) => {
     res.render('login')
 });

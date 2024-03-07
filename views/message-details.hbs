@@ -7,31 +7,7 @@
     <link rel="stylesheet" href="/style.css"> <!-- Make sure to link to your CSS file for styling -->
 </head>
 <body>
-    <nav>
-        <h4 style="font-size:13px">Logo Placeholder</h4>
-        <ul>
-            <li><a href="/admin/dashboard">Home</a></li>
-            <li><a href="/admin/inventory">Inventory</a></li>
-            <li>
-                <a href="/admin/orders">Orders 
-                    {{#if ordersCount}}
-                        <span class="notification-bubble">{{ordersCount}}</span>
-                    {{/if}}
-                </a>
-            </li>
-            <li>
-                <a href="/admin/messages">Messages 
-                    {{#if messagesCount}}
-                        <span class="notification-bubble">{{messagesCount}}</span>
-                    {{/if}}
-                </a>
-            </li>
-            <li><a href="/admin/feedback">Feedback</a></li>
-            <li><a href="/admin/payments">Payments</a></li>
-            <li><a href="/admin/dashboard">Reports</a></li>
-            <li><a href="/admin/logout">Logout</a></li>
-        </ul>
-    </nav>
+    {{> navbar}}
     <section class="conversation-subject">
         <h2>Subject: {{conversation.Subject}}</h2>
         {{#if orderNumber}}
