@@ -14,8 +14,8 @@ exports.authenticateToken = (req, res, next) => {
 
 exports.notificationCounts = async (req, res, next) => {
     if (!req.user || !req.user.id) {
-        res.locals.ordersCount = 1;
-        res.locals.messagesCount = 1;
+        res.locals.ordersCount = 0;
+        res.locals.messagesCount = 0;
         return next();
     }
 
@@ -26,10 +26,10 @@ exports.notificationCounts = async (req, res, next) => {
             INNER JOIN Orders ON Shipping.OrderNumber = Orders.OrderNumber
             WHERE Orders.SellerID = ? AND Shipping.ShippedWithTracking = 0
         `;
-        // Await for the query to execute and directly destructure the first element of the result array
-        const [orders] = await db.query(ordersQuery, [req.user.id]);
-        // Assuming the first element of the array is the RowDataPacket object you're interested in
-        res.locals.ordersCount = orders[0]?.count || 0; // Use optional chaining and nullish coalescing to default to 0
+        const ordersResults = await db.query(ordersQuery, [req.user.id]);
+        console.log("Orders Results:", ordersResults); // Debugging
+        const ordersCount = ordersResults[0]?.count || 0;
+        res.locals.ordersCount = ordersCount;
 
         const messagesQuery = `
             SELECT COUNT(*) AS count
@@ -37,16 +37,17 @@ exports.notificationCounts = async (req, res, next) => {
             INNER JOIN Conversations ON Messages.ConversationID = Conversations.ConversationID
             WHERE Conversations.SellerID = ? AND Messages.IsRead = 0
         `;
-        // Await for the query to execute and directly destructure the first element of the result array
-        const [messages] = await db.query(messagesQuery, [req.user.id]);
-        // Assuming the first element of the array is the RowDataPacket object you're interested in
-        res.locals.messagesCount = messages[0]?.count || 0; // Use optional chaining and nullish coalescing to default to 0
+        const messagesResults = await db.query(messagesQuery, [req.user.id]);
+        console.log("Messages Results:", messagesResults); // Debugging
+        const messagesCount = messagesResults[0]?.count || 0;
+        res.locals.messagesCount = messagesCount;
 
         next();
     } catch (err) {
         console.error('Error fetching notification counts:', err);
-        next(err); // Ensure the next middleware or route handler can run even in case of an error
+        next(err);
     }
 };
+
 
 

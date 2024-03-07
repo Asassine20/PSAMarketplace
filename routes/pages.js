@@ -9,7 +9,7 @@ const PDFDocument = require('pdfkit');
 redisClient.connect();
 router.use(express.json()); // This line is crucial
 
-router.use(notificationCounts);
+//router.use(notificationCounts);
 
 router.use(express.urlencoded({ extended: true }));
 
@@ -25,7 +25,7 @@ router.get('/login', (req, res) => {
     res.render('login')
 });
 
-router.get('/dashboard', authenticateToken, async (req, res) => {
+router.get('/dashboard', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id; // Assuming authentication middleware sets req.user.id
 
     try {
