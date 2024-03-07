@@ -69,7 +69,7 @@ exports.login = (req, res) => {
         });
         // Set the token in a cookie and redirect to the dashboard
         res.cookie('jwt', token, { httpOnly: true, maxAge: 7200000 });
-        res.status(200).redirect("/dashboard");
+        res.status(200).redirect("/admin/dashboard");
         
         console.log("The token is: " + token);
         

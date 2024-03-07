@@ -12,25 +12,25 @@
     <nav>
         <h4 style="font-size:13px">Logo Placeholder</h4>
         <ul>
-            <li><a href="/dashboard">Home</a></li>
-            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/inventory">Inventory</a></li>
             <li>
-                <a href="/orders">Orders 
+                <a href="/admin/orders">Orders 
                     {{#if ordersCount}}
                         <span class="notification-bubble">{{ordersCount}}</span>
                     {{/if}}
                 </a>
             </li>
             <li>
-                <a href="/messages">Messages 
+                <a href="/admin/messages">Messages 
                     {{#if messagesCount}}
                         <span class="notification-bubble">{{messagesCount}}</span>
                     {{/if}}
                 </a>
             </li>
-            <li><a href="/feedback">Feedback</a></li>
-            <li><a href="/dashboard">Payments</a></li>
-            <li><a href="/dashboard">Reports</a></li>
+            <li><a href="/admin/feedback">Feedback</a></li>
+            <li><a href="/admin/payments">Payments</a></li>
+            <li><a href="/admin/dashboard">Reports</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
@@ -40,7 +40,7 @@
         <div class="banner-text">
             <h1>Welcome To GemTCG</h1>
             <h2>Zero Seller Fees On All Sales</h2>
-            <a href="/inventory" class="start-selling-button">Start Selling</a>
+            <a href="/admin/inventory" class="start-selling-button">Start Selling</a>
         </div>
         <img src="https://d1htnxwo4o0jhw.cloudfront.net/cert/139361397/0pGBYXhSc0OTF50t_hBqIw.jpg" alt="Right Image" class="banner-image">
     </div>

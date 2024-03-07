@@ -11,26 +11,26 @@
     <nav>
         <h4 style="font-size:13px">Logo Placeholder</h4>
         <ul>
-            <li><a href="/dashboard">Home</a></li>
-            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/inventory">Inventory</a></li>
             <li>
-                <a href="/orders">Orders 
+                <a href="/admin/orders">Orders 
                     {{#if ordersCount}}
                         <span class="notification-bubble">{{ordersCount}}</span>
                     {{/if}}
                 </a>
             </li>
             <li>
-                <a href="/messages">Messages 
+                <a href="/admin/messages">Messages 
                     {{#if messagesCount}}
                         <span class="notification-bubble">{{messagesCount}}</span>
                     {{/if}}
                 </a>
             </li>
-            <li><a href="/feedback">Feedback</a></li>
-            <li><a href="/dashboard">Payments</a></li>
-            <li><a href="/dashboard">Reports</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/admin/feedback">Feedback</a></li>
+            <li><a href="/admin/payments">Payments</a></li>
+            <li><a href="/admin/dashboard">Reports</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
         </ul>
     </nav>
     <!-- Order Summary -->
@@ -142,8 +142,8 @@
     <div class="refund-cancel-box">
         <h4>Refunds</h4>
         <div style="text-align: center;">
-            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Partial Refund</button>
-            <button style="width: 50%;" type="button" onclick="window.location.href='/order-details?ordernumber={{OrderNumber}}'" class="table-button">Full Refund</button>
+            <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/admin/order-details?ordernumber={{OrderNumber}}'" class="table-button">Partial Refund</button>
+            <button style="width: 50%;" type="button" onclick="window.location.href='/admin/order-details?ordernumber={{OrderNumber}}'" class="table-button">Full Refund</button>
         </div>
     </div>
 </div>
@@ -222,7 +222,7 @@
         updateShippingSelection(true, trackingNumber);
     });
     function updateOrder(data) {
-        fetch('/update-shipping-details', {
+        fetch('/admin/update-shipping-details', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -257,7 +257,7 @@
         const buyerId = '{{order.BuyerID}}'; // Assume you have buyer ID
         const sellerId = '{{user.id}}'; // Assume you have seller ID
 
-        fetch('/create-or-find-conversation', {
+        fetch('/admin/create-or-find-conversation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -267,7 +267,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.conversationId) {
-                window.location.href = `/message-details/${data.conversationId}`; // Redirect to the conversation details page
+                window.location.href = `/admin/message-details/${data.conversationId}`; // Redirect to the conversation details page
             } else {
                 alert('Failed to create or find conversation');
             }
@@ -275,7 +275,7 @@
         .catch(error => console.error('Error:', error));
     });
     function downloadPackingSlip(orderNumber) {
-        const url = `/download-order?orderNumber=${orderNumber}`;
+        const url = `/admin/download-order?orderNumber=${orderNumber}`;
         window.location.href = url;
     }
 

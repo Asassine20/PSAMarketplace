@@ -11,29 +11,29 @@
     <nav>
         <h4 style="font-size:13px">Logo Placeholder</h4>
         <ul>
-            <li><a href="/dashboard">Home</a></li>
-            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/inventory">Inventory</a></li>
             <li>
-                <a href="/orders">Orders 
+                <a href="/admin/orders">Orders 
                     {{#if ordersCount}}
                         <span class="notification-bubble">{{ordersCount}}</span>
                     {{/if}}
                 </a>
             </li>
             <li>
-                <a href="/messages">Messages 
+                <a href="/admin/messages">Messages 
                     {{#if messagesCount}}
                         <span class="notification-bubble">{{messagesCount}}</span>
                     {{/if}}
                 </a>
             </li>
-            <li><a href="/feedback">Feedback</a></li>
-            <li><a href="/dashboard">Payments</a></li>
-            <li><a href="/dashboard">Reports</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/admin/feedback">Feedback</a></li>
+            <li><a href="/admin/payments">Payments</a></li>
+            <li><a href="/admin/dashboard">Reports</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
         </ul>
     </nav>
-<form action="/submit-inventory" method="post">
+<form action="/admin/submit-inventory" method="post">
     <div class="flex-container">
         <div class="table-container" id="grades-table">
             <table>
@@ -142,7 +142,7 @@
         if (!certNumber) return;
 
         // Define the URL for the fetch request using the correct endpoint
-        const url = `/api/fetch-card-data?certNumber=${certNumber}`; // Adjusted to match the correct server-side endpoint
+        const url = `/api/admin/fetch-card-data?certNumber=${certNumber}`; // Adjusted to match the correct server-side endpoint
 
         try {
             const response = await fetch(url);
@@ -178,7 +178,7 @@
     async function fetchAndDisplayImage(certNumber) {
         if (!certNumber) return; // Skip if certNumber is empty
         try {
-            const response = await fetch(`/api/fetch-image?certNumber=${certNumber}`);
+            const response = await fetch(`/api/admin/fetch-image?certNumber=${certNumber}`);
             const data = await response.json();
             if (data.frontImageUrl) {
                 // Assuming you have a dedicated place to show the image
@@ -216,7 +216,7 @@
 async function fetchCardDataByCertNumber(certNumber) {
     try {
         // Adjusted to call your backend endpoint, which then calls the PSA Card API
-        const response = await fetch(`/api/fetch-card-data?certNumber=${certNumber}`);
+        const response = await fetch(`/api/admin/fetch-card-data?certNumber=${certNumber}`);
         if (!response.ok) {
             throw new Error(`Error fetching card data: ${response.statusText}`);
         }

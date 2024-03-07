@@ -27,7 +27,6 @@ exports.notificationCounts = async (req, res, next) => {
             WHERE Orders.SellerID = ? AND Shipping.ShippedWithTracking = 0
         `;
         const ordersResults = await db.query(ordersQuery, [req.user.id]);
-        console.log("Orders Results:", ordersResults); // Debugging
         const ordersCount = ordersResults[0]?.count || 0;
         res.locals.ordersCount = ordersCount;
 
@@ -38,7 +37,6 @@ exports.notificationCounts = async (req, res, next) => {
             WHERE Conversations.SellerID = ? AND Messages.IsRead = 0
         `;
         const messagesResults = await db.query(messagesQuery, [req.user.id]);
-        console.log("Messages Results:", messagesResults); // Debugging
         const messagesCount = messagesResults[0]?.count || 0;
         res.locals.messagesCount = messagesCount;
 

@@ -23,7 +23,7 @@ router.get('/login', (req, res) => {
     res.render('login')
 });
 
-router.get('/dashboard', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/dashboard', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id; // Assuming authentication middleware sets req.user.id
 
     try {
@@ -84,7 +84,7 @@ function getSurroundingPages(currentPage, totalPages) {
     return pages;
 }
 
-router.get('/inventory', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/inventory', authenticateToken, notificationCounts, async (req, res) => {
     const sellerId = req.user.id; // Assuming the user's ID is stored in req.user
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.pageSize) || 25;
@@ -298,7 +298,7 @@ async function fetchInventoryData({ searchTerm, cardSet, cardYear, sport, cardCo
 // Assuming you want to call preWarmCache at application startup
 preWarmCache().catch(console.error);
 
-router.get('/cardsets', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/cardsets', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
@@ -354,7 +354,7 @@ router.get('/cardsets', authenticateToken, notificationCounts, async (req, res) 
     }
 });
 
-router.get('/years', authenticateToken,notificationCounts, async (req, res) => {
+router.get('/admin/years', authenticateToken,notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const cardColor = req.query.cardColor || '';
@@ -408,7 +408,7 @@ router.get('/years', authenticateToken,notificationCounts, async (req, res) => {
     }
 });
 
-router.get('/sports', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/sports', authenticateToken, notificationCounts, async (req, res) => {
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
@@ -444,7 +444,7 @@ router.get('/sports', authenticateToken, notificationCounts, async (req, res) =>
 });
 
 
-router.get('/cardcolors', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/cardcolors', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
@@ -488,7 +488,7 @@ router.get('/cardcolors', authenticateToken, notificationCounts, async (req, res
     }
 });
 
-router.get('/cardvariants', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/cardvariants', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const year = req.query.year || '';
@@ -533,7 +533,7 @@ router.get('/cardvariants', authenticateToken, notificationCounts, async (req, r
 });
 
 // Endpoint for full search
-router.get('/search-card-sets', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/search-card-sets', authenticateToken, notificationCounts, async (req, res) => {
     const { term, sport, year, cardColor, cardVariant } = req.query;
     // Generate a unique cache key based on the search parameters
     const cacheKey = `search:cardsets:${term}:${sport}:${year}:${cardColor}:${cardVariant}`;
@@ -586,7 +586,7 @@ router.get('/search-card-sets', authenticateToken, notificationCounts, async (re
     }
 });
 
-router.get('/update-inventory-pricing', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/update-inventory-pricing', authenticateToken, notificationCounts, async (req, res) => {
     const cardId = req.query.cardId;
     const sellerId = req.user.id;
 
@@ -618,7 +618,7 @@ router.get('/update-inventory-pricing', authenticateToken, notificationCounts, a
     }
 });
 
-router.post('/submit-inventory', authenticateToken, notificationCounts, async (req, res) => {
+router.post('/admin/submit-inventory', authenticateToken, notificationCounts, async (req, res) => {
     const { action, cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
     const sellerId = req.user.id;
     const defaultImageUrl = '/images/defaultPSAImage.png'; 
@@ -630,7 +630,7 @@ router.post('/submit-inventory', authenticateToken, notificationCounts, async (r
             const deleteQuery = 'DELETE FROM Inventory WHERE CardID = ? AND SellerID = ?';
             await db.query(deleteQuery, [cardId, sellerId]);
             // Redirect after clearing the inventory
-            return res.redirect('/inventory');
+            return res.redirect('/admin/inventory');
         } catch (error) {
             console.error('Error clearing inventory:', error);
             return res.status(500).send('Error clearing inventory');
@@ -667,7 +667,7 @@ router.post('/submit-inventory', authenticateToken, notificationCounts, async (r
             }
         }
 
-        return res.redirect('/inventory');
+        return res.redirect('/admin/inventory');
     } catch (err) {
         console.error('Error processing inventory submission:', err);
         return res.status(500).send('Error processing inventory');
@@ -747,7 +747,7 @@ async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
     }
 }
 
-router.get('/quick-list-inventory', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/quick-list-inventory', authenticateToken, notificationCounts, async (req, res) => {
     try {
         // Example: sending user info or configurations
         res.render('quick-list-inventory', {
@@ -801,7 +801,7 @@ router.get('/fetch-card-image', authenticateToken, notificationCounts, async (re
     }
 });
 
-router.get('/orders', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/orders', authenticateToken, notificationCounts, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
     const offset = (page - 1) * limit;
@@ -842,7 +842,7 @@ router.get('/orders', authenticateToken, notificationCounts, async (req, res) =>
     }
 });
 
-router.get('/order-details', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/order-details', authenticateToken, notificationCounts, async (req, res) => {
     const orderNumber = req.query.orderNumber;
     try {
         const orderDetailsQuery = `
@@ -905,7 +905,7 @@ router.get('/order-details', authenticateToken, notificationCounts, async (req, 
     }
 });
 
-router.post('/update-shipping-details', authenticateToken, notificationCounts, async (req, res) => {
+router.post('/admin/update-shipping-details', authenticateToken, notificationCounts, async (req, res) => {
     const { orderNumber, ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus } = req.body;
 
     try {
@@ -932,7 +932,7 @@ router.post('/update-shipping-details', authenticateToken, notificationCounts, a
 });
 
 
-router.get('/messages', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/messages', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
@@ -986,7 +986,7 @@ router.get('/messages', authenticateToken, notificationCounts, async (req, res) 
     }
 });
 
-router.get('/message-details/:conversationId', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/message-details/:conversationId', authenticateToken, notificationCounts, async (req, res) => {
     const conversationId = req.params.conversationId;
     const userId = req.user.id;
 
@@ -1028,7 +1028,7 @@ router.get('/message-details/:conversationId', authenticateToken, notificationCo
     }
 });
 
-router.post('/send-message', authenticateToken, notificationCounts, async (req, res) => {
+router.post('/admin/send-message', authenticateToken, notificationCounts, async (req, res) => {
     const { conversationId, messageText } = req.body;
     const sellerId = req.user.id; // Assuming this is your seller's ID
 
@@ -1043,7 +1043,7 @@ router.post('/send-message', authenticateToken, notificationCounts, async (req, 
     
 
         // Redirect back to the message-details page or handle as needed
-        res.redirect(`/message-details/${conversationId}`);
+        res.redirect(`/admin/message-details/${conversationId}`);
     } catch (error) {
         console.error('Error sending message:', error);
         res.status(500).send('Error sending message');
@@ -1057,7 +1057,7 @@ async function fetchBuyerIdFromConversation(conversationId) {
     return results[0]; // Assuming there's always a valid result
 }
 
-router.post('/create-or-find-conversation', authenticateToken, notificationCounts, async (req, res) => {
+router.post('/admin/create-or-find-conversation', authenticateToken, notificationCounts, async (req, res) => {
     const { orderNumber, buyerId, subject: receivedSubject } = req.body;
     const sellerId = req.user.id;
 
@@ -1138,7 +1138,7 @@ async function getOrderDetails(orderNumber) {
     }
 }
 
-router.get('/download-order', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/download-order', authenticateToken, notificationCounts, async (req, res) => {
     const orderNumber = req.query.orderNumber;
 
     try {
@@ -1225,7 +1225,7 @@ router.get('/download-order', authenticateToken, notificationCounts, async (req,
     }
 });
 
-router.get('/feedback', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/feedback', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
@@ -1307,6 +1307,46 @@ async function getFeedbackStats(sellerId) {
     }
     return stats;
 }
+
+router.get('/admin/payments', authenticateToken, notificationCounts, async (req, res) => {
+    const sellerId = req.user.id; // Assuming req.user.id contains the unique SellerID
+
+    try {
+        const query = `
+            SELECT 
+                DATE_FORMAT(MIN(OrderDate), '%Y-%m-%d') AS WeekStartDate,
+                DATE_FORMAT(MAX(OrderDate) + INTERVAL 6 DAY, '%Y-%m-%d') AS WeekEndDate,
+                SUM(SalePrice) AS TotalSalePrice,
+                SUM(ShippingPrice) AS TotalShippingPrice,
+                SUM(OrderAmount) AS TotalOrderAmount,
+                SUM(FeeAmount) AS TotalFeeAmount,
+                SUM(NetAmount) AS TotalNetAmount
+            FROM Orders
+            WHERE 
+                SellerID = ? AND
+                OrderDate BETWEEN CURDATE() - INTERVAL 28 DAY AND CURDATE()
+            GROUP BY YEARWEEK(OrderDate)
+            ORDER BY WeekStartDate ASC;
+        `;
+
+        // Execute the query
+        const results = await db.query(query, [sellerId]);
+        // Ensure the result is in the format of an array of objects
+        const paymentData = Array.isArray(results[0]) ? results[0] : [results[0]];
+
+        console.log("Payment Data:", paymentData);
+
+        // Pass the array to the Handlebars template
+        res.render('payments', {
+            paymentData: paymentData
+        });
+    } catch (error) {
+        console.error('Error fetching payment data:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+
 
 
 

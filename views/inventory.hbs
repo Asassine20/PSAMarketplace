@@ -19,31 +19,31 @@
     <nav>
         <h4 style="font-size:13px">Logo Placeholder</h4>
         <ul>
-            <li><a href="/dashboard">Home</a></li>
-            <li><a href="/inventory">Inventory</a></li>
+            <li><a href="/admin/dashboard">Home</a></li>
+            <li><a href="/admin/inventory">Inventory</a></li>
             <li>
-                <a href="/orders">Orders 
+                <a href="/admin/orders">Orders 
                     {{#if ordersCount}}
                         <span class="notification-bubble">{{ordersCount}}</span>
                     {{/if}}
                 </a>
             </li>
             <li>
-                <a href="/messages">Messages 
+                <a href="/admin/messages">Messages 
                     {{#if messagesCount}}
                         <span class="notification-bubble">{{messagesCount}}</span>
                     {{/if}}
                 </a>
             </li>
-            <li><a href="/feedback">Feedback</a></li>
-            <li><a href="/dashboard">Payments</a></li>
-            <li><a href="/dashboard">Reports</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/admin/feedback">Feedback</a></li>
+            <li><a href="/admin/payments">Payments</a></li>
+            <li><a href="/admin/dashboard">Reports</a></li>
+            <li><a href="/admin/logout">Logout</a></li>
         </ul>
     </nav>
     <h4>{{username}} Inventory</h4>
     <div class="inventorySearch" id="inventorySearchForm">
-        <form action="/inventory" method="get" style="flex-grow 1">
+        <form action="/admin/inventory" method="get" style="flex-grow 1">
             <div>
                 <label for="searchTerm">Player:</label>
                 <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown" placeholder="Player Name" value="{{searchTerm}}">
@@ -154,7 +154,7 @@
                 <td>{{this.CardColor}}</td>
                 <td>{{this.CardVariant}}</td>
                 <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId={{this.CardID}}'" class="table-button">Add</button>
+                    <button type="button" onclick="window.location.href='/admin/update-inventory-pricing?cardId={{this.CardID}}'" class="table-button">Add</button>
                 </td>
             </tr>            
             {{else}}
@@ -220,7 +220,7 @@
     // Fetches and updates sports options
     function fetchSports(sport, cardSet, year, cardColor, cardVariant) {
         $.ajax({
-            url: '/sports',
+            url: '/admin/sports',
             type: 'GET',
             data: {
                 cardSet: cardSet,
@@ -243,7 +243,7 @@
     // Fetches and updates card sets options
     function fetchCardSets(sport, cardSet, year, cardColor, cardVariant) {
         $.ajax({
-            url: '/cardsets',
+            url: '/admin/cardsets',
             type: 'GET',
             data: {
                 sport: sport,
@@ -268,7 +268,7 @@
     // Fetches and updates years options
     function fetchYears(sport, cardSet, year, cardColor, cardVariant) {
         $.ajax({
-            url: '/years',
+            url: '/admin/years',
             type: 'GET',
             data: {
                 sport: sport,
@@ -293,7 +293,7 @@
     // Fetches and updates card colors options
     function fetchCardColors(sport, cardSet, year, cardColor, cardVariant) {
         $.ajax({
-            url: '/cardcolors',
+            url: '/admin/cardcolors',
             type: 'GET',
             data: {
                 sport: sport,
@@ -318,7 +318,7 @@
     // Fetches and updates card variants options
     function fetchCardVariants(sport, cardSet, year, cardColor, cardVariant) {
         $.ajax({
-            url: '/cardvariants',
+            url: '/admin/cardvariants',
             type: 'GET',
             data: {
                 sport: sport,
@@ -427,7 +427,7 @@
         const cardVariant = document.getElementById('cardVariant').value;
 
         // Starts constructing the URL for the API call and appends the search term as a query
-        let url = `/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
+        let url = `/admin/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
         if (sport) {
             url += `&sport=${encodeURIComponent(sport)}`;
         }
@@ -560,7 +560,7 @@
 
     function fetchInventoryData(data) {
         $.ajax({
-            url: `/inventory`,
+            url: `/admin/inventory`,
             type: 'GET',
             data: data, // Automatically converts data object to query string
             dataType: 'json',
@@ -637,7 +637,7 @@
                 <td>${card.CardColor || ''}</td>
                 <td>${card.CardVariant ? card.CardVariant : ''}</td>
                 <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
+                    <button type="button" onclick="window.location.href='/admin/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
             `;
             tableBody.appendChild(row);
