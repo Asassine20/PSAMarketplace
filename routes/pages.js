@@ -19,8 +19,16 @@ router.get('/register', (req, res) => {
     res.render('register')
 });
 
+router.get('seller-info', (req, res) => {
+    res.render('seller-info')
+})
+
 router.get('/register/seller-info', (req, res) => {
     res.render('seller-info');
+});
+
+router.get('/final-verification', (req, res) => {
+    res.render('final-verification');
 });
 
 router.post('/check-store-name', async (req, res) => {

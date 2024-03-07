@@ -94,7 +94,7 @@ exports.submitSellerInfo = (req, res) => {
                                             message: 'An error occurred while saving bank information'
                                         });
                                     } else {
-                                        return res.redirect('/admin/dashboard');
+                                        return res.redirect('/final-verification');
                                     }
                                 });
                             }
