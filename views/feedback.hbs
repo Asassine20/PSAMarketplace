@@ -33,27 +33,29 @@
 
     <div class="table-container">
         <div class="table-controls">
-            <div class="pagination-controls">
-                <label for="pageSize">Feedback per page:</label>
-                <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
-                    <option value="25" {{#if (eq limit 25)}}selected{{/if}}>25 per page</option>
-                    <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50 per page</option>
-                    <option value="100" {{#if (eq limit 100)}}selected{{/if}}>100 per page</option>
-                    <option value="250" {{#if (eq limit 250)}}selected{{/if}}>250 per page</option>
-                </select>
+            <div class="table-header">
+                <h2 style="padding-left: 60px;">{{feedbackCount}} Total Feedback</h2>
+                <div class="page-size-selector">
+                    <label for="pageSize">Feedback per page:</label>
+                    <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
+                        <option value="25" {{#if (eq limit 25)}}selected{{/if}}>25 per page</option>
+                        <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50 per page</option>
+                        <option value="100" {{#if (eq limit 100)}}selected{{/if}}>100 per page</option>
+                        <option value="250" {{#if (eq limit 250)}}selected{{/if}}>250 per page</option>
+                    </select>
 
-                <div class="pagination-links">
-                    {{#if (gt page 1)}}
-                        <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
-                    {{/if}}
-                    Page {{page}} of {{totalPages}}
-                    {{#if (lt page totalPages)}}
-                        <a href="?page={{inc page}}&limit={{limit}}">Next</a>
-                    {{/if}}
+                    <div class="pagination-links">
+                        {{#if (gt page 1)}}
+                            <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
+                        {{/if}}
+                        Page {{page}} of {{totalPages}}
+                        {{#if (lt page totalPages)}}
+                            <a href="?page={{inc page}}&limit={{limit}}">Next</a>
+                        {{/if}}
+                    </div>
                 </div>
             </div>
         </div>
-        <h4 style="padding-left: 60px;">{{feedbackCount}} Total Feedback</h4>
         <table class="orders-orderNumber" style="margin-top: 20px;">
             <thead>
                 <tr>
