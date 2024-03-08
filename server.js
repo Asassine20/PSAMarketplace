@@ -15,6 +15,7 @@ server.use(cookieParser());
 server.use(compression());
 
 server.use(express.static(publicDirectory));
+server.use(express.static('public'));
 
 server.set('view engine', 'hbs');
 

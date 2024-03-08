@@ -3,15 +3,17 @@ body {
 }
 nav {
     color: #9BA0AA;
-    padding: 30px 60px;
+    padding: 10px 0;
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid #eee; /* Thin line for each row */
+    align-items: center;
 
 }
 
 nav ul {
     display: flex;
+    list-style: none;
     justify-content: space-around;
     align-items: center;
 }
@@ -33,15 +35,34 @@ nav li a:hover {
     text-decoration: none;
 }
 
+.nav-item-container {
+    display: flex;
+    align-items: center; /* Centers items vertically within each nav item */
+}
+
 .notification-bubble {
-    background-color: #9BA0AA; /* Red background for visibility */
+    background-color: #e0e0e0; /* Red background for visibility */
     color: #050505; /* White text color */
     border-radius: 50%; /* Circular shape */
     padding: 2px 6px; /* Top and Bottom padding 2px, Left and Right padding 6px */
-    font-size: 1; /* Smaller font size */
+    font-size: smaller; /* Adjust based on your preference */
     margin-left: 4px; /* Space between text and bubble */
-    vertical-align: super; /* Align with the top of the text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20px; /* Ensure height is equal to min-width for a circle */
+    min-width: 20px; /* Minimum width to maintain circle shape */
+    text-align: center;
 }
+
+/* Additional adjustments for single digits to ensure circular shape */
+.notification-bubble:after {
+    content: "";
+    padding-top: 100%; /* Forces the bubble to maintain a circular shape */
+}
+
+
+
 
 .form-group {
     padding: 5px;
@@ -717,3 +738,9 @@ margin-top: 20px;
 .orders-orderNumber td a {
     text-decoration: none;
 }
+/* Increase specificity */
+nav .logo-image {
+    width: 60px;
+    height: 60px;
+}
+

@@ -1,25 +1,23 @@
 <nav>
-        <h4 style="font-size:13px">Logo Placeholder</h4>
-        <ul>
-            <li><a href="/admin/dashboard">Home</a></li>
-            <li><a href="/admin/inventory">Inventory</a></li>
-            <li>
-                <a href="/admin/orders">Orders 
-                    {{#if ordersCount}}
-                        <span class="notification-bubble">{{ordersCount}}</span>
-                    {{/if}}
-                </a>
-            </li>
-            <li>
-                <a href="/admin/messages">Messages 
-                    {{#if messagesCount}}
-                        <span class="notification-bubble">{{messagesCount}}</span>
-                    {{/if}}
-                </a>
-            </li>
-            <li><a href="/admin/feedback">Feedback</a></li>
-            <li><a href="/admin/payments">Payments</a></li>
-            <li><a href="/admin/dashboard">Reports</a></li>
-            <li><a href="/logout">Logout</a></li>
-        </ul>
-    </nav>
+    <img src="/images/logo.png" class="logo-image">
+    <ul>
+        <li class="nav-item-container"><a href="/admin/dashboard">Home</a></li>
+        <li class="nav-item-container"><a href="/admin/inventory">Inventory</a></li>
+        <li class="nav-item-container">
+            <a href="/admin/orders">Orders</a>
+            {{#if ordersCount}}
+                <span class="notification-bubble">{{ordersCount}}</span>
+            {{/if}}
+        </li>
+        <li class="nav-item-container">
+            <a href="/admin/messages">Messages</a>
+            {{#if messagesCount}}
+                <span class="notification-bubble">{{messagesCount}}</span>
+            {{/if}}
+        </li>
+        <li class="nav-item-container"><a href="/admin/feedback">Feedback</a></li>
+        <li class="nav-item-container"><a href="/admin/payments">Payments</a></li>
+        <li class="nav-item-container"><a href="/admin/dashboard">Reports</a></li>
+        <li class="nav-item-container"><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
