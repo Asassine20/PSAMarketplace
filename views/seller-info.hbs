@@ -16,6 +16,7 @@
     <div class="container mt-4">
         <h2>Complete Your Seller Profile</h2>
         <form action="/seller-info" method="POST">
+            <input type="hidden" name="email" id="emailField" value="">
             <div class="form-group">
                 <label for="firstName">First Name</label>
                 <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Enter first name" required>
@@ -154,6 +155,11 @@
         .catch(error => {
             console.error('Error:', error);
         });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        document.getElementById('emailField').value = email;
     });
 </script>
 

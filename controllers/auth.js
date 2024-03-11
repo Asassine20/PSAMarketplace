@@ -10,106 +10,95 @@ const connection = mysql.createPool({
 });
 
 exports.register = (req, res) => {
-    console.log(req.body);
-
     const { name, email, password, passwordConfirm } = req.body;
-
     connection.query('SELECT Email FROM Users WHERE Email = ?', [email], async (error, results) => {
         if (error) {
             console.log(error);
         }
-
         if (results.length > 0) {
             return res.render('register', {
                 message: 'That email has already been registered'
-            })
+            });
         } else if (password !== passwordConfirm) {
             return res.render('register', {
                 message: 'Passwords do not match'
             });
         }
-
         let hashedPassword = await bcrypt.hash(password, 8);
         console.log(hashedPassword);
         connection.query('INSERT INTO Users SET ?', { Username: name, Email: email, PasswordHash: hashedPassword }, (error, results) => {
             if (error) {
                 console.log(error);
             } else {
-                return res.redirect('/register/seller-info');
+                const encodedEmail = encodeURIComponent(email);
+                return res.redirect(`/register/seller-info?email=${encodedEmail}`);
             }
-        })
+        });
     });
 };
 
 exports.submitSellerInfo = (req, res) => {
-    const { street, street2, city, state, zip, country, storeName, accountType, accountName, routingNumber, accountNumber } = req.body;
-    const token = req.cookies.jwt;
-
-    if (!token) {
-        return res.status(401).render('seller-info', {
-            message: 'You need to be logged in to submit this information.'
-        });
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userID = decoded.id;
-
-        connection.query('SELECT StoreName FROM Stores WHERE StoreName = ?', [storeName], async (error, results) => {
-            if (error) {
-                console.log(error);
-                return res.render('seller-info', {
-                    message: 'An error occurred while checking the store name'
-                });
+    const { firstName, lastName, street, street2, city, state, zip, country, storeName, accountType, accountName, routingNumber, accountNumber, email } = req.body;
+    connection.getConnection((err, conn) => {
+        if (err) {
+            return res.status(500).send('Server error while obtaining connection.');
+        }
+        conn.beginTransaction(err => {
+            if (err) {
+                conn.release();
+                return res.status(500).send('Server error while beginning transaction.');
             }
-
-            if (results.length > 0) {
-                return res.render('seller-info', {
-                    message: 'This store name is already registered. Please choose a different name.'
-                });
-            } else {
-                connection.query('INSERT INTO Stores SET ?', { UserID: userID, StoreName: storeName, Description: '' }, (error, storeResults) => {
+            conn.query('SELECT UserID FROM Users WHERE Email = ?', [email], (error, results) => {
+                if (error) {
+                    conn.rollback(() => {
+                        conn.release();
+                        return res.status(500).send('Server error.');
+                    });
+                }
+                const userID = results[0].UserID;
+                const addressData = { Street: street, Street2: street2, City: city, State: state, ZipCode: zip, Country: country, IsPrimary: true, UserID: userID };
+                conn.query('INSERT INTO Addresses SET ?', addressData, (error, results) => {
                     if (error) {
-                        console.log(error);
-                        return res.render('seller-info', {
-                            message: 'An error occurred while saving store information'
-                        });
-                    } else {
-                        const storeID = storeResults.insertId;
-                        connection.query('INSERT INTO Addresses SET ?', {
-                            UserID: userID, Street: street, City: city, State: state, ZipCode: zip, Country: country, Street2: street2
-                        }, (addressError) => {
-                            if (addressError) {
-                                console.log(addressError);
-                                return res.render('seller-info', {
-                                    message: 'An error occurred while saving address information'
-                                });
-                            } else {
-                                connection.query('INSERT INTO BankInfo SET ?', {
-                                    StoreID: storeID, AccountType: accountType, AccountName: accountName, RoutingNumber: routingNumber, AccountNumber: accountNumber
-                                }, (bankInfoError) => {
-                                    if (bankInfoError) {
-                                        console.log(bankInfoError);
-                                        return res.render('seller-info', {
-                                            message: 'An error occurred while saving bank information'
-                                        });
-                                    } else {
-                                        return res.redirect('/final-verification');
-                                    }
-                                });
-                            }
+                        conn.rollback(() => {
+                            conn.release();
+                            return res.status(500).send('Error inserting address.');
                         });
                     }
+                    const storeData = { UserID: userID, StoreName: storeName, Description: '' };
+                    conn.query('INSERT INTO Stores SET ?', storeData, (error, results) => {
+                        if (error) {
+                            conn.rollback(() => {
+                                conn.release();
+                                return res.status(500).send('Error inserting store.');
+                            });
+                        }
+                        const storeID = results.insertId;
+                        const bankInfoData = { StoreID: storeID, AccountType: accountType, AccountName: accountName, RoutingNumber: routingNumber, AccountNumber: accountNumber };
+                        conn.query('INSERT INTO BankInfo SET ?', bankInfoData, (error, results) => {
+                            if (error) {
+                                conn.rollback(() => {
+                                    conn.release();
+                                    return res.status(500).send('Error inserting bank info.');
+                                });
+                            }
+                            conn.commit(err => {
+                                if (err) {
+                                    conn.rollback(() => {
+                                        conn.release();
+                                        return res.status(500).send('Error committing transaction.');
+                                    });
+                                }
+                                conn.release();
+                                res.redirect('/final-verification');
+                            });
+                        });
+                    });
                 });
-            }
+            });
         });
-    } catch (error) {
-        console.log(error);
-        return res.status(403).render('seller-info', {
-            message: 'Invalid token. Please log in again.'
-        });
-    }
+    });
 };
+
 
 exports.login = (req, res) => {
     const { email, password } = req.body;
