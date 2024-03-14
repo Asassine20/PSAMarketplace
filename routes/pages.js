@@ -24,7 +24,12 @@ router.get('seller-info', (req, res) => {
 })
 
 router.get('/register/seller-info', (req, res) => {
-    res.render('seller-info');
+    const encodedEmail = req.query.email; // This is the encoded email from the URL
+    const email = decodeURIComponent(encodedEmail || ''); // Decode it to get the original email
+
+    res.render('seller-info', {
+        formData: { email: email } // Ensure the email is included in formData
+    });
 });
 
 router.get('/final-verification', (req, res) => {

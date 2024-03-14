@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 
+console.log('Initializing transporter...');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -9,12 +10,18 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+console.log(`Transporter initialized with user: ${process.env.EMAIL_USERNAME}`);
+
 function generateConfirmationLink(user) {
+    console.log(`Generating token for user ID: ${user.id}`);
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    return `http://gemtcg.com/confirm-email?token=${token}`;
+    const link = `http://gemtcg.com/confirm-email?token=${token}`;
+    console.log(`Generated link: ${link}`);
+    return link;
 }
 
 exports.sendConfirmationEmail = async (user) => {
+    console.log(`Preparing to send confirmation email to: ${user.email}`);
     const confirmationLink = generateConfirmationLink(user);
     const mailOptions = {
         from: process.env.EMAIL_FROM_ADDRESS,
@@ -24,6 +31,7 @@ exports.sendConfirmationEmail = async (user) => {
     };
 
     try {
+        console.log('Sending email...');
         await transporter.sendMail(mailOptions);
         console.log('Email sent successfully');
     } catch (error) {

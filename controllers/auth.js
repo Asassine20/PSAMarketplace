@@ -31,6 +31,7 @@ exports.register = (req, res) => {
                 console.log(error);
             } else {
                 const encodedEmail = encodeURIComponent(email);
+                req.session.email = email; // Store the email in the session
                 return res.redirect(`/register/seller-info?email=${encodedEmail}`);
             }
         });
@@ -38,7 +39,35 @@ exports.register = (req, res) => {
 };
 
 exports.submitSellerInfo = (req, res) => {
-    const { firstName, lastName, street, street2, city, state, zip, country, storeName, accountType, accountName, routingNumber, accountNumber, email } = req.body;
+    const email = req.body.email || req.session.email; // Corrected to handle email properly
+
+    if (!email || email.trim() === '') {
+        return res.render('seller-info', {
+            message: 'Email is required.',
+            formData: req.body
+        });
+    }
+
+    const { firstName, lastName, street, street2, city, state, zip, country, storeName, accountType, accountName, routingNumber, accountNumber, confirmRoutingNumber, confirmAccountNumber } = req.body; // Removed email from this destructuring to avoid duplication
+    if (routingNumber.length !== 9) {
+        return res.render('seller-info', {
+            message: 'Routing number must be 9 numbers long.',
+            formData: req.body // Include the submitted form data
+        });
+    }
+    if (routingNumber !== confirmRoutingNumber) {
+        return res.render('seller-info', {
+            message: 'Routing numbers do not match.',
+            formData: req.body
+        });
+    }
+    if (accountNumber !== confirmAccountNumber) {
+        return res.render('seller-info', {
+            message: 'Account numbers do not match.',
+            formData: req.body
+        });
+    }
+
     connection.getConnection((err, conn) => {
         if (err) {
             return res.status(500).send('Server error while obtaining connection.');

@@ -8,6 +8,7 @@ const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
 const cookieParser = require('cookie-parser');
 const inventoryRoutes = require('./routes/pages');
+const session = require('express-session');
 const hbs = require('hbs');
 
 server.use(cookieParser());
@@ -16,7 +17,12 @@ server.use(compression());
 
 server.use(express.static(publicDirectory));
 server.use(express.static('public'));
-
+server.use(session({
+    secret: '123', // Replace with your own secret, ideally stored in an environment variable
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: !true } // Set to `true` only if you're serving your site over HTTPS
+  }));
 server.set('view engine', 'hbs');
 
 // Parse URL-encoded bodies (as sent by HTML Forms)
