@@ -1276,8 +1276,17 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
     const offset = (page - 1) * limit;
 
     try {
-        // Count total feedback for pagination
+        // Fetch FeedbackAverage from Stores
+        const feedbackAverageQuery = `SELECT FeedbackAverage FROM Stores WHERE UserID = ?`;
+        console.log("feedbackaveragequery", feedbackAverageQuery);
+        const [averageResult] = await db.query(feedbackAverageQuery, [userId]);
+        console.log('Average Result:', averageResult);
 
+        // Adjusted access based on actual result structure
+        const feedbackAverage = averageResult ? averageResult.FeedbackAverage : null;
+        console.log('Feedback Average:', feedbackAverage);
+
+        // Count total feedback for pagination
         const countQuery = `SELECT COUNT(*) AS feedbackCount FROM Feedback WHERE SellerID = ?`;
         const [countResult] = await db.query(countQuery, [userId]);
         const feedbackCount = countResult.feedbackCount;
@@ -1312,6 +1321,7 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
         res.render('feedback', {
             feedback: feedback,
             feedbackCount: feedbackCount,
+            feedbackAverage: feedbackAverage,
             page: page,
             limit: limit,
             feedbackStats: feedbackStats,
