@@ -1388,8 +1388,6 @@ router.get('/admin/payments', authenticateToken, notificationCounts, async (req,
         // Ensure the result is in the format of an array of objects
         const paymentData = Array.isArray(results[0]) ? results[0] : [results[0]];
 
-        console.log("Payment Data:", paymentData);
-
         // Pass the array to the Handlebars template
         res.render('payments', {
             paymentData: paymentData
@@ -1397,6 +1395,61 @@ router.get('/admin/payments', authenticateToken, notificationCounts, async (req,
     } catch (error) {
         console.error('Error fetching payment data:', error);
         res.status(500).send('Server error');
+    }
+});
+
+async function getSalesData(startTime, endTime) {
+    // Implement database query to fetch sales data between startTime and endTime
+    // Return the data or an empty array if no data is found
+    return [];
+}
+
+router.get('/admin/reports', authenticateToken, notificationCounts, async (req, res) => {
+    const { startTime, endTime } = req.query; // Assuming the time period is passed as query parameters
+
+    try {
+        const salesData = await getSalesData(startTime, endTime);
+        res.render('reports', { salesData }); // Render the reports page with the fetched data
+    } catch (error) {
+        console.error('Error fetching sales data:', error);
+        res.status(500).send('Server error while fetching sales data.');
+    }
+});
+
+router.get('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
+    const userId = req.user.id; // Assuming you have user authentication in place and can get the user's ID
+
+    try {
+        // Fetch user settings data (e.g., from Users and Stores tables)
+        // This is a placeholder function, replace it with your actual query to get the user's data
+        const userData = await getUserData(userId);
+
+        res.render('settings', { userData }); // Render the settings page with the fetched data
+    } catch (error) {
+        console.error('Error fetching user settings data:', error);
+        res.status(500).send('Server error while fetching user settings data.');
+    }
+});
+
+// Mock function to get user data, replace with your actual database query
+async function getUserData(userId) {
+    // Implement database query to fetch user's settings data based on userId
+    // Return the data or an empty object if no data is found
+    return {};
+}
+
+router.post('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
+    const { name, email, password, confirmPassword, ...otherSettings } = req.body;
+
+    try {
+        // Update user settings data in your database
+        // Include validation, especially for email and password changes
+        // This is a placeholder, replace with your actual update logic
+
+        res.redirect('/admin/settings?success=true'); // Redirect back to the settings page, potentially with a success query parameter
+    } catch (error) {
+        console.error('Error updating user settings:', error);
+        res.status(500).send('Server error while updating user settings.');
     }
 });
 
