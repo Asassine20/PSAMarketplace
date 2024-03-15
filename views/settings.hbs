@@ -6,4 +6,78 @@
 </head>
 <body>
     {{> navbar}}
-    
+<form action="/admin/settings" method="POST">
+<h2>My Seller Settings</h2>
+    <div class="form-group">
+       <label>Username:</label>
+        <p>{{sellerInfo.Username}}</p>
+    </div>
+
+    <div class="form-group">
+        <label>Email:</label>
+        <p>{{sellerInfo.Email}}</p>
+    </div>
+
+    <div class="form-group">
+        <label>Store Name:</label>
+        <p>{{sellerInfo.StoreName}}</p>
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" maxlength="140" class="form-control" required>{{sellerInfo.Description}}</textarea>
+        <div id="descriptionHelp" class="form-text">Maximum 140 characters.</div>
+    </div>
+    <div class="form-group">
+        <label for="shippingPrice">Shipping Price:</label>
+        <input type="number" id="shippingPrice" name="shippingPrice" class="form-control" value="{{sellerInfo.ShippingPrice}}" step="0.01" required>
+    </div>
+
+
+    <div class="form-group">
+        <label for="street">Street:</label>
+        <input type="text" id="street" name="street" class="form-control" value="{{sellerInfo.Street}}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="street2">Street 2:</label>
+        <input type="text" id="street2" name="street2" class="form-control" value="{{sellerInfo.Street2}}">
+    </div>
+
+    <div class="form-group">
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" class="form-control" value="{{sellerInfo.City}}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="state">State:</label>
+        <input type="text" id="state" name="state" class="form-control" value="{{sellerInfo.State}}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="zipCode">Zip Code:</label>
+        <input type="text" id="zipCode" name="zipCode" class="form-control" value="{{sellerInfo.ZipCode}}" required>
+    </div>
+
+    <div class="form-group">
+        <label for="country">Country:</label>
+        <input type="text" id="country" name="country" class="form-control" value="{{sellerInfo.Country}}" required>
+    </div>
+    <div class="form-group">
+        <label>Account Number:</label>
+        <p>{{maskedAccountNumber}}</p>
+    </div>
+
+    <div class="form-group">
+        <label>Account Type:</label>
+        <p>{{sellerInfo.AccountType}}</p>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+<script>
+    document.getElementById('description').oninput = function () {
+    const maxLength = 140;
+    const currentLength = this.value.length;
+    document.getElementById('descriptionHelp').textContent = `${maxLength - currentLength} characters left`;
+    };
+</script>

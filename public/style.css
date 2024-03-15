@@ -741,3 +741,7 @@ nav .logo-image {
     height: 60px;
 }
 
+
+.form-group label {
+    font-weight: bold;
+}

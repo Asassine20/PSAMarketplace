@@ -1416,42 +1416,76 @@ router.get('/admin/reports', authenticateToken, notificationCounts, async (req, 
     }
 });
 
-router.get('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
-    const userId = req.user.id; // Assuming you have user authentication in place and can get the user's ID
-
-    try {
-        // Fetch user settings data (e.g., from Users and Stores tables)
-        // This is a placeholder function, replace it with your actual query to get the user's data
-        const userData = await getUserData(userId);
-
-        res.render('settings', { userData }); // Render the settings page with the fetched data
-    } catch (error) {
-        console.error('Error fetching user settings data:', error);
-        res.status(500).send('Server error while fetching user settings data.');
+function maskAccountNumber(accountNumber) {
+    if (accountNumber) {
+        return accountNumber.slice(0, -4).replace(/\d/g, 'X') + accountNumber.slice(-4);
     }
-});
-
-// Mock function to get user data, replace with your actual database query
-async function getUserData(userId) {
-    // Implement database query to fetch user's settings data based on userId
-    // Return the data or an empty object if no data is found
-    return {};
+    return ''; // Return an empty string if accountNumber is undefined or null
 }
 
-router.post('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
-    const { name, email, password, confirmPassword, ...otherSettings } = req.body;
+router.get('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
+    const userId = req.user.id; // Assuming you're storing the user's ID in req.user
 
     try {
-        // Update user settings data in your database
-        // Include validation, especially for email and password changes
-        // This is a placeholder, replace with your actual update logic
+        const query = `
+            SELECT Users.Username, Users.Email, Stores.StoreName, Stores.Description, 
+            Addresses.Street, Addresses.Street2, Addresses.City, Addresses.State, 
+            Addresses.ZipCode, Addresses.Country, BankInfo.AccountNumber, 
+            BankInfo.AccountType, Stores.ShippingPrice
+            FROM Users
+            LEFT JOIN Stores ON Users.UserID = Stores.UserID
+            LEFT JOIN Addresses ON Users.UserID = Addresses.UserID
+            LEFT JOIN BankInfo ON Stores.StoreID = BankInfo.StoreID
+            WHERE Users.UserID = ?`;
 
-        res.redirect('/admin/settings?success=true'); // Redirect back to the settings page, potentially with a success query parameter
+        const [results] = await db.query(query, [userId]);
+        if (results.length === 0) {
+            return res.status(404).send("User not found.");
+        }
+
+        // Assuming the first result is the one you want
+        const sellerInfo = results[0];
+        const maskedAccountNumber = maskAccountNumber(sellerInfo.AccountNumber);
+
+        res.render('admin/settings', { 
+            sellerInfo: sellerInfo,            
+            maskedAccountNumber: maskedAccountNumber
+        });
     } catch (error) {
-        console.error('Error updating user settings:', error);
-        res.status(500).send('Server error while updating user settings.');
+        console.error('Error fetching seller info:', error);
+        res.status(500).send('Server error');
     }
 });
+
+
+router.post('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
+    const { username, email, storeName, description, street, street2, city, state, zipCode, country } = req.body;
+    const userId = req.user.id; // Assuming user's ID is stored in req.user
+    if (description.length > 140) {
+        // Handle the error, e.g., by re-rendering the form with an error message
+        return res.render('settings', {
+            error: 'Description must be 140 characters or fewer.',
+            sellerInfo: req.body, // So they don't have to re-enter everything
+        });
+    }
+    try {
+        // Update Users table
+        await db.query(`UPDATE Users SET Username = ?, Email = ? WHERE UserID = ?`, [username, email, userId]);
+
+        // Update Stores table
+        await db.query(`UPDATE Stores SET StoreName = ?, Description = ? WHERE UserID = ?`, [storeName, description, userId]);
+
+        // Update Addresses table
+        // Assume there's only one primary address per user for simplicity
+        await db.query(`UPDATE Addresses SET Street = ?, Street2 = ?, City = ?, State = ?, ZipCode = ?, Country = ? WHERE UserID = ?`, [street, street2, city, state, zipCode, country, userId]);
+
+        res.redirect('settings');
+    } catch (error) {
+        console.error('Error updating seller info:', error);
+        res.status(500).send('Server error');
+    }
+});
+
 
 
 
