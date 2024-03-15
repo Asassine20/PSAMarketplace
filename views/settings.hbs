@@ -63,15 +63,13 @@
         <input type="text" id="country" name="country" class="form-control" value="{{sellerInfo.Country}}" required>
     </div>
     <div class="form-group">
-        <label>Account Number:</label>
-        <p>{{maskedAccountNumber}}</p>
-    </div>
-
-    <div class="form-group">
         <label>Account Type:</label>
         <p>{{sellerInfo.AccountType}}</p>
     </div>
-
+    <div class="form-group">
+        <label>Account Number:</label>
+        <p>{{sellerInfo.AccountNumber}}</p>
+    </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
 <script>

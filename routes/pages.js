@@ -1416,14 +1416,7 @@ router.get('/admin/reports', authenticateToken, notificationCounts, async (req, 
     }
 });
 
-function maskAccountNumber(accountNumber) {
-    if (accountNumber) {
-        return accountNumber.slice(0, -4).replace(/\d/g, 'X') + accountNumber.slice(-4);
-    }
-    return ''; // Return an empty string if accountNumber is undefined or null
-}
-
-router.get('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id; // Assuming you're storing the user's ID in req.user
 
     try {
@@ -1437,29 +1430,21 @@ router.get('/admin/settings', authenticateToken, notificationCounts, async (req,
             LEFT JOIN Addresses ON Users.UserID = Addresses.UserID
             LEFT JOIN BankInfo ON Stores.StoreID = BankInfo.StoreID
             WHERE Users.UserID = ?`;
-
-        const [results] = await db.query(query, [userId]);
-        if (results.length === 0) {
+        
+        const [sellerInfo] = await db.query(query, [userId]);
+        if (!sellerInfo) {
             return res.status(404).send("User not found.");
         }
-
-        // Assuming the first result is the one you want
-        const sellerInfo = results[0];
-        const maskedAccountNumber = maskAccountNumber(sellerInfo.AccountNumber);
-
-        res.render('admin/settings', { 
-            sellerInfo: sellerInfo,            
-            maskedAccountNumber: maskedAccountNumber
-        });
+        console.log(sellerInfo); // Add this line
+        res.render('settings', { sellerInfo });
     } catch (error) {
         console.error('Error fetching seller info:', error);
         res.status(500).send('Server error');
     }
 });
 
-
 router.post('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
-    const { username, email, storeName, description, street, street2, city, state, zipCode, country } = req.body;
+    const { username, email, storeName, shippingPrice, description, street, street2, city, state, zipCode, country } = req.body;
     const userId = req.user.id; // Assuming user's ID is stored in req.user
     if (description.length > 140) {
         // Handle the error, e.g., by re-rendering the form with an error message
@@ -1469,15 +1454,12 @@ router.post('/admin/settings',  authenticateToken, notificationCounts, async (re
         });
     }
     try {
-        // Update Users table
-        await db.query(`UPDATE Users SET Username = ?, Email = ? WHERE UserID = ?`, [username, email, userId]);
-
-        // Update Stores table
-        await db.query(`UPDATE Stores SET StoreName = ?, Description = ? WHERE UserID = ?`, [storeName, description, userId]);
-
         // Update Addresses table
         // Assume there's only one primary address per user for simplicity
         await db.query(`UPDATE Addresses SET Street = ?, Street2 = ?, City = ?, State = ?, ZipCode = ?, Country = ? WHERE UserID = ?`, [street, street2, city, state, zipCode, country, userId]);
+        
+        // Update Shipping price
+        await db.query(`UPDATE Stores SET ShippingPrice = ? WHERE UserID = ?`, [shippingPrice, userId]);
 
         res.redirect('settings');
     } catch (error) {
