@@ -1432,8 +1432,9 @@ router.get('/admin/settings',  authenticateToken, notificationCounts, async (req
             WHERE Users.UserID = ?`;
         
         const [sellerInfo] = await db.query(query, [userId]);
-        if (!sellerInfo) {
-            return res.status(404).send("User not found.");
+        if (sellerInfo.AccountNumber) {
+            const maskedAccountNumber = sellerInfo.AccountNumber.slice(-4).padStart(sellerInfo.AccountNumber.length, 'X');
+            sellerInfo.MaskedAccountNumber = maskedAccountNumber;
         }
         console.log(sellerInfo); // Add this line
         res.render('settings', { sellerInfo });
@@ -1444,7 +1445,7 @@ router.get('/admin/settings',  authenticateToken, notificationCounts, async (req
 });
 
 router.post('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
-    const { username, email, storeName, shippingPrice, description, street, street2, city, state, zipCode, country } = req.body;
+    const { shippingPrice, description, street, street2, city, state, zipCode, country } = req.body;
     const userId = req.user.id; // Assuming user's ID is stored in req.user
     if (description.length > 140) {
         // Handle the error, e.g., by re-rendering the form with an error message
@@ -1457,7 +1458,8 @@ router.post('/admin/settings',  authenticateToken, notificationCounts, async (re
         // Update Addresses table
         // Assume there's only one primary address per user for simplicity
         await db.query(`UPDATE Addresses SET Street = ?, Street2 = ?, City = ?, State = ?, ZipCode = ?, Country = ? WHERE UserID = ?`, [street, street2, city, state, zipCode, country, userId]);
-        
+                // Update Stores table
+        await db.query(`UPDATE Stores SET Description = ? WHERE UserID = ?`, [description, userId]);
         // Update Shipping price
         await db.query(`UPDATE Stores SET ShippingPrice = ? WHERE UserID = ?`, [shippingPrice, userId]);
 
@@ -1467,7 +1469,6 @@ router.post('/admin/settings',  authenticateToken, notificationCounts, async (re
         res.status(500).send('Server error');
     }
 });
-
 
 
 

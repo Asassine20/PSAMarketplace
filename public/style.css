@@ -745,3 +745,31 @@ nav .logo-image {
 .form-group label {
     font-weight: bold;
 }
+
+.settings-form-container {
+    background-color: #f2f2f2; /* Light grey background */
+    border-radius: 8px; /* Rounded corners for the form container */
+    padding: 20px; /* Padding inside the container for spacing */
+    margin-bottom: 20px; /* Margin at the bottom of the form container */
+    margin: auto;
+    width: 95%;
+}
+
+.settings-form-container .form-group {
+    margin-bottom: 15px; /* Spacing between form groups */
+}
+
+.form-control {
+    border-radius: 4px; /* Rounded edges for form controls like input and textarea */
+}
+
+textarea.form-control {
+    border: 1px solid #ced4da; /* Border for textarea */
+    background-color: white; /* White background for the input area */
+}
+
+.form-text {
+    margin-top: 5px;
+    font-size: 0.875em;
+    color: #6c757d;
+}
