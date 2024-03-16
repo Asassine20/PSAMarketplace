@@ -1,6 +1,8 @@
 const mysql = require('mysql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { sendConfirmationEmail } = require('./email'); // Adjust the path according to your project structure
+
 
 const connection = mysql.createPool({
     host: process.env.DB_HOST,
