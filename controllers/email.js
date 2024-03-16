@@ -26,7 +26,18 @@ exports.sendConfirmationEmail = async (user) => {
         from: process.env.EMAIL_FROM_ADDRESS,
         to: user.email,
         subject: 'Please confirm your email address',
-        html: `<p>Please confirm your email by clicking on this link: <a href="${confirmationLink}">${confirmationLink}</a></p>`,
+        html: `
+            <div style="background-color: #333; padding: 20px; text-align: center;">
+                <div style="background-color: white; padding: 20px; display: inline-block; text-align: left; max-width: 600px; width: 100%;">
+                    <img src="/images/banner.png" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; width: 50%;" />
+                    <h1 style="text-align: center;">Thank you for creating an account with GemTCG</h1>
+                    <p style="text-align: center;">Please click the button below to confirm your email address and activate your account.</p>
+                    <div style="text-align: center; margin: 20px;">
+                        <a href="${confirmationLink}" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">Confirm Email</a>
+                    </div>
+                </div>
+            </div>
+        `,
     };
 
     try {
@@ -37,3 +48,4 @@ exports.sendConfirmationEmail = async (user) => {
         console.error('Error sending email:', error);
     }
 };
+
