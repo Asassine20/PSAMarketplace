@@ -1,16 +1,15 @@
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 console.log('Initializing transporter...');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: process.env.EMAIL_APP_PASSWORD,
     },
 });
-
-console.log(`Transporter initialized with user: ${process.env.EMAIL_USERNAME}`);
 
 function generateConfirmationLink(user) {
     console.log(`Generating token for user ID: ${user.id}`);
