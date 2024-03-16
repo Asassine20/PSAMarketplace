@@ -27,13 +27,13 @@ exports.sendConfirmationEmail = async (user) => {
         to: user.email,
         subject: 'Please confirm your email address',
         html: `
-            <div style="background-color: #333; padding: 20px; text-align: center;">
-                <div style="background-color: white; padding: 20px; display: inline-block; text-align: left; max-width: 600px; width: 100%;">
-                    <img src="/images/banner.png" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; width: 50%;" />
+            <div style="background-color: #333; padding: 10px; text-align: center;">
+                <div style="background-color: white; padding: 10px; display: inline-block; text-align: left; max-width: 400px; width: 100%;">
+                    <img src="https://scontent.fdet1-2.fna.fbcdn.net/v/t39.30808-1/432925224_793841712785548_1804237986512213891_n.jpg?stp=dst-jpg_p480x480&_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=FrhAP0xdRiAAX-zmkQj&_nc_ht=scontent.fdet1-2.fna&oh=00_AfBBcwdrGArklAEmv3x_Wcmzy5NjECoJMxgVMtfPpRo2sQ&oe=65FB4255" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; width: 25%;" />
                     <h1 style="text-align: center;">Thank you for creating an account with GemTCG</h1>
                     <p style="text-align: center;">Please click the button below to confirm your email address and activate your account.</p>
                     <div style="text-align: center; margin: 20px;">
-                        <a href="${confirmationLink}" style="background-color: #4CAF50; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">Confirm Email</a>
+                        <a href="${confirmationLink}" style="background-color: #0050A2; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px;">Confirm Email</a>
                     </div>
                 </div>
             </div>

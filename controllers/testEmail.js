@@ -2,8 +2,8 @@ const { sendConfirmationEmail } = require('./email'); // Adjust the path as nece
 
 // Define test user data
 const testUser = {
-    id: '87', // Provide a test user ID
-    email: 'jacquelinnelee@gmail.com' // Replace with your test email address
+    id: '86', // Provide a test user ID
+    email: 'kickznkardz@gmail.com' // Replace with your test email address
 };
 
 // Call the sendConfirmationEmail function with the test user
