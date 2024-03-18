@@ -8,6 +8,7 @@ const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
 const cookieParser = require('cookie-parser');
 const inventoryRoutes = require('./routes/pages');
+const articlesRoutes = require('./routes/articles');
 const hbs = require('hbs');
 
 server.use(cookieParser());
@@ -28,6 +29,7 @@ server.use(authRoutes);
 
 //Define routes
 server.use('/', require('./routes/pages'));
+server.use('/articles', articlesRoutes);
 
 server.use('/auth', require('./routes/auth'));
 
