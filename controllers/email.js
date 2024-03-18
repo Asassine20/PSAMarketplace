@@ -2,7 +2,6 @@ const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-console.log('Initializing transporter...');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {

@@ -1398,23 +1398,56 @@ router.get('/admin/payments', authenticateToken, notificationCounts, async (req,
     }
 });
 
-async function getSalesData(startTime, endTime) {
-    // Implement database query to fetch sales data between startTime and endTime
-    // Return the data or an empty array if no data is found
-    return [];
-}
-
 router.get('/admin/reports', authenticateToken, notificationCounts, async (req, res) => {
-    const { startTime, endTime } = req.query; // Assuming the time period is passed as query parameters
+    const { startDate, endDate } = req.query;
+
+    console.log(`Received startDate: ${startDate}, endDate: ${endDate}`);
+
+    if (!startDate || !endDate) {
+        console.log('No startDate or endDate provided, rendering initial page.');
+        return res.render('reports', {
+            salesData: null,
+            startDate: '',
+            endDate: ''
+        });
+    }
+
+    // Adjust endDate to include the full day
+    const adjustedEndDate = endDate + ' 23:59:59';
 
     try {
-        const salesData = await getSalesData(startTime, endTime);
-        res.render('reports', { salesData }); // Render the reports page with the fetched data
+        const sql = `
+            SELECT 
+                SUM(SalePrice) AS totalSalePrice, 
+                SUM(ShippingPrice) AS totalShippingPrice, 
+                COUNT(OrderNumber) AS totalOrderAmount, 
+                SUM(FeeAmount) AS totalFeeAmount, 
+                SUM(NetAmount) AS totalNetAmount 
+            FROM Orders 
+            WHERE SellerID = ? AND DATE(OrderDate) BETWEEN ? AND DATE(?)`;
+
+        const params = [req.user.id, startDate, adjustedEndDate];
+        console.log(`Executing SQL with params: ${params.join(', ')}`);
+
+        const [results] = await db.query(sql, params);
+        console.log(results); // Assuming this logs the RowDataPacket correctly
+
+        // Directly using results if it already contains the correct structure.
+        const salesData = results || {};
+        console.log('Sales data fetched:', salesData);
+
+        res.render('reports', {
+            salesData, 
+            startDate,
+            endDate
+        });
+
     } catch (error) {
         console.error('Error fetching sales data:', error);
-        res.status(500).send('Server error while fetching sales data.');
+        res.status(500).send('Server error');
     }
 });
+
 
 router.get('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id; // Assuming you're storing the user's ID in req.user

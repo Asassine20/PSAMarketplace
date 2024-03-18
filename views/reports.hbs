@@ -6,3 +6,42 @@
 </head>
 <body>
     {{> navbar}}
+<h2 style="padding-left: 25px;">Sales Report</h2>
+<form action="/admin/reports" method="GET" class="inventory-bubble">
+  <div class="form-group">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate" name="startDate" class="form-control" value="{{startDate}}">
+  </div>
+  <div class="form-group">
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate" name="endDate" class="form-control" value="{{endDate}}">
+  </div>
+  <button type="submit" class="btn btn-primary">Generate Report</button>
+</form>
+
+
+{{#if salesData}}
+  <h3 style="padding-left: 45px;">Report from {{startDate}} to {{endDate}}</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Total Sale Price</th>
+        <th>Total Shipping Price</th>
+        <th>Total Order Amount</th>
+        <th>Total Fee Amount</th>
+        <th>Total Net Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{salesData.totalSalePrice}}</td>
+        <td>{{salesData.totalShippingPrice}}</td>
+        <td>{{salesData.totalOrderAmount}}</td>
+        <td>{{salesData.totalFeeAmount}}</td>
+        <td>{{salesData.totalNetAmount}}</td>
+      </tr>
+    </tbody>
+  </table>
+{{else}}
+  <p>No sales data available for the selected period.</p>
+{{/if}}
