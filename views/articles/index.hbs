@@ -1,0 +1,9 @@
+{{> head}}
+<h1>Articles</h1>
+{{#each articles}}
+  <article>
+    <h2>{{this.Title}}</h2>
+    <p>{{this.Content}}</p>
+    <p>Published on {{this.PublishedDate}}</p>
+  </article>
+{{/each}}

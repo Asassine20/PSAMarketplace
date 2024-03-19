@@ -1,0 +1,10 @@
+{{> head}}
+<body>
+    <article>
+        <h1>{{article.Title}}</h1>
+        <p>Published on {{dateFormat article.PublishedDate}}</p>
+        <div>{{{article.Content}}}</div> <!-- Use triple-stash for raw HTML -->
+    </article>
+    <a href="/articles">Back to articles</a>
+</body>
+</html>

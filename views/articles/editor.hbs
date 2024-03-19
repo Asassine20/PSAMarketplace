@@ -12,6 +12,7 @@
 <body>
     <h1>Article Editor</h1>
     <form method="POST" action="/articles/publish">
+        <input type="text" name="title" placeholder="Title" required>
         <textarea id="mytextarea" name="content">Start writing your article...</textarea>
         <button type="submit">Publish</button>
     </form>
