@@ -9,10 +9,15 @@ const slugify = require('slugify');
 router.get('/editor', authenticateAdmin, articlesController.editor);
 
 router.post('/publish', authenticateAdmin, async (req, res) => {
-    const { title, content } = req.body;
-    const slug = slugify(title, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g }); 
+    const { title, content, caption, coverImage } = req.body;
+    const slug = slugify(title, { lower: true, strict: true, remove: /[*+~.()'"!:@]/g });
+
     try {
-        const result = await db.query("INSERT INTO Articles (Title, Content, Slug, PublishedDate) VALUES (?, ?, ?, NOW())", [title, content, slug]);
+        // Ensure your query includes the new fields
+        const result = await db.query(
+          "INSERT INTO Articles (Title, Content, Caption, CoverImage, Slug, PublishedDate) VALUES (?, ?, ?, ?, ?, NOW())",
+          [title, content, caption, coverImage, slug]
+        );
         console.log("Article saved", result);
         res.redirect('/articles/editor?success=true');
     } catch (error) {
@@ -20,6 +25,7 @@ router.post('/publish', authenticateAdmin, async (req, res) => {
         res.status(500).send('Error publishing article');
     }
 });
+
 
 
 router.get('/', async (req, res) => {

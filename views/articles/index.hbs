@@ -1,15 +1,30 @@
 {{> articlesNavbar}}
+
 <h1>Articles</h1>
 
-{{#if articles.length}}
+<div class="articles-grid">
   {{#each articles}}
-    <article>
-      <h2><a href="/articles/{{this.Slug}}">{{this.Title}}</a></h2>
-      <p>{{{slice this.Content limit=200}}}...</p>
-      <p>{{formatDateNoTime this.PublishedDate}}</p>
-    </article>
+    <div class="article-card" data-url="/articles/{{this.Slug}}">
+      <img src="{{this.CoverImage}}" alt="Cover Image" class="article-cover-image">
+      <h2 class="article-title">{{this.Title}}</h2>
+      <p class="article-caption">{{this.Caption}}</p>
+      <p class="article-date">{{formatDateNoTime this.PublishedDate}}</p>
+    </div>
   {{/each}}
-{{else}}
-  <p>No articles found.</p>
-{{/if}}
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Get all elements with the class 'article-card'
+  const cards = document.querySelectorAll('.article-card');
+  
+  // Add a click event listener to each card
+  cards.forEach(card => {
+    card.addEventListener('click', function() {
+      // Navigate to the URL in the data-url attribute
+      window.location.href = this.getAttribute('data-url');
+    });
+  });
+});
+</script>
+
 

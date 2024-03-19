@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
     <title>Article Editor</title>
     <script src="https://cdn.tiny.cloud/1/fserroq0h0k2h4met1o8fzy8x2i47ezn3hucj4bje6am2eb8/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
@@ -8,13 +9,33 @@
             selector: '#mytextarea'
         });
     </script>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" href="/images/logo.png" type="image/png">
 </head>
+    <nav>
+        <a href="/">
+            <img src="/images/logo.png" class="logo-image" alt="Logo">
+        </a>
+        <form action="/articles/search" method="GET" class="articles-search-bar">
+            <input type="text" name="query" placeholder="Search articles...">
+            <button type="submit">Search</button>
+        </form>
+        <ul>
+            <li><a href="/Articles">Articles</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
+        </ul>
+    </nav>
+
 <body>
     <h1>Article Editor</h1>
     <form method="POST" action="/articles/publish">
         <input type="text" name="title" placeholder="Title" required>
+        <input type="text" name="caption" placeholder="Caption" required> <!-- Caption input -->
+        <input type="text" name="coverImage" placeholder="Cover Image URL" required> <!-- Cover Image URL input -->
         <textarea id="mytextarea" name="content">Start writing your article...</textarea>
         <button type="submit">Publish</button>
     </form>
 </body>
 </html>
+
