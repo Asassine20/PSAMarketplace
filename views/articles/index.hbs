@@ -1,27 +1,15 @@
-{{> head}}
-    <nav>
-        <a href="/">
-            <img src="/images/logo.png" class="logo-image" alt="Logo">
-        </a>
-        <ul>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
-        </ul>
-    </nav>
+{{> articlesNavbar}}
 <h1>Articles</h1>
 
-<!-- Search form -->
-<form action="/articles/search" method="GET">
-    <input type="text" name="query" placeholder="Search articles...">
-    <button type="submit">Search</button>
-</form>
+{{#if articles.length}}
+  {{#each articles}}
+    <article>
+      <h2><a href="/articles/{{this.Slug}}">{{this.Title}}</a></h2>
+      <p>{{{slice this.Content limit=200}}}...</p>
+      <p>{{formatDateNoTime this.PublishedDate}}</p>
+    </article>
+  {{/each}}
+{{else}}
+  <p>No articles found.</p>
+{{/if}}
 
-{{#each articles}}
-  <article>
-    <!-- Link to the article using its slug -->
-    <h2><a href="/articles/{{this.Slug}}">{{this.Title}}</a></h2>
-    <!-- You might want to limit the content shown here, e.g., to the first 200 characters -->
-    <p>{{{slice this.Content limit=200}}}...</p>
-    <p>{{formatDate this.PublishedDate}}</p>
-  </article>
-{{/each}}

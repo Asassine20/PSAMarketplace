@@ -32,6 +32,17 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/search', async (req, res) => {
+    const searchTerm = req.query.query; // Assuming the search term is passed as a query parameter named "query"
+    try {
+        const articles = await db.query("SELECT * FROM Articles WHERE Title LIKE ? OR Content LIKE ?", [`%${searchTerm}%`, `%${searchTerm}%`]);
+        res.render('articles/index', { articles });
+    } catch (error) {
+        console.error('Error fetching articles:', error);
+        res.status(500).send('Error fetching articles');
+    }
+});
+
 router.get('/:slug', async (req, res) => {
     const { slug } = req.params;
     try {
@@ -45,19 +56,6 @@ router.get('/:slug', async (req, res) => {
     } catch (error) {
         console.error('Error fetching article by slug:', error);
         res.status(500).send('Error fetching article');
-    }
-});
-
-
-
-router.get('/search', async (req, res) => {
-    const searchTerm = req.query.query; // Assuming the search term is passed as a query parameter named "query"
-    try {
-        const articles = await db.query("SELECT * FROM Articles WHERE Title LIKE ? OR Content LIKE ?", [`%${searchTerm}%`, `%${searchTerm}%`]);
-        res.render('articles/index', { articles });
-    } catch (error) {
-        console.error('Error fetching articles:', error);
-        res.status(500).send('Error fetching articles');
     }
 });
 

@@ -61,6 +61,15 @@ hbs.registerHelper('formatDate', function(date) {
     };
     return new Date(date).toLocaleDateString('en-US', options);
   });
+
+hbs.registerHelper('formatDateNoTime', function(date) {
+    const options = { 
+      year: 'numeric', 
+      month: 'numeric', 
+      day: 'numeric',
+    };
+    return new Date(date).toLocaleDateString('en-US', options);
+  });
   
 hbs.registerHelper('displayShippingMethod', function(shippedWithTracking) {
     return shippedWithTracking ? "Shipped with tracking" : "Shipped without tracking";
@@ -118,3 +127,4 @@ hbs.registerHelper('slice', function(content, options) {
 });
 
 hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views');
+hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views/articles');

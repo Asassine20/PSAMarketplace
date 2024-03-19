@@ -773,3 +773,36 @@ textarea.form-control {
     font-size: 0.875em;
     color: #6c757d;
 }
+
+.articles-search-bar {
+    display: flex;
+    align-items: center;
+    background-color: #f3f3f3;
+    border-radius: 20px;
+}
+
+.articles-search-bar input[type="text"] {
+    border: none;
+    border-radius: 20px;
+    background-color: transparent;
+    outline: none;
+    padding: 5px;
+    width: 200px;
+    font-size: 16px;
+}
+
+.articles-search-bar button {
+    border: none;
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.articles-search-bar button:hover {
+    background-color: #0056b3;
+}
+

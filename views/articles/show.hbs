@@ -1,17 +1,8 @@
-{{> head}}
-    <nav>
-        <a href="/">
-            <img src="/images/logo.png" class="logo-image" alt="Logo">
-        </a>
-        <ul>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/register">Register</a></li>
-        </ul>
-    </nav>
+{{> articlesNavbar}}
 <body>
     <article>
         <h1>{{article.Title}}</h1>
-        <p>Published on {{formatDate article.PublishedDate}}</p>
+        <p>{{formatDateNoTime article.PublishedDate}}</p>
         <div>{{{article.Content}}}</div> <!-- Use triple-stash for raw HTML -->
     </article>
     
