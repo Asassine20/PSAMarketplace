@@ -112,4 +112,9 @@ hbs.registerHelper('formatCurrency', function(value) {
     return value.toFixed(2);
 });
 
+hbs.registerHelper('slice', function(content, options) {
+    const limit = options.hash.limit;
+    return content.length > limit ? content.substring(0, limit) + "..." : content;
+});
+
 hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views');

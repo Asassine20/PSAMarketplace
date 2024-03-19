@@ -1,10 +1,26 @@
 {{> head}}
+    <nav>
+        <a href="/">
+            <img src="/images/logo.png" class="logo-image" alt="Logo">
+        </a>
+        <ul>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
+        </ul>
+    </nav>
 <body>
     <article>
         <h1>{{article.Title}}</h1>
-        <p>Published on {{dateFormat article.PublishedDate}}</p>
+        <p>Published on {{formatDate article.PublishedDate}}</p>
         <div>{{{article.Content}}}</div> <!-- Use triple-stash for raw HTML -->
     </article>
+    
+    <!-- Example addition: a comments section -->
+    <section>
+        <h2>Comments</h2>
+        <!-- Comments go here -->
+    </section>
+
     <a href="/articles">Back to articles</a>
 </body>
 </html>

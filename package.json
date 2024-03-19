@@ -27,7 +27,8 @@
     "nodemailer": "^6.9.11",
     "pdfkit": "^0.14.0",
     "plaid": "^21.0.0",
-    "redis": "^4.6.12"
+    "redis": "^4.6.12",
+    "slugify": "^1.6.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
