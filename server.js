@@ -3,7 +3,7 @@ const compression = require('compression');
 const path = require('path');
 const server = express();
 const db = require('./db');
-const port = 3000;
+const port = 5000;
 const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
 const cookieParser = require('cookie-parser');
@@ -128,3 +128,13 @@ hbs.registerHelper('slice', function(content, options) {
 
 hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views');
 hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views/articles');
+
+
+// React 
+// Serve static files from the React frontend app
+server.use(express.static(path.join(__dirname, 'frontend/build')));
+
+// Anything that doesn't match the above, send back index.html
+server.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/frontend/build/index.html'));
+});
