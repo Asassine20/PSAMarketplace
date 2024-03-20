@@ -871,3 +871,50 @@ textarea.form-control {
     }
   }
   
+  .individual-article {
+    max-width: 800px; /* Adjust based on your layout */
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .individual-title {
+    font-size: 3rem; /* Large font for the title */
+    margin-bottom: 10px;
+  }
+  
+  .individual-caption {
+    font-size: 1.25rem;
+    color: #666; /* Subdued text color for the caption */
+    margin-bottom: 5px;
+  }
+  
+  .individual-date {
+    font-size: 1rem;
+    color: #999; /* Even more subdued color for the date */
+    margin-bottom: 20px;
+  }
+  
+  .individual-cover-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover; /* This will crop the image to fill the area */
+  }  
+  
+  .individual-content {
+    padding-top: 20px;
+    font-size: 1.1rem;
+    line-height: 1.6; /* Improved readability for the content */
+  }
+  
+  .back-to-articles-link {
+    display: block;
+    margin-top: 20px;
+    color: #007bff; /* Bootstrap's default link color */
+    text-decoration: none;
+    padding-left: 30px;
+  }
+  
+  .back-to-articles-link:hover {
+    text-decoration: underline;
+  }
+  

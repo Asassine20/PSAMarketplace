@@ -1,11 +1,11 @@
 {{> articlesNavbar}}
-<body>
-    <article>
-        <h1>{{article.Title}}</h1>
-        <p>{{formatDateNoTime article.PublishedDate}}</p>
-        <div>{{{article.Content}}}</div> <!-- Use triple-stash for raw HTML -->
-    </article>
+<a href="/articles" class="back-to-articles-link">Back to articles</a>
+<article class="individual-article">
+    <h1 class="individual-title">{{article.Title}}</h1>
+    <p class="individual-caption">{{article.Caption}}</p>
+    <p class="individual-date">{{formatDateNoTime article.PublishedDate}}</p>
+    <img src="{{article.CoverImage}}" alt="Cover Image" class="individual-cover-image">
+    <div class="individual-content">{{{article.Content}}}</div>
+</article>
 
-    <a href="/articles" style="text-decoration:none;">Back to articles</a>
-</body>
-</html>
+
