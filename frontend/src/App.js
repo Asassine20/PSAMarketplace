@@ -1,16 +1,16 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './components/HomePage'; // Make sure the path is correct
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import HomePage from './components/HomePage/HomePage';
 
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          // Define other routes here
-        </Routes>
-      </div>
+      <Navbar /> {/* This ensures Navbar is always visible */}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        {/* Define other routes here */}
+      </Routes>
     </Router>
   );
 }

@@ -1,0 +1,42 @@
+.search-bar-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; /* Space between search bar and navbar */
+  }
+  
+  .search-form input[type="text"] {
+    /* Style for the search input */
+  }
+  
+  .search-form button {
+    /* Style for the search button */
+  }
+.home-link-container {
+    text-align: center; /* Center the home link */
+    margin-bottom: 10px; /* Space between home link and navbar */
+  }
+  
+  .navbar {
+    display: flex;
+    background-color: #007bff; /* Adjust background color as needed */
+    justify-content: center; /* Center navbar items */
+    flex-wrap: wrap; /* Wrap items if they overflow */
+  }
+  
+  .sports-links {
+    display: flex; /* Align sports links horizontally */
+  }
+  
+  .nav-link {
+    text-decoration: none;
+    color: #fff; /* Adjust color as needed */
+    padding: 10px 15px; /* Adjust padding as needed */
+    margin: 0 5px; /* Space between links */
+    border-radius: 5px; /* Rounded corners */
+    display: block;
+  }
+  
+  .nav-link:hover {
+    background-color: #0056b3; /* Darker on hover */
+  }
+  

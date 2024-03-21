@@ -3,12 +3,12 @@ const compression = require('compression');
 const path = require('path');
 const server = express();
 const db = require('./db');
-const port = 5000;
+const port = 3001;
 const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
 const cookieParser = require('cookie-parser');
-const inventoryRoutes = require('./routes/pages');
 const articlesRoutes = require('./routes/articles');
+const homePageRoutes = require('./routes/homepage');
 const hbs = require('hbs');
 
 server.use(cookieParser());
@@ -26,14 +26,12 @@ server.use(express.urlencoded({ extended: true }));
 // Parse JSON bodies (as sent by API clients)
 server.use(express.json());
 server.use(authRoutes);
-
+server.use(homePageRoutes);
 //Define routes
 server.use('/', require('./routes/pages'));
 server.use('/articles', articlesRoutes);
 
 server.use('/auth', require('./routes/auth'));
-
-server.use('/', inventoryRoutes);
 
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
