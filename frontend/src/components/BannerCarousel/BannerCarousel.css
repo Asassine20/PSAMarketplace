@@ -1,7 +1,6 @@
 .banner-container {
   position: relative;
   height: 400px; /* Example height, adjust as necessary */
-  /* Ensure it has no padding or margins that could offset the inner content */
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -10,6 +9,8 @@
 .images-container {
   display: flex;
   height: 100%;
+  flex-wrap: nowrap;
+  transition: transform 0.5s ease-in-out; /* Smooth transition for sliding effect */
   align-items: center; /* Vertically center the images */
   justify-content: center; /* Horizontally center the images */
 }
@@ -33,6 +34,10 @@
   left: 50%;
   transform: translate(-50%, -50%); /* Center the content */
   color: #fff; /* Adjust text color as needed */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; 
   text-align: left;
   font-weight: bold;
   font-size: 3rem;
@@ -145,5 +150,33 @@ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 background-attachment: fixed;
 background-size: cover;
 background-position: center;
+}
+
+.banner-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+
+.banner-button:hover {
+  background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+.banner-image-1 .banner-button {
+  background-color: #eb1c2d;
+}
+.banner-image-2 .banner-button {
+  background-color: #0050a2;
+}
+.banner-image-3 .banner-button {
+  background-color: #4c00a2;
 }
 
