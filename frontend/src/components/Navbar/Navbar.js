@@ -19,11 +19,12 @@ const Navbar = () => {
       <div className="search-bar-container">
         <form className="search-form">
           <input type="text" placeholder="Search for cards..." />
-          <button type="submit">Search</button>
+          <button type="submit">
+            <i class="fas fa-search"></i>
+          </button>
         </form>
       </div>
       <nav className="navbar">
-        <Link to="/" className="nav-link">Home</Link>
         <div className="sports-links">
           {sports.map((sport, index) => (
             <Link key={index} to={`/sports/${sport.toLowerCase()}`} className="nav-link">{sport}</Link>

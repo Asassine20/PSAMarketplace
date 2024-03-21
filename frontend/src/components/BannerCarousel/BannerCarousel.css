@@ -1,0 +1,54 @@
+.banner-container {
+  position: relative;
+  height: 400px; /* Example height, adjust as necessary */
+  /* Ensure it has no padding or margins that could offset the inner content */
+  padding: 0;
+  margin: 0;
+}
+
+.banner-carousel-item {
+  width: 100%;
+  height: 400px;; /* Adjust height as needed */
+  background-size: cover;
+  background-position: center;
+}
+
+.banner-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the content */
+  color: #fff; /* Adjust text color as needed */
+  text-align: left;
+  font-weight: bold;
+  font-size: 3rem;
+}
+
+
+
+.banner-image-1 {
+  background-color: #B8B900;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000'%3E%3Cg %3E%3Ccircle fill='%23B8B900' cx='50' cy='0' r='50'/%3E%3Cg fill='%23bfb700' %3E%3Ccircle cx='0' cy='50' r='50'/%3E%3Ccircle cx='100' cy='50' r='50'/%3E%3C/g%3E%3Ccircle fill='%23c4b300' cx='50' cy='100' r='50'/%3E%3Cg fill='%23caaf00' %3E%3Ccircle cx='0' cy='150' r='50'/%3E%3Ccircle cx='100' cy='150' r='50'/%3E%3C/g%3E%3Ccircle fill='%23cfaa00' cx='50' cy='200' r='50'/%3E%3Cg fill='%23d4a500' %3E%3Ccircle cx='0' cy='250' r='50'/%3E%3Ccircle cx='100' cy='250' r='50'/%3E%3C/g%3E%3Ccircle fill='%23daa000' cx='50' cy='300' r='50'/%3E%3Cg fill='%23e09900' %3E%3Ccircle cx='0' cy='350' r='50'/%3E%3Ccircle cx='100' cy='350' r='50'/%3E%3C/g%3E%3Ccircle fill='%23e59300' cx='50' cy='400' r='50'/%3E%3Cg fill='%23eb8b00' %3E%3Ccircle cx='0' cy='450' r='50'/%3E%3Ccircle cx='100' cy='450' r='50'/%3E%3C/g%3E%3Ccircle fill='%23f08400' cx='50' cy='500' r='50'/%3E%3Cg fill='%23f57c00' %3E%3Ccircle cx='0' cy='550' r='50'/%3E%3Ccircle cx='100' cy='550' r='50'/%3E%3C/g%3E%3Ccircle fill='%23fb7300' cx='50' cy='600' r='50'/%3E%3Cg fill='%23ff6a01' %3E%3Ccircle cx='0' cy='650' r='50'/%3E%3Ccircle cx='100' cy='650' r='50'/%3E%3C/g%3E%3Ccircle fill='%23ff6207' cx='50' cy='700' r='50'/%3E%3Cg fill='%23ff5a0c' %3E%3Ccircle cx='0' cy='750' r='50'/%3E%3Ccircle cx='100' cy='750' r='50'/%3E%3C/g%3E%3Ccircle fill='%23ff5312' cx='50' cy='800' r='50'/%3E%3Cg fill='%23ff4d18' %3E%3Ccircle cx='0' cy='850' r='50'/%3E%3Ccircle cx='100' cy='850' r='50'/%3E%3C/g%3E%3Ccircle fill='%23ff471d' cx='50' cy='900' r='50'/%3E%3Cg fill='%23ff4122' %3E%3Ccircle cx='0' cy='950' r='50'/%3E%3Ccircle cx='100' cy='950' r='50'/%3E%3C/g%3E%3Ccircle fill='%23FF3C28' cx='50' cy='1000' r='50'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: contain;
+  background-position: center;
+}
+
+.banner-image-2 {
+  background-color: #000000;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1600 800'%3E%3Cg %3E%3Cpolygon fill='%232f0609' points='1600 160 0 460 0 350 1600 50'/%3E%3Cpolygon fill='%235e0b12' points='1600 260 0 560 0 450 1600 150'/%3E%3Cpolygon fill='%238d111b' points='1600 360 0 660 0 550 1600 250'/%3E%3Cpolygon fill='%23bc1624' points='1600 460 0 760 0 650 1600 350'/%3E%3Cpolygon fill='%23EB1C2D' points='1600 800 0 800 0 750 1600 450'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+}
+
+.banner-image-3{
+background-color: #77aa77;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 2 1'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2377aa77'/%3E%3Cstop offset='1' stop-color='%23065C17'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cf8' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23cf8' stop-opacity='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='c' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='2' y2='2'%3E%3Cstop offset='0' stop-color='%23cf8' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23cf8' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='2' height='1'/%3E%3Cg fill-opacity='0.5'%3E%3Cpolygon fill='url(%23b)' points='0 1 0 0 2 0'/%3E%3Cpolygon fill='url(%23c)' points='2 1 2 0 0 0'/%3E%3C/g%3E%3C/svg%3E");
+background-attachment: fixed;
+background-size: cover;
+background-position: center;
+}
+/* Add more classes as needed for additional backgrounds */
+
+
