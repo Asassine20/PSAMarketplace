@@ -4,6 +4,7 @@
   /* Ensure it has no padding or margins that could offset the inner content */
   padding: 0;
   margin: 0;
+  overflow: hidden;
 }
 
 .images-container {
@@ -18,8 +19,6 @@
   object-fit: cover;
   width: auto; /* You might adjust this based on your design needs */
 }
-
-
 
 .banner-carousel-item {
   width: 100% ;
@@ -82,7 +81,56 @@
   background-attachment: fixed;
   background-position: center;
 }
+.banner-image-1 .banner-content {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30%; /* Adjusted width for content */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding-right: 20px; 
+  padding-left: 20px;
+  z-index: 2;
+}
 
+.banner-image-1 .images-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 70%; /* Adjusted width to complement content's width */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Adjust alignment of images within the container */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .banner-image-1 .banner-content, .banner-image-1 .images-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    left: 0;
+    top: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .banner-image-1 .images-container {
+    order: 1; /* Images come after the content */
+  }
+
+  .banner-image-1 .banner-content {
+    transform: translateY(0);
+    top: auto;
+    padding-right: 0; /* Remove padding on smaller screens */
+  }
+}
 .banner-image-2 {
   background-color: #000000;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1600 800'%3E%3Cg %3E%3Cpolygon fill='%232f0609' points='1600 160 0 460 0 350 1600 50'/%3E%3Cpolygon fill='%235e0b12' points='1600 260 0 560 0 450 1600 150'/%3E%3Cpolygon fill='%238d111b' points='1600 360 0 660 0 550 1600 250'/%3E%3Cpolygon fill='%23bc1624' points='1600 460 0 760 0 650 1600 350'/%3E%3Cpolygon fill='%23EB1C2D' points='1600 800 0 800 0 750 1600 450'/%3E%3C/g%3E%3C/svg%3E");
