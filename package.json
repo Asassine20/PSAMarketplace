@@ -24,6 +24,7 @@
     "hbs": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.9.2",
     "nodemailer": "^6.9.11",
     "pdfkit": "^0.14.0",
     "plaid": "^21.0.0",
