@@ -11,13 +11,11 @@ const Navbar = () => {
     fetch('/api/nav-sports')
       .then(response => response.json())
       .then(data => {
-        // Ensure that data is an array
         if (Array.isArray(data)) {
           setSports(data);
         } else {
-          // Handle the case where data is not an array
           console.error('Data is not an array:', data);
-          setSports([]); // Reset sports to an empty array or set it to a default value
+          setSports([]);
         }
       })
       .catch(error => console.error('Error fetching sports:', error));
@@ -36,8 +34,8 @@ const Navbar = () => {
       <nav className={styles.navbar}>
         <div className={styles.sportsLinks}>
           {Array.isArray(sports) && sports.map((sport, index) => (
-            <Link key={index} href={`/sports/${sport.toLowerCase()}`}>
-              <a className={styles.navLink}>{sport}</a>
+            <Link key={index} href={`/sports/${sport.Sport.toLowerCase()}`} passHref>
+              <div className={styles.navLink}>{sport.Sport}</div>
             </Link>
           ))}
         </div>

@@ -1,24 +1,24 @@
 .searchBarContainer {
-  padding-top: 10px;
+    padding-top: 10px;
     display: flex;
     justify-content: center;
     margin-bottom: 20px; /* Space between search bar and navbar */
   }
-  
+    
   .searchForm {
     display: flex;
     border: 1px solid #ccc; /* Light grey border */
     border-radius: 6px; /* Rounded corners for the whole search form */
     overflow: hidden; /* Ensures the inner elements conform to the container's rounded corners */
   }
-  
+    
   .searchForm input[type="text"] {
     border: none; /* Removes the default border */
     padding: 10px 15px; /* Spacing inside the search input */
     width: 350px; /* Adjust as needed */
     outline: none; /* Removes the outline on focus */
   }
-  
+    
   .searchForm button {
     border: none; /* Removes the default border */
     padding: 10px 15px; /* Spacing inside the button */
@@ -27,31 +27,33 @@
     cursor: pointer; /* Changes cursor to pointer on hover */
     outline: none; /* Removes the outline on focus */
   }
-  
+    
   .searchForm button:hover {
     background-color: #0056b3; /* A slightly darker blue on hover */
   }
-  
-.homeLinkContainer {
+    
+  .homeLinkContainer {
     text-align: center; /* Center the home link */
     margin-bottom: 10px; /* Space between home link and navbar */
   }
-  
-.navbar {
+    
+  .navbar {
     display: flex;
     background-color: #007bff; /* Adjust background color as needed */
     justify-content: center; /* Center navbar items */
     flex-wrap: wrap; /* Wrap items if they overflow */
     width: 100%; /* Ensure navbar takes full width */
     margin-bottom: 20px;
-}  
-  
+    text-decoration: none;
+  }
+
   .sportsLinks {
     display: flex; /* Align sports links horizontally */
+    text-decoration: none ;
   }
-  
+    
   .navLink {
-    text-decoration: none;
+    text-decoration: none ; /* Ensures text decoration is removed */
     color: #fff; /* Adjust color as needed */
     font-weight: bold;
     padding: 15px 15px; /* Adjust padding as needed */
@@ -59,8 +61,16 @@
     border-radius: 5px; /* Rounded corners */
     display: block;
   }
-  
+    
   .navLink:hover {
     background-color: #0056b3; /* Darker on hover */
+    text-decoration: none; /* Ensures text decoration is removed on hover */
+  }
+
+/* Hide the navbar on screens smaller than 860px */
+@media (max-width: 860px) {
+    .navbar {
+      display: none;
+    }
   }
   

@@ -47,7 +47,6 @@ const BannerCarousel = () => {
     const navigate = useRouter(); 
     const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
     const intervalRef = useRef(null);
-    /*
     const resetTimer = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
@@ -59,20 +58,19 @@ const BannerCarousel = () => {
       resetTimer();
       return () => clearInterval(intervalRef.current); // Cleanup on unmount
     }, [currentBannerIndex]);
-    */
     const navigateToPrevious = () => {
       setCurrentBannerIndex((prevIndex) => prevIndex === 0 ? banners.length - 1 : prevIndex - 1);
-      //resetTimer();
+      resetTimer();
     };
   
     const navigateToNext = () => {
       setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
-      //resetTimer();
+      resetTimer();
     };
   
     const handleCircleClick = (index) => {
       setCurrentBannerIndex(index);
-      //resetTimer();
+      resetTimer();
     };
     const currentBanner = banners[currentBannerIndex];
 
