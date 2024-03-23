@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './Navbar.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -23,6 +24,10 @@ const Navbar = () => {
 
   return (
     <div className={styles.navbarContainer}>
+      <div className={styles.logoAndSearchContainer}>
+        <Link href="/">
+          <Image src="/logo.png" alt="Logo" width={70} height={70} style={{ cursor: 'pointer' }} />
+        </Link>
       <div className={styles.searchBarContainer}>
         <form className={styles.searchForm}>
           <input type="text" placeholder="Search for cards..." className={styles.searchInput}/>
@@ -31,6 +36,7 @@ const Navbar = () => {
           </button>
         </form>
       </div>
+    </div>
       <nav className={styles.navbar}>
         <div className={styles.sportsLinks}>
           {Array.isArray(sports) && sports.map((sport, index) => (

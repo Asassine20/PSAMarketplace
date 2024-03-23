@@ -1,74 +1,89 @@
-.searchBarContainer {
-    padding-top: 10px;
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  }
+  
+  .logoAndSearchContainer {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px; /* Space between search bar and navbar */
+    align-items: center;
+    width: 100%;
   }
-    
+  
+  .logoContainer {
+    position: absolute;
+    left: 20px;
+  }
+  
+  .searchBarContainer {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+  }
+  
   .searchForm {
     display: flex;
-    border: 1px solid #ccc; /* Light grey border */
-    border-radius: 6px; /* Rounded corners for the whole search form */
-    overflow: hidden; /* Ensures the inner elements conform to the container's rounded corners */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: fit-content;
+    margin: 0 auto;
+    overflow: hidden;
   }
-    
+  
   .searchForm input[type="text"] {
-    border: none; /* Removes the default border */
-    padding: 10px 15px; /* Spacing inside the search input */
-    width: 350px; /* Adjust as needed */
-    outline: none; /* Removes the outline on focus */
+    border: none;
+    padding: 10px 15px;
+    width: 450px;
+    outline: none;
   }
-    
+  
   .searchForm button {
-    border: none; /* Removes the default border */
-    padding: 10px 15px; /* Spacing inside the button */
-    background-color: #000000; /* eBay-like blue background */
-    color: white; /* White text */
-    cursor: pointer; /* Changes cursor to pointer on hover */
-    outline: none; /* Removes the outline on focus */
+    border: none;
+    padding: 10px 15px;
+    background-color: #000000;
+    color: white;
+    cursor: pointer;
+    outline: none;
   }
-    
+  
   .searchForm button:hover {
-    background-color: #0056b3; /* A slightly darker blue on hover */
+    background-color: #0056b3;
   }
-    
-  .homeLinkContainer {
-    text-align: center; /* Center the home link */
-    margin-bottom: 10px; /* Space between home link and navbar */
-  }
-    
+  
   .navbar {
     display: flex;
-    background-color: #007bff; /* Adjust background color as needed */
-    justify-content: center; /* Center navbar items */
-    flex-wrap: wrap; /* Wrap items if they overflow */
-    width: 100%; /* Ensure navbar takes full width */
-    margin-bottom: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: 10px;
+    background-color: #007bff;
+    margin-top: 20px;
     text-decoration: none;
   }
-
+  
   .sportsLinks {
-    display: flex; /* Align sports links horizontally */
-    text-decoration: none ;
+    display: flex;
+    text-decoration: none;
   }
-    
+  
   .navLink {
-    text-decoration: none ; /* Ensures text decoration is removed */
-    color: #fff; /* Adjust color as needed */
+    text-decoration: none;
+    color: #fff;
     font-weight: bold;
-    padding: 15px 15px; /* Adjust padding as needed */
-    margin: 0 10px; /* Space between links */
-    border-radius: 5px; /* Rounded corners */
+    padding: 15px 15px;
+    margin: 0 10px;
+    border-radius: 5px;
     display: block;
   }
-    
+  
   .navLink:hover {
-    background-color: #0056b3; /* Darker on hover */
-    text-decoration: none; /* Ensures text decoration is removed on hover */
+    background-color: #0056b3;
+    text-decoration: none;
   }
-
-/* Hide the navbar on screens smaller than 860px */
-@media (max-width: 860px) {
+  
+  @media (max-width: 860px) {
     .navbar {
       display: none;
     }
