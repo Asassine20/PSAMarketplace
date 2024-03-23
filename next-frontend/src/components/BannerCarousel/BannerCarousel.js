@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router'; 
+import Image from 'next/image';
 import styles from './BannerCarousel.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -29,7 +30,13 @@ const banners = [
       text: 'Start Selling',
       url: '/'
     },
-    images: []
+    images: [
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/154267273/GP2HfHlLVUWjpdZesxKgjg.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/131673031/kARb8BfhA0GYFWYOLK6DiQ.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/138710615/HA4_Q18RIUiaXvzyTFVTTA.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/132689436/yqLZCPcUxEeo8rx9m8Fpug.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/151745671/KXL_OkYz-kKNClEDUpGo0w.jpg'
+    ]
   },
   {
     class: styles.bannerImage3,
@@ -39,7 +46,16 @@ const banners = [
       text: 'Learn More',
       url: '/articles'
     },
-    images: []
+    images: [
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/126889271/356421395.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/155109986/14g4QNGMfkiNpdZ2IKBLRA.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/153177160/cEj19vcd5kWKfIMN-iC38A.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/138498058/ZTQYf8LPcEKWJZQTvD0j3Q.jpg',
+      'https://d1htnxwo4o0jhw.cloudfront.net/cert/153135854/zETzhtIPBEukV2b6_CpAxA.jpg'
+
+
+
+    ]
   }
 ];
 
