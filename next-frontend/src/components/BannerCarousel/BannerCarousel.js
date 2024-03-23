@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/router'; // Changed from 'react-router-dom' to 'next/router'
+import { useRouter } from 'next/router'; 
 import styles from './BannerCarousel.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -47,32 +47,32 @@ const BannerCarousel = () => {
     const navigate = useRouter(); 
     const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
     const intervalRef = useRef(null);
-  
+    /*
     const resetTimer = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
         setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
       }, 10000);
     };
-  
+    
     useEffect(() => {
       resetTimer();
       return () => clearInterval(intervalRef.current); // Cleanup on unmount
     }, [currentBannerIndex]);
-  
+    */
     const navigateToPrevious = () => {
       setCurrentBannerIndex((prevIndex) => prevIndex === 0 ? banners.length - 1 : prevIndex - 1);
-      resetTimer();
+      //resetTimer();
     };
   
     const navigateToNext = () => {
       setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
-      resetTimer();
+      //resetTimer();
     };
   
     const handleCircleClick = (index) => {
       setCurrentBannerIndex(index);
-      resetTimer();
+      //resetTimer();
     };
     const currentBanner = banners[currentBannerIndex];
 
