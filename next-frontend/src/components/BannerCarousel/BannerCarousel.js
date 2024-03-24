@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router'; 
-import Image from 'next/image';
 import styles from './BannerCarousel.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -24,7 +23,7 @@ const banners = [
   },
   {
     class: styles.bannerImage2,
-    content: 'Sell Cards In Seconds',
+    content: 'List Cards In Seconds',
     icon: null,
     button: {
       text: 'Start Selling',

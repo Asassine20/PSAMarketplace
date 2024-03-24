@@ -1,91 +1,126 @@
 .headerContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-  }
-  
-  .logoAndSearchContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .logoContainer {
-    position: absolute;
-    left: 20px;
-  }
-  
-  .searchBarContainer {
-    display: flex;
-    justify-content: center;
-    flex-grow: 1;
-  }
-  
-  .searchForm {
-    display: flex;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    width: fit-content;
-    margin: 0 auto;
-    overflow: hidden;
-  }
-  
-  .searchForm input[type="text"] {
-    border: none;
-    padding: 10px 15px;
-    width: 450px;
-    outline: none;
-  }
-  
-  .searchForm button {
-    border: none;
-    padding: 10px 15px;
-    background-color: #000000;
-    color: white;
-    cursor: pointer;
-    outline: none;
-  }
-  
-  .searchForm button:hover {
-    background-color: #0056b3;
-  }
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.searchBarContainer {
+  display: flex;
+  justify-content: center;
+  flex-grow: 1;
+  margin-top: 5px; /* Reduced margin-top for closer alignment */
+  width: 95%; /* Make searchBarContainer take 90% of the width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.searchForm {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%; /* Make searchForm take full width of its container */
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.searchForm input[type="text"] {
+  border: none;
+  padding: 10px 15px;
+  width: calc(100% - 30px); /* Adjust width to make room for the button */
+  outline: none;
+}
+
+.searchForm button {
+  border: none;
+  padding: 10px 15px;
+  background-color: #000000;
+  color: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.searchForm button:hover {
+  background-color: #0056b3;
+}
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-bottom: 10px;
+  background-color: #0050a2;
+  margin-top: 20px;
+  text-decoration: none;
+}
+
+.sportsLinks {
+  display: flex;
+  text-decoration: none;
+}
+
+.navLink {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  padding: 15px 15px;
+  margin: 0 10px;
+  border-radius: 5px;
+  display: block;
+}
+
+.navLink:hover {
+  background-color: #0056b3;
+  text-decoration: none;
+}
+
+.rightNav {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Adjusted for closer spacing */
+  width: auto;
+}
+
+.startSellingButton {
+  background-color: #000000; /* Black background for Start Selling button */
+  color: white;
+  padding: 5px 10px; /* Adjusted padding for Start Selling button */
+  border-radius: 5px;
+  text-decoration: none;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.startSellingButton:hover {
+  background-color: #0050a2; /* Darker color on hover */
+}
+
+.navIcon {
+  color: #000000; /* Icon color */
+  margin: 0 10px; /* Reduced margin for closer icons */
+  cursor: pointer;
+  font-size: 1.5rem; /* Adjust this value as needed */
+  padding: 5px; /* Padding for icons */
+  border: 1px solid black; /* Black border for icons */
+  border-radius: 5px; /* Rounded corners for icons */
+  display: inline-flex; /* Ensures icons are aligned and treated as flex items */
+  justify-content: center;
+  align-items: center;
+}
+
+.navIcon:hover {
+  border-color: #0056b3; /* Border color highlights on hover */
+}
+
+
+@media (max-width: 860px) {
   .navbar {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    width: 100%;
-    margin-bottom: 10px;
-    background-color: #007bff;
+    display: none;
     margin-top: 20px;
-    text-decoration: none;
   }
-  
-  .sportsLinks {
-    display: flex;
-    text-decoration: none;
+  .searchBarContainer {
+    margin-bottom: 20px;
   }
-  
-  .navLink {
-    text-decoration: none;
-    color: #fff;
-    font-weight: bold;
-    padding: 15px 15px;
-    margin: 0 10px;
-    border-radius: 5px;
-    display: block;
-  }
-  
-  .navLink:hover {
-    background-color: #0056b3;
-    text-decoration: none;
-  }
-  
-  @media (max-width: 860px) {
-    .navbar {
-      display: none;
-    }
-  }
-  
+}
