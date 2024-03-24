@@ -1,0 +1,41 @@
+.shopCategories {
+    text-align: center;
+    margin: 40px 0;
+  }
+.categoriesHeader {
+    font-size: 2rem;
+    padding-bottom: 20px;
+    padding-top: 10px;
+}
+  .categoryCards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px; /* Creates space between the cards */
+    padding: 0 20px;
+  }
+  
+  .categoryCard {
+    width: calc(33.333% - 20px); /* Adjust based on the gap and desired card width */
+    cursor: pointer;
+    transition: transform 0.2s; /* Smooth transition for hover effect */
+    display: flex;
+    flex-direction: column; /* Ensure content flows vertically */
+  }
+  
+  .categoryCard:hover {
+    transform: translateY(-5px); /* Slight lift effect on hover */
+  }
+  
+  .categoryCard h3 {
+    order: -1; /* Move header above the image */
+    margin-bottom: 10px; /* Adjusted margin */
+    color: black; /* Make text black */
+  }
+  
+  .categoryCard img {
+    border-radius: 5px; /* Slight border radius */
+    height: auto; /* Adjust height based on width to maintain aspect ratio */
+    max-height: 400px; /* Make images a little taller */
+  }
+  

@@ -1,0 +1,55 @@
+/* components/Footer.module.css */
+
+.footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    margin-top: 80px;
+    background-color: #f3f3f3; /* Light grey background */
+    border-top: 1px solid #e1e1e1; /* Light grey border */
+  }
+  
+  .footerSection {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .footerSection h4 {
+    margin-bottom: 10px;
+  }
+  
+  .footerSection a {
+    text-decoration: none;
+    color: #797d86; /* Bootstrap primary blue for link color */
+    margin-bottom: 5px;
+  }
+
+  .socialMediaSection {
+  text-align: center;
+}
+
+.socialIcons a {
+  margin: 0 10px; /* Space out icons */
+  color: inherit; /* Inherit color from parent or change as needed */
+  font-size: 24px; /* Icon size, adjust as needed */
+}
+.socialIcons {
+    padding-top: 5px;
+    color: #797d86;
+}
+
+.tiktokIcon:hover {
+    color:#00f2ea
+}
+
+.facebookIcon:hover {
+    color: #316ff6;
+}
+
+.instagramIcon:hover {
+    color: #d62976;
+}
+
+.youtubeIcon:hover {
+    color: #ff0000;
+}

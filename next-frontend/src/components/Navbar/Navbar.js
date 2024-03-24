@@ -3,7 +3,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './Navbar.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUser, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { IoCartOutline } from "react-icons/io5";
+import { FaRegUser } from "react-icons/fa";
+
 
 const Navbar = () => {
   const [sports, setSports] = useState([]);
@@ -25,15 +28,20 @@ const Navbar = () => {
   return (
     <div className={styles.navbarContainer}>
       <div className={styles.headerContainer}>
-        <Link href="/">
-          <Image src="/logo.png" alt="Logo" width={70} height={70} style={{ cursor: 'pointer' }} />
-        </Link>
+        <div className={styles.logosContainer}> {/* Container for both logos */}
+          <Link href="/">
+            <Image src="/logo.png" alt="Logo" width={80} height={80} style={{ cursor: 'pointer' }} />
+          </Link>
+          <a href="https://www.psacard.com" target="_blank" rel="noopener noreferrer">
+            <Image src="/psaLogo.png" alt="PSA Logo" width={70} height={70} style={{ cursor: 'pointer', paddingLeft: '10px' }}/>
+          </a>
+        </div>
         <div className={styles.rightNav}>
-          <FontAwesomeIcon icon={faUser} size="2x" className={styles.navIcon} />
+          <FaRegUser className={`${styles.navIcon} ${styles.faIcon}`} />
           <Link href="/sell">
             <span className={styles.startSellingButton}>Start Selling</span>
           </Link>
-          <FontAwesomeIcon icon={faShoppingCart} size="2x" className={styles.navIcon} />
+          <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
         </div>
       </div>
       <div className={styles.searchBarContainer}>
@@ -54,6 +62,7 @@ const Navbar = () => {
         </div>
       </nav>
     </div>
+
   );
 };
 
