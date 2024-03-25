@@ -8,20 +8,43 @@
 
 .cardsSection {
   flex: 3;
-  width: 80%;
+  width: 95%;
   margin-top: 20px;
 }
 
 .cardsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+}
+
+@media (max-width: 1699px) {
+  .cardsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .cardsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card {
+    height: 350px;
+  }
+}
+
+@media (max-width: 600px) {
+  .cardsGrid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .card {
+    height: 350px;
+  }
 }
 
 .card {
   display: flex;
-  flex-direction: column;
-  background-color: #fff;
+  background-color: #f3f3f3;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   border-radius: 8px;
   overflow: hidden;
@@ -32,19 +55,44 @@
   transform: scale(1.05);
 }
 
-.card div {
+
+.cardImageWrapper {
+  flex: 0 0 50%; /* Half of the card's width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Full height of the card */
+}
+
+.cardImage {
+  border-radius: 8px 8px 8px 8px; /* Rounded corners on the left side */
+  width: auto; /* Fill the width of the wrapper */
+  height: auto; /* Fill the height of the wrapper */
+  object-fit: cover; /* Cover the wrapper area without losing the aspect ratio */
+}
+
+
+.cardInfo {
   padding: 10px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  flex: 1;
 }
 
-.card div:not(:first-child) {
-  border-top: 1px solid #eee;
+.cardName, .cardSet, .cardYear, .cardColor, .cardVariant, .cardNumber {
+  margin-bottom: 10px; /* Adds a little more padding between each row */
 }
 
-.card div:first-child img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+.cardName {
+  font-weight: bold;
+  margin-top: 15px; /* Adds slightly more padding below the card name */
+}
+
+.cardColor, .cardVariant {
+  display: inline-block;
 }
 
 .pagination {
