@@ -1,100 +1,133 @@
-/* styles/Search.module.css */
 .mainContent {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px;
-}
-
-.cardsSection {
-  flex: 3;
   width: 95%;
-  margin-top: 20px;
 }
 
-.cardsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.controlSection {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+  border-bottom: 1px solid #ccc;
+}
+
+.filterAndCardsContainer {
+  display: flex;
+  width: 95%;
   gap: 20px;
 }
 
-@media (max-width: 1699px) {
-  .cardsGrid {
-    grid-template-columns: repeat(3, 1fr);
+.filterSection {
+  display: block;
+  width: 200px;
+  padding: 10px;
+  border-right: 1px solid #ccc;
+}
+
+@media (min-width: 1201px) {
+  .filterAndCardsContainer {
+    flex-direction: row;
   }
 }
 
-@media (max-width: 900px) {
-  .cardsGrid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 1200px) {
+  .filterAndCardsContainer {
+    flex-direction: column;
   }
-  .card {
-    height: 350px;
+
+  .filterSection {
+    display: none;
+  }
+
+  .filterToggleButton {
+    display: block;
+    position: fixed;
+    top: 10px;
+    left: 20px;
+    z-index: 5;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
   }
 }
 
-@media (max-width: 600px) {
-  .cardsGrid {
-    grid-template-columns: repeat(1, 1fr);
-  }
-  .card {
-    height: 350px;
-  }
+.cardsSection {
+  width: 100%;
+}
+
+/* Cards grid layout */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
 }
 
 .card {
+  width: 100%;
+  height: 350px;
   display: flex;
   background-color: #f3f3f3;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   border-radius: 8px;
   overflow: hidden;
+  cursor: pointer;
+}
+.card:hover {
+  transform: scale(1.05);
   transition: transform 0.2s ease-in-out;
 }
 
-.card:hover {
-  transform: scale(1.05);
-}
-
-
 .cardImageWrapper {
-  flex: 0 0 50%; /* Half of the card's width */
+  width: 200px;
+  height: 335px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%; /* Full height of the card */
 }
 
 .cardImage {
-  border-radius: 8px 8px 8px 8px; /* Rounded corners on the left side */
-  width: auto; /* Fill the width of the wrapper */
-  height: auto; /* Fill the height of the wrapper */
-  object-fit: cover; /* Cover the wrapper area without losing the aspect ratio */
+  border-radius: 8px;
+  width: 200px;
+  height: 335px;
+  object-fit: cover;
 }
 
-
 .cardInfo {
-  padding: 10px;
+  flex: 1;
+  padding-left: 20px;
+  margin-top: 30px;
+  padding-bottom: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   text-align: left;
-  flex: 1;
 }
 
-.cardName, .cardSet, .cardYear, .cardColor, .cardVariant, .cardNumber {
-  margin-bottom: 10px; /* Adds a little more padding between each row */
+.cardName, .cardSport, .cardSet, .cardYear, .cardColor, .cardVariant {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
+
 
 .cardName {
   font-weight: bold;
-  margin-top: 15px; /* Adds slightly more padding below the card name */
 }
 
-.cardColor, .cardVariant {
-  display: inline-block;
-}
-
+/* Pagination styles */
 .pagination {
   display: flex;
   justify-content: center;
@@ -103,13 +136,13 @@
 
 .pagination button {
   padding: 10px 20px;
-  margin: 0 10px;
+  margin: 0 5px;
   background-color: #007bff;
-  color: #ffffff;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: background-color 0.2s;
 }
 
 .pagination button:hover {

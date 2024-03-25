@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     try {
         const sql = `
             SELECT * FROM Card
-            WHERE CardName LIKE ?
+            WHERE CardName like ?
             LIMIT ? OFFSET ?
         `;
         // Use the query function from your db module
