@@ -138,8 +138,6 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
     const sport = req.query.sport || '';
     const cardColor = req.query.cardColor || '';
     const cardVariant = req.query.cardVariant || '';
-    //const sortColumn = req.query.sortColumn; 
-    //const sortOrder = req.query.sortOrder; 
     const cacheKey = `inventory:${sellerId}:${page}:${limit}:${searchTerm}:${cardSet}:${cardYear}:${sport}:${cardColor}:${cardVariant}`;
 
     try {
@@ -171,19 +169,6 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             whereConditions.push("CardVariant = ?");
             values.push(cardVariant);
         }
-
-        /*let orderByClause = '';
-        if (sortColumn && sortOrder) {
-            // Ensure the sort column and order are valid to prevent SQL injection
-            const validSortColumns = ['Sport', 'CardName', 'CardSet', 'CardYear', 'CardNumber', 'CardColor', 'CardVariant'];
-            const validSortOrder = ['asc', 'desc'];
-            if (validSortColumns.includes(sortColumn) && validSortOrder.includes(sortOrder)) {
-                orderByClause = ` ORDER BY ${sortColumn} ${sortOrder}`;
-            } else {
-                return res.status(400).send('Invalid sort parameters');
-            }
-        }
-*/
         let query = "SELECT * FROM Card";
         if (whereConditions.length) {
             query += " WHERE " + whereConditions.join(" AND ");

@@ -1,6 +1,9 @@
 .shopCategories {
     text-align: center;
     margin: 40px 0;
+    background-color: #9ba0aa;
+    padding: 20px;
+    color: white;
   }
 .categoriesHeader {
     font-size: 2rem;
@@ -30,7 +33,7 @@
   .categoryCard h3 {
     order: -1; /* Move header above the image */
     margin-bottom: 10px; /* Adjusted margin */
-    color: black; /* Make text black */
+    color: white; /* Make text black */
   }
   
   .categoryCard img {

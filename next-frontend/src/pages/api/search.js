@@ -1,45 +1,21 @@
-import db from '@/db';
+// pages/api/search.js
+import db from '@/db'; // Ensure this path matches your db module's actual location
 
-router.get('/search', async (req, res) => {
-    const { cardName, sport, cardSet, cardColor, cardVariant, cardYear } = req.query;
-    let query = "SELECT * FROM Card WHERE 1 = 1";
-    let values = [];
+export default async function handler(req, res) {
+  const { cardName } = req.query;
 
-    if (cardName) {
-        query += " AND CardName LIKE ?";
-        values.push(`%${cardName}%`);
-    }
+  try {
+    const query = `
+      SELECT * FROM Card
+      WHERE CardName LIKE ?
+    `;
+    const values = [`%${cardName}%`];
 
-    if (sport) {
-        query += " AND Sport = ?";
-        values.push(sport);
-    }
-
-    if (cardSet) {
-        query += " AND CardSet = ?";
-        values.push(cardSet);
-    }
-
-    if (cardColor) {
-        query += " AND CardColor = ?";
-        values.push(cardColor);
-    }
-
-    if (cardVariant) {
-        query += " AND CardVariant = ?";
-        values.push(cardVariant);
-    }
-
-    if (cardYear) {
-        query += " AND CardYear = ?";
-        values.push(cardYear);
-    }
-
-    try {
-        const result = await db.query(query, values);
-        res.json(result);
-    } catch (error) {
-        console.error('Error fetching cards:', error);
-        res.status(500).send('Error fetching cards');
-    }
-});
+    const [rows] = await db.query(query, values);
+    console.log(rows);
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error("Failed to fetch cards:", error);
+    res.status(500).json({ message: "Failed to fetch cards" });
+  }
+}

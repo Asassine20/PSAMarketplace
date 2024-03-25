@@ -1,0 +1,25 @@
+/* styles/Search.module.css */
+.mainContent {
+    display: flex;
+  }
+  
+  .filterSection {
+    flex: 1;
+    /* Adjust styles as needed */
+  }
+  
+  .cardsSection {
+    flex: 3;
+    /* Adjust styles as needed */
+  }
+  
+  .cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns */
+    gap: 20px; /* Adjust the gap between cards */
+  }
+  
+  .card {
+    /* Style each card */
+  }
+  

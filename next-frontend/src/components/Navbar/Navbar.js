@@ -1,5 +1,7 @@
+// Navbar.js
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
 import styles from './Navbar.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,9 +9,10 @@ import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { IoCartOutline } from "react-icons/io5";
 import { FaRegUser } from "react-icons/fa";
 
-
 const Navbar = () => {
   const [sports, setSports] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     fetch('/api/nav-sports')
@@ -24,6 +27,12 @@ const Navbar = () => {
       })
       .catch(error => console.error('Error fetching sports:', error));
   }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    router.push(`/search?cardName=${encodeURIComponent(searchQuery)}`);
+  };
+
 
   return (
     <div className={styles.navbarContainer}>
@@ -45,8 +54,14 @@ const Navbar = () => {
         </div>
       </div>
       <div className={styles.searchBarContainer}>
-        <form className={styles.searchForm}>
-          <input type="text" placeholder="Search for cards..." className={styles.searchInput} />
+        <form onSubmit={handleSearch} className={styles.searchForm}>
+          <input
+            type="text"
+            placeholder="Search for cards..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
           <button type="submit" className={styles.searchButton}>
             <FontAwesomeIcon icon={faSearch} />
           </button>
