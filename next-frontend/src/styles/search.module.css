@@ -1,25 +1,74 @@
 /* styles/Search.module.css */
 .mainContent {
-    display: flex;
-  }
-  
-  .filterSection {
-    flex: 1;
-    /* Adjust styles as needed */
-  }
-  
-  .cardsSection {
-    flex: 3;
-    /* Adjust styles as needed */
-  }
-  
-  .cardsGrid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 columns */
-    gap: 20px; /* Adjust the gap between cards */
-  }
-  
-  .card {
-    /* Style each card */
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.cardsSection {
+  flex: 3;
+  width: 80%;
+  margin-top: 20px;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card div {
+  padding: 10px;
+  text-align: center;
+}
+
+.card div:not(:first-child) {
+  border-top: 1px solid #eee;
+}
+
+.card div:first-child img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.pagination button:hover {
+  background-color: #0056b3;
+}
+
+.pagination button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
