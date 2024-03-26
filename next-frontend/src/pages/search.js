@@ -39,9 +39,18 @@ const SearchPage = () => {
     };
     const handleFilterChange = () => {
         // Construct the query string with new filter parameters
-        const query = `?cardName=${encodeURIComponent(cardName)}&sport=${sport}&cardSet=${cardSet}&cardYear=${cardYear}&cardColor=${cardColor}&cardVariant=${cardVariant}&inStock=${inStock}&page=${page}&limit=${cardsPerPage}`;
-        router.push(query);
+        let query = `?page=1`; // Reset to page 1 whenever filters change
+        if (sport) query += `&sport=${encodeURIComponent(sport)}`;
+        if (cardSet) query += `&cardSet=${encodeURIComponent(cardSet)}`;
+        if (cardYear) query += `&cardYear=${encodeURIComponent(cardYear)}`;
+        if (cardColor) query += `&cardColor=${encodeURIComponent(cardColor)}`;
+        if (cardVariant) query += `&cardVariant=${encodeURIComponent(cardVariant)}`;
+        if (inStock) query += `&inStock=${inStock}`;
+    
+        // Assuming you have a function to fetch cards based on the query
+        fetchFilteredCards(query);
     };
+    
     return (
         <div>
             <div className={styles.mainContent}>
@@ -59,8 +68,53 @@ const SearchPage = () => {
                     {isFilterVisible && (
                         <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
                             <button className={styles.closeFilterButton} onClick={toggleFilterVisibility}>X</button>
-                            <input type="text" placeholder="Filter by sport..." className={styles.filterInput} />
-                            {/* Additional filter inputs can be added here */}
+                            <input
+                                type="text"
+                                placeholder="Filter by sport..."
+                                className={styles.filterInput}
+                                value={sport}
+                                onChange={(e) => setSport(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Filter by card set..."
+                                className={styles.filterInput}
+                                value={cardSet}
+                                onChange={(e) => setCardSet(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Filter by card year..."
+                                className={styles.filterInput}
+                                value={cardYear}
+                                onChange={(e) => setCardYear(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Filter by card color..."
+                                className={styles.filterInput}
+                                value={cardColor}
+                                onChange={(e) => setCardColor(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Filter by card variant..."
+                                className={styles.filterInput}
+                                value={cardVariant}
+                                onChange={(e) => setCardVariant(e.target.value)}
+                            />
+                            {/* Example of a toggle for 'in stock' - you might need additional logic to handle this */}
+                            <div>
+                                <label>
+                                    In Stock:
+                                    <input
+                                        type="checkbox"
+                                        checked={inStock}
+                                        onChange={() => setInStock(!inStock)} // Assuming you add a useState for inStock as a boolean
+                                    />
+                                </label>
+                            </div>
+                            <button onClick={handleFilterChange} className={styles.filterApplyButton}>Apply Filters</button>
                         </aside>
                     )}
                     <section className={styles.cardsSection}>
@@ -82,8 +136,8 @@ const SearchPage = () => {
                                             <div className={styles.cardSport}>{card.Sport}</div>
                                             <div className={styles.cardSet}>{card.CardSet}</div>
                                             <div className={styles.cardNumber}># {card.CardNumber}</div>
-                                            <div className={styles.cardVariant}>{card.CardVariant || 'N/A'}</div>
-                                            <div className={styles.cardColor}>{card.CardColor || 'N/A'}</div>
+                                            <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
+                                            <div className={styles.cardColor}>{card.CardColor || ''}</div>
                                             <div className={styles.cardName}>{card.CardName}</div>
                                         </div>
                                     </div>
