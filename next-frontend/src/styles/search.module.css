@@ -25,6 +25,7 @@
   display: flex;
   width: 95%;
   gap: 20px;
+  position: relative;
 }
 
 .filterSection {
@@ -32,34 +33,56 @@
   width: 200px;
   padding: 10px;
   border-right: 1px solid #ccc;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+}
+
+.closeFilterButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  font-size: 24px;
 }
 
 @media (min-width: 1201px) {
   .filterAndCardsContainer {
     flex-direction: row;
   }
+    .filterSection {
+    height: auto; /* Adapt height to content */
+  }
+  .filterToggleButton {
+    display: none; /* Hide toggle button */
+  }
+
 }
 
 @media (max-width: 1200px) {
-  .filterAndCardsContainer {
-    flex-direction: column;
-  }
-
-  .filterSection {
-    display: none;
-  }
-
   .filterToggleButton {
     display: block;
     position: fixed;
     top: 10px;
     left: 20px;
-    z-index: 5;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
+    z-index: 30; /* Ensure toggle button is above the filter section */
+  }
+
+  .filterSection {
+    position: fixed; /* or absolute, depending on your layout needs */
+    top: 0; /* Adjust as needed */
+    left: 0; /* Adjust as needed */
+    width: 200px; /* or whatever width you prefer */
+    height: 100%; /* Take up full viewport height, adjust as needed */
+    background-color: white; /* or any color you prefer */
+    overflow-y: auto; /* In case of scrolling */
+    z-index: 20; /* Higher than cardsSection */
+    display: none; /* Initially hidden */
+  }
+
+  .filterVisible {
+    display: block; /* Show filter section */
   }
 }
 
@@ -152,4 +175,7 @@
 .pagination button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+}
+.filterVisible {
+  display: block !important; /* Override any other display settings */
 }

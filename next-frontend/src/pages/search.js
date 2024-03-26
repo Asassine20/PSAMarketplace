@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Image from 'next/image'; // Import Image from next/image
-import styles from '../styles/search.module.css'; // Adjust the import path as necessary
+import Image from 'next/image';
+import styles from '../styles/search.module.css';
 
 const SearchPage = () => {
     const [filteredCards, setFilteredCards] = useState([]);
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
     const router = useRouter();
-    const { cardName, page = '1' } = router.query; // Use page from the query params, default to 1
+    const { cardName, page = '1' } = router.query;
     const cardsPerPage = 24;
 
     useEffect(() => {
         const fetchFilteredCards = async () => {
             if (!cardName) return;
-            // Use the page from router.query for pagination
             const url = `/api/search?cardName=${encodeURIComponent(cardName)}&page=${page}&limit=${cardsPerPage}`;
             const response = await fetch(url);
             const data = await response.json();
@@ -20,18 +20,23 @@ const SearchPage = () => {
         };
 
         fetchFilteredCards();
-    }, [cardName, page]); // Depend on both cardName and page from query
+    }, [cardName, page]);
 
-    // Function to change page, updating the URL
     const paginate = pageNumber => {
         router.push(`?cardName=${encodeURIComponent(cardName)}&page=${pageNumber}`);
     };
 
+    // Step 2: Function to toggle filter section visibility
+    const toggleFilterVisibility = () => {
+        console.log("Toggling filter visibility"); // Debug: Check if this logs
+        setIsFilterVisible(!isFilterVisible);
+    };
+    
     return (
         <div>
             <div className={styles.mainContent}>
                 <div className={styles.controlSection}>
-                    <button className={styles.filterToggle}>Filter</button>
+                    <button onClick={toggleFilterVisibility} className={styles.filterToggle}>Filter</button>
                     <select className={styles.sortDropdown}>
                         <option value="name">Best Selling</option>
                         <option value="year">A-Z</option>
@@ -41,7 +46,7 @@ const SearchPage = () => {
                     <span className={styles.resultCount}>{filteredCards.length} Results</span>
                 </div>
                 <div className={styles.filterAndCardsContainer}>
-                    <aside className={styles.filterSection}>
+                    <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
                         <input type="text" placeholder="Filter by sport..." className={styles.filterInput} />
                         {/* Additional filter inputs can be added here */}
                     </aside>
