@@ -4,6 +4,14 @@ import Image from 'next/image';
 import styles from '../styles/search.module.css';
 
 const SearchPage = () => {
+    // State for filters
+    const [sport, setSport] = useState('');
+    const [cardSet, setCardSet] = useState('');
+    const [cardYear, setCardYear] = useState('');
+    const [cardColor, setCardColor] = useState('');
+    const [cardVariant, setCardVariant] = useState('');
+    const [inStock, setInStock] = useState(false);
+
     const [filteredCards, setFilteredCards] = useState([]);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const router = useRouter();
@@ -29,7 +37,11 @@ const SearchPage = () => {
     const toggleFilterVisibility = () => {
         setIsFilterVisible(!isFilterVisible);
     };
-
+    const handleFilterChange = () => {
+        // Construct the query string with new filter parameters
+        const query = `?cardName=${encodeURIComponent(cardName)}&sport=${sport}&cardSet=${cardSet}&cardYear=${cardYear}&cardColor=${cardColor}&cardVariant=${cardVariant}&inStock=${inStock}&page=${page}&limit=${cardsPerPage}`;
+        router.push(query);
+    };
     return (
         <div>
             <div className={styles.mainContent}>

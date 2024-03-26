@@ -1,29 +1,62 @@
-const { query } = require('@/db'); // Adjust the import path as necessary
+const { query } = require('@/db');
 
 export default async function handler(req, res) {
-    const { cardName, page = '1', limit = '24' } = req.query;
+    const { searchMode = 'inventory', cardName, cardNumber, cardColor, cardVariant, sport, cardYear, cardSet, page = '1', limit = '24' } = req.query;
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const offset = (pageNum - 1) * limitNum;
 
-    // Base SQL and values array
-    let sql = `SELECT * FROM Card`;
-    let whereConditions = [];
-    let values = [];
+    let sql, whereConditions = [], values = [];
 
-    // Check if there's a cardName search term
-    if (cardName) {
-        whereConditions.push("CardName LIKE ?");
-        values.push(`${cardName.trim()}%`); // Using '%' at the end for prefix matching
+    if (searchMode === 'inventory') {
+        // Adjusting the query to group results by CardID for distinct card entries
+        sql = `SELECT Card.*, MIN(Inventory.SalePrice) AS MinSalePrice 
+               FROM Inventory 
+               JOIN Card ON Inventory.CardID = Card.CardID`;
+    } else {
+        // Optional search through the Card catalog
+        sql = `SELECT * FROM Card`;
     }
 
-    // If there are any conditions, append them to the query
+    if (cardName) {
+        whereConditions.push("Card.CardName LIKE ?");
+        values.push(`%${cardName.trim()}%`);
+    }
+    if (cardNumber) {
+        whereConditions.push("Card.CardNumber = ?");
+        values.push(cardNumber);
+    }
+    if (cardColor) {
+        whereConditions.push("Card.CardColor = ?");
+        values.push(cardColor);
+    }
+    if (cardVariant) {
+        whereConditions.push("Card.CardVariant = ?");
+        values.push(cardVariant);
+    }
+    if (sport) {
+        whereConditions.push("Card.Sport = ?");
+        values.push(sport);
+    }
+    if (cardYear) {
+        whereConditions.push("Card.CardYear = ?");
+        values.push(cardYear);
+    }
+    if (cardSet) {
+        whereConditions.push("Card.CardSet = ?");
+        values.push(cardSet);
+    }
+
     if (whereConditions.length > 0) {
         sql += ` WHERE ` + whereConditions.join(' AND ');
     }
 
-    // Append LIMIT and OFFSET for pagination
-    sql += ` LIMIT ? OFFSET ?`;
+    // Group by CardID for distinct card entries; applicable for inventory mode
+    if (searchMode === 'inventory') {
+        sql += ` GROUP BY Card.CardID`;
+    }
+
+    sql += ` ORDER BY Card.CardName LIMIT ? OFFSET ?`; // Adding ORDER BY for consistent ordering
     values.push(limitNum, offset);
 
     try {
