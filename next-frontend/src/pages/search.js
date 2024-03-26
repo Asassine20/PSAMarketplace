@@ -26,12 +26,10 @@ const SearchPage = () => {
         router.push(`?cardName=${encodeURIComponent(cardName)}&page=${pageNumber}`);
     };
 
-    // Step 2: Function to toggle filter section visibility
     const toggleFilterVisibility = () => {
-        console.log("Toggling filter visibility"); // Debug: Check if this logs
         setIsFilterVisible(!isFilterVisible);
     };
-    
+
     return (
         <div>
             <div className={styles.mainContent}>
@@ -46,10 +44,13 @@ const SearchPage = () => {
                     <span className={styles.resultCount}>{filteredCards.length} Results</span>
                 </div>
                 <div className={styles.filterAndCardsContainer}>
-                    <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
-                        <input type="text" placeholder="Filter by sport..." className={styles.filterInput} />
-                        {/* Additional filter inputs can be added here */}
-                    </aside>
+                    {isFilterVisible && (
+                        <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
+                            <button className={styles.closeFilterButton} onClick={toggleFilterVisibility}>X</button>
+                            <input type="text" placeholder="Filter by sport..." className={styles.filterInput} />
+                            {/* Additional filter inputs can be added here */}
+                        </aside>
+                    )}
                     <section className={styles.cardsSection}>
                         <div className={styles.cardsGrid}>
                             {filteredCards.length > 0 ? (
