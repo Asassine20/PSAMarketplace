@@ -4,31 +4,83 @@ import Image from 'next/image';
 import styles from '../styles/search.module.css';
 
 const SearchPage = () => {
-    // State for filters
-    const [sport, setSport] = useState('');
-    const [cardSet, setCardSet] = useState('');
-    const [cardYear, setCardYear] = useState('');
-    const [cardColor, setCardColor] = useState('');
-    const [cardVariant, setCardVariant] = useState('');
-    const [inStock, setInStock] = useState(false);
-
+    const [filterOptions, setFilterOptions] = useState({
+        sports: [],
+        cardSets: [],
+        cardYears: [],
+        cardColors: [],
+        cardVariants: []
+    });
+    const [filters, setFilters] = useState({
+        sport: [],
+        cardSet: [],
+        cardYear: [],
+        cardColor: [],
+        cardVariant: [],
+        inStock: false
+    });
     const [filteredCards, setFilteredCards] = useState([]);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const router = useRouter();
     const { cardName, page = '1' } = router.query;
-    const cardsPerPage = 24;
+
+    const fetchFilteredCards = async () => {
+        if (!cardName) return;
+        let query = `/api/search?cardName=${encodeURIComponent(cardName)}&page=${page}`;
+        console.log('Filters before making request:', JSON.stringify(filters));
+        Object.keys(filters).forEach(filterKey => {
+            const filterValue = filters[filterKey];
+            if (Array.isArray(filterValue)) {
+                filterValue.forEach(value => {
+                    query += `&${filterKey}[]=${encodeURIComponent(value)}`;
+                });
+            } else {
+                if (filterKey === 'inStock') {
+                    query += `&inStock=${filterValue}`;
+                }
+            }
+        });
+
+        console.log('Query:', query);
+        const response = await fetch(query);
+        const data = await response.json();
+        setFilteredCards(data);
+    };
 
     useEffect(() => {
-        const fetchFilteredCards = async () => {
-            if (!cardName) return;
-            const url = `/api/search?cardName=${encodeURIComponent(cardName)}&page=${page}&limit=${cardsPerPage}`;
-            const response = await fetch(url);
+        const fetchFilterOptions = async () => {
+            const response = await fetch(`/api/search?fetchFilters=true`);
+            if (!response.ok) {
+                console.error("Failed to fetch filter options");
+                return;
+            }
             const data = await response.json();
-            setFilteredCards(data);
+            console.log('Fetched filter options:', JSON.stringify(data));
+            setFilterOptions({
+                sports: data.sports || [],
+                cardSets: data.cardSets || [],
+                cardYears: data.cardYears || [],
+                cardColors: data.cardColors || [],
+                cardVariants: data.cardVariants || []
+            });
         };
+        fetchFilterOptions();
+    }, []);
 
+    useEffect(() => {
         fetchFilteredCards();
-    }, [cardName, page]);
+    }, [cardName, page, filters]);
+
+    const handleFilterChange = (filterKey, value, isChecked) => {
+        setFilters(prevFilters => {
+            const updatedFilter = isChecked
+                ? [...prevFilters[filterKey], value]
+                : prevFilters[filterKey].filter(v => v !== value);
+
+            console.log(`Updated ${filterKey} filters:`, updatedFilter);
+            return { ...prevFilters, [filterKey]: updatedFilter };
+        });
+    };
 
     const paginate = pageNumber => {
         router.push(`?cardName=${encodeURIComponent(cardName)}&page=${pageNumber}`);
@@ -37,20 +89,7 @@ const SearchPage = () => {
     const toggleFilterVisibility = () => {
         setIsFilterVisible(!isFilterVisible);
     };
-    const handleFilterChange = () => {
-        // Construct the query string with new filter parameters
-        let query = `?page=1`; // Reset to page 1 whenever filters change
-        if (sport) query += `&sport=${encodeURIComponent(sport)}`;
-        if (cardSet) query += `&cardSet=${encodeURIComponent(cardSet)}`;
-        if (cardYear) query += `&cardYear=${encodeURIComponent(cardYear)}`;
-        if (cardColor) query += `&cardColor=${encodeURIComponent(cardColor)}`;
-        if (cardVariant) query += `&cardVariant=${encodeURIComponent(cardVariant)}`;
-        if (inStock) query += `&inStock=${inStock}`;
-    
-        // Assuming you have a function to fetch cards based on the query
-        fetchFilteredCards(query);
-    };
-    
+
     return (
         <div>
             <div className={styles.mainContent}>
@@ -67,54 +106,24 @@ const SearchPage = () => {
                 <div className={styles.filterAndCardsContainer}>
                     {isFilterVisible && (
                         <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
-                            <button className={styles.closeFilterButton} onClick={toggleFilterVisibility}>X</button>
-                            <input
-                                type="text"
-                                placeholder="Filter by sport..."
-                                className={styles.filterInput}
-                                value={sport}
-                                onChange={(e) => setSport(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Filter by card set..."
-                                className={styles.filterInput}
-                                value={cardSet}
-                                onChange={(e) => setCardSet(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Filter by card year..."
-                                className={styles.filterInput}
-                                value={cardYear}
-                                onChange={(e) => setCardYear(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Filter by card color..."
-                                className={styles.filterInput}
-                                value={cardColor}
-                                onChange={(e) => setCardColor(e.target.value)}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Filter by card variant..."
-                                className={styles.filterInput}
-                                value={cardVariant}
-                                onChange={(e) => setCardVariant(e.target.value)}
-                            />
-                            {/* Example of a toggle for 'in stock' - you might need additional logic to handle this */}
-                            <div>
-                                <label>
-                                    In Stock:
-                                    <input
-                                        type="checkbox"
-                                        checked={inStock}
-                                        onChange={() => setInStock(!inStock)} // Assuming you add a useState for inStock as a boolean
-                                    />
-                                </label>
-                            </div>
-                            <button onClick={handleFilterChange} className={styles.filterApplyButton}>Apply Filters</button>
+                            <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
+                            {Object.keys(filterOptions).map((filterKey) => (
+                                <div key={filterKey}>
+                                    {filterOptions[filterKey].map((option, index) => (
+                                        <div key={index}>
+                                            <label>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option)}
+                                                    onChange={(e) => handleFilterChange(filterKey, option, e.target.checked)}
+                                                />
+                                                {option}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                            <button onClick={fetchFilteredCards} className={styles.filterApplyButton}>Apply Filters</button>
                         </aside>
                     )}
                     <section className={styles.cardsSection}>
@@ -123,14 +132,7 @@ const SearchPage = () => {
                                 filteredCards.map((card, index) => (
                                     <div key={index} className={styles.card}>
                                         <div className={styles.cardImageWrapper}>
-                                            <Image
-                                                src={card.CardImage}
-                                                alt={card.CardName}
-                                                width={180}
-                                                height={270}
-                                                layout="intrinsic"
-                                                className={styles.cardImage}
-                                            />
+                                            <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />
                                         </div>
                                         <div className={styles.cardInfo}>
                                             <div className={styles.cardSport}>{card.Sport}</div>
