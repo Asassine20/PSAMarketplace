@@ -191,3 +191,43 @@
   cursor: not-allowed;
 }
 
+.fullPageOverlay {
+  position: fixed; /* Or 'absolute' if the parent is positioned */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5); /* Light overlay */
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, .1);
+  border-radius: 50%;
+  border-top-color: #3498db; /* Use your color */
+  width: 50px;
+  height: 50px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin { /* Safari */
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.centeredContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Or a specific height as needed */
+}
+
+
