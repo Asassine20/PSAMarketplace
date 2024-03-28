@@ -16,25 +16,35 @@ export default async function handler(req, res) {
     } = req.query;
 
     if (fetchFilters === 'true') {
+        let baseSql = `FROM Card`;
+        let whereConditions = [];
+        let values = [];
+
+        if (cardName) {
+            whereConditions.push("CardName LIKE ?");
+            values.push(`%${cardName.trim()}%`);
+        }
+        // Add more conditions based on other search parameters if needed
+
+        let whereSql = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
+
         try {
-            const sportsPromise = query(`SELECT DISTINCT Sport FROM Card`);
-            const cardSetsPromise = query(`SELECT DISTINCT CardSet FROM Card`);
-            const cardYearsPromise = query(`SELECT DISTINCT CardYear FROM Card`);
-            const cardColorsPromise = query(`SELECT DISTINCT CardColor FROM Card`);
-            const cardVariantsPromise = query(`SELECT DISTINCT CardVariant FROM Card`);
+            const sportsPromise = query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values);
+            const cardSetsPromise = query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values);
+            const cardYearsPromise = query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values);
+            const cardColorsPromise = query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values);
+            const cardVariantsPromise = query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values);
             
             const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all([
                 sportsPromise, cardSetsPromise, cardYearsPromise, cardColorsPromise, cardVariantsPromise
             ]);
 
-            const transformResults = (results) => results.map(result => Object.values(result)[0]);
-
             res.status(200).json({
-                sports: transformResults(sports),
-                cardSets: transformResults(cardSets),
-                cardYears: transformResults(cardYears),
-                cardColors: transformResults(cardColors),
-                cardVariants: transformResults(cardVariants),
+                sports: sports.map(s => s.Sport),
+                cardSets: cardSets.map(cs => cs.CardSet),
+                cardYears: cardYears.map(cy => cy.CardYear),
+                cardColors: cardColors.map(cc => cc.CardColor),
+                cardVariants: cardVariants.map(cv => cv.CardVariant),
             });
         } catch (error) {
             console.error("Failed to fetch filter options:", error);

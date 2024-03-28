@@ -49,13 +49,14 @@ const SearchPage = () => {
 
     useEffect(() => {
         const fetchFilterOptions = async () => {
-            const response = await fetch(`/api/search?fetchFilters=true`);
+            // Include the current search parameters in the filter options request
+            const searchParams = new URLSearchParams({ fetchFilters: 'true', cardName });
+            const response = await fetch(`/api/search?${searchParams}`);
             if (!response.ok) {
                 console.error("Failed to fetch filter options");
                 return;
             }
             const data = await response.json();
-            console.log('Fetched filter options:', JSON.stringify(data));
             setFilterOptions({
                 sports: data.sports || [],
                 cardSets: data.cardSets || [],
@@ -64,8 +65,11 @@ const SearchPage = () => {
                 cardVariants: data.cardVariants || []
             });
         };
-        fetchFilterOptions();
-    }, []);
+    
+        if (cardName) {
+            fetchFilterOptions();
+        }
+    }, [cardName]);
 
     useEffect(() => {
         fetchFilteredCards();
@@ -73,13 +77,16 @@ const SearchPage = () => {
 
     const handleFilterChange = (filterKey, value, isChecked) => {
         setFilters(prevFilters => {
+            // Ensure prevFilters[filterKey] is always an array
+            const currentFilterValues = Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : [];
+            
             const updatedFilter = isChecked
-                ? [...prevFilters[filterKey], value]
-                : prevFilters[filterKey].filter(v => v !== value);
-
+                ? [...currentFilterValues, value]
+                : currentFilterValues.filter(v => v !== value);
+        
             console.log(`Updated ${filterKey} filters:`, updatedFilter);
             return { ...prevFilters, [filterKey]: updatedFilter };
-        });
+        });        
     };
 
     const paginate = pageNumber => {
