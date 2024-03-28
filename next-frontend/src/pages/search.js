@@ -90,9 +90,18 @@ const SearchPage = () => {
         setIsFilterVisible(!isFilterVisible);
     };
 
+    const filterTitles = {
+        sports: 'Sports',
+        cardSets: 'Card Sets',
+        cardYears: 'Card Years',
+        cardColors: 'Card Colors',
+        cardVariants: 'Card Variants',
+    };
+
     return (
         <div>
             <div className={styles.mainContent}>
+                {/* Control Section remains unchanged */}
                 <div className={styles.controlSection}>
                     <button onClick={toggleFilterVisibility} className={styles.filterToggle}>Filter</button>
                     <select className={styles.sortDropdown}>
@@ -108,7 +117,8 @@ const SearchPage = () => {
                         <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
                             <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
                             {Object.keys(filterOptions).map((filterKey) => (
-                                <div key={filterKey}>
+                                <div key={filterKey} className={styles.filterCategory}>
+                                    <h4>{filterTitles[filterKey]}</h4>
                                     {filterOptions[filterKey].map((option, index) => (
                                         <div key={index}>
                                             <label>
@@ -125,6 +135,7 @@ const SearchPage = () => {
                             ))}
                             <button onClick={fetchFilteredCards} className={styles.filterApplyButton}>Apply Filters</button>
                         </aside>
+
                     )}
                     <section className={styles.cardsSection}>
                         <div className={styles.cardsGrid}>

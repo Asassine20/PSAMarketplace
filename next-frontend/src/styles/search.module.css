@@ -37,6 +37,14 @@
   position: relative;
 }
 
+.filterCategory {
+  max-height: 150px; /* Adjust based on your needs */
+  overflow-y: auto; /* Enables vertical scrolling within the category */
+  padding: 4px 0; /* Adds some vertical padding within the category */
+  border-bottom: 1px solid #ccc; /* Optional: adds a separator between categories */
+  margin-bottom: 8px; /* Optional: adds some space between categories */
+}
+
 .filterVisible {
   display: block !important; /* Override any other display settings */
 }
