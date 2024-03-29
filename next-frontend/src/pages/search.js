@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import styles from '../styles/search.module.css';
 
-// Assuming you have a Spinner component
+// Assuming Spinner is a spinner component
 const Spinner = () => (
   <div className={styles.spinner}></div>
 );
@@ -22,32 +22,25 @@ const SearchPage = () => {
     cardYear: [],
     cardColor: [],
     cardVariant: [],
-    inStock: false
+    inStock: true
   });
   const [filteredCards, setFilteredCards] = useState([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
-  const [isLoadingCards, setIsLoadingCards] = useState(false);
+  const [isLoadingCards, setIsLoadingCards] = useState(true);
   const router = useRouter();
   const { cardName, page = '1' } = router.query;
 
   const fetchFilteredCards = async () => {
     setIsLoadingCards(true);
-    if (!cardName) {
-      setIsLoadingCards(false);
-      return;
-    }
-    let query = `/api/search?cardName=${encodeURIComponent(cardName)}&page=${page}`;
+    let query = `/api/search?cardName=${encodeURIComponent(cardName || '')}&page=${page}&showAll=${!filters.inStock}`;
+
     Object.keys(filters).forEach(filterKey => {
       const filterValue = filters[filterKey];
       if (Array.isArray(filterValue)) {
         filterValue.forEach(value => {
           query += `&${filterKey}[]=${encodeURIComponent(value)}`;
         });
-      } else {
-        if (filterKey === 'inStock') {
-          query += `&inStock=${filterValue}`;
-        }
       }
     });
 
@@ -57,11 +50,11 @@ const SearchPage = () => {
     setIsLoadingCards(false);
   };
 
+  // Fetch filters and default card set on component mount
   useEffect(() => {
     const fetchFilterOptions = async () => {
       setIsLoadingFilters(true);
-      const searchParams = new URLSearchParams({ fetchFilters: 'true', cardName });
-      const response = await fetch(`/api/search?${searchParams}`);
+      const response = await fetch('/api/search?fetchFilters=true');
       if (!response.ok) {
         console.error("Failed to fetch filter options");
         setIsLoadingFilters(false);
@@ -72,14 +65,13 @@ const SearchPage = () => {
       setIsLoadingFilters(false);
     };
 
-    if (cardName) {
-      fetchFilterOptions();
-    }
-  }, [cardName]);
+    fetchFilterOptions();
+    fetchFilteredCards(); // Fetch cards on initial render
+  }, []);
 
   useEffect(() => {
-    fetchFilteredCards();
-  }, [cardName, page, filters]);
+    fetchFilteredCards(); // Fetch cards when filters change
+  }, [cardName, filters, page]);
 
   const handleFilterChange = (filterKey, value, isChecked) => {
     setFilters(prevFilters => ({

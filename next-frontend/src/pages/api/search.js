@@ -3,7 +3,7 @@ const { query } = require('@/db');
 export default async function handler(req, res) {
     const {
         fetchFilters,
-        cardName,
+        cardName = '',
         cardNumber,
         cardColor,
         cardVariant,
