@@ -73,20 +73,20 @@ const SearchPage = () => {
     }, [cardName, filters, page]);
     useEffect(() => {
         function handleResize() {
-          const shouldShowFilter = window.innerWidth > 1201;
-          setIsFilterVisible(shouldShowFilter);
+            const shouldShowFilter = window.innerWidth > 1201;
+            setIsFilterVisible(shouldShowFilter);
         }
-      
+
         // Call handleResize initially in case the initial width is > 1201
         handleResize();
-      
+
         // Add event listener
         window.addEventListener('resize', handleResize);
-      
+
         // Cleanup
         return () => window.removeEventListener('resize', handleResize);
-      }, []); // Empty dependency array ensures this runs once on mount
-      
+    }, []); // Empty dependency array ensures this runs once on mount
+
     const handleFilterChange = (filterKey, value, isChecked) => {
         setFilters(prevFilters => ({
             ...prevFilters,
@@ -137,10 +137,9 @@ const SearchPage = () => {
                     {isFilterVisible && (
                         <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
                             <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
-
                             {/* Toggle Switch and Label */}
                             <div className={styles.toggleSwitchContainer}>
-                                <span className={styles.toggleLabel}>Show In-Stock Cards Only</span>
+                                <div className={styles.toggleLabel}>In stock only</div>
                                 <label className={styles.switch}>
                                     <input
                                         type="checkbox"
@@ -150,7 +149,6 @@ const SearchPage = () => {
                                     <span className={`${styles.slider} ${styles.round}`}></span>
                                 </label>
                             </div>
-
                             {/* Filter Options */}
                             {isLoadingFilters ? <div className={styles.centeredContent}><Spinner /></div> : Object.keys(filterOptions).map((filterKey) => (
                                 <div key={filterKey} className={styles.filterCategory}>

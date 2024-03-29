@@ -3,17 +3,19 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  background-color: white;
   max-width: calc(100% - 40px); /* Adjust based on the padding to ensure full width */
 }
 
 .controlSection {
-  width: calc(100% - 40px); /* Adjust this width to compensate for mainContent padding */
+  width: calc(100%); /* Adjust this width to compensate for mainContent padding */
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-top: 5px;
   padding-bottom: 10px;
   margin-bottom: 30px;
+  background-color: white;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -26,11 +28,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  margin-bottom: -10px;
+  padding-bottom: -10px;
   border-bottom: 1px solid #ccc; /* Sharp and thin line */
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
   width: 100vw; /* Stretch to the full viewport width */
   margin-left: calc(-50vw + 50%); /* Centering the line based on viewport */
+  background-color: white;
+  z-index: 10;
 }
 
 /* Adjust the filter section and container */
@@ -43,13 +47,16 @@
   width: 95%;
   gap: 20px;
   position: relative;
+  align-items: stretch;
 }
 
 .filterSection {
   display: block;
-  width: 200px;
+  width: 100%;
   padding: 10px;
-  border-right: 1px solid #ccc;
+  border: 1px solid #e6e6e6; /* Slightly darker than white for visibility */
+  border-radius: 4px; /* Slight border-radius */
+  background-color: #f9f9f9; /* Slightly darker white color for the background */
   transition: all 0.3s ease-in-out;
   position: relative;
 }
@@ -60,7 +67,31 @@
   padding: 4px 0; /* Adds some vertical padding within the category */
   border-bottom: 1px solid #ccc; /* Optional: adds a separator between categories */
   margin-bottom: 8px; /* Optional: adds some space between categories */
+  width: 100%;
 }
+
+/* Adjust the padding below each filter category header */
+.filterCategory h4 {
+  margin-bottom: 15px; /* Increase the bottom margin below the header for more space */
+}
+
+/* Style for the labels and checkboxes within each filter option */
+.filterCategory label {
+  display: flex;
+  align-items: center; /* Align the checkbox and label text vertically */
+  gap: 8px; /* Increase the space between the checkbox and the label text */
+  margin-bottom: 8px; /* Adjust as needed for space between each filter option */
+}
+
+/* Style for the checkboxes */
+.filterCategory input[type="checkbox"] {
+}
+
+/* Additional styles for checkbox names to increase padding, if separate from the label styles */
+.filterCategory label span {
+  padding-left: 5px; /* Increase left padding for the checkbox name, adjust as needed */
+}
+
 
 .filterVisible {
   display: block !important; /* Override any other display settings */
@@ -87,9 +118,11 @@
 
   .filterSection {
     display: block; /* Ensure the filter section is always displayed */
-    width: 200px; /* Adjust the width of the filter section as needed */
-    padding: 0; /* Remove padding from the filter section specifically */
-    border-right: 1px solid #ccc; /* A border to separate the filter section from the cards section */
+    width: 400px; /* Increased width */
+    padding: 0 20px; /* Add padding to the left and right */
+    border: 1px solid #e6e6e6; /* Full border */
+    border-radius: 4px; /* Slight border-radius */
+    background-color: #f9f9f9; /* Slightly darker white color for the background */
     transition: all 0.3s ease-in-out;
     position: sticky;
     top: 0; /* Makes the filter section stick to the top when scrolling */
@@ -116,7 +149,7 @@
     position: fixed; /* or absolute, depending on your layout needs */
     top: 0; /* Adjust as needed */
     left: 0; /* Adjust as needed */
-    width: 200px; /* or whatever width you prefer */
+    width: 400px; /* or whatever width you prefer */
     height: 100%; /* Take up full viewport height, adjust as needed */
     background-color: white; /* or any color you prefer */
     overflow-y: auto; /* In case of scrolling */
@@ -259,73 +292,60 @@
   height: 100%; /* Or a specific height as needed */
 }
 .toggleSwitchContainer {
+  font-weight: bold;
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* Aligns the switch to the left */
-  margin-bottom: 15px; /* Adds some space between the toggle and the next filter */
+  margin: 20px 0 10px; /* Combines top and bottom margins */
 }
 
-.toggleLabel {
-  margin-bottom: 5px; /* Space between the label and the switch */
-}
-
-/* Ensure your existing .switch and .round styles apply */
 .switch {
-position: relative;
-display: inline-block;
-width: 60px;
-height: 34px;
+  position: relative;
+  display: inline-block;
+  width: 40px; /* Smaller width */
+  height: 22px; /* Smaller height */
+  margin: 0; /* Ensures no external spacing affects the switch */
+  margin-top: 10px;
 }
 
-.switch input { 
-opacity: 0;
-width: 0;
-height: 0;
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .slider {
-position: absolute;
-cursor: pointer;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background-color: #ccc;
--webkit-transition: .4s;
-transition: .4s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.2s; /* Faster transition */
+  border-radius: 22px; /* Rounded slider */
 }
 
 .slider:before {
-position: absolute;
-content: "";
-height: 26px;
-width: 26px;
-left: 4px;
-bottom: 4px;
-background-color: white;
--webkit-transition: .4s;
-transition: .4s;
+  position: absolute;
+  content: "";
+  height: 18px; /* Smaller slider knob */
+  width: 18px; /* Smaller slider knob */
+  left: 2px; /* Adjusted for smaller knob */
+  bottom: 2px; /* Centered vertically */
+  background-color: white;
+  transition: 0.2s; /* Faster transition */
+  border-radius: 50%; /* Rounded knob */
 }
 
 input:checked + .slider {
-background-color: #2196F3;
+  background-color: #2196F3;
 }
 
 input:focus + .slider {
-box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #2196F3;
 }
 
 input:checked + .slider:before {
--webkit-transform: translateX(26px);
--ms-transform: translateX(26px);
-transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-border-radius: 34px;
-}
-
-.slider.round:before {
-border-radius: 50%;
+  transform: translateX(18px); /* Adjusted for smaller switch */
 }
