@@ -186,6 +186,8 @@ const SearchPage = () => {
                                                 <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
                                                 <div className={styles.cardColor}>{card.CardColor || ''}</div>
                                                 <div className={styles.cardName}>{card.CardName}</div>
+                                                <div className={styles.cardListings}>{card.numberOfListings} Listings</div>
+                                                <div className={styles.cardMarketPrice}>Market Price: ${card.marketPrice}</div>
                                             </div>
                                         </div>
                                     ))

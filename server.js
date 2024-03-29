@@ -116,8 +116,18 @@ hbs.registerHelper('json', function(context) {
 });
 
 hbs.registerHelper('formatCurrency', function(value) {
-    return value.toFixed(2);
+    // Attempt to convert the incoming value to a float
+    const num = parseFloat(value);
+    // Check if the conversion was successful (i.e., the result is not NaN)
+    if (!isNaN(num)) {
+        // If successful, format the number and return it
+        return num.toFixed(2);
+    }
+    // If conversion wasn't successful, return a default value or message
+    // This could be a message or simply the original value, depending on your preference
+    return "N/A"; // Or any appropriate fallback value
 });
+
 
 hbs.registerHelper('slice', function(content, options) {
     const limit = options.hash.limit;

@@ -177,7 +177,7 @@
   width: 100%;
   height: 350px;
   display: flex;
-  background-color: #f3f3f3;
+  background-color: white;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   border-radius: 8px;
   overflow: hidden;
@@ -205,25 +205,39 @@
 
 .cardInfo {
   flex: 1;
-  padding-left: 20px;
-  margin-top: 30px;
-  padding-bottom: 200px;
+  padding: 20px; /* Adjust padding to ensure content is not touching edges */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  text-align: left;
+  justify-content: center; /* Adjust vertical alignment */
+  align-items: flex-start; /* Adjust horizontal alignment */
+  overflow: hidden; /* Prevent overflow */
+  color: #9ba0aa;
 }
+
+.cardName {
+  font-weight: bold;
+  font-size: 1rem; /* Adjust font size as needed */
+  white-space: nowrap; /* Prevent wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+  max-width: 90%; /* Limit width to prevent pushing layout */
+  color: black;
+}
+.cardListings, .cardMarketPrice {
+  margin-top: 10px;
+  font-size: 0.9rem; /* Adjust the font size as needed */
+}
+
+.cardMarketPrice {
+  font-weight: bold; /* Highlight the market price */
+  color: black;
+}
+
 
 .cardName, .cardSport, .cardSet, .cardYear, .cardColor, .cardVariant {
   display: block;
   margin-top: 5px;
   margin-bottom: 5px;
-}
-
-
-.cardName {
-  font-weight: bold;
 }
 
 /* Pagination styles */
