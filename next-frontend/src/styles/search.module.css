@@ -3,22 +3,39 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  width: 95%;
+  max-width: calc(100% - 40px); /* Adjust based on the padding to ensure full width */
 }
 
 .controlSection {
-  width: 100%;
+  width: calc(100% - 40px); /* Adjust this width to compensate for mainContent padding */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
+  padding-top: 5px;
   padding-bottom: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   position: sticky;
   top: 0;
-  background-color: white;
   z-index: 10;
-  border-bottom: 1px solid #ccc;
+  /* Adding border-bottom to the pseudo-element instead */
+}
+
+.controlSection::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-bottom: -10px;
+  border-bottom: 1px solid #ccc; /* Sharp and thin line */
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+  width: 100vw; /* Stretch to the full viewport width */
+  margin-left: calc(-50vw + 50%); /* Centering the line based on viewport */
+}
+
+/* Adjust the filter section and container */
+.filterAndCardsContainer, .filterSection, .cardsSection {
+  width: 100%; /* Ensuring these elements take up full width */
 }
 
 .filterAndCardsContainer {
@@ -63,16 +80,28 @@
 
 @media (min-width: 1201px) {
   .filterAndCardsContainer {
+    display: flex;
     flex-direction: row;
-  }
-    .filterSection {
-    height: auto; /* Adapt height to content */
-  }
-  .filterToggleButton {
-    display: none; /* Hide toggle button */
+    gap: 20px; /* Adjust the gap between the filter section and the cards section as needed */
   }
 
+  .filterSection {
+    display: block; /* Ensure the filter section is always displayed */
+    width: 200px; /* Adjust the width of the filter section as needed */
+    padding: 0; /* Remove padding from the filter section specifically */
+    border-right: 1px solid #ccc; /* A border to separate the filter section from the cards section */
+    transition: all 0.3s ease-in-out;
+    position: sticky;
+    top: 0; /* Makes the filter section stick to the top when scrolling */
+    height: auto; /* Adjust height automatically based on the content */
+  }
+
+  /* Only target the .filterAndCardsContainer for width adjustments, don't remove padding here */
+  .filterAndCardsContainer {
+    width: 100%; /* Adjust the width to take up the full width of its container */
+  }
 }
+
 
 @media (max-width: 1200px) {
   .filterToggleButton {
@@ -229,5 +258,74 @@
   align-items: center;
   height: 100%; /* Or a specific height as needed */
 }
+.toggleSwitchContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Aligns the switch to the left */
+  margin-bottom: 15px; /* Adds some space between the toggle and the next filter */
+}
 
+.toggleLabel {
+  margin-bottom: 5px; /* Space between the label and the switch */
+}
 
+/* Ensure your existing .switch and .round styles apply */
+.switch {
+position: relative;
+display: inline-block;
+width: 60px;
+height: 34px;
+}
+
+.switch input { 
+opacity: 0;
+width: 0;
+height: 0;
+}
+
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #ccc;
+-webkit-transition: .4s;
+transition: .4s;
+}
+
+.slider:before {
+position: absolute;
+content: "";
+height: 26px;
+width: 26px;
+left: 4px;
+bottom: 4px;
+background-color: white;
+-webkit-transition: .4s;
+transition: .4s;
+}
+
+input:checked + .slider {
+background-color: #2196F3;
+}
+
+input:focus + .slider {
+box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+-webkit-transform: translateX(26px);
+-ms-transform: translateX(26px);
+transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+border-radius: 34px;
+}
+
+.slider.round:before {
+border-radius: 50%;
+}
