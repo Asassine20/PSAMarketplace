@@ -3,7 +3,6 @@ const { query } = require('@/db');
 export default async function handler(req, res) {
     const {
         fetchFilters,
-        searchMode = 'inventory',
         cardName,
         cardNumber,
         cardColor,
@@ -11,99 +10,127 @@ export default async function handler(req, res) {
         sport,
         cardYear,
         cardSet,
-        page = '1',
+        page = '1', // Provide a default value to ensure page is always defined
         limit = '24',
+        showAll = 'false',
     } = req.query;
 
+    // The rest of your code follows
+    let baseSql = `FROM Card`;
+    let whereConditions = [];
+    let values = [];
+
+    if (showAll !== 'true') {
+        whereConditions.push(`inStock = 1`);
+    }
+
+    // Filter conditions
+    if (cardName) {
+        whereConditions.push(`CardName LIKE ?`);
+        values.push(`%${cardName.trim()}%`);
+    }
+    if (cardNumber) {
+        whereConditions.push(`CardNumber = ?`);
+        values.push(cardNumber);
+    }
+    if (cardColor) {
+        whereConditions.push(`CardColor = ?`);
+        values.push(cardColor);
+    }
+    if (cardVariant) {
+        whereConditions.push(`CardVariant = ?`);
+        values.push(cardVariant);
+    }
+    if (sport) {
+        whereConditions.push(`Sport = ?`);
+        values.push(sport);
+    }
+    if (cardYear) {
+        whereConditions.push(`CardYear = ?`);
+        values.push(cardYear);
+    }
+    if (cardSet) {
+        whereConditions.push(`CardSet = ?`);
+        values.push(cardSet);
+    }
+
+    let whereSql = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
+
     if (fetchFilters === 'true') {
-        let baseSql = `FROM Card`;
-        let whereConditions = [];
-        let values = [];
-
-        if (cardName) {
-            whereConditions.push("CardName LIKE ?");
-            values.push(`%${cardName.trim()}%`);
-        }
-        // Add more conditions based on other search parameters if needed
-
-        let whereSql = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
-
         try {
-            const sportsPromise = query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values);
-            const cardSetsPromise = query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values);
-            const cardYearsPromise = query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values);
-            const cardColorsPromise = query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values);
-            const cardVariantsPromise = query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values);
-            
-            const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all([
-                sportsPromise, cardSetsPromise, cardYearsPromise, cardColorsPromise, cardVariantsPromise
-            ]);
+            const promises = [
+                query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
+                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values),
+                query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
+                query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
+                query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
+            ];
+
+            const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(promises);
+
+            const transformResults = results => results.map(result => Object.values(result)[0]);
 
             res.status(200).json({
-                sports: sports.map(s => s.Sport),
-                cardSets: cardSets.map(cs => cs.CardSet),
-                cardYears: cardYears.map(cy => cy.CardYear),
-                cardColors: cardColors.map(cc => cc.CardColor),
-                cardVariants: cardVariants.map(cv => cv.CardVariant),
+                sports: transformResults(sports),
+                cardSets: transformResults(cardSets),
+                cardYears: transformResults(cardYears),
+                cardColors: transformResults(cardColors),
+                cardVariants: transformResults(cardVariants),
             });
         } catch (error) {
             console.error("Failed to fetch filter options:", error);
             res.status(500).json({ message: "Failed to fetch filter options" });
         }
     } else {
-        const pageNum = parseInt(page, 10);
+        const pageNum = parseInt(page, 10); // page is now defined via destructuring from req.query
         const limitNum = parseInt(limit, 10);
         const offset = (pageNum - 1) * limitNum;
 
-        let sql, whereConditions = [], values = [];
+        let sql = `SELECT * FROM Card WHERE inStock = 1`;
+        let whereConditions = [];
+        let values = [];
 
-        if (searchMode === 'inventory') {
-            sql = `SELECT Card.*, MIN(Inventory.SalePrice) AS MinSalePrice 
-                   FROM Inventory 
-                   JOIN Card ON Inventory.CardID = Card.CardID`;
-        } else {
-            sql = `SELECT * FROM Card`;
+        if (showAll === 'true') {
+            sql = `SELECT * FROM Card`; // If showing all, remove inStock condition
         }
 
+        // The following conditions add to the WHERE clause based on user input
         if (cardName) {
-            whereConditions.push("Card.CardName LIKE ?");
+            whereConditions.push("CardName LIKE ?");
             values.push(`%${cardName.trim()}%`);
         }
         if (cardNumber) {
-            whereConditions.push("Card.CardNumber = ?");
+            whereConditions.push("CardNumber = ?");
             values.push(cardNumber);
         }
         if (cardColor) {
-            whereConditions.push("Card.CardColor = ?");
+            whereConditions.push("CardColor = ?");
             values.push(cardColor);
         }
         if (cardVariant) {
-            whereConditions.push("Card.CardVariant = ?");
+            whereConditions.push("CardVariant = ?");
             values.push(cardVariant);
         }
         if (sport) {
-            whereConditions.push("Card.Sport = ?");
+            whereConditions.push("Sport = ?");
             values.push(sport);
         }
         if (cardYear) {
-            whereConditions.push("Card.CardYear = ?");
+            whereConditions.push("CardYear = ?");
             values.push(cardYear);
         }
         if (cardSet) {
-            whereConditions.push("Card.CardSet = ?");
+            whereConditions.push("CardSet = ?");
             values.push(cardSet);
         }
 
+        // Add any additional WHERE conditions
         if (whereConditions.length > 0) {
-            sql += ` WHERE ` + whereConditions.join(' AND ');
+            sql += (showAll === 'true' ? ' WHERE ' : ' AND ') + whereConditions.join(' AND ');
         }
 
-        if (searchMode === 'inventory') {
-            sql += ` GROUP BY Card.CardID`;
-        }
-
-        sql += ` ORDER BY Card.CardName LIMIT ? OFFSET ?`;
-        values.push(limitNum, offset);
+        // Omitted the ORDER BY clause
+        values.push(limitNum, offset); // This line can also be removed if LIMIT and OFFSET are not used without ORDER BY
 
         try {
             const rows = await query(sql, values);
