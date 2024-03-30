@@ -196,12 +196,12 @@ const SearchPage = () => {
                                 )}
                             </div>
                         )}
-                        <div className={styles.pagination}>
-                            <button disabled={page === '1'} onClick={() => paginate(parseInt(page, 10) - 1)}>Prev</button>
-                            <button onClick={() => paginate(parseInt(page, 10) + 1)}>Next</button>
-                        </div>
                     </section>
                 </div>
+            </div>
+            <div className={styles.pagination}>
+                <button disabled={page === '1'} onClick={() => paginate(parseInt(page, 10) - 1)}>Prev</button>
+                <button onClick={() => paginate(parseInt(page, 10) + 1)}>Next</button>
             </div>
         </div >
     );

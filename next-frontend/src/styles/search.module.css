@@ -2,24 +2,23 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  background-color: white;
-  max-width: calc(100% - 40px); /* Adjust based on the padding to ensure full width */
+  background-color: #f3f3f3;
+  margin-top: 30px;
+  max-width: 100%; /* Adjust based on the padding to ensure full width */
 }
 
 .controlSection {
-  width: calc(100%); /* Adjust this width to compensate for mainContent padding */
+  width: 100%; /* Adjust this width to compensate for mainContent padding */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 5px;
-  padding-bottom: 10px;
-  margin-bottom: 30px;
+  padding-top: 20px;
+  padding-bottom: 20px;
   background-color: white;
+  margin-top: -30px;
   position: sticky;
   top: 0;
   z-index: 10;
-  /* Adding border-bottom to the pseudo-element instead */
 }
 
 .controlSection::before {
@@ -36,6 +35,21 @@
   background-color: white;
   z-index: 10;
 }
+
+.controlSection button {
+  margin-left: 30px;
+  font-weight: bold;
+  padding:5px;
+}
+
+.resultCount {
+  padding-right: 30px;
+}
+
+.sortDropdown {
+  margin-right: 10px;
+}
+
 
 /* Adjust the filter section and container */
 .filterAndCardsContainer, .filterSection, .cardsSection {
@@ -56,7 +70,7 @@
   padding: 10px;
   border: 1px solid #e6e6e6; /* Slightly darker than white for visibility */
   border-radius: 4px; /* Slight border-radius */
-  background-color: #f9f9f9; /* Slightly darker white color for the background */
+  background-color: white; /* Slightly darker white color for the background */
   transition: all 0.3s ease-in-out;
   position: relative;
 }
@@ -120,9 +134,10 @@
     display: block; /* Ensure the filter section is always displayed */
     width: 400px; /* Increased width */
     padding: 0 20px; /* Add padding to the left and right */
+    margin-top: 20px;
     border: 1px solid #e6e6e6; /* Full border */
     border-radius: 4px; /* Slight border-radius */
-    background-color: #f9f9f9; /* Slightly darker white color for the background */
+    background-color: white; /* Slightly darker white color for the background */
     transition: all 0.3s ease-in-out;
     position: sticky;
     top: 0; /* Makes the filter section stick to the top when scrolling */
@@ -151,7 +166,6 @@
     left: 0; /* Adjust as needed */
     width: 400px; /* or whatever width you prefer */
     height: 100%; /* Take up full viewport height, adjust as needed */
-    background-color: white; /* or any color you prefer */
     overflow-y: auto; /* In case of scrolling */
     z-index: 20; /* Higher than cardsSection */
     display: none; /* Initially hidden */
@@ -170,6 +184,7 @@
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  padding-top: 20px;
   gap: 20px;
 }
 
@@ -191,6 +206,8 @@
 .cardImageWrapper {
   width: 200px;
   height: 335px;
+  margin-top: 8px;
+  margin-left: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -245,6 +262,7 @@
   display: flex;
   justify-content: center;
   margin-top: 20px;
+  margin-bottom: -60px;
 }
 
 .pagination button {
