@@ -29,11 +29,33 @@ const SearchPage = () => {
     const [isLoadingCards, setIsLoadingCards] = useState(true);
     const router = useRouter();
     const { cardName, page = '1' } = router.query;
+    const updateFiltersInUrl = () => {
+        const queryParameters = new URLSearchParams({
+            cardName: cardName || '',
+            page: page,
+            showAll: !filters.inStock ? 'false' : 'true',
+        });
+
+        Object.keys(filters).forEach(filterKey => {
+            const filterValue = filters[filterKey];
+            if (Array.isArray(filterValue) && filterValue.length) {
+                filterValue.forEach(value => {
+                    queryParameters.append(filterKey, value);
+                });
+            }
+        });
+
+        router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
+    };
+
+    useEffect(() => {
+        updateFiltersInUrl(); // Update URL when filters change
+    }, [filters, page]); // React to changes in filters and pagination
 
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
         let query = `/api/search?cardName=${encodeURIComponent(cardName || '')}&page=${page}&showAll=${!filters.inStock}`;
-
+    
         Object.keys(filters).forEach(filterKey => {
             const filterValue = filters[filterKey];
             if (Array.isArray(filterValue)) {
@@ -42,35 +64,69 @@ const SearchPage = () => {
                 });
             }
         });
-
+    
+        console.log(`Fetching filtered cards with query: ${query}`);
         const response = await fetch(query);
         const data = await response.json();
+        console.log('Filtered cards data:', data);
         setFilteredCards(data);
         setIsLoadingCards(false);
     };
+    
 
     // Fetch filters and default card set on component mount
     useEffect(() => {
         const fetchFilterOptions = async () => {
             setIsLoadingFilters(true);
-            const response = await fetch('/api/search?fetchFilters=true');
-            if (!response.ok) {
+            // Construct query parameters based on the current URL (router.query)
+            let queryParams = new URLSearchParams({ 
+                fetchFilters: 'true', 
+                cardName: router.query.cardName || '',
+                // include other relevant parameters from router.query
+            });
+            
+            // Append other filters from router.query if necessary
+            
+            const response = await fetch(`/api/search?${queryParams.toString()}`);
+            if (response.ok) {
+                const data = await response.json();
+                setFilterOptions(data);
+            } else {
                 console.error("Failed to fetch filter options");
-                setIsLoadingFilters(false);
-                return;
             }
-            const data = await response.json();
-            setFilterOptions(data);
+            setIsLoadingFilters(false);
+        };        
+    
+        fetchFilterOptions();
+    }, [router.query]); // React to changes in router.query
+    
+    useEffect(() => {
+        // This useEffect ensures fetching of filter options based on current search/filters
+        const fetchFilterOptions = async () => {
+            setIsLoadingFilters(true);
+            let queryParams = new URLSearchParams({ fetchFilters: 'true', cardName: cardName || '' });
+    
+            // Potentially add other parameters to influence filter options
+            const response = await fetch(`/api/search?${queryParams.toString()}`);
+            if (response.ok) {
+                const data = await response.json();
+                setFilterOptions(data);
+            } else {
+                console.error("Failed to fetch filter options");
+            }
             setIsLoadingFilters(false);
         };
-
+    
         fetchFilterOptions();
-        fetchFilteredCards(); // Fetch cards on initial render
-    }, []);
+    }, [cardName]);
 
     useEffect(() => {
-        fetchFilteredCards(); // Fetch cards when filters change
-    }, [cardName, filters, page]);
+        console.log('URL query parameters changed:', router.query);
+        fetchFilteredCards(); // Adjust this function as needed
+    }, [router.query]);
+    
+    
+    
     useEffect(() => {
         function handleResize() {
             const shouldShowFilter = window.innerWidth > 1201;
@@ -88,13 +144,18 @@ const SearchPage = () => {
     }, []); // Empty dependency array ensures this runs once on mount
 
     const handleFilterChange = (filterKey, value, isChecked) => {
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [filterKey]: isChecked
-                ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
-                : prevFilters[filterKey].filter(v => v !== value),
-        }));
+        setFilters(prevFilters => {
+            const updatedFilters = {
+                ...prevFilters,
+                [filterKey]: isChecked
+                    ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
+                    : prevFilters[filterKey].filter(v => v !== value),
+            };
+            console.log(`Filters updated: ${filterKey}`, updatedFilters[filterKey]);
+            return updatedFilters;
+        });
     };
+    
     const handleToggleChange = () => {
         setFilters(prevFilters => ({
             ...prevFilters,

@@ -4,6 +4,7 @@
   align-items: center;
   background-color: #f3f3f3;
   margin-top: 30px;
+  padding-bottom: 20px;
   max-width: 100%; /* Adjust based on the padding to ensure full width */
 }
 
@@ -135,6 +136,7 @@
     width: 400px; /* Increased width */
     padding: 0 20px; /* Add padding to the left and right */
     margin-top: 20px;
+    margin-left: 20px;
     border: 1px solid #e6e6e6; /* Full border */
     border-radius: 4px; /* Slight border-radius */
     background-color: white; /* Slightly darker white color for the background */
@@ -142,6 +144,11 @@
     position: sticky;
     top: 0; /* Makes the filter section stick to the top when scrolling */
     height: auto; /* Adjust height automatically based on the content */
+  }
+
+  .cardsGrid {
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
   /* Only target the .filterAndCardsContainer for width adjustments, don't remove padding here */
