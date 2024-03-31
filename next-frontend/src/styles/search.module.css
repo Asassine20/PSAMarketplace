@@ -40,8 +40,12 @@
 .controlSection button {
   margin-left: 30px;
   font-weight: bold;
+  font-size: 15px;
   padding:5px;
+  cursor: pointer;
+
 }
+
 
 .resultCount {
   padding-right: 30px;

@@ -4,7 +4,6 @@ export default async function handler(req, res) {
     const {
         fetchFilters,
         cardName = '',
-        cardNumber,
         cardColor,
         cardVariant,
         sport,
@@ -14,12 +13,12 @@ export default async function handler(req, res) {
         limit = '24',
         showAll = 'false',
     } = req.query;
-    console.log("Received query parameters:", req.query);
 
     let baseSql = `FROM Card`;
     let whereConditions = [];
     let values = [];
 
+    // Apply 'inStock = 1' condition only if showAll is not 'true'.
     if (showAll !== 'true') {
         whereConditions.push(`inStock = 1`);
     }
@@ -77,16 +76,16 @@ export default async function handler(req, res) {
                 query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
             ];
 
-            const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(promises);
+            const results = await Promise.all(promises);
+            const [sports, cardSets, cardYears, cardColors, cardVariants] = results;
 
-            const transformResults = results => results.map(result => Object.values(result)[0]);
 
             res.status(200).json({
-                sports: transformResults(sports),
-                cardSets: transformResults(cardSets),
-                cardYears: transformResults(cardYears),
-                cardColors: transformResults(cardColors),
-                cardVariants: transformResults(cardVariants),
+                sports: sports.map(r => r.Sport),
+                cardSets: cardSets.map(r => r.CardSet),
+                cardYears: cardYears.map(r => r.CardYear),
+                cardColors: cardColors.map(r => r.CardColor),
+                cardVariants: cardVariants.map(r => r.CardVariant),
             });
         } catch (error) {
             console.error("Failed to fetch filter options:", error);

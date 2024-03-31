@@ -11,7 +11,7 @@ const banners = [
     icon: null,
     button: {
       text: 'Shop Now',
-      url: '/shop'
+      url: '/search?cardName=&page=1&showAll=true'
     },
     images: [
       'https://d1htnxwo4o0jhw.cloudfront.net/cert/154592358/4w2WeHLJ_EaXv3fmYB-djA.jpg',

@@ -73,32 +73,30 @@ const SearchPage = () => {
         setIsLoadingCards(false);
     };
     
-
     // Fetch filters and default card set on component mount
     useEffect(() => {
         const fetchFilterOptions = async () => {
-            setIsLoadingFilters(true);
-            // Construct query parameters based on the current URL (router.query)
-            let queryParams = new URLSearchParams({ 
-                fetchFilters: 'true', 
-                cardName: router.query.cardName || '',
-                // include other relevant parameters from router.query
-            });
-            
-            // Append other filters from router.query if necessary
-            
-            const response = await fetch(`/api/search?${queryParams.toString()}`);
-            if (response.ok) {
-                const data = await response.json();
-                setFilterOptions(data);
-            } else {
-                console.error("Failed to fetch filter options");
-            }
-            setIsLoadingFilters(false);
-        };        
-    
+          setIsLoadingFilters(true);
+          let queryParams = new URLSearchParams({ 
+            fetchFilters: 'true', 
+            cardName: router.query.cardName || '',
+            // Pass showAll based on the inStock state
+            showAll: filters.inStock ? 'false' : 'true', // Adjust this line
+          });
+          
+          const response = await fetch(`/api/search?${queryParams.toString()}`);
+          if (response.ok) {
+            const data = await response.json();
+            setFilterOptions(data);
+          } else {
+            console.error("Failed to fetch filter options");
+          }
+          setIsLoadingFilters(false);
+        };
+      
         fetchFilterOptions();
-    }, [router.query]); // React to changes in router.query
+      }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
+      
     
     useEffect(() => {
         // This useEffect ensures fetching of filter options based on current search/filters
