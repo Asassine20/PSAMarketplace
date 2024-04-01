@@ -46,7 +46,6 @@
 
 }
 
-
 .resultCount {
   padding-right: 30px;
 }
@@ -391,4 +390,41 @@ input:focus + .slider {
 
 input:checked + .slider:before {
   transform: translateX(18px); /* Adjusted for smaller switch */
+}
+
+.appliedFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filterBubble {
+  background-color: #f1f1f1;
+  color: black;
+  border: none; 
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 15px;
+  cursor: pointer; 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.filterBubble:hover {
+  background-color: rgb(185, 182, 182); 
+}
+
+.filterX {
+  margin-right: 10px;
+  color: #333; /* Make the "X" less prominent */
+  user-select: none; /* Prevents selection to improve UX */
+}
+
+.appliedFiltersHeading {
+  margin-top: 15px;
+  margin-bottom: 10px; 
+  font-weight: bold; 
 }

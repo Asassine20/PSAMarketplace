@@ -100,12 +100,23 @@ export default async function handler(req, res) {
         values.push(limitNum, offset);
         console.log("Constructed SQL query:", sql, values);
 
+        let countSql = `SELECT COUNT(*) as totalCount ${baseSql} ${whereSql}`;
         try {
+            const totalCountResults = await query(countSql, values);
+            const totalCount = totalCountResults[0].totalCount;
+        
+            // Now fetch paginated results as before
+            let sql = `SELECT * ${baseSql} ${whereSql} LIMIT ? OFFSET ?`;
+            values.push(limitNum, offset);
+        
             const rows = await query(sql, values);
-            res.status(200).json(rows);
+            res.status(200).json({
+                cards: rows,
+                totalCount // Include the totalCount in the response
+            });
         } catch (error) {
-            console.error("Failed to fetch cards:", error);
-            res.status(500).json({ message: "Failed to fetch cards" });
+            console.error("Failed to execute query:", error);
+            res.status(500).json({ message: "Failed to execute query" });
         }
     }
 }

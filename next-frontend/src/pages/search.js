@@ -27,6 +27,7 @@ const SearchPage = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isLoadingFilters, setIsLoadingFilters] = useState(false);
     const [isLoadingCards, setIsLoadingCards] = useState(true);
+    const [totalCount, setTotalCount] = useState(0);
     const router = useRouter();
     const { cardName, page = '1' } = router.query;
     const updateFiltersInUrl = () => {
@@ -55,7 +56,7 @@ const SearchPage = () => {
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
         let query = `/api/search?cardName=${encodeURIComponent(cardName || '')}&page=${page}&showAll=${!filters.inStock}`;
-    
+
         Object.keys(filters).forEach(filterKey => {
             const filterValue = filters[filterKey];
             if (Array.isArray(filterValue)) {
@@ -64,46 +65,53 @@ const SearchPage = () => {
                 });
             }
         });
-    
+
         console.log(`Fetching filtered cards with query: ${query}`);
         const response = await fetch(query);
-        const data = await response.json();
-        console.log('Filtered cards data:', data);
-        setFilteredCards(data);
+        if (!response.ok) {
+            console.log('Failed to fetch filtered cards');
+            setIsLoadingCards(false);
+            return;
+        }
+
+        const { cards, totalCount } = await response.json(); // Assuming your API response structure
+        console.log('Filtered cards data:', cards);
+        setFilteredCards(cards);
+        setTotalCount(totalCount); // Set the total count from the response
         setIsLoadingCards(false);
     };
-    
+
     // Fetch filters and default card set on component mount
     useEffect(() => {
         const fetchFilterOptions = async () => {
-          setIsLoadingFilters(true);
-          let queryParams = new URLSearchParams({ 
-            fetchFilters: 'true', 
-            cardName: router.query.cardName || '',
-            // Pass showAll based on the inStock state
-            showAll: filters.inStock ? 'false' : 'true', // Adjust this line
-          });
-          
-          const response = await fetch(`/api/search?${queryParams.toString()}`);
-          if (response.ok) {
-            const data = await response.json();
-            setFilterOptions(data);
-          } else {
-            console.error("Failed to fetch filter options");
-          }
-          setIsLoadingFilters(false);
+            setIsLoadingFilters(true);
+            let queryParams = new URLSearchParams({
+                fetchFilters: 'true',
+                cardName: router.query.cardName || '',
+                // Pass showAll based on the inStock state
+                showAll: filters.inStock ? 'false' : 'true', // Adjust this line
+            });
+
+            const response = await fetch(`/api/search?${queryParams.toString()}`);
+            if (response.ok) {
+                const data = await response.json();
+                setFilterOptions(data);
+            } else {
+                console.error("Failed to fetch filter options");
+            }
+            setIsLoadingFilters(false);
         };
-      
+
         fetchFilterOptions();
-      }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
-      
-    
+    }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
+
+
     useEffect(() => {
         // This useEffect ensures fetching of filter options based on current search/filters
         const fetchFilterOptions = async () => {
             setIsLoadingFilters(true);
             let queryParams = new URLSearchParams({ fetchFilters: 'true', cardName: cardName || '' });
-    
+
             // Potentially add other parameters to influence filter options
             const response = await fetch(`/api/search?${queryParams.toString()}`);
             if (response.ok) {
@@ -114,7 +122,7 @@ const SearchPage = () => {
             }
             setIsLoadingFilters(false);
         };
-    
+
         fetchFilterOptions();
     }, [cardName]);
 
@@ -122,9 +130,9 @@ const SearchPage = () => {
         console.log('URL query parameters changed:', router.query);
         fetchFilteredCards(); // Adjust this function as needed
     }, [router.query]);
-    
-    
-    
+
+
+
     useEffect(() => {
         function handleResize() {
             const shouldShowFilter = window.innerWidth > 1201;
@@ -142,6 +150,7 @@ const SearchPage = () => {
     }, []); // Empty dependency array ensures this runs once on mount
 
     const handleFilterChange = (filterKey, value, isChecked) => {
+        setIsLoadingFilters(true); // Set loading to true when a filter is changed
         setFilters(prevFilters => {
             const updatedFilters = {
                 ...prevFilters,
@@ -152,8 +161,9 @@ const SearchPage = () => {
             console.log(`Filters updated: ${filterKey}`, updatedFilters[filterKey]);
             return updatedFilters;
         });
+        setIsLoadingFilters(false); // Consider setting this to false after the data has been fetched/updated
     };
-    
+
     const handleToggleChange = () => {
         setFilters(prevFilters => ({
             ...prevFilters,
@@ -190,12 +200,28 @@ const SearchPage = () => {
                         <option value="sport">Price: High - Low</option>
                         <option value="sport">Price: Low - High</option>
                     </select>
-                    <span className={styles.resultCount}>{filteredCards.length} Results</span>
+                    <span className={styles.resultCount}>{totalCount} Results</span>
                 </div>
                 <div className={styles.filterAndCardsContainer}>
                     {isFilterVisible && (
                         <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
                             <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
+                            {/* Conditionally render the "Applied Filters" heading */}
+                            {Object.values(filters).some(filterArray => Array.isArray(filterArray) && filterArray.length > 0) && (
+                                <h4 className={styles.appliedFiltersHeading}>Applied Filters</h4>
+                            )}
+                            <div className={styles.appliedFilters}>
+                                {Object.entries(filters).filter(([key, value]) => Array.isArray(value) && value.length > 0).map(([key, values]) => (
+                                    <div key={key}>
+                                        {values.map((value, index) => (
+                                            <button key={`${key}-${index}`} className={styles.filterBubble} onClick={() => handleFilterChange(key, value, false)} aria-label={`Remove ${value}`}>
+                                                <span className={styles.filterX}>X</span> {/* Decorative "X", purely for visual cue */}
+                                                {value}
+                                            </button>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
                             {/* Toggle Switch and Label */}
                             <div className={styles.toggleSwitchContainer}>
                                 <div className={styles.toggleLabel}>In stock only</div>
@@ -209,26 +235,27 @@ const SearchPage = () => {
                                 </label>
                             </div>
                             {/* Filter Options */}
-                            {isLoadingFilters ? <div className={styles.centeredContent}><Spinner /></div> : Object.keys(filterOptions).map((filterKey) => (
-                                <div key={filterKey} className={styles.filterCategory}>
-                                    <h4>{filterTitles[filterKey]}</h4>
-                                    {filterOptions[filterKey].map((option, index) => (
-                                        <div key={index}>
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option)}
-                                                    onChange={(e) => handleFilterChange(filterKey, option, e.target.checked)}
-                                                />
-                                                {option}
-                                            </label>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
+                            {isLoadingFilters ? <div className={styles.centeredContent}><Spinner /></div> :
+                                Object.keys(filterOptions).map((filterKey) => (
+                                    <div key={filterKey} className={`${styles.filterCategory} ${isLoadingFilters ? styles.disabled : ''}`}>
+                                        <h4>{filterTitles[filterKey]}</h4>
+                                        {filterOptions[filterKey].map((option, index) => (
+                                            <div key={index}>
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        disabled={isLoadingFilters}
+                                                        checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option)}
+                                                        onChange={(e) => handleFilterChange(filterKey, option, e.target.checked)}
+                                                    />
+                                                    {option}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
                         </aside>
                     )}
-
                     <section className={styles.cardsSection}>
                         {isLoadingCards ? <div className={styles.centeredContent}><Spinner /></div> : (
                             <div className={styles.cardsGrid}>
