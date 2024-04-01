@@ -40,12 +40,14 @@
 .controlSection button {
   margin-left: 30px;
   font-weight: bold;
-  font-size: 15px;
-  padding:5px;
+  font-size: 18px;
+  padding: 5px 10px;
   cursor: pointer;
-
+  border-radius: 4px;
 }
-
+.controlSection button:hover {
+  background-color: #ddd;
+}
 .resultCount {
   padding-right: 30px;
 }
@@ -73,7 +75,6 @@
   width: 100%;
   padding: 10px;
   border: 1px solid #e6e6e6; /* Slightly darker than white for visibility */
-  border-radius: 4px; /* Slight border-radius */
   background-color: white; /* Slightly darker white color for the background */
   transition: all 0.3s ease-in-out;
   position: relative;
@@ -141,7 +142,7 @@
     margin-top: 20px;
     margin-left: 20px;
     border: 1px solid #e6e6e6; /* Full border */
-    border-radius: 4px; /* Slight border-radius */
+    border-radius: 8px; /* Slight border-radius */
     background-color: white; /* Slightly darker white color for the background */
     transition: all 0.3s ease-in-out;
     position: sticky;
@@ -203,14 +204,15 @@
   height: 350px;
   display: flex;
   background-color: white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Lighter shadow for normal state */
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out; /* Smooth transition for box-shadow */
 }
+
 .card:hover {
-  transform: scale(1.05);
-  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.4); /* More apparent shadow on hover */
 }
 
 .cardImageWrapper {

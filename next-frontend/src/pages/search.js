@@ -7,6 +7,15 @@ const Spinner = () => (
     <div className={styles.spinner}></div>
 );
 
+const SearchInput = ({ onChange, placeholder }) => (
+    <input
+      type="text"
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={styles.searchInput}
+    />
+  );
+
 const SearchPage = () => {
     const [filterOptions, setFilterOptions] = useState({
         sports: [],
@@ -52,6 +61,7 @@ const SearchPage = () => {
     useEffect(() => {
         updateFiltersInUrl(); // Update URL when filters change
     }, [filters, page]); // React to changes in filters and pagination
+    
 
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
@@ -105,33 +115,10 @@ const SearchPage = () => {
         fetchFilterOptions();
     }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
 
-
-    useEffect(() => {
-        // This useEffect ensures fetching of filter options based on current search/filters
-        const fetchFilterOptions = async () => {
-            setIsLoadingFilters(true);
-            let queryParams = new URLSearchParams({ fetchFilters: 'true', cardName: cardName || '' });
-
-            // Potentially add other parameters to influence filter options
-            const response = await fetch(`/api/search?${queryParams.toString()}`);
-            if (response.ok) {
-                const data = await response.json();
-                setFilterOptions(data);
-            } else {
-                console.error("Failed to fetch filter options");
-            }
-            setIsLoadingFilters(false);
-        };
-
-        fetchFilterOptions();
-    }, [cardName]);
-
     useEffect(() => {
         console.log('URL query parameters changed:', router.query);
         fetchFilteredCards(); // Adjust this function as needed
     }, [router.query]);
-
-
 
     useEffect(() => {
         function handleResize() {

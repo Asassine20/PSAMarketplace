@@ -68,21 +68,20 @@ export default async function handler(req, res) {
 
     if (fetchFilters === 'true') {
         try {
+            const cardSetsPromise = query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql} LIMIT 1000`, values);
             const promises = [
                 query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values),
+                cardSetsPromise,
                 query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
             ];
-
-            const results = await Promise.all(promises);
-            const [sports, cardSets, cardYears, cardColors, cardVariants] = results;
-
-
+    
+            const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(promises);
+    
             res.status(200).json({
                 sports: sports.map(r => r.Sport),
-                cardSets: cardSets.map(r => r.CardSet),
+                cardSets: cardSets.map(r => r.CardSet).slice(0, 1000),
                 cardYears: cardYears.map(r => r.CardYear),
                 cardColors: cardColors.map(r => r.CardColor),
                 cardVariants: cardVariants.map(r => r.CardVariant),
@@ -95,28 +94,24 @@ export default async function handler(req, res) {
         const pageNum = parseInt(page, 10);
         const limitNum = parseInt(limit, 10);
         const offset = (pageNum - 1) * limitNum;
-
-        let sql = `SELECT * ${baseSql} ${whereSql} LIMIT ? OFFSET ?`;
-        values.push(limitNum, offset);
-        console.log("Constructed SQL query:", sql, values);
-
+    
         let countSql = `SELECT COUNT(*) as totalCount ${baseSql} ${whereSql}`;
         try {
             const totalCountResults = await query(countSql, values);
             const totalCount = totalCountResults[0].totalCount;
         
-            // Now fetch paginated results as before
             let sql = `SELECT * ${baseSql} ${whereSql} LIMIT ? OFFSET ?`;
             values.push(limitNum, offset);
         
             const rows = await query(sql, values);
             res.status(200).json({
                 cards: rows,
-                totalCount // Include the totalCount in the response
+                totalCount
             });
         } catch (error) {
             console.error("Failed to execute query:", error);
             res.status(500).json({ message: "Failed to execute query" });
         }
     }
+    
 }
