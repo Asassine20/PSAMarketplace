@@ -9,12 +9,12 @@ const Spinner = () => (
 
 const SearchInput = ({ onChange, placeholder }) => (
     <input
-      type="text"
-      onChange={e => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={styles.searchInput}
+        type="text"
+        onChange={e => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={styles.searchInput}
     />
-  );
+);
 
 const SearchPage = () => {
     const [filterOptions, setFilterOptions] = useState({
@@ -31,6 +31,13 @@ const SearchPage = () => {
         cardColor: [],
         cardVariant: [],
         inStock: true
+    });
+    const [filterSearchTerms, setFilterSearchTerms] = useState({
+        sports: '',
+        cardSets: '',
+        cardYears: '',
+        cardColors: '',
+        cardVariants: ''
     });
     const [filteredCards, setFilteredCards] = useState([]);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -61,7 +68,7 @@ const SearchPage = () => {
     useEffect(() => {
         updateFiltersInUrl(); // Update URL when filters change
     }, [filters, page]); // React to changes in filters and pagination
-    
+
 
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
@@ -114,6 +121,13 @@ const SearchPage = () => {
 
         fetchFilterOptions();
     }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
+
+    const handleFilterSearchChange = (filterKey, searchTerm) => {
+        setFilterSearchTerms(prevTerms => ({
+            ...prevTerms,
+            [filterKey]: searchTerm
+        }));
+    };
 
     useEffect(() => {
         console.log('URL query parameters changed:', router.query);
@@ -226,19 +240,28 @@ const SearchPage = () => {
                                 Object.keys(filterOptions).map((filterKey) => (
                                     <div key={filterKey} className={`${styles.filterCategory} ${isLoadingFilters ? styles.disabled : ''}`}>
                                         <h4>{filterTitles[filterKey]}</h4>
-                                        {filterOptions[filterKey].map((option, index) => (
-                                            <div key={index}>
-                                                <label>
-                                                    <input
-                                                        type="checkbox"
-                                                        disabled={isLoadingFilters}
-                                                        checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option)}
-                                                        onChange={(e) => handleFilterChange(filterKey, option, e.target.checked)}
-                                                    />
-                                                    {option}
-                                                </label>
-                                            </div>
-                                        ))}
+                                        <SearchInput
+                                            onChange={(value) => handleFilterSearchChange(filterKey, value)}
+                                            placeholder={`Search ${filterTitles[filterKey]}`}
+                                        />
+                                        {filterOptions[filterKey]
+                                            .filter(option =>
+                                                option && // Ensure option is not null or undefined
+                                                option.toString().toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
+                                            )
+                                            .map((option, index) => (
+                                                <div key={index} className={styles.filterOption}>
+                                                    <label>
+                                                        <input
+                                                            type="checkbox"
+                                                            disabled={isLoadingFilters}
+                                                            checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option)}
+                                                            onChange={(e) => handleFilterChange(filterKey, option, e.target.checked)}
+                                                        />
+                                                        {option}
+                                                    </label>
+                                                </div>
+                                            ))}
                                     </div>
                                 ))}
                         </aside>

@@ -18,7 +18,6 @@ export default async function handler(req, res) {
     let whereConditions = [];
     let values = [];
 
-    // Apply 'inStock = 1' condition only if showAll is not 'true'.
     if (showAll !== 'true') {
         whereConditions.push(`inStock = 1`);
     }
@@ -28,60 +27,32 @@ export default async function handler(req, res) {
         values.push(`%${cardName.trim()}%`);
     }
 
-    // Example adjustment for handling 'cardSets[]'
-    if (req.query['cardSets[]']) {
-        const cardSets = Array.isArray(req.query['cardSets[]']) ? req.query['cardSets[]'] : [req.query['cardSets[]']];
-        whereConditions.push(`CardSet IN (${cardSets.map(() => '?').join(', ')})`);
-        values.push(...cardSets);
-    }
-
-
-    // Handling multiple cardColors
-    if (req.query['cardColors[]']) {
-        const cardColors = Array.isArray(req.query['cardColors[]']) ? req.query['cardColors[]'] : [req.query['cardColors[]']];
-        whereConditions.push(`CardColor IN (${cardColors.map(() => '?').join(',')})`);
-        values.push(...cardColors);
-    }
-
-    // Handling multiple cardVariants
-    if (req.query['cardVariants[]']) {
-        const cardVariants = Array.isArray(req.query['cardVariants[]']) ? req.query['cardVariants[]'] : [req.query['cardVariants[]']];
-        whereConditions.push(`CardVariant IN (${cardVariants.map(() => '?').join(',')})`);
-        values.push(...cardVariants);
-    }
-
-    // Handling multiple sports
-    if (req.query['sports[]']) {
-        const sports = Array.isArray(req.query['sports[]']) ? req.query['sports[]'] : [req.query['sports[]']];
-        whereConditions.push(`Sport IN (${sports.map(() => '?').join(',')})`);
-        values.push(...sports);
-    }
-
-    // Handling multiple cardYears
-    if (req.query['cardYears[]']) {
-        const cardYears = Array.isArray(req.query['cardYears[]']) ? req.query['cardYears[]'] : [req.query['cardYears[]']];
-        whereConditions.push(`CardYear IN (${cardYears.map(() => '?').join(',')})`);
-        values.push(...cardYears);
-    }
+    // Dynamic handling for array filters (e.g., cardSets, cardColors)
+    ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears'].forEach(filter => {
+        if (req.query[`${filter}[]`]) {
+            const items = Array.isArray(req.query[`${filter}[]`]) ? req.query[`${filter}[]`] : [req.query[`${filter}[]`]];
+            whereConditions.push(`${filter.slice(0, -1)} IN (${items.map(() => '?').join(',')})`);
+            values.push(...items);
+        }
+    });
 
     let whereSql = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
 
     if (fetchFilters === 'true') {
         try {
-            const cardSetsPromise = query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql} LIMIT 1000`, values);
-            const promises = [
+            const filtersPromises = [
                 query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
-                cardSetsPromise,
+                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
             ];
-    
-            const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(promises);
-    
+
+            const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(filtersPromises);
+
             res.status(200).json({
                 sports: sports.map(r => r.Sport),
-                cardSets: cardSets.map(r => r.CardSet).slice(0, 1000),
+                cardSets: cardSets.map(r => r.CardSet),
                 cardYears: cardYears.map(r => r.CardYear),
                 cardColors: cardColors.map(r => r.CardColor),
                 cardVariants: cardVariants.map(r => r.CardVariant),
@@ -94,15 +65,14 @@ export default async function handler(req, res) {
         const pageNum = parseInt(page, 10);
         const limitNum = parseInt(limit, 10);
         const offset = (pageNum - 1) * limitNum;
-    
-        let countSql = `SELECT COUNT(*) as totalCount ${baseSql} ${whereSql}`;
+
         try {
-            const totalCountResults = await query(countSql, values);
+            const totalCountResults = await query(`SELECT COUNT(*) as totalCount ${baseSql} ${whereSql}`, values);
             const totalCount = totalCountResults[0].totalCount;
-        
+
             let sql = `SELECT * ${baseSql} ${whereSql} LIMIT ? OFFSET ?`;
             values.push(limitNum, offset);
-        
+
             const rows = await query(sql, values);
             res.status(200).json({
                 cards: rows,
@@ -113,5 +83,4 @@ export default async function handler(req, res) {
             res.status(500).json({ message: "Failed to execute query" });
         }
     }
-    
 }

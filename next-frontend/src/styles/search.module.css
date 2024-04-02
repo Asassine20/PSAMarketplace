@@ -81,13 +81,19 @@
 }
 
 .filterCategory {
-  max-height: 150px; /* Adjust based on your needs */
+  max-height: 400px; /* Adjust based on your needs */
   overflow-y: auto; /* Enables vertical scrolling within the category */
   padding: 4px 0; /* Adds some vertical padding within the category */
   border-bottom: 1px solid #ccc; /* Optional: adds a separator between categories */
   margin-bottom: 8px; /* Optional: adds some space between categories */
   width: 100%;
 }
+
+.filterOption {
+  margin-bottom: 8px; /* Adjust the space between each filter option */
+  padding: 1px 0; /* Adds padding above and below each option for more space */
+}
+
 
 /* Adjust the padding below each filter category header */
 .filterCategory h4 {
@@ -102,14 +108,34 @@
   margin-bottom: 8px; /* Adjust as needed for space between each filter option */
 }
 
-/* Style for the checkboxes */
-.filterCategory input[type="checkbox"] {
-}
-
 /* Additional styles for checkbox names to increase padding, if separate from the label styles */
 .filterCategory label span {
   padding-left: 5px; /* Increase left padding for the checkbox name, adjust as needed */
 }
+
+.searchInput {
+  width: 100%; /* Makes the search input span the full width of its container */
+  padding: 8px 10px; /* Adds some padding inside the search box for better text visibility */
+  margin-bottom: 10px; /* Adds some space below the search box */
+  border: 1px solid #ccc; /* Adds a subtle border to the search box */
+  border-radius: 4px; /* Slightly rounds the corners of the search box */
+  box-sizing: border-box; /* Ensures padding does not affect the final computed width of the search box */
+  color: #333; /* Text color */
+  font-size: 14px; /* Text size */
+  background-color: #fff; /* Background color of the search box */
+  outline: none; /* Removes the default focus outline */
+  transition: border-color 0.2s; /* Smooth transition for border color change */
+}
+
+.searchInput:focus {
+  border-color: #007bff; /* Changes the border color of the search box when it is focused to indicate active state */
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25); /* Adds a subtle shadow around the search box when focused */
+}
+
+.searchInput::placeholder {
+  color: #aaa; /* Color of the placeholder text */
+}
+
 
 
 .filterVisible {
