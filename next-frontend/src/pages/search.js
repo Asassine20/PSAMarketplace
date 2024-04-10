@@ -44,6 +44,8 @@ const SearchPage = () => {
     const [isLoadingFilters, setIsLoadingFilters] = useState(false);
     const [isLoadingCards, setIsLoadingCards] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
+    const [delayedSearch, setDelayedSearch] = useState(null); 
+
     const router = useRouter();
     const { cardName, page = '1' } = router.query;
     const updateFiltersInUrl = () => {
@@ -123,10 +125,20 @@ const SearchPage = () => {
     }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
-        setFilterSearchTerms(prevTerms => ({
-            ...prevTerms,
-            [filterKey]: searchTerm
-        }));
+        if (delayedSearch) {
+            clearTimeout(delayedSearch);
+        }
+
+        // Set a new timeout
+        const newTimeout = setTimeout(() => {
+            setFilterSearchTerms(prevTerms => ({
+                ...prevTerms,
+                [filterKey]: searchTerm
+            }));
+        }, 500); // Delay of 2 seconds
+
+        // Save the new timeout ID
+        setDelayedSearch(newTimeout);
     };
 
     useEffect(() => {
