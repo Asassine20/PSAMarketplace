@@ -65,17 +65,29 @@ export default async function handler(req, res) {
         const pageNum = parseInt(page, 10);
         const limitNum = parseInt(limit, 10);
         const offset = (pageNum - 1) * limitNum;
-
+    
         try {
-            const totalCountResults = await query(`SELECT COUNT(*) as totalCount ${baseSql} ${whereSql}`, values);
-            const totalCount = totalCountResults[0].totalCount;
-
-            let sql = `SELECT * ${baseSql} ${whereSql} LIMIT ? OFFSET ?`;
+            // Updated to include a JOIN with the Inventory table and aggregate functions
+            let sql = `
+            SELECT Card.*, 
+                   Card.MarketPrice, 
+                   COUNT(Inventory.CardID) as ListingsCount
+            ${baseSql}
+            LEFT JOIN Inventory ON Card.CardID = Inventory.CardID
+            ${whereSql}
+            GROUP BY Card.CardID
+            LIMIT ? OFFSET ?`;
+            
             values.push(limitNum, offset);
-
-            const rows = await query(sql, values);
+    
+            const cardsData = await query(sql, values);
+    
+            // Assuming you still want the total count of cards matching the query (without considering pagination)
+            const totalCountResult = await query(`SELECT COUNT(DISTINCT Card.CardID) as totalCount ${baseSql} ${whereSql}`, values.slice(0, -2)); // Remove limit and offset values for this count query
+            const totalCount = totalCountResult[0]?.totalCount || 0;
+    
             res.status(200).json({
-                cards: rows,
+                cards: cardsData,
                 totalCount
             });
         } catch (error) {
