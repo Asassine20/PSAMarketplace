@@ -17,37 +17,42 @@ const SearchInput = ({ onChange, placeholder }) => (
 );
 
 const SearchPage = () => {
+    const router = useRouter();
+    const { query } = router;
+    const [filters, setFilters] = useState({
+        sport: query.sport || [],
+        cardSet: query.cardSet || [],
+        cardYear: query.cardYear || [],
+        cardColor: query.cardColor || [],
+        cardVariant: query.cardVariant || [],
+        inStock: query.showAll !== 'true',
+        cardName: query.cardName || '',
+        page: query.page || '1',
+    });
     const [filterOptions, setFilterOptions] = useState({
         sports: [],
         cardSets: [],
         cardYears: [],
         cardColors: [],
-        cardVariants: []
+        cardVariants: [],
     });
-    const [filters, setFilters] = useState({
-        sport: [],
-        cardSet: [],
-        cardYear: [],
-        cardColor: [],
-        cardVariant: [],
-        inStock: true
-    });
+    const [filteredCards, setFilteredCards] = useState([]);
+    const [isLoadingCards, setIsLoadingCards] = useState(true);
+    const [totalCount, setTotalCount] = useState(0);
     const [filterSearchTerms, setFilterSearchTerms] = useState({
         sports: '',
         cardSets: '',
         cardYears: '',
         cardColors: '',
-        cardVariants: ''
+        cardVariants: '',
     });
-    const [filteredCards, setFilteredCards] = useState([]);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isLoadingFilters, setIsLoadingFilters] = useState(false);
-    const [isLoadingCards, setIsLoadingCards] = useState(true);
-    const [totalCount, setTotalCount] = useState(0);
-    const [delayedSearch, setDelayedSearch] = useState(null); 
+    const [delayedSearch, setDelayedSearch] = useState(null);
 
-    const router = useRouter();
     const { cardName, page = '1' } = router.query;
+
+    // updates the browser url when searches and filters are updated
     const updateFiltersInUrl = () => {
         const queryParameters = new URLSearchParams({
             cardName: cardName || '',
@@ -55,10 +60,10 @@ const SearchPage = () => {
             showAll: !filters.inStock ? 'false' : 'true',
         });
 
-        Object.keys(filters).forEach(filterKey => {
+        Object.keys(filters).forEach((filterKey) => {
             const filterValue = filters[filterKey];
             if (Array.isArray(filterValue) && filterValue.length) {
-                filterValue.forEach(value => {
+                filterValue.forEach((value) => {
                     queryParameters.append(filterKey, value);
                 });
             }
@@ -67,48 +72,50 @@ const SearchPage = () => {
         router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
     };
 
+    // calls the updateFiltersInUrl function whenever the filters or page is changed
     useEffect(() => {
-        updateFiltersInUrl(); // Update URL when filters change
-    }, [filters, page]); // React to changes in filters and pagination
+        updateFiltersInUrl();
+    }, [filters, page]);
 
-
+    // fetches and displays the data as search results
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
         let query = `/api/search?cardName=${encodeURIComponent(cardName || '')}&page=${page}&showAll=${!filters.inStock}`;
 
-        Object.keys(filters).forEach(filterKey => {
+        Object.keys(filters).forEach((filterKey) => {
             const filterValue = filters[filterKey];
             if (Array.isArray(filterValue)) {
-                filterValue.forEach(value => {
+                filterValue.forEach((value) => {
                     query += `&${filterKey}[]=${encodeURIComponent(value)}`;
                 });
             }
         });
 
-        console.log(`Fetching filtered cards with query: ${query}`);
         const response = await fetch(query);
         if (!response.ok) {
-            console.log('Failed to fetch filtered cards');
             setIsLoadingCards(false);
             return;
         }
 
-        const { cards, totalCount } = await response.json(); // Assuming your API response structure
-        console.log('Filtered cards data:', cards);
+        const { cards, totalCount } = await response.json();
         setFilteredCards(cards);
-        setTotalCount(totalCount); // Set the total count from the response
+        setTotalCount(totalCount);
         setIsLoadingCards(false);
     };
 
-    // Fetch filters and default card set on component mount
+    // calls the fetchFilteredCards function when the router.query is updated
+    useEffect(() => {
+        fetchFilteredCards();
+    }, [router.query]);
+
+    // Declares fetchFilterOptions which fetches and displays all filter options in the filter section
     useEffect(() => {
         const fetchFilterOptions = async () => {
             setIsLoadingFilters(true);
             let queryParams = new URLSearchParams({
                 fetchFilters: 'true',
                 cardName: router.query.cardName || '',
-                // Pass showAll based on the inStock state
-                showAll: filters.inStock ? 'false' : 'true', // Adjust this line
+                showAll: filters.inStock ? 'false' : 'true',
             });
 
             const response = await fetch(`/api/search?${queryParams.toString()}`);
@@ -116,77 +123,55 @@ const SearchPage = () => {
                 const data = await response.json();
                 setFilterOptions(data);
             } else {
-                console.error("Failed to fetch filter options");
+                console.error('Failed to fetch filter options');
             }
             setIsLoadingFilters(false);
         };
 
         fetchFilterOptions();
-    }, [router.query, filters.inStock]); // Add filters.inStock as a dependency
+    }, [router.query, filters.inStock]);
 
+    // Delays the search request for the filter search bar 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
         if (delayedSearch) {
             clearTimeout(delayedSearch);
         }
 
-        // Set a new timeout
         const newTimeout = setTimeout(() => {
-            setFilterSearchTerms(prevTerms => ({
+            setFilterSearchTerms((prevTerms) => ({
                 ...prevTerms,
-                [filterKey]: searchTerm
+                [filterKey]: searchTerm,
             }));
-        }, 500); // Delay of 2 seconds
+        }, 500);
 
-        // Save the new timeout ID
         setDelayedSearch(newTimeout);
     };
 
-    useEffect(() => {
-        console.log('URL query parameters changed:', router.query);
-        fetchFilteredCards(); // Adjust this function as needed
-    }, [router.query]);
-
-    useEffect(() => {
-        function handleResize() {
-            const shouldShowFilter = window.innerWidth > 1201;
-            setIsFilterVisible(shouldShowFilter);
-        }
-
-        // Call handleResize initially in case the initial width is > 1201
-        handleResize();
-
-        // Add event listener
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup
-        return () => window.removeEventListener('resize', handleResize);
-    }, []); // Empty dependency array ensures this runs once on mount
-
+    // Updates the filter state when a filter option is changed. 
     const handleFilterChange = (filterKey, value, isChecked) => {
-        setIsLoadingFilters(true); // Set loading to true when a filter is changed
-        setFilters(prevFilters => {
+        setIsLoadingFilters(true);
+        setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 [filterKey]: isChecked
                     ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
-                    : prevFilters[filterKey].filter(v => v !== value),
+                    : prevFilters[filterKey].filter((v) => v !== value),
             };
-            console.log(`Filters updated: ${filterKey}`, updatedFilters[filterKey]);
             return updatedFilters;
         });
-        setIsLoadingFilters(false); // Consider setting this to false after the data has been fetched/updated
+        setIsLoadingFilters(false);
     };
 
+    // toggles the inStock filter state and fetches the filtered cards based on the new state
     const handleToggleChange = () => {
-        setFilters(prevFilters => ({
+        setFilters((prevFilters) => ({
             ...prevFilters,
-            inStock: !prevFilters.inStock
+            inStock: !prevFilters.inStock,
         }));
-        // You might want to re-fetch cards based on the new inStock value
-        fetchFilteredCards();
+        fetchFilteredCards(); // Call fetchFilteredCards here to update cards when filter changes
     };
 
-    const paginate = pageNumber => {
+    const paginate = (pageNumber) => {
         router.push(`?cardName=${encodeURIComponent(cardName)}&page=${pageNumber}`);
     };
 
