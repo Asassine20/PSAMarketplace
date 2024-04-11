@@ -203,7 +203,10 @@ const SearchPage = () => {
                 <div className={styles.filterAndCardsContainer}>
                     {isFilterVisible && (
                         <aside className={`${styles.filterSection} ${isFilterVisible ? styles.filterVisible : ''}`}>
-                            <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
+                            <div className={styles.filterHeader}>
+                                <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
+                                <h2 className={styles.filterTitle}>Filters</h2>
+                            </div>
                             {/* Conditionally render the "Applied Filters" heading */}
                             {Object.values(filters).some(filterArray => Array.isArray(filterArray) && filterArray.length > 0) && (
                                 <h4 className={styles.appliedFiltersHeading}>Applied Filters</h4>

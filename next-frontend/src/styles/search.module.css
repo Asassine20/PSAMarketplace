@@ -190,28 +190,54 @@
 
 @media (max-width: 1200px) {
   .filterToggleButton {
-    display: block;
-    position: fixed;
-    top: 10px;
-    left: 20px;
-    z-index: 30; /* Ensure toggle button is above the filter section */
+      display: block;
+      position: fixed;
+      top: 10px;
+      left: 20px;
+      z-index: 30;
   }
 
   .filterSection {
-    position: fixed; /* or absolute, depending on your layout needs */
-    top: 0; /* Adjust as needed */
-    left: 0; /* Adjust as needed */
-    width: 400px; /* or whatever width you prefer */
-    height: 100%; /* Take up full viewport height, adjust as needed */
-    overflow-y: auto; /* In case of scrolling */
-    z-index: 20; /* Higher than cardsSection */
-    display: none; /* Initially hidden */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 400px;
+      height: 100%;
+      overflow-y: auto;
+      z-index: 20;
+      display: none; /* Initially hidden */
+      padding-top: 0; /* Ensure no padding at the top */
   }
 
   .filterVisible {
-    display: block; /* Show filter section */
+      display: block; /* Show filter section */
+  }
+
+  .filterHeader {
+      position: sticky;
+      top: 0; 
+      z-index: 25;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      width: 100%;
+      margin: 0; 
+  }
+
+  .closeFilterButton {
+      margin: 0;
+  }
+
+  .filterTitle {
+      margin: 0; /* Ensure there's no default margin */
   }
 }
+
+
+
 
 .cardsSection {
   width: 100%;
