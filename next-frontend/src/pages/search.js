@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import styles from '../styles/search.module.css';
+import { FaCaretDown } from 'react-icons/fa';
 
 const Spinner = () => (
     <div className={styles.spinner}></div>
@@ -192,12 +193,15 @@ const SearchPage = () => {
             <div className={styles.mainContent}>
                 <div className={styles.controlSection}>
                     <button onClick={toggleFilterVisibility} className={styles.filterToggle}>Filter</button>
-                    <select className={styles.sortDropdown}>
-                        <option value="name">Best Selling</option>
-                        <option value="year">A-Z</option>
-                        <option value="sport">Price: High - Low</option>
-                        <option value="sport">Price: Low - High</option>
-                    </select>
+                    <div className={styles.dropdownContainer}>
+                        <select className={styles.sortDropdown}>
+                            <option value="name">Best Selling</option>
+                            <option value="year">A-Z</option>
+                            <option value="sport">Price: High - Low</option>
+                            <option value="sport">Price: Low - High</option>
+                        </select>
+                        <FaCaretDown className={styles.dropdownIcon} />
+                    </div>
                     <span className={styles.resultCount}>{totalCount} Results</span>
                 </div>
                 <div className={styles.filterAndCardsContainer}>

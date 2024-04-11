@@ -42,19 +42,63 @@
   font-weight: bold;
   font-size: 18px;
   padding: 5px 10px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  appearance: none;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 .controlSection button:hover {
-  background-color: #ddd;
+  border-color: #888;
+}
+
+.controlSection button:hover {
+  border-color: #0056b3; /* Highlight color when focused */
+  box-shadow: 0 0 5px rgba(0, 86, 179, 0.25); /* Subtle focus shadow */
 }
 .resultCount {
   padding-right: 30px;
 }
 
+.dropdownContainer {
+  position: relative;
+  display: inline-block;
+}
+
 .sortDropdown {
   margin-right: 10px;
+  padding-right: 30px; /* Make space for the icon */
+  padding: 8px 16px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #333;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  width: 100%; /* Ensure it fills the container */
 }
+
+
+.sortDropdown:hover {
+  border-color: #888; /* Slightly darker border on hover */
+}
+
+.sortDropdown:focus {
+  border-color: #0056b3; /* Highlight color when focused */
+  box-shadow: 0 0 5px rgba(0, 86, 179, 0.25); /* Subtle focus shadow */
+}
+.dropdownIcon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* Icon does not interfere with dropdown interaction */
+  color: #333; /* Match the color of the arrow to the text or as needed */
+}
+
 
 
 /* Adjust the filter section and container */
@@ -235,10 +279,6 @@
       margin: 0; /* Ensure there's no default margin */
   }
 }
-
-
-
-
 .cardsSection {
   width: 100%;
 }
