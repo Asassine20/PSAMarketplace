@@ -1,0 +1,97 @@
+.cardDetail {
+    display: flex;
+    flex-wrap: wrap;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.cardImageWrapper {
+    flex: 1 1 300px;
+    margin-right: 20px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px; 
+}
+
+.cardImage {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.cardContent {
+    flex: 3 1 600px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.cardInfo {
+    flex: 1 1 100%;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.cardInfo h1 {
+    font-size: 24px;
+    color: #0070f3;
+}
+
+.cardInfo p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+.cardGraph, .latestSales, .listingsTable {
+    flex: 1 1 48%;
+    background-color: #f9f9f9; /* Light background for the tables */
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px; /* Rounded corners for all tables */
+}
+
+.latestSales {
+    margin-left: 4%;
+    border: none; /* Removing extra borders */
+    overflow: hidden; /* Adding overflow hidden here to clip the corners of the table */
+    border-radius: 8px; /* Applying border-radius here to ensure it contains the table properly */
+}
+
+.latestSales table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.latestSales th, .latestSales td {
+    border: 1px solid #ccc; /* Uniform light grey border */
+    padding: 8px;
+    text-align: left;
+}
+
+.latestSales th {
+    background-color: #ccc; /* Light grey background for headers */
+    color: #333; /* Dark grey text for contrast */
+    font-size: 16px;
+}
+
+.latestSales td {
+    background-color: #fff; /* White background for cells */
+    color: #333; /* Dark text for readability */
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .cardContent {
+        flex-direction: column;
+    }
+
+    .cardGraph, .latestSales, .listingsTable {
+        flex: 1 1 100%;
+        margin-left: 0;
+    }
+}

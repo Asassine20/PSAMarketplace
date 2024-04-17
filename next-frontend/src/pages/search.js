@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import Link from 'next/link';
 import styles from '../styles/search.module.css';
 import { FaCaretDown } from 'react-icons/fa';
 
@@ -271,29 +272,35 @@ const SearchPage = () => {
                         </aside>
                     )}
                     <section className={styles.cardsSection}>
-                        {isLoadingCards ? <div className={styles.centeredContent}><Spinner /></div> : (
+                        {isLoadingCards ? (
+                            <div className={styles.centeredContent}><Spinner /></div>
+                        ) : (
                             <div className={styles.cardsGrid}>
+                                {console.log("Filtered Cards: ", filteredCards)}
                                 {filteredCards.length > 0 ? (
                                     filteredCards.map((card, index) => (
-                                        <div key={index} className={styles.card}>
-                                            <div className={styles.cardImageWrapper}>
-                                                <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />
+                                        <Link key={index} href={`/cards/${card.CardID}`}> 
+                                            <div className={styles.card}>
+                                                <div className={styles.cardImageWrapper}>
+                                                    <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />
+                                                </div>
+                                                <div className={styles.cardInfo}>
+                                                    <div className={styles.cardSport}>{card.Sport}</div>
+                                                    <div className={styles.cardSet}>{card.CardSet}</div>
+                                                    <div className={styles.cardNumber}># {card.CardNumber}</div>
+                                                    <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
+                                                    <div className={styles.cardColor}>{card.CardColor || ''}</div>
+                                                    <div className={styles.cardName}>{card.CardName}</div>
+                                                    <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
+                                                    <div className={styles.cardMarketPrice}>Market Price: ${card.MarketPrice}</div>
+                                                </div>
                                             </div>
-                                            <div className={styles.cardInfo}>
-                                                <div className={styles.cardSport}>{card.Sport}</div>
-                                                <div className={styles.cardSet}>{card.CardSet}</div>
-                                                <div className={styles.cardNumber}># {card.CardNumber}</div>
-                                                <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
-                                                <div className={styles.cardColor}>{card.CardColor || ''}</div>
-                                                <div className={styles.cardName}>{card.CardName}</div>
-                                                <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
-                                                <div className={styles.cardMarketPrice}>Market Price: ${card.MarketPrice}</div>
-                                            </div>
-                                        </div>
+                                        </Link>
                                     ))
                                 ) : (
                                     <div>No results found</div>
                                 )}
+
                             </div>
                         )}
                     </section>

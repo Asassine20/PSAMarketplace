@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+console.log('Auth Config:', process.env.EMAIL_USERNAME, process.env.EMAIL_APP_PASSWORD);
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -28,7 +29,7 @@ exports.sendConfirmationEmail = async (user) => {
         html: `
             <div style="background-color: #333; padding: 10px; text-align: center;">
                 <div style="background-color: white; padding: 10px; display: inline-block; text-align: left; max-width: 400px; width: 100%;">
-                    <img src="https://scontent.fdet1-2.fna.fbcdn.net/v/t39.30808-1/432925224_793841712785548_1804237986512213891_n.jpg?stp=dst-jpg_p480x480&_nc_cat=108&ccb=1-7&_nc_sid=5f2048&_nc_ohc=FrhAP0xdRiAAX-zmkQj&_nc_ht=scontent.fdet1-2.fna&oh=00_AfBBcwdrGArklAEmv3x_Wcmzy5NjECoJMxgVMtfPpRo2sQ&oe=65FB4255" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; width: 25%;" />
+                    <img src="https://www.facebook.com/photo?fbid=122099215124245612&set=a.122099213774245612" alt="Logo" style="display: block; margin-left: auto; margin-right: auto; width: 25%;" />
                     <h1 style="text-align: center;">Thank you for creating an account with GemTCG</h1>
                     <p style="text-align: center;">Please click the button below to confirm your email address and activate your account.</p>
                     <div style="text-align: center; margin: 20px;">

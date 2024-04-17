@@ -3,6 +3,7 @@ const compression = require('compression');
 const path = require('path');
 const server = express();
 const db = require('./db');
+const session = require('express-session');
 const port = 3001;
 const publicDirectory = path.join(__dirname, './public')
 const authRoutes = require('./routes/auth');
@@ -10,6 +11,12 @@ const cookieParser = require('cookie-parser');
 const articlesRoutes = require('./routes/articles');
 const homePageRoutes = require('./routes/homepage');
 const hbs = require('hbs');
+server.use(session({
+    secret: '123',  // This is a secret key used to sign the session ID cookie.
+    resave: false,              // Forces the session to be saved back to the session store, even if the session was never modified during the request.
+    saveUninitialized: true,    // Forces a session that is "uninitialized" to be saved to the store.
+    cookie: { secure: false }   // Use `secure: true` if you are on HTTPS.
+}));
 
 server.use(cookieParser());
 
@@ -118,13 +125,9 @@ hbs.registerHelper('json', function(context) {
 hbs.registerHelper('formatCurrency', function(value) {
     // Attempt to convert the incoming value to a float
     const num = parseFloat(value);
-    // Check if the conversion was successful (i.e., the result is not NaN)
     if (!isNaN(num)) {
-        // If successful, format the number and return it
         return num.toFixed(2);
     }
-    // If conversion wasn't successful, return a default value or message
-    // This could be a message or simply the original value, depending on your preference
     return "N/A"; // Or any appropriate fallback value
 });
 
