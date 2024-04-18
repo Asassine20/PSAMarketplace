@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import React, { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import Image from 'next/image';
 import styles from '../../styles/Card.module.css';
@@ -7,15 +8,38 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 function CardDetails() {
     const router = useRouter();
-    const { CardID } = router.query;
+    const { CardID, ListingID } = router.query;
     const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher);
+    const [hoveredImage, setHoveredImage] = useState(null);
+    const imageRef = useRef(null);
+    useEffect(() => {
+        const checkSize = () => {
+            if (window.innerWidth <= 768) {
+                // For mobile: add click event listeners
+                imageRef.current?.addEventListener('click', handleImageClick);
+            } else {
+                // For desktop: ensure no click handlers are active
+                imageRef.current?.removeEventListener('click', handleImageClick);
+            }
+        };
 
+        checkSize();
+        window.addEventListener('resize', checkSize);
+
+        return () => {
+            window.removeEventListener('resize', checkSize);
+            imageRef.current?.removeEventListener('click', handleImageClick);
+        };
+    }, []);
+
+    const handleImageClick = (event) => {
+        setHoveredImage(event.target.src);
+    };
     if (error) return <div>Failed to load data</div>;
     if (!data) return <div>Loading...</div>;
     if (!data.card) return <div>Card not found</div>;
 
-    const { card } = data;
-
+    const { card, listing } = data;
     return (
         <div className={styles.cardDetail}>
             <div className={styles.cardImageWrapper}>
@@ -29,7 +53,6 @@ function CardDetails() {
                     <p><strong>Number:</strong> {card.CardNumber}</p>
                     <p><strong>Variant:</strong> {card.CardVariant || 'N/A'}</p>
                     <p><strong>Color:</strong> {card.CardColor || 'N/A'}</p>
-                    <p><strong>Listings:</strong> {card.ListingsCount}</p>
                     <p><strong>Market Price:</strong> ${card.MarketPrice}</p>
                 </div>
                 <div className={styles.latestSales}>
@@ -57,9 +80,65 @@ function CardDetails() {
                     </table>
                 </div>
             </div>
-            <div className={styles.listingsTable}>
-                <p>Current Sellers Listing Here</p>
-            </div>
+            {data.card.listings && data.card.listings.length > 0 ? (
+                <div className={styles.listingsContainer}>
+                    {data.card.listings.map((listing, index) => (
+                        <div key={index} className={styles.listingCard}>
+                            <div className={styles.listingImages}>
+                                <img
+                                    src={listing.FrontImageURL}
+                                    alt="Front"
+                                    className={styles.listingImage}
+                                    onMouseEnter={() => setHoveredImage(listing.FrontImageURL)}
+                                    onMouseLeave={() => setHoveredImage(null)}
+                                />
+                                <img
+                                    src={listing.BackImageURL}
+                                    alt="Back"
+                                    className={styles.listingImage}
+                                    onMouseEnter={() => setHoveredImage(listing.BackImageURL)}
+                                    onMouseLeave={() => setHoveredImage(null)}
+                                />
+                            </div>
+                            <div className={styles.listingDetails}>
+                                <div className={styles.listingInfo}>{listing.SellerID}</div>
+                                <div className={styles.listingInfo}>{listing.Feedback}</div>
+                                <div className={`${styles.listingInfo} ${styles.salePriceInfo}`}>${listing.SalePrice}</div>
+                                <div className={styles.listingInfo}>{listing.GradeValue}</div>
+                                <div className={styles.listingInfo}>
+                                    <a href={`https://www.psacard.com/cert/${listing.CertNumber}`} target="_blank" rel="noopener noreferrer">
+                                        Cert Number: {listing.CertNumber}
+                                    </a>
+                                </div>
+                            </div>
+                            <div className={styles.listingAction}>
+                                <button className={styles.button}>Add to Cart</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className={styles.listingsTable}>
+                    <p>No listings available for this card.</p>
+                </div>
+            )}
+            {hoveredImage && (
+                <div style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 100,
+                    border: '1px solid #ccc',
+                    borderRadius: '8px',
+                }}>
+                    <img
+                        src={hoveredImage}
+                        style={{ width: '500px', height: 'auto', objectFit: 'cover', borderRadius: '8px' }}
+                        alt="Enlarged"
+                    />
+                </div>
+            )}
         </div>
     );
 }

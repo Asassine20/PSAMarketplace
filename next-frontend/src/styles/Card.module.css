@@ -4,35 +4,36 @@
     padding: 20px;
     max-width: 1200px;
     margin: 20px auto;
+    align-items: stretch; /* Ensures that all flex children (columns) stretch to the same height */
 }
 
 .cardImageWrapper {
-    flex: 1 1 300px;
-    margin-right: 20px;
+    flex: 1 1 300px; /* Fixed basis and flex-grow to allow size adjustment */
     display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+    align-items: center; /* Centers the image vertically */
+    justify-content: center; /* Centers the image horizontally */
+    margin-right: 20px;
 }
 
 .cardImage {
-    max-width: 100%;
-    height: auto;
+    width: 100%; /* Makes sure the image is as wide as the wrapper */
+    height: 100%; /* Makes sure the image is as tall as the wrapper */
+    object-fit: cover; /* Ensures the image covers the full area without distorting aspect ratio */
 }
 
 .cardContent {
     display: flex;
     flex-direction: column;
-    flex: 3 1 600px;
+    flex: 3 1 600px; /* Flex-grow is 3 to allow the content area to be larger than the image area */
     justify-content: space-between;
 }
 
-.cardInfo {
-    text-align: left;
+.cardInfo, .latestSales {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
-    padding: 20px;  /* Increased padding for a better look */
-    background: #fff;  /* Background color for the bubble effect */
-    border-radius: 8px;  /* Rounded corners for the bubble effect */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Shadow for depth */
 }
 
 .cardInfo h1 {
@@ -41,23 +42,14 @@
     margin-bottom: 10px;
 }
 
-.cardInfo p {
+.cardInfo p, .latestSales p {
     font-size: 18px;
     margin: 8px 0;
 }
 
 .latestSales {
-    flex: 1 1 100%;
-    margin-top: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    padding: 20px;  /* Consistent padding with cardInfo */
-}
-
-.latestSalesTableContainer {
-    overflow: auto;
+    flex: 1; /* Allows this section to grow and fill available space */
+    overflow: hidden; /* Maintains the border-radius */
 }
 
 .latestSales h2 {
@@ -80,7 +72,6 @@
     background-color: #eee;
     color: #333;
     font-size: 16px;
-    letter-spacing: 0.5px;
 }
 
 .latestSales td {
@@ -89,13 +80,128 @@
     font-size: 16px;
 }
 
+.listingsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    margin-top: 20px;
+    width: 95%; /* Sets width to 90% of the parent container */
+    max-width: 1200px; /* Optional: Ensures it doesn't grow beyond 1200px */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.listingInfo {
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.listingInfo a {
+    color: inherit; /* Inherits the color from the parent element */
+    text-decoration: none; /* Optional: removes underline from the link */
+}
+
+
+.salePriceInfo {
+    color: #0070f3;   /* Blue color for price */
+    font-weight: bold; /* Make it bold */
+    font-size: 20px;   /* Larger font size */
+    padding: 10px;     /* Some padding for visual space */
+    background-color: #f0f0f0; /* Light grey background */
+    border-radius: 4px; /* Rounded corners */
+    margin: 5px 0;     /* Consistent margin with other items */
+}
+
+.listingCard {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.listingImages {
+    display: flex;
+    gap: 10px;
+}
+
+.listingImage {
+    position: relative; /* Needed for positioning the pseudo-element */
+    width: 75px;
+    height: 100px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.listingImage:hover::after {
+    content: ''; /* Necessary for pseudo-elements */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 300px; /* Large size for the popup image */
+    height: 300px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: translate(-50%, -50%); /* Centers the image */
+    z-index: 100; /* Ensures it's above other content */
+    border-radius: 8px; /* Optional: Adds rounded corners to the popup image */
+}
+
+.listingDetails {
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 16px;
+}
+
+.listingAction {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.button {
+    padding: 8px 16px;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.enlargedImage {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10; /* Ensure it's above other content */
+    /* Additional styles for aesthetics */
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+}
+
+
 @media (max-width: 768px) {
-    .cardContent {
-        flex-direction: column;
+    .listingCard {
+        flex-direction: row; /* Change to row to maintain horizontal alignment */
+        flex-wrap: wrap; /* Allow items to wrap if needed */
+        
     }
 
-    .latestSales, .cardInfo {
-        flex: 1 1 100%;
-        padding-left: 10px;
+    .listingImages {
+        justify-content: flex-start; /* Align images to the start (left side) */
+        width: 30%; /* Assign width to prevent overcrowding */
+    }
+
+    .listingDetails {
+        flex-direction: row; /* Keep details in a row to align horizontally */
+        flex-wrap: wrap; /* Allow wrapping */
+        width: 40%; /* Assign width to prevent overcrowding */
     }
 }
