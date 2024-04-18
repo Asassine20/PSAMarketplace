@@ -10,11 +10,14 @@ export default async function handler(req, res) {
             WHERE CardID = ?;
         `;
 
+        // Updated SQL to join Inventory with Stores and Grade tables and fetch additional details
         const listingsSql = `
-            SELECT *
+            SELECT Inventory.*, Stores.StoreName, Stores.ShippingPrice, Stores.FeedbackAverage, Grade.GradeValue
             FROM Inventory
-            WHERE CardID = ?
-            ORDER BY SalePrice DESC;  
+            LEFT JOIN Stores ON Inventory.SellerID = Stores.UserID  
+            LEFT JOIN Grade ON Inventory.GradeID = Grade.GradeID  
+            WHERE Inventory.CardID = ?
+            ORDER BY Inventory.SalePrice DESC;  
         `;
 
         // Execute both queries
@@ -23,7 +26,7 @@ export default async function handler(req, res) {
 
         if (cardResults.length > 0) {
             const card = cardResults[0];
-            card.listings = listingsResults;  // Attach listings to the card object
+            card.listings = listingsResults;  // Attach enhanced listings to the card object
             res.status(200).json({ card });
         } else {
             res.status(404).json({ message: "Card not found" });

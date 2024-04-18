@@ -86,8 +86,8 @@
     gap: 20px;
     padding: 20px;
     margin-top: 20px;
-    width: 95%; /* Sets width to 90% of the parent container */
-    max-width: 1200px; /* Optional: Ensures it doesn't grow beyond 1200px */
+    width: 95%;
+    max-width: 1200px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
@@ -104,14 +104,17 @@
 
 
 .salePriceInfo {
-    color: #0070f3;   /* Blue color for price */
-    font-weight: bold; /* Make it bold */
-    font-size: 20px;   /* Larger font size */
-    padding: 10px;     /* Some padding for visual space */
-    background-color: #f0f0f0; /* Light grey background */
-    border-radius: 4px; /* Rounded corners */
-    margin: 5px 0;     /* Consistent margin with other items */
+    color: #0070f3; /* Blue color for emphasis */
+    border-radius: 4px;
+    padding: 5px;
+    margin-bottom: 5px;
 }
+
+.feedbackInfo {
+    font-size: 14px;
+    color: #666;
+}
+
 
 .listingCard {
     background: #ffffff;
@@ -120,7 +123,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
+
 
 .listingImages {
     display: flex;
@@ -128,7 +133,6 @@
 }
 
 .listingImage {
-    position: relative; /* Needed for positioning the pseudo-element */
     width: 75px;
     height: 100px;
     border-radius: 8px;
@@ -163,7 +167,10 @@
     justify-content: center;
     align-items: center;
 }
-
+.listingPriceDetails {
+    display: flex;
+    flex-direction: column;
+}
 .button {
     padding: 8px 16px;
     background-color: #0070f3;
@@ -171,6 +178,12 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+.shippingPriceInfo {
+    font-size: 12px; /* Slightly smaller font size for shipping price */
+    padding-top: 0; /* No top padding to keep it close to sale price */
+    color: #666; /* Grey color for less emphasis compared to sale price */
+    font-weight: regular;
 }
 
 .enlargedImage {
@@ -189,19 +202,47 @@
 
 @media (max-width: 768px) {
     .listingCard {
-        flex-direction: row; /* Change to row to maintain horizontal alignment */
-        flex-wrap: wrap; /* Allow items to wrap if needed */
-        
+        flex-direction: row; /* Align items horizontally */
+        align-items: center; /* Center items vertically */
+        justify-content: space-between; /* Space out images, details, and button */
     }
 
     .listingImages {
+        flex: 1; /* Allocate space for images */
         justify-content: flex-start; /* Align images to the start (left side) */
-        width: 30%; /* Assign width to prevent overcrowding */
     }
 
     .listingDetails {
-        flex-direction: row; /* Keep details in a row to align horizontally */
-        flex-wrap: wrap; /* Allow wrapping */
-        width: 40%; /* Assign width to prevent overcrowding */
+        flex: 2; /* Allocate more space for details */
+        flex-direction: column; /* Stack details vertically */
+        padding: 0 10px; /* Add some padding for separation */
+        align-items: flex-start; /* Align details to the start */
+    }
+
+    .listingInfo {
+        font-size: 14px; /* Smaller font size for better readability on small screens */
+        padding: 5px 0; /* Increased vertical padding for better visual separation */
+    }
+
+    .salePriceInfo {
+        font-weight: bold; /* Make sale price bold */
+        color: #0070f3; /* Blue color for emphasis */
+        margin-bottom: 2px; /* Reduced bottom margin to bring shipping price closer */
+    }
+
+    .shippingPriceInfo {
+        font-size: 12px; /* Slightly smaller font size for shipping price */
+        padding-top: 0; /* No top padding to keep it close to sale price */
+        color: #666; /* Grey color for less emphasis compared to sale price */
+    }
+
+    .listingAction {
+        flex: 1; /* Allocate space for the button */
+        justify-content: flex-end; /* Align button to the end (right side) */
+        padding-right: 10px; /* Add some padding for separation */
+    }
+
+    .button {
+        width: 100%; /* Make button expand to fill space */
     }
 }

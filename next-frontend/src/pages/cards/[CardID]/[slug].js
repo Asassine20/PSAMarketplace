@@ -12,35 +12,31 @@ function CardDetails() {
     const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher);
     const [hoveredImage, setHoveredImage] = useState(null);
     const imageRef = useRef(null);
-    const [cardSet, cardName] = decodeURIComponent(slug).split('+');
+
     useEffect(() => {
-        const checkSize = () => {
-            if (window.innerWidth <= 768) {
-                // For mobile: add click event listeners
-                imageRef.current?.addEventListener('click', handleImageClick);
-            } else {
-                // For desktop: ensure no click handlers are active
-                imageRef.current?.removeEventListener('click', handleImageClick);
-            }
-        };
-
-        checkSize();
         window.addEventListener('resize', checkSize);
-
+        checkSize();  // Initial check
         return () => {
             window.removeEventListener('resize', checkSize);
             imageRef.current?.removeEventListener('click', handleImageClick);
         };
     }, []);
 
-    const handleImageClick = (event) => {
-        setHoveredImage(event.target.src);
+    const handleImageClick = (event) => setHoveredImage(event.target.src);
+
+    const checkSize = () => {
+        if (window.innerWidth <= 768) {
+            imageRef.current?.addEventListener('click', handleImageClick);
+        } else {
+            imageRef.current?.removeEventListener('click', handleImageClick);
+        }
     };
+
     if (error) return <div>Failed to load data</div>;
     if (!data) return <div>Loading...</div>;
     if (!data.card) return <div>Card not found</div>;
 
-    const { card, listing } = data;
+    const { card } = data;
     return (
         <div className={styles.cardDetail}>
             <div className={styles.cardImageWrapper}>
@@ -102,10 +98,12 @@ function CardDetails() {
                                 />
                             </div>
                             <div className={styles.listingDetails}>
-                                <div className={styles.listingInfo}>{listing.SellerID}</div>
-                                <div className={styles.listingInfo}>{listing.Feedback}</div>
-                                <div className={`${styles.listingInfo} ${styles.salePriceInfo}`}>${listing.SalePrice}</div>
-                                <div className={styles.listingInfo}>{listing.GradeValue}</div>
+                                <div className={styles.listingInfo}><span>{listing.StoreName}</span><sup className={styles.feedbackInfo}>({listing.FeedbackAverage}%)</sup></div>
+                                <div className={styles.listingPriceDetails}>
+                                    <div className={`${styles.listingInfo} ${styles.salePriceInfo}`}>${listing.SalePrice}</div>
+                                    <div className={`${styles.listingInfo} ${styles.shippingPriceInfo}`}>+ ${listing.ShippingPrice} Shipping</div>
+                                </div>
+                                <div className={styles.listingInfo}>Grade: {listing.GradeValue}</div>
                                 <div className={styles.listingInfo}>
                                     <a href={`https://www.psacard.com/cert/${listing.CertNumber}`} target="_blank" rel="noopener noreferrer">
                                         Cert Number: {listing.CertNumber}
