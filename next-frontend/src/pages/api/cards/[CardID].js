@@ -1,31 +1,35 @@
-import { query } from '@/db';  // Ensure this import path is correctly pointing to your database module
+import { query } from '@/db';
 
 export default async function handler(req, res) {
-    // Since you've renamed your route parameter to CardID, use it directly
     const CardID = req.query.CardID;
 
-    console.log("Received CardID: ", CardID);  // Debugging output to verify the correct ID is received
-
     try {
-        const sql = `
-            SELECT Card.*, 
-                   Card.MarketPrice, 
-                   COUNT(Inventory.CardID) as ListingsCount
+        // Fetching card details and market price history
+        const cardSql = `
+            SELECT *
             FROM Card
-            LEFT JOIN Inventory ON Card.CardID = Inventory.CardID
-            WHERE Card.CardID = ?
-            GROUP BY Card.CardID`;
+            WHERE CardID = ?;
+        `;
+        const pricesSql = `
+            SELECT Price, DateRecorded
+            FROM MarketPriceHistory
+            WHERE CardID = ?
+            ORDER BY DateRecorded ASC;
+        `;
 
-        // Use the CardID directly in your query parameter list
-        const results = await query(sql, [CardID]);
+        // Execute both queries
+        const cardResults = await query(cardSql, [CardID]);
+        const priceResults = await query(pricesSql, [CardID]);
 
-        if (results.length > 0) {
-            res.status(200).json({ card: results[0] });
+        if (cardResults.length > 0) {
+            const card = cardResults[0];
+            card.prices = priceResults;  // Append price history to the card object
+            res.status(200).json({ card });
         } else {
             res.status(404).json({ message: "Card not found" });
         }
     } catch (error) {
-        console.error("Error fetching card data:", error);
-        res.status(500).json({ message: "Error fetching card data" });
+        console.error("Error fetching card data and price history:", error);
+        res.status(500).json({ message: "Error fetching data" });
     }
 }

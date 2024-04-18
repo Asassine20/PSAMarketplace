@@ -23,7 +23,7 @@ function CardDetails() {
             </div>
             <div className={styles.cardContent}>
                 <div className={styles.cardInfo}>
-                    <h1 style={{ fontSize: '28px' }}>{card.CardName}</h1>
+                    <h1 style={{ fontSize: '34px' }}>{card.CardName}</h1>
                     <p><strong>Sport:</strong> {card.Sport}</p>
                     <p><strong>Set:</strong> {card.CardSet}</p>
                     <p><strong>Number:</strong> {card.CardNumber}</p>
@@ -32,11 +32,8 @@ function CardDetails() {
                     <p><strong>Listings:</strong> {card.ListingsCount}</p>
                     <p><strong>Market Price:</strong> ${card.MarketPrice}</p>
                 </div>
-                <div className={styles.cardGraph}>
-                    <p>Market Price Graph Here</p>
-                </div>
                 <div className={styles.latestSales}>
-                    <h2 style={{ textAlign: 'center' }}>Latest Sales</h2>
+                    <h2 style={{ textAlign: 'left' }}>Latest Sales</h2>
                     <table>
                         <thead>
                             <tr>
@@ -47,12 +44,12 @@ function CardDetails() {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>2024-04-01</td>
+                                <td>1/4/24</td>
                                 <td>9.5</td>
                                 <td>$200</td>
                             </tr>
                             <tr>
-                                <td>2024-04-02</td>
+                                <td>1/4/24</td>
                                 <td>10</td>
                                 <td>$300</td>
                             </tr>
