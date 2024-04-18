@@ -279,7 +279,7 @@ const SearchPage = () => {
                                 {console.log("Filtered Cards: ", filteredCards)}
                                 {filteredCards.length > 0 ? (
                                     filteredCards.map((card, index) => (
-                                        <Link key={index} href={`/cards/${card.CardID}`}> 
+                                        <Link key={index} href={`/cards/${card.CardID}/${encodeURIComponent(card.CardSet + '+' + card.CardName)}`}>
                                             <div className={styles.card}>
                                                 <div className={styles.cardImageWrapper}>
                                                     <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />

@@ -2,16 +2,17 @@ import { useRouter } from 'next/router';
 import React, { useState, useEffect, useRef } from 'react';
 import useSWR from 'swr';
 import Image from 'next/image';
-import styles from '../../styles/Card.module.css';
+import styles from '../../../styles/Card.module.css';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 function CardDetails() {
     const router = useRouter();
-    const { CardID, ListingID } = router.query;
+    const { CardID, slug } = router.query;
     const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher);
     const [hoveredImage, setHoveredImage] = useState(null);
     const imageRef = useRef(null);
+    const [cardSet, cardName] = decodeURIComponent(slug).split('+');
     useEffect(() => {
         const checkSize = () => {
             if (window.innerWidth <= 768) {
