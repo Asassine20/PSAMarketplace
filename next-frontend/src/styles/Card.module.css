@@ -183,7 +183,6 @@
     font-size: 12px; /* Slightly smaller font size for shipping price */
     padding-top: 0; /* No top padding to keep it close to sale price */
     color: #666; /* Grey color for less emphasis compared to sale price */
-    font-weight: regular;
 }
 
 .enlargedImage {

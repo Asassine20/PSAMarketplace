@@ -10,6 +10,8 @@ function CardDetails() {
     const router = useRouter();
     const { CardID, slug } = router.query;
     const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher);
+    console.log("Data loaded:", data);  // Check what data is actually being loaded
+    console.log("Error:", error);  // Check if there are any errors
     const [hoveredImage, setHoveredImage] = useState(null);
     const imageRef = useRef(null);
 
@@ -63,16 +65,13 @@ function CardDetails() {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1/4/24</td>
-                                <td>9.5</td>
-                                <td>$200</td>
-                            </tr>
-                            <tr>
-                                <td>1/4/24</td>
-                                <td>10</td>
-                                <td>$300</td>
-                            </tr>
+                            {data?.card?.sales?.map((sale, index) => (
+                                <tr key={index}>
+                                    <td>{new Date(sale.OrderDate).toLocaleDateString()}</td>
+                                    <td>{sale.GradeValue}</td>
+                                    <td>${sale.Price}</td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
