@@ -685,7 +685,6 @@ router.post('/admin/submit-inventory', authenticateToken, notificationCounts, as
                     await updateCardImage(cardId, frontImageUrl, defaultImageUrl);
                 }
             }
-
             if (listingId) {
                 const updateQuery = 'UPDATE Inventory SET FrontImageUrl = ?, BackImageUrl = ? WHERE ListingID = ? AND CardID = ?';
                 await db.query(updateQuery, [frontImageUrl, backImageUrl, listingId, cardId]);
@@ -693,6 +692,7 @@ router.post('/admin/submit-inventory', authenticateToken, notificationCounts, as
                 const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
                 await db.query(insertQuery, [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId]);
             }
+            
         }
 
         return res.redirect('/admin/inventory');

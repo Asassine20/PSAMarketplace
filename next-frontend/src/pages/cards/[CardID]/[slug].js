@@ -10,8 +10,6 @@ function CardDetails() {
     const router = useRouter();
     const { CardID, slug } = router.query;
     const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher);
-    console.log("Data loaded:", data);  // Check what data is actually being loaded
-    console.log("Error:", error);  // Check if there are any errors
     const [hoveredImage, setHoveredImage] = useState(null);
     const imageRef = useRef(null);
 
@@ -120,6 +118,7 @@ function CardDetails() {
                     <p>No listings available for this card.</p>
                 </div>
             )}
+
             {hoveredImage && (
                 <div style={{
                     position: 'fixed',
