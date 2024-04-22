@@ -16,9 +16,10 @@
 }
 
 .cardImage {
-    width: 100%; /* Makes sure the image is as wide as the wrapper */
-    height: 100%; /* Makes sure the image is as tall as the wrapper */
+    width: auto; /* Makes sure the image is as wide as the wrapper */
+    max-height: auto; /* Makes sure the image is as tall as the wrapper */
     object-fit: cover; /* Ensures the image covers the full area without distorting aspect ratio */
+    border-radius: 10px;
 }
 
 .cardContent {
@@ -248,5 +249,16 @@
 
     .button {
         width: 100%; /* Make button expand to fill space */
+    }
+    .cardImage {
+        height: 570px;
+        width: 340px;
+    }
+}
+
+@media (max-width: 960px) and (min-width: 768px) {
+    .cardImage {
+        height: 570px;
+        width: 340px;
     }
 }
