@@ -101,6 +101,14 @@
     color: inherit; /* Inherits the color from the parent element */
 }
 
+.underlinedText {
+    text-decoration: underline;
+}
+
+.underlinedText:hover {
+    color: #9ba0aa
+}
+
 
 .salePriceInfo {
     color: #0070f3; /* Blue color for emphasis */
@@ -111,7 +119,7 @@
 
 .feedbackInfo {
     font-size: 14px;
-    color: #666;
+    color: #9ba0aa;
 }
 
 
@@ -178,6 +186,7 @@
     justify-content: center;
     align-items: center;
 }
+
 .listingPriceDetails {
     display: flex;
     flex-direction: column;
@@ -190,10 +199,15 @@
     border-radius: 4px;
     cursor: pointer;
 }
+
+.button:hover{
+    background-color: #2381f6;
+}
+
 .shippingPriceInfo {
     font-size: 12px; /* Slightly smaller font size for shipping price */
     padding-top: 0; /* No top padding to keep it close to sale price */
-    color: #666; /* Grey color for less emphasis compared to sale price */
+    color: #9ba0aa; /* Grey color for less emphasis compared to sale price */
 }
 
 .enlargedImage {
@@ -243,7 +257,7 @@
     .shippingPriceInfo {
         font-size: 12px; /* Slightly smaller font size for shipping price */
         padding-top: 0; /* No top padding to keep it close to sale price */
-        color: #666; /* Grey color for less emphasis compared to sale price */
+        color: #9ba0aa; /* Grey color for less emphasis compared to sale price */
     }
 
     .listingAction {

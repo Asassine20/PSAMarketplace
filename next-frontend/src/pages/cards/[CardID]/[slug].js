@@ -104,7 +104,7 @@ function CardDetails() {
                                 <div className={styles.listingDetails}>
                                     <div className={styles.listingInfo}>
                                         <span>{listing.StoreName}</span>
-                                        {listing.FeedbackAverage > 95 && <FaStar style={{ color: 'blue', marginLeft: '5px' }} />}
+                                        {listing.FeedbackAverage > 95 && <FaStar style={{ color: '#0070f3', marginLeft: '5px', marginRight: '5px' }} />}
                                         <sup className={styles.feedbackInfo}>({listing.FeedbackAverage}%)</sup>
                                     </div>
                                     <div className={styles.listingPriceDetails}>
@@ -114,7 +114,7 @@ function CardDetails() {
                                     <div className={styles.listingInfo}>Grade: {listing.GradeValue}</div>
                                     <div className={styles.listingInfo}>
                                         <a href={`https://www.psacard.com/cert/${listing.CertNumber}`} target="_blank" rel="noopener noreferrer">
-                                            Cert Number: {listing.CertNumber}
+                                            Cert Number: <span className={styles.underlinedText}>{listing.CertNumber}</span>
                                         </a>
                                     </div>
                                 </div>
