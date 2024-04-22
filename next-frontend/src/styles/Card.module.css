@@ -93,14 +93,12 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 .listingInfo {
-    text-decoration: none;
     font-weight: bold;
     font-size: 20px;
 }
 
 .listingInfo a {
     color: inherit; /* Inherits the color from the parent element */
-    text-decoration: none; /* Optional: removes underline from the link */
 }
 
 
@@ -160,6 +158,13 @@
     border-radius: 8px; /* Optional: Adds rounded corners to the popup image */
 }
 
+.listingsHeader {
+    font-size: 40px;
+    width: 100%;       
+    text-align: left; 
+    margin-top: 20px;  
+    margin-bottom: 10px; 
+}
 .listingDetails {
     flex-grow: 1;
     display: flex;
