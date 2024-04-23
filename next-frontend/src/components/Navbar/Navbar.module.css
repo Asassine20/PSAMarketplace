@@ -33,16 +33,24 @@
 }
 
 .searchForm button {
-  border: none;
+  border: none;  /* No border by default */
   padding: 10px 15px;
-  background-color: #000000;
-  color: white;
+  background-color: white;
+  color: black;
   cursor: pointer;
-  outline: none;
+  display: flex;            /* Ensures the content is properly centered */
+  justify-content: center;  /* Center content horizontally */
+  align-items: center;      /* Center content vertically */
+  position: relative;       /* Needed to position the icon if necessary */
+  overflow: hidden;         /* Keeps all content within the borders */
+  font-size: 16px;          /* Default text size. Adjust if needed */
 }
 
 .searchForm button:hover {
-  background-color: #0050a2;
+  border: 2px solid black;  /* Solid border on hover, change thickness as needed */
+}
+.searchForm button .faIcon {
+  color: black; /* Ensuring the icon is full black for maximum contrast */
 }
 
 .navbar {
@@ -84,8 +92,9 @@
 }
 
 .startSellingButton {
-  background-color: #000000; /* Black background for Start Selling button */
-  color: white;
+  color: black;
+  font-weight: bold;
+  border: 2px solid black;
   padding: 5px 10px; /* Adjusted padding for Start Selling button */
   border-radius: 5px;
   text-decoration: none;
@@ -93,8 +102,10 @@
   cursor: pointer;
 }
 
-.startSellingButton:hover {
-  background-color: #0050a2; /* Darker color on hover */
+.startSellingButton:hover, 
+.navIcon:hover {
+  border-color: #0050a2; /* Darker color on hover */
+  color: #0050a2;
 }
 
 .navIcon {
@@ -103,15 +114,11 @@
   cursor: pointer;
   font-size: 1.5rem; /* Adjust this value as needed */
   padding: 5px; /* Padding for icons */
-  border: 1px solid black; /* Black border for icons */
+  border: 2px solid black; /* Black border for icons */
   border-radius: 5px; /* Rounded corners for icons */
   display: inline-flex; /* Ensures icons are aligned and treated as flex items */
   justify-content: center;
   align-items: center;
-}
-
-.navIcon:hover {
-  border-color: #0056b3; /* Border color highlights on hover */
 }
 
 

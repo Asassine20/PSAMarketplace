@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/router'; 
+import { useRouter } from 'next/router';
 import styles from './BannerCarousel.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -27,7 +27,7 @@ const banners = [
     icon: null,
     button: {
       text: 'Start Selling',
-      url: '/'
+      url: 'http://localhost:3001/register'
     },
     images: [
       'https://d1htnxwo4o0jhw.cloudfront.net/cert/154267273/GP2HfHlLVUWjpdZesxKgjg.jpg',
@@ -43,7 +43,7 @@ const banners = [
     icon: null,
     button: {
       text: 'Learn More',
-      url: '/articles'
+      url: 'http://localhost:3001/articles'
     },
     images: [
       'https://d1htnxwo4o0jhw.cloudfront.net/cert/126889271/356421395.jpg',
@@ -59,65 +59,73 @@ const banners = [
 ];
 
 const BannerCarousel = () => {
-    const navigate = useRouter(); 
-    const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-    const intervalRef = useRef(null);
-    const resetTimer = () => {
-      clearInterval(intervalRef.current);
-      intervalRef.current = setInterval(() => {
-        setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
-      }, 10000);
-    };
-    
-    useEffect(() => {
-      resetTimer();
-      return () => clearInterval(intervalRef.current); // Cleanup on unmount
-    }, [currentBannerIndex]);
-    const navigateToPrevious = () => {
-      setCurrentBannerIndex((prevIndex) => prevIndex === 0 ? banners.length - 1 : prevIndex - 1);
-      resetTimer();
-    };
-  
-    const navigateToNext = () => {
+  const navigate = useRouter();
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const intervalRef = useRef(null);
+  const resetTimer = () => {
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
       setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
-      resetTimer();
-    };
-  
-    const handleCircleClick = (index) => {
-      setCurrentBannerIndex(index);
-      resetTimer();
-    };
-    const currentBanner = banners[currentBannerIndex];
+    }, 10000);
+  };
 
-    return (
-      <div className={styles.bannerCarouselWrapper}>
-        <div className={`${styles.bannerContainer} ${currentBanner.class}`}>
-          <div className={styles.imagesContainer}>
-            {currentBanner.images.length > 0 ? currentBanner.images.map((imgSrc, imgIndex) => (
-              <img key={imgIndex} src={imgSrc} alt={`Banner ${imgIndex + 1}`} className={styles.bannerImage} />
-            )) : <div className={styles.bannerFallback}></div>}
-          </div>
-          <div className={styles.bannerContent}>
-            {currentBanner.icon}
-            <span>{currentBanner.content}</span>
-            {currentBanner.button && (
-              <button onClick={() => navigate.push(currentBanner.button.url)} className={styles.bannerButton}>
-                {currentBanner.button.text}
-              </button>
-            )}
-          </div>
+  useEffect(() => {
+    resetTimer();
+    return () => clearInterval(intervalRef.current); // Cleanup on unmount
+  }, [currentBannerIndex]);
+  const navigateToPrevious = () => {
+    setCurrentBannerIndex((prevIndex) => prevIndex === 0 ? banners.length - 1 : prevIndex - 1);
+    resetTimer();
+  };
+
+  const navigateToNext = () => {
+    setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
+    resetTimer();
+  };
+
+  const handleCircleClick = (index) => {
+    setCurrentBannerIndex(index);
+    resetTimer();
+  };
+
+  const handleButtonClick = (url, newTab) => {
+    if (newTab) {
+        window.open(url, '_blank');
+    } else {
+        navigate.push(url);
+    }
+};
+  const currentBanner = banners[currentBannerIndex];
+
+  return (
+    <div className={styles.bannerCarouselWrapper}>
+      <div className={`${styles.bannerContainer} ${banners[currentBannerIndex].class}`}>
+        <div className={styles.imagesContainer}>
+          {banners[currentBannerIndex].images.map((imgSrc, index) => (
+            <img key={index} src={imgSrc} alt={`Banner image ${index + 1}`} className={styles.bannerImage} />
+          ))}
         </div>
-        <div className={styles.bannerNavigation}>
-          <FontAwesomeIcon icon={faChevronLeft} onClick={navigateToPrevious} className={styles.bannerNavArrow} />
-          <div className={styles.bannerIndicators}>
-            {banners.map((_, index) => (
-              <span key={index} className={`${styles.bannerIndicator} ${index === currentBannerIndex ? styles.active : ''}`} onClick={() => handleCircleClick(index)}></span>
-            ))}
-          </div>
-          <FontAwesomeIcon icon={faChevronRight} onClick={navigateToNext} className={styles.bannerNavArrow} />
+        <div className={styles.bannerContent}>
+          <span>{banners[currentBannerIndex].content}</span>
+          {banners[currentBannerIndex].button && (
+            <button onClick={() => handleButtonClick(banners[currentBannerIndex].button.url, ['Start Selling', 'Learn More'].includes(banners[currentBannerIndex].button.text))} className={styles.bannerButton}>
+              {banners[currentBannerIndex].button.text}
+            </button>
+          )}
         </div>
       </div>
-    );
+      <div className={styles.bannerNavigation}>
+        <FontAwesomeIcon icon={faChevronLeft} onClick={() => setCurrentBannerIndex(currentBannerIndex === 0 ? banners.length - 1 : currentBannerIndex - 1)} className={styles.bannerNavArrow} />
+        <div className={styles.bannerIndicators}>
+          {banners.map((_, index) => (
+            <span key={index} onClick={() => setCurrentBannerIndex(index)} className={`${styles.bannerIndicator} ${index === currentBannerIndex ? styles.active : ''}`}></span>
+          ))}
+        </div>
+        <FontAwesomeIcon icon={faChevronRight} onClick={() => setCurrentBannerIndex((currentBannerIndex + 1) % banners.length)} className={styles.bannerNavArrow} />
+      </div>
+    </div>
+  );
 };
+
 
 export default BannerCarousel;

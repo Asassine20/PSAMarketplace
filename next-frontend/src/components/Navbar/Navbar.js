@@ -37,19 +37,19 @@ const Navbar = () => {
   return (
     <div className={styles.navbarContainer}>
       <div className={styles.headerContainer}>
-        <div className={styles.logosContainer}> {/* Container for both logos */}
-          <Link href="/">
+        <div className={styles.logosContainer}>
+          <Link href="/" passHref>
             <Image src="/logo.png" alt="Logo" width={80} height={80} style={{ cursor: 'pointer' }} />
           </Link>
           <a href="https://www.psacard.com" target="_blank" rel="noopener noreferrer">
-            <Image src="/psaLogo.png" alt="PSA Logo" width={70} height={70} style={{ cursor: 'pointer', paddingLeft: '10px' }}/>
+            <Image src="/psaLogo.png" alt="PSA Logo" width={70} height={70} style={{ cursor: 'pointer', paddingLeft: '10px' }} />
           </a>
         </div>
         <div className={styles.rightNav}>
           <FaRegUser className={`${styles.navIcon} ${styles.faIcon}`} />
-          <Link href="/sell">
+          <a href="http://localhost:3001/register" target="_blank" rel="noopener noreferrer">
             <span className={styles.startSellingButton}>Start Selling</span>
-          </Link>
+          </a>
           <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
         </div>
       </div>
@@ -63,9 +63,10 @@ const Navbar = () => {
             className={styles.searchInput}
           />
           <button type="submit" className={styles.searchButton}>
-            <FontAwesomeIcon icon={faSearch} />
+            <FontAwesomeIcon icon={faSearch} style={{ fontSize: '20px', color: 'black' }} />
           </button>
         </form>
+
       </div>
       <nav className={styles.navbar}>
         <div className={styles.sportsLinks}>
@@ -77,7 +78,6 @@ const Navbar = () => {
         </div>
       </nav>
     </div>
-
   );
 };
 
