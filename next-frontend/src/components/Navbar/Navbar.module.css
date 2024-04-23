@@ -80,7 +80,7 @@
 }
 
 .navLink:hover {
-  background-color: #0056b3;
+  background-color: #0077cc;
   text-decoration: none;
 }
 
@@ -121,6 +121,61 @@
   align-items: center;
 }
 
+.sidePanel {
+  position: absolute;
+  top: 70px;  /* Adjust this value to ensure it starts just below the navbar */
+  right: 10px;
+  width: 300px;  /* Or whatever width fits your design */
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);  /* Subtle shadow for depth */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow-y: auto;  /* Allows scrolling within the panel if content is too long */
+  z-index: 100;  /* Ensure it's above other content but adjust based on your layout */
+  border-radius: 6px;  /* Smooth rounded corners */
+  border: 1px solid #babbbc;  /* Adds the black border around the panel */
+  transition: top 0.3s ease;  /* Smooth transition for moving the panel if needed */
+}
+
+.panelContent {
+  display: flex;
+  justify-content: space-between;
+}
+
+.accountSection, .sellerHelpSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.link {
+  background-color: #f0f0f0; /* Light gray background for each link */
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 4px;
+  width: calc(100% - 24px); /* full width minus padding */
+  box-sizing: border-box; /* include padding in width calculation */
+  text-align: left;
+}
+
+.loginButton, .signUpButton {
+  background-color: #0056b3; 
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 10px 5px 10px 0;  
+  width: calc(50% - 10px);  
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+  display: inline-block;  
+}
+
+
+.loginButton:hover, .signUpButton:hover {
+  background-color: #0077cc; 
+}
 
 @media (max-width: 860px) {
   .navbar {

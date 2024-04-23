@@ -1,0 +1,65 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* This keeps the form centered */
+    justify-content: center;
+    background-color: #f0f2f5;
+    position: relative; /* Needed for absolute positioning of the logo */
+}
+
+.logo {
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    left: 10px; /* Adjust as needed */
+    cursor: pointer; /* Indicates the logo is clickable */
+}
+
+.form {
+    padding: 40px;  /* Ample padding for space inside the form */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 400px;  /* Suitable width for a larger form */
+    max-width: 90%; /* Ensures form doesn’t stretch too much on smaller screens */
+    display: flex;  /* Using flex to align children */
+    flex-direction: column;  /* Stack children vertically */
+    align-items: center;  /* Align children (inputs, labels) centrally */
+}
+
+.header {
+    text-align: center;
+    font-size: 24px; /* More prominent font size */
+    margin-bottom: 20px; /* Space below header */
+}
+
+.label {
+    self-align: start;  /* Align labels to the start of the flex container */
+    width: 100%;  /* Full width to align with inputs below */
+    margin-bottom: 10px; /* Space below each label */
+    font-size: 18px; /* Clear, readable font size */
+}
+
+.input {
+    width: 90%;  /* Slightly less than full width for aesthetic padding */
+    padding: 12px;  /* Comfortable text entry */
+    margin-bottom: 20px; /* Space between inputs */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px; /* Easily readable text size */
+}
+
+.button {
+    width: 90%;  /* Matches input width */
+    padding: 15px 10px; /* Taller button for easier clicking */
+    margin-top: 20px; /* Space above button */
+    margin-bottom: 20px; /* Space below button before any potentially added text */
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+}
