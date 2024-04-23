@@ -837,11 +837,13 @@ router.get('/admin/orders', authenticateToken, notificationCounts, async (req, r
 
     try {
         const query = `
-            SELECT Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, Users.Username, Shipping.ShipmentStatus
+            SELECT Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, 
+                   Addresses.FirstName, Addresses.LastName, Shipping.ShipmentStatus
             FROM Orders
             LEFT JOIN Users ON Orders.BuyerID = Users.UserID
+            LEFT JOIN Addresses ON Users.UserID = Addresses.UserID
             LEFT JOIN Shipping ON Orders.OrderNumber = Shipping.OrderNumber
-            WHERE Orders.SellerID = ?
+            WHERE Orders.SellerID = ? AND Addresses.IsPrimary = 1  
             ORDER BY 
                 CASE 
                     WHEN Shipping.ShipmentStatus = 'Awaiting shipment' THEN 1
@@ -870,14 +872,16 @@ router.get('/admin/orders', authenticateToken, notificationCounts, async (req, r
     }
 });
 
+
 router.get('/admin/order-details', authenticateToken, notificationCounts, async (req, res) => {
     const orderNumber = req.query.orderNumber;
     try {
         const orderDetailsQuery = `
-            SELECT Orders.*, Users.Username
+            SELECT Orders.*, Addresses.FirstName, Addresses.LastName
             FROM Orders
             JOIN Users ON Orders.BuyerID = Users.UserID
-            WHERE Orders.OrderNumber = ? 
+            JOIN Addresses ON Users.UserID = Addresses.UserID 
+            WHERE Orders.OrderNumber = ? AND Addresses.IsPrimary = 1  
         `;
         const orderDetails = await db.query(orderDetailsQuery, [orderNumber]);
 
@@ -916,22 +920,22 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
         const shippingQuery = 'SELECT * FROM Shipping WHERE OrderNumber = ?';
         const shipping = await db.query(shippingQuery, [orderNumber]);
 
-        const addressId = orderDetails[0].AddressID;
-        const addressQuery = 'SELECT * FROM Addresses WHERE AddressID = ?';
-        const address = await db.query(addressQuery, [addressId]);
-
         res.render('order-details', {
             order: orderDetails[0],
             items: processedItems,
             feedback: feedback[0] ? feedback[0] : null,
             shipping: shipping[0] ? shipping[0] : null,
-            address: address[0] ? address[0] : null
+            address: { // Adjusted to pull from orderDetails directly
+                FirstName: orderDetails[0]?.FirstName,
+                LastName: orderDetails[0]?.LastName
+            }
         });
     } catch (error) {
         console.error('Error fetching order details:', error);
         res.status(500).send('Error fetching order details');
     }
 });
+
 
 router.post('/admin/update-shipping-details', authenticateToken, notificationCounts, async (req, res) => {
     const { orderNumber, ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus } = req.body;
@@ -980,7 +984,7 @@ router.get('/admin/messages', authenticateToken, notificationCounts, async (req,
                 c.Subject,
                 c.OrderNumber,  
                 m.SenderID,
-                u.Username AS SenderName,
+                CONCAT(a.FirstName, ' ', a.LastName) AS SenderName,
                 m.MessageText,
                 m.Timestamp,
                 m.IsRead
@@ -994,6 +998,7 @@ router.get('/admin/messages', authenticateToken, notificationCounts, async (req,
             ) lm ON c.ConversationID = lm.ConversationID
             INNER JOIN Messages m ON lm.LatestMessageID = m.MessageID
             INNER JOIN Users u ON m.SenderID = u.UserID
+            INNER JOIN Addresses a ON u.UserID = a.UserID AND a.IsPrimary = 1  -- Joining Addresses table
             WHERE c.SellerID = ? OR c.BuyerID = ?
             ORDER BY m.Timestamp DESC
             LIMIT ? OFFSET ?`;
@@ -1024,12 +1029,14 @@ router.get('/admin/message-details/:conversationId', authenticateToken, notifica
         const updateQuery = `UPDATE Messages SET IsRead = 1 WHERE ConversationID = ? AND SenderID != ?`;
         await db.query(updateQuery, [conversationId, userId]);
 
-        // Fetch messages and conversation details, including OrderNumber directly
+        // Fetch messages and conversation details, now using first name and last name
         const conversationAndMessagesQuery = `
-            SELECT m.MessageID, m.SenderID, m.MessageText, m.Timestamp, u.Username AS SenderName,
+            SELECT m.MessageID, m.SenderID, m.MessageText, m.Timestamp, 
+                   CONCAT(a.FirstName, ' ', a.LastName) AS SenderName,
                    c.Subject, o.OrderNumber
             FROM Messages m
             JOIN Users u ON m.SenderID = u.UserID
+            JOIN Addresses a ON u.UserID = a.UserID AND a.IsPrimary = 1  
             JOIN Conversations c ON m.ConversationID = c.ConversationID
             LEFT JOIN Orders o ON c.OrderNumber = o.OrderNumber
             WHERE m.ConversationID = ?
@@ -1038,7 +1045,6 @@ router.get('/admin/message-details/:conversationId', authenticateToken, notifica
         let messages = await db.query(conversationAndMessagesQuery, [conversationId]);
 
         const orderNumber = messages.length > 0 ? messages[0].OrderNumber : null;
-
         const [conversation] = messages.length > 0 ? [{ Subject: messages[0].Subject }] : [{}];
 
         res.render('message-details', {
@@ -1056,6 +1062,7 @@ router.get('/admin/message-details/:conversationId', authenticateToken, notifica
         res.status(500).send('Server error');
     }
 });
+
 
 router.post('/admin/send-message', authenticateToken, notificationCounts, async (req, res) => {
     const { conversationId, messageText } = req.body;
@@ -1114,16 +1121,18 @@ router.post('/admin/create-or-find-conversation', authenticateToken, notificatio
 
 async function getOrderDetails(orderNumber) {
     try {
-        // Fetch basic order details, including buyer and seller names
+        // Fetch basic order details, including buyer and seller names from the updated schema
         let orderSql = `
-            SELECT o.OrderNumber, o.OrderDate, o.SalePrice AS TotalPrice, 
-                   buyer.Username AS BuyerName, seller.Username AS SellerName,
+            SELECT o.OrderNumber, o.OrderDate, o.SalePrice AS TotalPrice,
+                   CONCAT(a.FirstName, ' ', a.LastName) AS BuyerName,  
+                   s.StoreName AS SellerName, 
                    a.Street, a.City, a.State, a.ZipCode, a.Country
             FROM Orders o
             JOIN Users buyer ON o.BuyerID = buyer.UserID
+            JOIN Addresses a ON buyer.UserID = a.UserID AND a.IsPrimary = 1 
             JOIN Users seller ON o.SellerID = seller.UserID
-            JOIN Addresses a ON o.AddressID = a.AddressID
-            WHERE o.OrderNumber = ? AND a.IsPrimary = 1`;
+            JOIN Stores s ON seller.UserID = s.UserID 
+            WHERE o.OrderNumber = ?`;
 
         const orderDetails = await db.query(orderSql, [orderNumber]);
         if (orderDetails.length === 0) {
@@ -1135,7 +1144,7 @@ async function getOrderDetails(orderNumber) {
 
         // Fetch details for each item in the order
         let itemsSql = `
-            SELECT oi.Quantity, oi.Price, c.CardName, c.CardNumber, c.CardColor, 
+            SELECT oi.Quantity, oi.Price, c.CardName, c.CardNumber, c.CardColor,
                    c.CardVariant, c.Sport, c.CardYear, c.CardSet
             FROM OrderItems oi
             JOIN Card c ON oi.CardID = c.CardID
@@ -1156,7 +1165,7 @@ async function getOrderDetails(orderNumber) {
                 State: mainOrderDetails.State,
                 ZipCode: mainOrderDetails.ZipCode,
                 Country: mainOrderDetails.Country,
-                },            
+            },            
             items: itemsDetails
         };
 
@@ -1263,13 +1272,8 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
     try {
         // Fetch FeedbackAverage from Stores
         const feedbackAverageQuery = `SELECT FeedbackAverage FROM Stores WHERE UserID = ?`;
-        console.log("feedbackaveragequery", feedbackAverageQuery);
         const [averageResult] = await db.query(feedbackAverageQuery, [userId]);
-        console.log('Average Result:', averageResult);
-
-        // Adjusted access based on actual result structure
         const feedbackAverage = averageResult ? averageResult.FeedbackAverage : null;
-        console.log('Feedback Average:', feedbackAverage);
 
         // Count total feedback for pagination
         const countQuery = `SELECT COUNT(*) AS feedbackCount FROM Feedback WHERE SellerID = ?`;
@@ -1277,13 +1281,12 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
         const feedbackCount = countResult.feedbackCount;
         const totalPages = Math.ceil(feedbackCount / limit);
 
-        // Fetch feedback details
         const feedbackQuery = `
             SELECT 
                 f.FeedbackID, 
                 f.SellerID, 
                 f.BuyerID, 
-                u.Username AS BuyerUsername, 
+                CONCAT(a.FirstName, ' ', a.LastName) AS BuyerName, 
                 f.FeedbackText, 
                 f.Rating, 
                 f.FeedbackDate, 
@@ -1291,14 +1294,13 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
                 o.OrderDate
             FROM Feedback f
             INNER JOIN Orders o ON f.OrderNumber = o.OrderNumber
-            INNER JOIN Users u ON f.BuyerID = u.UserID
-            WHERE f.SellerID = ?
+            INNER JOIN Addresses a ON f.BuyerID = a.UserID
+            WHERE f.SellerID = ? AND a.IsPrimary = 1
             ORDER BY f.FeedbackDate DESC
             LIMIT ? OFFSET ?`;
         const feedbackResults = await db.query(feedbackQuery, [userId, limit, offset]);
 
-        // Properly handling feedbackResults based on the structure it returns
-        // Assuming feedbackResults is structured as [rows, fields] or similar, depending on the library
+        // Extract feedback from the query results
         const feedback = Array.isArray(feedbackResults) ? feedbackResults : feedbackResults[0];
 
         const feedbackStats = await getFeedbackStats(userId);
@@ -1317,6 +1319,7 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
         res.status(500).send('Server error');
     }
 });
+
 
 const intervals = [
     { key: '30 Days', value: '30 DAY' },
@@ -1439,7 +1442,7 @@ router.get('/admin/settings',  authenticateToken, notificationCounts, async (req
 
     try {
         const query = `
-            SELECT Users.Username, Users.Email, Stores.StoreName, Stores.Description, 
+            SELECT Users.Email, Stores.StoreName, Stores.Description, 
             Addresses.Street, Addresses.Street2, Addresses.City, Addresses.State, 
             Addresses.ZipCode, Addresses.Country, BankInfo.AccountNumber, 
             BankInfo.AccountType, Stores.ShippingPrice

@@ -104,9 +104,15 @@ function CardDetails() {
                                 <div className={styles.listingDetails}>
                                     <div className={styles.listingInfo}>
                                         <span>{listing.StoreName}</span>
-                                        {listing.FeedbackAverage > 95 && <FaStar style={{ color: '#0070f3', marginLeft: '5px', marginRight: '5px' }} />}
+                                        {listing.FeedbackAverage > 95 && (
+                                            <div className={styles.starContainer}>
+                                                <FaStar style={{ color: '#0070f3', marginLeft: '5px', marginRight: '5px' }} />
+                                                <span className={styles.tooltip}>Star Seller</span>
+                                            </div>
+                                        )}
                                         <sup className={styles.feedbackInfo}>({listing.FeedbackAverage}%)</sup>
                                     </div>
+
                                     <div className={styles.listingPriceDetails}>
                                         <div className={`${styles.listingInfo} ${styles.salePriceInfo}`}>${listing.SalePrice}</div>
                                         <div className={`${styles.listingInfo} ${styles.shippingPriceInfo}`}>+ ${listing.ShippingPrice} Shipping</div>

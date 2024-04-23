@@ -151,6 +151,38 @@
     cursor: pointer;
 }
 
+/* styles.module.css */
+.starContainer {
+    position: relative;
+    display: inline-block;
+    cursor: pointer; /* Optional: changes the cursor on hover */
+}
+
+.tooltip {
+    visibility: hidden;
+    width: 80px;
+    color: black;
+    background-color: #e8eaee;
+    text-align: center;
+    border-radius: 6px;
+    font-size: 14px;
+    padding: 5px 0;
+    font-weight: normal;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px; /* Use half of the width to center it */
+    opacity: 0;
+    transition: opacity 0.6s;
+}
+
+.starContainer:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
 .listingImage:hover::after {
     content: ''; /* Necessary for pseudo-elements */
     position: fixed;

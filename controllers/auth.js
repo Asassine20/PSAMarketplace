@@ -12,10 +12,11 @@ const connection = mysql.createPool({
 });
 
 exports.register = (req, res) => {
-    const { name, email, password, passwordConfirm } = req.body;
+    const { email, password, passwordConfirm } = req.body;  // Removed name/username from destructuring
     connection.query('SELECT Email FROM Users WHERE Email = ?', [email], async (error, results) => {
         if (error) {
             console.log(error);
+            return res.status(500).send('Database error');
         }
         if (results.length > 0) {
             return res.render('register', {
@@ -28,9 +29,11 @@ exports.register = (req, res) => {
         }
         let hashedPassword = await bcrypt.hash(password, 8);
         console.log(hashedPassword);
-        connection.query('INSERT INTO Users SET ?', { Username: name, Email: email, PasswordHash: hashedPassword }, (error, results) => {
+        // Updated to only include email and hashed password in the INSERT query
+        connection.query('INSERT INTO Users SET ?', { Email: email, PasswordHash: hashedPassword }, (error, results) => {
             if (error) {
                 console.log(error);
+                return res.status(500).send('Database insert error');
             } else {
                 const encodedEmail = encodeURIComponent(email);
                 req.session.email = email; // Store the email in the session
@@ -150,7 +153,14 @@ exports.submitSellerInfo = (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
-    connection.query('SELECT * FROM Users WHERE Email = ?', [email], async (error, results) => {
+    const query = `
+        SELECT Users.UserID, Users.PasswordHash, Stores.StoreName 
+        FROM Users
+        JOIN Stores ON Users.UserID = Stores.UserID
+        WHERE Users.Email = ?
+    `;
+
+    connection.query(query, [email], async (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).render('login', {
@@ -164,15 +174,52 @@ exports.login = (req, res) => {
             });
         }
 
-        const id = results[0].UserID;
-        const username = results[0].Username;
-        const token = jwt.sign({ id, username }, process.env.JWT_SECRET, {
-            expiresIn: process.env.JWT_EXPIRES_IN
+        const user = {
+            id: results[0].UserID,
+            storeName: results[0].StoreName
+        };
+
+        // Create Access Token
+        const accessToken = jwt.sign(user, process.env.JWT_SECRET, {
+            expiresIn: '15m'  // e.g., 15 minutes
         });
 
-        res.cookie('jwt', token, { httpOnly: true, maxAge: 7200000 });
-        res.status(200).redirect("/admin/dashboard");
+        // Create Refresh Token
+        const refreshToken = jwt.sign(user, process.env.JWT_REFRESH_SECRET, {
+            expiresIn: '7d'  // e.g., 7 days
+        });
 
-        console.log("The token is: " + token);
+        // Send tokens to client
+        res.cookie('jwt', accessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
+        res.cookie('refreshJwt', refreshToken, { httpOnly: true, maxAge: 604800000 }); // 7 days
+
+        res.status(200).redirect("/admin/dashboard");
     });
+};
+
+
+
+exports.refreshToken = (req, res) => {
+    const { token } = req.cookies.refreshJwt;
+    if (!token) {
+        return res.status(403).json({ message: "Access Denied" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        const user = {
+            id: decoded.id,
+            storeName: decoded.storeName
+        };
+
+        const newToken = jwt.sign(user, process.env.JWT_SECRET, {
+            expiresIn: '15m'
+        });
+
+        res.cookie('jwt', newToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
+        res.status(200).json({ message: "Token refreshed" });
+    } catch (error) {
+        console.error('Error refreshing token:', error);
+        res.status(403).json({ message: "Invalid Token" });
+    }
 };

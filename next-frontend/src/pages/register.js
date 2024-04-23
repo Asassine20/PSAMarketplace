@@ -6,7 +6,6 @@ import Image from 'next/image';
 import styles from '../styles/Register.module.css';
 
 export default function Register() {
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,7 +26,7 @@ export default function Register() {
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({email, password }),
             });
             const data = await response.json();
             if (data.message === 'User Created Successfully') {
@@ -51,9 +50,6 @@ export default function Register() {
             <Link href="/"><Image src="/logo.png" alt="Home" width={60} height={60} /></Link>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <h1 className={styles.header}>Create Account</h1>
-                <label htmlFor="username" className={styles.label}>Username</label>
-                <input type="text" id="username" name="username" value={username}
-                       onChange={(e) => setUsername(e.target.value)} required className={styles.input}/>
                 <label htmlFor="email" className={styles.label}>Email</label>
                 <input type="email" id="email" name="email" value={email}
                        onChange={(e) => setEmail(e.target.value)} required className={styles.input}/>

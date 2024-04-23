@@ -1,34 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {{> head}}
     <title>Feedback</title>
 </head>
+
 <body>
     {{> navbar}}
-        <table style="width: 50%; margin: 20px auto auto 65px;">
-            <thead>
-                <tr>
-                    <th colspan="4" style="text-align: center;">Feedback: {{feedbackAverage}}%</th>
-                </tr>
-                <tr>
+    <table style="width: 50%; margin: 20px auto auto 65px;">
+        <thead>
+            <tr>
+                <th colspan="4" style="text-align: center;">Feedback: {{feedbackAverage}}%</th>
+            </tr>
+            <tr>
                 <th>Period</th>
                 <th style="color: green;">Positive</th>
                 <th style="color: grey;">Neutral</th>
                 <th style="color: red;">Negative</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each feedbackStats}}
-                <tr>
-                    <td>{{@key}}</td>
-                    <td>{{this.Positive}}</td>
-                    <td>{{this.Neutral}}</td>
-                    <td>{{this.Negative}}</td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each feedbackStats}}
+            <tr>
+                <td>{{@key}}</td>
+                <td>{{this.Positive}}</td>
+                <td>{{this.Neutral}}</td>
+                <td>{{this.Negative}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
 
     <div class="table-container">
         <div class="table-controls">
@@ -45,11 +47,11 @@
 
                     <div class="pagination-links">
                         {{#if (gt page 1)}}
-                            <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
+                        <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
                         {{/if}}
                         Page {{page}} of {{totalPages}}
                         {{#if (lt page totalPages)}}
-                            <a href="?page={{inc page}}&limit={{limit}}">Next</a>
+                        <a href="?page={{inc page}}&limit={{limit}}">Next</a>
                         {{/if}}
                     </div>
                 </div>
@@ -62,7 +64,7 @@
                     <th>Order Date</th>
                     <th>Rating</th>
                     <th>Feedback</th>
-                    <th>Buyer ID</th>
+                    <th>Buyer Name</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,9 +76,10 @@
                     <td>{{formatDate fb.OrderDate}}</td>
                     <td>{{fb.Rating}}</td>
                     <td>{{fb.FeedbackText}}</td>
-                    <td>{{fb.BuyerUsername}}</td>
+                    <td>{{fb.BuyerName}}</td> 
                 </tr>
                 {{/each}}
+
             </tbody>
         </table>
     </div>

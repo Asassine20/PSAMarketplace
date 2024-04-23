@@ -14,7 +14,7 @@
     <div class="table-container">
         <div class="table-controls">
             <div class="table-header">
-            <h2 style="padding-left: 60px;">{{totalOrders}} Total Orders </h2>
+                <h2 style="padding-left: 60px;">{{totalOrders}} Total Orders</h2>
                 <div class="page-size-selector">
                     <label for="pageSize">Orders per page:</label>
                     <select class="page-size-selector" id="pageSize" onchange="changeLimit(this.value)">
@@ -23,7 +23,6 @@
                         <option value="100" {{#if (eq limit 100)}}selected{{/if}}>100 per page</option>
                         <option value="250" {{#if (eq limit 250)}}selected{{/if}}>250 per page</option>
                     </select>
-
                     <div class="pagination-links">
                         {{#if (gt page 1)}}
                             <a href="?page={{dec page}}&limit={{limit}}">Previous</a>
@@ -34,37 +33,37 @@
                         {{/if}}
                     </div>
                 </div>
+            </div>
         </div>
-    </div>
-    <table style="margin-top: 20px;">
-        <thead>
-            <tr>
-                <th>Order Number</th>
-                <th>Buyer Name</th>
-                <th>Sale Price</th>
-                <th>Order Date</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody class="orders-orderNumber">
-            {{#each orders}}
-                <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
-                    <td >
-                        <a href="#" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{OrderNumber}}'); return false;" class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">{{OrderNumber}}</a>
-                    </td>
-                    <td>{{Username}}</td>
-                    <td>${{formatCurrency SalePrice}}</td>
-                    <td>{{formatDate OrderDate}}</td>
-                    <td>{{ShipmentStatus}}</td>
-                    <td class="button-cell">
-                        <button type="button" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{this.OrderNumber}}')" class="table-button">Manage</button>
-                    </td>
+        <table style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>Order Number</th>
+                    <th>Buyer Name</th>
+                    <th>Sale Price</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
                 </tr>
-            {{/each}}
-        </tbody>
-    </table>
-
+            </thead>
+            <tbody class="orders-orderNumber">
+                {{#each orders}}
+                    <tr class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">
+                        <td >
+                            <a href="#" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{OrderNumber}}'); return false;" class="{{#if (eq ShipmentStatus 'Awaiting shipment')}}in-stock{{/if}}">{{OrderNumber}}</a>
+                        </td>
+                        <td>{{FirstName}} {{LastName}}</td>  <!-- Updated to use FirstName and LastName -->
+                        <td>${{formatCurrency SalePrice}}</td>
+                        <td>{{formatDate OrderDate}}</td>
+                        <td>{{ShipmentStatus}}</td>
+                        <td class="button-cell">
+                            <button type="button" onclick="window.location.href='/admin/order-details?orderNumber=' + encodeURIComponent('{{this.OrderNumber}}')" class="table-button">Manage</button>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
 </body>
 <script>
     function changeLimit(limit) {
