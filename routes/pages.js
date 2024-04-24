@@ -47,7 +47,7 @@ router.post('/check-store-name', async (req, res) => {
     try {
         const query = 'SELECT * FROM Stores WHERE StoreName = ?';
         const [rows] = await db.query(query, [storeName]);
-        
+
         if (rows && rows.length > 0) {
             // Store name exists
             res.json({ exists: true, message: 'Store name already exists' });
@@ -148,7 +148,7 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             whereConditions.push("CardName LIKE ?");
             values.push(`${searchTerm.trim()}%`);
         }
-        
+
         if (cardSet) {
             whereConditions.push("CardSet = ?");
             values.push(cardSet);
@@ -187,11 +187,11 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
         const cards = await db.query(query, values);
 
         const totalResult = await db.query(countQuery, countValues);
-        const totalItems = totalResult[0].count; 
+        const totalItems = totalResult[0].count;
         const totalPages = Math.ceil(totalItems / limit);
         const startPage = Math.max(1, page - 2); // Show 2 pages before the current page
         const endPage = Math.min(totalPages, page + 2); // Show 2 pages after the current page
-        
+
         // Generate page numbers for the pagination
         let pages = Array.from({ length: (endPage - startPage) + 1 }, (_, i) => startPage + i);
         const showPrevious = page > 1;
@@ -199,7 +199,7 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
 
         const cardSetsData = await db.query('SELECT DISTINCT CardSet FROM Card');
         const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card');
-        const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');    
+        const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');
         const cardColorsData = await db.query('SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL AND CardColor != \'\'');
         const cardVariantsData = await db.query('SELECT DISTINCT CardVariant FROM Card WHERE CardVariant IS NOT NULL');
         // Fetch inventory with a flag for in-stock items
@@ -211,8 +211,8 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
 
         // Map over the cards to include isInStock property
         const updatedCards = cards.map(card => ({
-        ...card,
-        isInStock: inStockCardIds.has(card.CardID) // Set isInStock to true if CardID is in the inStockCardIds set
+            ...card,
+            isInStock: inStockCardIds.has(card.CardID) // Set isInStock to true if CardID is in the inStockCardIds set
         }));
 
 
@@ -382,7 +382,7 @@ router.get('/admin/cardsets', authenticateToken, notificationCounts, async (req,
     }
 });
 
-router.get('/admin/years', authenticateToken,notificationCounts, async (req, res) => {
+router.get('/admin/years', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
     const cardColor = req.query.cardColor || '';
@@ -522,7 +522,7 @@ router.get('/admin/cardvariants', authenticateToken, notificationCounts, async (
     const year = req.query.year || '';
     const cardColor = req.query.cardColor || '';
     const cacheKey = `cardvariants:${sport}:${cardSet}:${year}:${cardColor}`;
- 
+
 
     try {
         // Check if data is in cache
@@ -649,7 +649,7 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
 router.post('/admin/submit-inventory', authenticateToken, notificationCounts, async (req, res) => {
     const { action, cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
     const sellerId = req.user.id;
-    const defaultImageUrl = '/images/defaultPSAImage.png'; 
+    const defaultImageUrl = '/images/defaultPSAImage.png';
 
     // Check if the action is to clear the inventory
     if (action === 'clearInventory') {
@@ -692,7 +692,7 @@ router.post('/admin/submit-inventory', authenticateToken, notificationCounts, as
                 const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
                 await db.query(insertQuery, [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId]);
             }
-            
+
         }
 
         return res.redirect('/admin/inventory');
@@ -739,25 +739,25 @@ async function getCardDataByCertNumber(certNumber, apiKey, accessToken) {
 async function getImagesByCertNumber(certNumber, apiKey, accessToken) {
     const endpoint = `https://api.psacard.com/publicapi/cert/GetImagesByCertNumber/${certNumber}`;
     try {
-      const response = await axios.get(endpoint, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${accessToken}` // Replace with actual access token
+        const response = await axios.get(endpoint, {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${accessToken}` // Replace with actual access token
+            }
+        });
+
+        // Check if the response contains images
+        if (response.data && response.data.length > 0) {
+            // Extract the image URLs
+            const frontImage = response.data.find(image => image.IsFrontImage)?.ImageURL;
+            const backImage = response.data.find(image => !image.IsFrontImage)?.ImageURL;
+            return { frontImageUrl: frontImage, backImageUrl: backImage };
         }
-      });
-  
-      // Check if the response contains images
-      if (response.data && response.data.length > 0) {
-        // Extract the image URLs
-        const frontImage = response.data.find(image => image.IsFrontImage)?.ImageURL;
-        const backImage = response.data.find(image => !image.IsFrontImage)?.ImageURL;
-        return { frontImageUrl: frontImage, backImageUrl: backImage };
-      }
-  
-      return { frontImageUrl: null, backImageUrl: null };
+
+        return { frontImageUrl: null, backImageUrl: null };
     } catch (error) {
-      console.error('Error fetching images from PSA Card API:', error);
-      throw error; // Or handle this error as appropriate for your application
+        console.error('Error fetching images from PSA Card API:', error);
+        throw error; // Or handle this error as appropriate for your application
     }
 }
 
@@ -877,12 +877,16 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
     const orderNumber = req.query.orderNumber;
     try {
         const orderDetailsQuery = `
-            SELECT Orders.*, Addresses.FirstName, Addresses.LastName
-            FROM Orders
-            JOIN Users ON Orders.BuyerID = Users.UserID
-            JOIN Addresses ON Users.UserID = Addresses.UserID 
-            WHERE Orders.OrderNumber = ? AND Addresses.IsPrimary = 1  
-        `;
+        SELECT 
+            Orders.OrderNumber, Orders.OrderDate, Orders.SalePrice, Orders.ShippingPrice,
+            Orders.FeeAmount, Orders.NetAmount, Orders.OrderAmount,
+            Addresses.FirstName, Addresses.LastName, Addresses.Street, Addresses.City,
+            Addresses.State, Addresses.ZipCode, Addresses.Country
+        FROM Orders
+        JOIN Addresses ON Orders.AddressID = Addresses.AddressID
+        WHERE Orders.OrderNumber = ? AND Addresses.IsPrimary = 1
+    `;
+
         const orderDetails = await db.query(orderDetailsQuery, [orderNumber]);
 
         const orderItemsQuery = `
@@ -921,15 +925,21 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
         const shipping = await db.query(shippingQuery, [orderNumber]);
 
         res.render('order-details', {
-            order: orderDetails[0],
+            order: orderDetails[0] || {}, // Make sure there's a fallback if no data
             items: processedItems,
-            feedback: feedback[0] ? feedback[0] : null,
-            shipping: shipping[0] ? shipping[0] : null,
-            address: { // Adjusted to pull from orderDetails directly
+            feedback: feedback[0] || null,
+            shipping: shipping[0] || null,
+            address: {
                 FirstName: orderDetails[0]?.FirstName,
-                LastName: orderDetails[0]?.LastName
+                LastName: orderDetails[0]?.LastName,
+                Street: orderDetails[0]?.Street,
+                City: orderDetails[0]?.City,
+                State: orderDetails[0]?.State,
+                ZipCode: orderDetails[0]?.ZipCode,
+                Country: orderDetails[0]?.Country
             }
         });
+        
     } catch (error) {
         console.error('Error fetching order details:', error);
         res.status(500).send('Error fetching order details');
@@ -952,10 +962,10 @@ router.post('/admin/update-shipping-details', authenticateToken, notificationCou
                 Shipping.ShipmentStatus = ?
             WHERE Shipping.OrderNumber = ?
         `;
-        
+
         const result = await db.query(updateShippingQuery, [ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus, orderNumber]);
         console.log(result);
-        
+
         res.json({ message: 'Shipping details updated successfully' });
     } catch (error) {
         console.error('Error updating shipping details:', error);
@@ -1076,7 +1086,7 @@ router.post('/admin/send-message', authenticateToken, notificationCounts, async 
             INSERT INTO Messages (ConversationID, SenderID, MessageText, Timestamp, ResponseNeeded)
             VALUES (?, ?, ?, NOW(), FALSE)`;
         await db.query(insertMessageQuery, [conversationId, sellerId, messageText]);
-    
+
 
         // Redirect back to the message-details page or handle as needed
         res.redirect(`/admin/message-details/${conversationId}`);
@@ -1123,16 +1133,24 @@ async function getOrderDetails(orderNumber) {
     try {
         // Fetch basic order details, including buyer and seller names from the updated schema
         let orderSql = `
-            SELECT o.OrderNumber, o.OrderDate, o.SalePrice AS TotalPrice,
-                   CONCAT(a.FirstName, ' ', a.LastName) AS BuyerName,  
-                   s.StoreName AS SellerName, 
-                   a.Street, a.City, a.State, a.ZipCode, a.Country
-            FROM Orders o
-            JOIN Users buyer ON o.BuyerID = buyer.UserID
-            JOIN Addresses a ON buyer.UserID = a.UserID AND a.IsPrimary = 1 
-            JOIN Users seller ON o.SellerID = seller.UserID
-            JOIN Stores s ON seller.UserID = s.UserID 
-            WHERE o.OrderNumber = ?`;
+        SELECT 
+        o.OrderNumber, 
+        o.OrderDate, 
+        o.SalePrice AS TotalPrice,
+        CONCAT(a.FirstName, ' ', a.LastName) AS BuyerName,
+        s.StoreName AS SellerName,
+        a.Street, 
+        a.City, 
+        a.State, 
+        a.ZipCode, 
+        a.Country
+    FROM Orders o
+    JOIN Users buyer ON o.BuyerID = buyer.UserID
+    JOIN Addresses a ON buyer.UserID = a.UserID AND a.IsPrimary = 1
+    JOIN Users seller ON o.SellerID = seller.UserID
+    JOIN Stores s ON seller.UserID = s.UserID
+    WHERE o.OrderNumber = ?
+    `;
 
         const orderDetails = await db.query(orderSql, [orderNumber]);
         if (orderDetails.length === 0) {
@@ -1165,7 +1183,7 @@ async function getOrderDetails(orderNumber) {
                 State: mainOrderDetails.State,
                 ZipCode: mainOrderDetails.ZipCode,
                 Country: mainOrderDetails.Country,
-            },            
+            },
             items: itemsDetails
         };
 
@@ -1178,9 +1196,11 @@ async function getOrderDetails(orderNumber) {
 
 router.get('/admin/download-order', authenticateToken, notificationCounts, async (req, res) => {
     const orderNumber = req.query.orderNumber;
+    console.log('Requested orderNumber:', orderNumber);
 
     try {
         const orderDetails = await getOrderDetails(orderNumber);
+        console.log('Order details:', orderDetails);
         if (!orderDetails) {
             return res.status(404).send('Order not found');
         }
@@ -1208,10 +1228,10 @@ router.get('/admin/download-order', authenticateToken, notificationCounts, async
 
         // Order Details
         doc.fontSize(12).font('Helvetica-Bold')
-           .text(`Order Number: ${orderDetails.orderNumber}`, 50)
-           .text(`Order Date: ${formatDate(orderDetails.orderDate)}`)
-           .text(`Seller Name: ${orderDetails.sellerName}`)
-           .moveDown(2);
+            .text(`Order Number: ${orderDetails.orderNumber}`, 50)
+            .text(`Order Date: ${formatDate(orderDetails.orderDate)}`)
+            .text(`Seller Name: ${orderDetails.sellerName}`)
+            .moveDown(2);
 
         // Items Table
         const startX = doc.x;
@@ -1234,12 +1254,12 @@ router.get('/admin/download-order', authenticateToken, notificationCounts, async
 
         // Reset font to normal for table entries
         doc.font('Helvetica');
-        
+
         // Loop through items and add them to the table
         orderDetails.items.forEach(item => {
             const itemTotalPrice = (item.Quantity * parseFloat(item.Price)).toFixed(2);
             const cardDescription = `${item.CardName} ${item.CardNumber} ${item.CardColor || ''} ${item.CardVariant || ''} ${item.Sport} ${item.CardYear} ${item.CardSet}`.trim();
-            
+
             // Check if the card description exceeds the description width and wrap it accordingly
             const wrappedDescription = doc.widthOfString(cardDescription) > descriptionWidth
                 ? doc.splitTextToSize(cardDescription, descriptionWidth)
@@ -1425,7 +1445,7 @@ router.get('/admin/reports', authenticateToken, notificationCounts, async (req, 
         console.log('Sales data fetched:', salesData);
 
         res.render('reports', {
-            salesData, 
+            salesData,
             startDate,
             endDate
         });
@@ -1437,7 +1457,7 @@ router.get('/admin/reports', authenticateToken, notificationCounts, async (req, 
 });
 
 
-router.get('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
+router.get('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id; // Assuming you're storing the user's ID in req.user
 
     try {
@@ -1451,7 +1471,7 @@ router.get('/admin/settings',  authenticateToken, notificationCounts, async (req
             LEFT JOIN Addresses ON Users.UserID = Addresses.UserID
             LEFT JOIN BankInfo ON Stores.StoreID = BankInfo.StoreID
             WHERE Users.UserID = ?`;
-        
+
         const [sellerInfo] = await db.query(query, [userId]);
         if (sellerInfo.AccountNumber) {
             const maskedAccountNumber = sellerInfo.AccountNumber.slice(-4).padStart(sellerInfo.AccountNumber.length, 'X');
@@ -1465,7 +1485,7 @@ router.get('/admin/settings',  authenticateToken, notificationCounts, async (req
     }
 });
 
-router.post('/admin/settings',  authenticateToken, notificationCounts, async (req, res) => {
+router.post('/admin/settings', authenticateToken, notificationCounts, async (req, res) => {
     const { shippingPrice, description, street, street2, city, state, zipCode, country } = req.body;
     const userId = req.user.id; // Assuming user's ID is stored in req.user
     if (description.length > 140) {
@@ -1479,7 +1499,7 @@ router.post('/admin/settings',  authenticateToken, notificationCounts, async (re
         // Update Addresses table
         // Assume there's only one primary address per user for simplicity
         await db.query(`UPDATE Addresses SET Street = ?, Street2 = ?, City = ?, State = ?, ZipCode = ?, Country = ? WHERE UserID = ?`, [street, street2, city, state, zipCode, country, userId]);
-                // Update Stores table
+        // Update Stores table
         await db.query(`UPDATE Stores SET Description = ? WHERE UserID = ?`, [description, userId]);
         // Update Shipping price
         await db.query(`UPDATE Stores SET ShippingPrice = ? WHERE UserID = ?`, [shippingPrice, userId]);
