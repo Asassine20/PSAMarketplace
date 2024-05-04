@@ -99,7 +99,9 @@ function CardDetails() {
             </div>
             {data.card.listings && data.card.listings.length > 0 ? (
                 <>
-                    <h2 className={styles.listingsHeader}>{data.card.listings.length} Listings</h2>
+                    <h2 className={styles.listingsHeader}>
+                        {data.card.listings.length} {data.card.listings.length === 1 ? 'Listing' : 'Listings'}
+                    </h2>
                     <div className={styles.listingsContainer}>
                         {data.card.listings.map((listing) => (
                             <div key={listing.ListingID} className={styles.listingCard}>
@@ -142,10 +144,13 @@ function CardDetails() {
                     </div>
                 </>
             ) : (
-                <div className={styles.listingsTable}>
-                    <p>No listings available for this card.</p>
-                </div>
+                <>
+                    <div className={styles.listingsEmpty}>  
+                        <h2 className={styles.listingsHeader}>No current listings</h2>
+                    </div>
+                </>
             )}
+
 
             {hoveredImage && (
                 <div style={{
