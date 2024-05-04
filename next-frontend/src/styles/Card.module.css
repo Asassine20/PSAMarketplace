@@ -51,7 +51,24 @@
 .latestSales {
     flex: 1; /* Allows this section to grow and fill available space */
     overflow: hidden; /* Maintains the border-radius */
+    position: relative;
 }
+
+.blurEffect {
+    filter: blur(4px);
+  }
+  
+  .noSalesOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 24px;
+    color: black;
+  }
 
 .latestSales h2 {
     padding-bottom: 20px;
@@ -63,6 +80,16 @@
     border: 1px solid #ccc;
 }
 
+.tableRowOdd {
+    background-color: #ffffff;  /* White for odd rows */
+  }
+  
+  .tableRowEven {
+    background-color: #ebedef;  /* Light grey for even rows */
+  }
+  
+  
+
 .latestSales th, .latestSales td {
     padding: 12px;
     text-align: left;
@@ -70,13 +97,12 @@
 }
 
 .latestSales th {
-    background-color: #eee;
     color: #333;
     font-size: 16px;
 }
 
 .latestSales td {
-    background-color: #fff;
+    background-color: inherit;  /* This ensures it inherits from the row rather than setting its own background */
     color: #333;
     font-size: 16px;
 }

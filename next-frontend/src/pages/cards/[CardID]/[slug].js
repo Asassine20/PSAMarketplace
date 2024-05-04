@@ -67,25 +67,35 @@ function CardDetails() {
                 </div>
                 <div className={styles.latestSales}>
                     <h2 style={{ textAlign: 'left' }}>Latest Sales</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Grade</th>
-                                <th>Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data?.card?.sales?.map((sale, index) => (
-                                <tr key={index}>
-                                    <td>{new Date(sale.OrderDate).toLocaleDateString()}</td>
-                                    <td>{sale.GradeValue}</td>
-                                    <td>${sale.Price}</td>
+                    <div className={data?.card?.sales?.length ? '' : styles.blurEffect}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Grade</th>
+                                    <th>Price</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {data?.card?.sales?.length > 0 ? (
+                                    data.card.sales.map((sale, index) => (
+                                        <tr key={index} className={index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd}>
+                                            <td>{new Date(sale.OrderDate).toLocaleDateString()}</td>
+                                            <td>{sale.GradeValue}</td>
+                                            <td>${sale.Price}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr style={{ display: 'none' }}></tr> // Ensuring tbody is not empty for valid HTML
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    {data?.card?.sales?.length === 0 && (
+                        <div className={styles.noSalesOverlay}>No sales yet for this card</div>
+                    )}
                 </div>
+
             </div>
             {data.card.listings && data.card.listings.length > 0 ? (
                 <>
