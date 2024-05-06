@@ -12,36 +12,43 @@ const connection = mysql.createPool({
 });
 
 exports.register = (req, res) => {
-    const { email, password, passwordConfirm } = req.body;  // Removed name/username from destructuring
-    connection.query('SELECT Email FROM Users WHERE Email = ?', [email], async (error, results) => {
+    const { email, password, passwordConfirm } = req.body;
+
+    connection.query('SELECT Email, IsSeller FROM Users WHERE Email = ?', [email], async (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).send('Database error');
         }
         if (results.length > 0) {
-            return res.render('register', {
-                message: 'That email has already been registered'
-            });
+            if (!results[0].IsSeller) {
+                // User has not completed seller info, redirect to complete it
+                const encodedEmail = encodeURIComponent(email);
+                return res.redirect(`/register/seller-info?email=${encodedEmail}`);
+            } else {
+                // Email has already been fully registered
+                return res.render('register', {
+                    message: 'That email has already been registered'
+                });
+            }
         } else if (password !== passwordConfirm) {
             return res.render('register', {
                 message: 'Passwords do not match'
             });
         }
+
         let hashedPassword = await bcrypt.hash(password, 8);
-        console.log(hashedPassword);
-        // Updated to only include email and hashed password in the INSERT query
-        connection.query('INSERT INTO Users SET ?', { Email: email, PasswordHash: hashedPassword }, (error, results) => {
+        connection.query('INSERT INTO Users (Email, PasswordHash, IsSeller) VALUES (?, ?, FALSE)', [email, hashedPassword], (error, results) => {
             if (error) {
                 console.log(error);
                 return res.status(500).send('Database insert error');
-            } else {
-                const encodedEmail = encodeURIComponent(email);
-                req.session.email = email; // Store the email in the session
-                return res.redirect(`/register/seller-info?email=${encodedEmail}`);
             }
+            const encodedEmail = encodeURIComponent(email);
+            req.session.email = email; // Store the email in the session
+            return res.redirect(`/register/seller-info?email=${encodedEmail}`);
         });
     });
 };
+
 
 exports.submitSellerInfo = (req, res) => {
     const email = req.body.email || req.session.email;
@@ -120,27 +127,34 @@ exports.submitSellerInfo = (req, res) => {
                                 return res.status(500).send('Error inserting bank info.');
                             }
 
-                            // Commit transaction
-                            conn.commit(err => {
-                                if (err) {
+                            // Update IsSeller to true
+                            conn.query('UPDATE Users SET IsSeller = 1 WHERE UserID = ?', [userID], (error) => {
+                                if (error) {
                                     conn.rollback(() => conn.release());
-                                    return res.status(500).send('Error committing transaction.');
+                                    return res.status(500).send('Error updating user seller status.');
                                 }
 
-                                conn.release(); // Release connection back to the pool
+                                // Commit transaction
+                                conn.commit(err => {
+                                    if (err) {
+                                        conn.rollback(() => conn.release());
+                                        return res.status(500).send('Error committing transaction.');
+                                    }
 
-                                // Send confirmation email
-                                const user = { id: userID, email };
-                                sendConfirmationEmail(user)
-                                    .then(() => {
-                                        console.log('Confirmation email sent successfully.');
-                                        res.redirect('/final-verification');
-                                    })
-                                    .catch(sendEmailError => {
-                                        console.error('Error sending confirmation email:', sendEmailError);
-                                        // Decide how you want to handle email sending failures
-                                        res.redirect('/final-verification'); // Proceed with the redirection even if email fails
-                                    });
+                                    conn.release(); // Release connection back to the pool
+
+                                    // Send confirmation email
+                                    const user = { id: userID, email };
+                                    sendConfirmationEmail(user)
+                                        .then(() => {
+                                            console.log('Confirmation email sent successfully.');
+                                            res.redirect('/final-verification');
+                                        })
+                                        .catch(sendEmailError => {
+                                            console.error('Error sending confirmation email:', sendEmailError);
+                                            res.redirect('/final-verification'); // Proceed with the redirection even if email fails
+                                        });
+                                });
                             });
                         });
                     });
@@ -150,13 +164,13 @@ exports.submitSellerInfo = (req, res) => {
     });
 };
 
+
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
     const query = `
-        SELECT Users.UserID, Users.PasswordHash, Stores.StoreName 
+        SELECT Users.UserID, Users.PasswordHash, Users.IsSeller 
         FROM Users
-        JOIN Stores ON Users.UserID = Stores.UserID
         WHERE Users.Email = ?
     `;
 
@@ -174,9 +188,14 @@ exports.login = (req, res) => {
             });
         }
 
+        if (!results[0].IsSeller) {
+            // User has not completed seller info
+            return res.redirect(`/register/seller-info?email=${encodeURIComponent(email)}`);
+        }
+
         const user = {
             id: results[0].UserID,
-            storeName: results[0].StoreName
+            isSeller: results[0].IsSeller
         };
 
         // Create Access Token

@@ -40,7 +40,7 @@ exports.authenticateToken = (req, res, next) => {
 exports.authenticateAdmin = async (req, res, next) => {
     const token = req.cookies.jwt; // Assuming the token is stored in cookies
     if (!token) {
-        return res.status(401).send('Access Denied: No Token Provided!');
+        return res.status(401).send('Access Denied: No Token Provided');
     }
 
     try {
