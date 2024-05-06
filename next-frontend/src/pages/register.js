@@ -26,8 +26,12 @@ export default function Register() {
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email, password }),
-            });
+                body: JSON.stringify({
+                  email, 
+                  password, 
+                  passwordConfirm: confirmPassword,  // Make sure this line correctly passes the confirmPassword state
+                }),
+              });                        
             const data = await response.json();
             if (data.message === 'User Created Successfully') {
                 alert('Registration successful');
