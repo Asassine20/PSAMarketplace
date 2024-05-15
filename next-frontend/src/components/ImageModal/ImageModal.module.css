@@ -20,6 +20,7 @@
     display: flex;
     align-items: center;
     justify-content: center; /* Center the content horizontally */
+    perspective: 1000px; /* Add perspective for 3D effect */
   }
   
   /* Image container */
@@ -31,10 +32,16 @@
   }
   
   .imageWrapper {
-    position: relative;
+    position: absolute; /* Change to absolute for flipping */
     width: 100%;
     height: 100%;
     cursor: url('/magnifying-glass-icon.png'), auto; /* Custom magnifying glass cursor */
+    backface-visibility: hidden; /* Ensure the back face is hidden during flip */
+    transition: transform 1s ease; /* Smooth transition for flip */
+  }
+  
+  .imageWrapper.flip {
+    transform: rotateY(180deg); /* Rotate around the y-axis */
   }
   
   .zoomedWrapper {
@@ -128,7 +135,6 @@
   .prevButton:hover, .nextButton:hover {
     background: rgba(255, 255, 255, 1);
   }
-  
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .modalContent {

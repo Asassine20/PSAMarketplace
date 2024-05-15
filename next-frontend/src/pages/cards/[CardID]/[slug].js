@@ -20,16 +20,6 @@ function CardDetails() {
   });
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const imageRef = useRef(null);
-
-  useEffect(() => {
-    window.addEventListener('resize', checkSize);
-    checkSize();
-    return () => {
-      window.removeEventListener('resize', checkSize);
-      imageRef.current?.removeEventListener('click', handleImageClick);
-    };
-  }, []);
 
   const handleImageClick = (images, index) => {
     setModalImages(images);
@@ -38,14 +28,6 @@ function CardDetails() {
 
   const closeModal = () => {
     setModalImages([]);
-  };
-
-  const checkSize = () => {
-    if (window.innerWidth <= 768) {
-      imageRef.current?.addEventListener('click', handleImageClick);
-    } else {
-      imageRef.current?.removeEventListener('click', handleImageClick);
-    }
   };
 
   if (error) return <div>Failed to load data</div>;
@@ -64,7 +46,6 @@ function CardDetails() {
           height={600} 
           layout="intrinsic" 
           className={styles.cardImage} 
-          onClick={() => handleImageClick([card.CardImage], 0)}  // Add onClick handler
         />
       </div>
       <div className={styles.cardContent}>

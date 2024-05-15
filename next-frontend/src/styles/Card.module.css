@@ -325,6 +325,10 @@
         color: #9ba0aa; /* Grey color for less emphasis compared to sale price */
     }
 
+    .cardContent {
+        margin-top: 20px;
+    }
+
     .listingAction {
         flex: 1; /* Allocate space for the button */
         justify-content: flex-end; /* Align button to the end (right side) */

@@ -5,13 +5,22 @@ const ImageModal = ({ images, initialIndex, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isZoomed, setIsZoomed] = useState(false);
   const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
+  const [isFlipping, setIsFlipping] = useState(false);
 
   const handlePrev = () => {
-    setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : images.length - 1));
+    setIsFlipping(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : images.length - 1));
+      setIsFlipping(false);
+    }, 300);
   };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex < images.length - 1 ? prevIndex + 1 : 0));
+    setIsFlipping(true);
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex < images.length - 1 ? prevIndex + 1 : 0));
+      setIsFlipping(false);
+    }, 300);
   };
 
   const handleImageClick = () => {
@@ -35,7 +44,7 @@ const ImageModal = ({ images, initialIndex, onClose }) => {
         <button className={styles.prevButton} onClick={handlePrev}>&#8249;</button>
         <div className={styles.imageContainer}>
           <div
-            className={`${styles.imageWrapper} ${isZoomed ? styles.zoomedWrapper : ''}`}
+            className={`${styles.imageWrapper} ${isFlipping ? styles.flip : ''} ${isZoomed ? styles.zoomedWrapper : ''}`}
             onClick={handleImageClick}
             onMouseMove={handleMouseMove}
           >
