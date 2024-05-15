@@ -15,22 +15,25 @@
   /* Prevent clicks on modal content from closing the modal */
   .modalContent {
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
+    width: 80vw;  /* Set width to 80% of the viewport width */
+    height: 80vh; /* Set height to 80% of the viewport height */
     display: flex;
     align-items: center;
+    justify-content: center; /* Center the content horizontally */
   }
   
   /* Image container */
   .imageContainer {
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
   }
   
   .imageWrapper {
     position: relative;
+    width: 100%;
+    height: 100%;
     cursor: url('/magnifying-glass-icon.png'), auto; /* Custom magnifying glass cursor */
   }
   
@@ -39,8 +42,9 @@
   }
   
   .modalImage {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ensure the image fits within the container */
     transition: transform 0.3s ease; /* Smooth transition */
   }
   
@@ -49,11 +53,31 @@
     transition: transform 0.1s ease; /* Smooth transition for movement */
   }
   
+  /* Zoom Button */
+  .zoomButton {
+    position: absolute;
+    bottom: 10px; /* Position at the bottom of the image */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1;
+    transition: background 0.3s;
+  }
+  
+  .zoomButton:hover {
+    background: rgba(255, 255, 255, 1);
+  }
+  
   /* Close button */
   .closeButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0;
+    right: 0;
+    margin: 10px;
     background: rgba(255, 255, 255, 0.8);
     border: none;
     border-radius: 50%;
@@ -65,6 +89,7 @@
     justify-content: center;
     align-items: center;
     transition: background 0.3s;
+    z-index: 2000;
   }
   
   .closeButton:hover {
@@ -87,17 +112,75 @@
     justify-content: center;
     align-items: center;
     transition: background 0.3s;
+    z-index: 2000;
   }
   
   .prevButton {
-    left: 10px;
+    left: 0;
+    margin-left: 10px; /* Adjusted positioning */
   }
   
   .nextButton {
-    right: 10px;
+    right: 0;
+    margin-right: 10px; /* Adjusted positioning */
   }
   
   .prevButton:hover, .nextButton:hover {
     background: rgba(255, 255, 255, 1);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .modalContent {
+      width: 90%;  /* Adjust width for smaller screens */
+      height: 90%; /* Adjust height for smaller screens */
+    }
+  
+    .prevButton {
+      left: 0;
+      margin-left: 5px; /* Adjust position for smaller screens */
+    }
+  
+    .nextButton {
+      right: 0;
+      margin-right: 5px; /* Adjust position for smaller screens */
+    }
+  
+    .closeButton {
+      top: 0;
+      right: 0;
+      margin: 5px; /* Adjust position for smaller screens */
+    }
+  
+    .zoomButton {
+      bottom: 5px; /* Adjust position for smaller screens */
+    }
+  }
+  
+  @media (min-width: 769px) and (max-width: 1130px) {
+    .modalContent {
+      width: 85%;  /* Adjust width for medium screens */
+      height: 85%; /* Adjust height for medium screens */
+    }
+  
+    .prevButton {
+      left: 0;
+      margin-left: 5px; /* Adjust position for medium screens */
+    }
+  
+    .nextButton {
+      right: 0;
+      margin-right: 5px; /* Adjust position for medium screens */
+    }
+  
+    .closeButton {
+      top: 0;
+      right: 0;
+      margin: 5px; /* Adjust position for medium screens */
+    }
+  
+    .zoomButton {
+      bottom: 10px; /* Adjust position for medium screens */
+    }
   }
   

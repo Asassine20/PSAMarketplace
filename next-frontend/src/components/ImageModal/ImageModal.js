@@ -39,6 +39,7 @@ const ImageModal = ({ images, initialIndex, onClose }) => {
             onClick={handleImageClick}
             onMouseMove={handleMouseMove}
           >
+            {!isZoomed && <div className={styles.zoomButton}>Click to Zoom</div>}
             <img
               src={images[currentIndex]}
               alt="Enlarged"
