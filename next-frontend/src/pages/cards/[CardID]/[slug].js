@@ -141,7 +141,8 @@ function CardDetails() {
                     onClick={() => addToCart({
                       id: listing.ListingID,
                       name: card.CardName,
-                      image: listing.FrontImageURL,
+                      imageFront: listing.FrontImageURL,
+                      imageBack: listing.BackImageURL,
                       storeName: listing.StoreName,
                       feedback: listing.FeedbackAverage,
                       grade: listing.GradeValue,

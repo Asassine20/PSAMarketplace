@@ -15,7 +15,10 @@ const CartPage = () => {
       <div className={styles.cartItems}>
         {cart.map((item) => (
           <div key={item.id} className={styles.cartItem}>
-            <img src={item.image} alt={item.name} className={styles.cartItemImage} />
+            <div className={styles.cartItemImages}>
+              <img src={item.imageFront} alt={`${item.name} Front`} className={styles.cartItemImage} />
+              <img src={item.imageBack} alt={`${item.name} Back`} className={styles.cartItemImage} />
+            </div>
             <div className={styles.cartItemDetails}>
               <p><strong>Name:</strong> {item.name}</p>
               <p><strong>Store:</strong> {item.storeName}</p>
