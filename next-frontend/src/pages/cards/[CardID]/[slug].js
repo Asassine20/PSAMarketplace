@@ -140,8 +140,10 @@ function CardDetails() {
                     className={styles.button}
                     onClick={() => addToCart({
                       id: listing.ListingID,
+                      cardId: card.CardID, // Add cardId
                       name: card.CardName,
                       sport: card.Sport,
+                      cardSet: card.CardSet, // Add cardSet
                       number: card.CardNumber,
                       variant: card.CardVariant,
                       color: card.CardColor,

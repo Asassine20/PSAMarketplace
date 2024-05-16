@@ -1,50 +1,63 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Create the Cart Context
 const CartContext = createContext();
 
-// Custom hook to use the Cart Context
-export const useCart = () => {
-  return useContext(CartContext);
-};
-
-// CartProvider component
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
-
-  // Load cart from localStorage on the client side
-  useEffect(() => {
-    if (typeof window !== 'undefined') { // Check if window is defined
+  const [cart, setCart] = useState(() => {
+    if (typeof window !== "undefined") {
       const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        setCart(JSON.parse(savedCart));
-      }
+      return savedCart ? JSON.parse(savedCart) : [];
     }
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
+    return [];
+  });
+  const [savedForLater, setSavedForLater] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedItems = localStorage.getItem('savedForLater');
+      return savedItems ? JSON.parse(savedItems) : [];
+    }
+    return [];
+  });
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
-    if (cart.length > 0) { // Ensure localStorage is only set when there are items in the cart
+    if (typeof window !== "undefined") {
       localStorage.setItem('cart', JSON.stringify(cart));
+      localStorage.setItem('savedForLater', JSON.stringify(savedForLater));
     }
-  }, [cart]);
+  }, [cart, savedForLater]);
 
   const addToCart = (item) => {
     setCart((prevCart) => [...prevCart, item]);
   };
 
   const removeFromCart = (id) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+    setCart((prevCart) => prevCart.filter(item => item.id !== id));
   };
 
   const clearCart = () => {
     setCart([]);
-    localStorage.removeItem('cart'); // Clear localStorage when the cart is cleared
+  };
+
+  const saveForLater = (id) => {
+    const itemToSave = cart.find(item => item.id === id);
+    setCart((prevCart) => prevCart.filter(item => item.id !== id));
+    setSavedForLater((prevSaved) => [...prevSaved, itemToSave]);
+  };
+
+  const addToCartFromSaved = (id) => {
+    const itemToAdd = savedForLater.find(item => item.id === id);
+    setSavedForLater((prevSaved) => prevSaved.filter(item => item.id !== id));
+    setCart((prevCart) => [...prevCart, itemToAdd]);
+  };
+
+  const removeFromSaved = (id) => {
+    setSavedForLater((prevSaved) => prevSaved.filter(item => item.id !== id));
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved }}>
       {children}
     </CartContext.Provider>
   );
 };
+
+export const useCart = () => useContext(CartContext);
