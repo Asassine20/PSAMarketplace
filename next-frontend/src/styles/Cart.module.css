@@ -5,11 +5,12 @@
   }
   
   .cartItems {
-    width: 80%;
+    width: 90%;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 20px;
+    background-color: #f8f8f8; /* Light grey background for cart items */
   }
   
   .cartItem {
@@ -36,6 +37,7 @@
   .cartItemImage {
     width: 100px;
     height: auto;
+    cursor: pointer; /* Make images clickable */
   }
   
   .cartItemDetails {
@@ -85,10 +87,11 @@
   }
   
   .cartSummary {
-    width: 80%;
+    width: 90%;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: #f8f8f8; /* Same background as cart items */
   }
   
   .cartSummary h2 {
@@ -116,10 +119,11 @@
   .actionButton {
     color: rgb(92, 92, 92) !important;
   }
+  
   .largeText {
     font-size: larger;
   }
-  
+
   .largeTextStrong {
     font-size: larger;
     font-weight: bold;
@@ -130,6 +134,7 @@
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 20px;
+    background-color: #fff; /* White background for packages */
   }
   
   .packageHeader {
@@ -139,6 +144,14 @@
   .shippingIncluded {
     text-align: right;
     font-size: 16px;
-    color: #9ba0aa;
+    color: #555; /* Match the color of the shipping price */
+  }
+  
+  .leftAlignedTitle {
+    width: 90%;
+    text-align: left;
+    font-size: 25px;
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
   

@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useCart } from '../components/Cart/CartProvider';
 import styles from '../styles/Cart.module.css';
 import Link from 'next/link';
+import ImageModal from '../components/ImageModal/ImageModal'; // Import the ImageModal component
 
 const CartPage = () => {
   const { cart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved } = useCart();
   const [mounted, setMounted] = useState(false);
+  const [modalImages, setModalImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -29,6 +32,15 @@ const CartPage = () => {
   const groupedCartItems = groupItemsByStore(cart);
   const groupedSavedItems = groupItemsByStore(savedForLater);
 
+  const handleImageClick = (images, index) => {
+    setModalImages(images);
+    setCurrentImageIndex(index);
+  };
+
+  const closeModal = () => {
+    setModalImages([]);
+  };
+
   if (!mounted) {
     // Prevent rendering on the server to avoid hydration issues
     return null;
@@ -36,7 +48,7 @@ const CartPage = () => {
 
   return (
     <div className={styles.cartPage}>
-      <h1 className={styles.largeText}>Your Shopping Cart</h1>
+      <h1 className={`${styles.largeText} ${styles.leftAlignedTitle}`}>Your Shopping Cart</h1>
       <div className={styles.cartItems}>
         {Object.keys(groupedCartItems).map((storeName) => (
           <div key={storeName} className={styles.package}>
@@ -47,8 +59,18 @@ const CartPage = () => {
               <div key={item.id} className={styles.cartItem} style={{ borderBottom: index === groupedCartItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
                 <div className={styles.cartItemDetailsLeft}>
                   <div className={styles.cartItemImages}>
-                    <img src={item.imageFront} alt={item.name} className={styles.cartItemImage} />
-                    <img src={item.imageBack} alt={item.name} className={styles.cartItemImage} />
+                    <img
+                      src={item.imageFront}
+                      alt={item.name}
+                      className={styles.cartItemImage}
+                      onClick={() => handleImageClick([item.imageFront, item.imageBack], 0)}
+                    />
+                    <img
+                      src={item.imageBack}
+                      alt={item.name}
+                      className={styles.cartItemImage}
+                      onClick={() => handleImageClick([item.imageFront, item.imageBack], 1)}
+                    />
                   </div>
                 </div>
                 <div className={styles.cartItemDetails}>
@@ -60,7 +82,7 @@ const CartPage = () => {
                 </div>
                 <div className={styles.cartItemPrices}>
                   <p className={styles.largeTextStrong}><strong>${(Number(item.price || 0)).toFixed(2)}</strong></p>
-                  <p className={`${styles.largeText} ${index === 0 ? '' : styles.shippingIncluded}`}>
+                  <p className={`${styles.largeText} ${styles.shippingIncluded}`}>
                     {index === 0 ? `+ ${(Number(item.shippingPrice || 0)).toFixed(2)}` : "Shipping included"}
                   </p>
                 </div>
@@ -86,8 +108,18 @@ const CartPage = () => {
                   <div key={item.id} className={styles.cartItem} style={{ borderBottom: index === groupedSavedItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
                     <div className={styles.cartItemDetailsLeft}>
                       <div className={styles.cartItemImages}>
-                        <img src={item.imageFront} alt={item.name} className={styles.cartItemImage} />
-                        <img src={item.imageBack} alt={item.name} className={styles.cartItemImage} />
+                        <img
+                          src={item.imageFront}
+                          alt={item.name}
+                          className={styles.cartItemImage}
+                          onClick={() => handleImageClick([item.imageFront, item.imageBack], 0)}
+                        />
+                        <img
+                          src={item.imageBack}
+                          alt={item.name}
+                          className={styles.cartItemImage}
+                          onClick={() => handleImageClick([item.imageFront, item.imageBack], 1)}
+                        />
                       </div>
                     </div>
                     <div className={styles.cartItemDetails}>
@@ -122,6 +154,10 @@ const CartPage = () => {
         <button className={styles.largeText} onClick={clearCart}>Clear Cart</button>
         <button className={styles.largeText} onClick={() => alert('Checkout not implemented yet')}>Checkout</button>
       </div>
+
+      {modalImages.length > 0 && (
+        <ImageModal images={modalImages} initialIndex={currentImageIndex} onClose={closeModal} />
+      )}
     </div>
   );
 };
