@@ -1,10 +1,11 @@
 import { useRouter } from 'next/router';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import useSWR from 'swr';
 import { FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 import styles from '../../../styles/Card.module.css';
-import ImageModal from '../../../components/ImageModal/ImageModal';  // Correctly import the ImageModal component
+import ImageModal from '../../../components/ImageModal/ImageModal';
+import { useCart } from '../../../components/Cart/CartProvider';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -18,6 +19,7 @@ function CardDetails() {
       }
     }
   });
+  const { addToCart } = useCart();
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -102,13 +104,13 @@ function CardDetails() {
                     src={listing.FrontImageURL} 
                     alt="Front" 
                     className={styles.listingImage}
-                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 0)}  // Add onClick handler
+                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 0)}  
                   />
                   <img 
                     src={listing.BackImageURL} 
                     alt="Back" 
                     className={styles.listingImage}
-                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 1)}  // Add onClick handler
+                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 1)}  
                   />
                 </div>
                 <div className={styles.listingDetails}>
@@ -134,7 +136,22 @@ function CardDetails() {
                   </div>
                 </div>
                 <div className={styles.listingAction}>
-                  <button className={styles.button}>Add to Cart</button>
+                  <button 
+                    className={styles.button}
+                    onClick={() => addToCart({
+                      id: listing.ListingID,
+                      name: card.CardName,
+                      image: listing.FrontImageURL,
+                      storeName: listing.StoreName,
+                      feedback: listing.FeedbackAverage,
+                      grade: listing.GradeValue,
+                      certNumber: listing.CertNumber,
+                      price: listing.SalePrice,
+                      shippingPrice: listing.ShippingPrice,
+                    })}
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               </div>
             ))}

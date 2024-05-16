@@ -58,7 +58,9 @@ const Navbar = () => {
           <a href="http://localhost:3001/register" target="_blank" rel="noopener noreferrer">
             <span className={styles.startSellingButton}>Start Selling</span>
           </a>
-          <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
+          <Link href="/cart" passHref>
+            <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
+          </Link>
         </div>
       </div>
       {isPanelOpen && (

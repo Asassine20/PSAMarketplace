@@ -1,6 +1,7 @@
 import '../styles/globals.css'; // Global styles
 import Navbar from '../components/Navbar/Navbar';
 import Footer from '../components/Footer/Footer';
+import { CartProvider } from '../components/Cart/CartProvider'; // Correct import
 import { useRouter } from 'next/router'; // Import useRouter
 
 export default function MyApp({ Component, pageProps }) {
@@ -10,10 +11,10 @@ export default function MyApp({ Component, pageProps }) {
   const showNavAndFooter = !['/register', '/login'].includes(router.pathname);
 
   return (
-    <>
-      {showNavAndFooter && <Navbar />}  
+    <CartProvider>
+      {showNavAndFooter && <Navbar />}
       <Component {...pageProps} />
-      {showNavAndFooter && <Footer />}  
-    </>
+      {showNavAndFooter && <Footer />}
+    </CartProvider>
   );
 }
