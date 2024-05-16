@@ -7,14 +7,28 @@
   .cartItems {
     width: 80%;
     margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
   }
   
   .cartItem {
     display: flex;
-    align-items: center;
+    align-items: center; /* Center vertically */
     justify-content: space-between;
-    border-bottom: 1px solid #ccc;
     padding: 10px 0;
+    position: relative;
+  }
+  
+  .cartItem:not(:last-child) {
+    border-bottom: 1px solid #ccc; /* Add border to all except the last item */
+  }
+  
+  .cartItemDetailsLeft {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align text to the left */
+    margin-right: 20px;
   }
   
   .cartItemImages {
@@ -30,10 +44,40 @@
   .cartItemDetails {
     flex-grow: 1;
     margin-left: 20px;
+    text-align: left; /* Align text to the left */
   }
   
   .cartItemDetails p {
     margin: 5px 0;
+  }
+  
+  .cartItemPrices {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: 20px;
+  }
+  
+  .cartItemPrices p {
+    margin: 5px 0;
+  }
+  
+  .removeButton {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: transparent;
+    color: #0070f3;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
+  .removeButton:hover {
+    background-color: transparent;
+    color: #005bb5;
   }
   
   .cartSummary {
@@ -63,5 +107,14 @@
   
   .cartSummary button:hover {
     background-color: #005bb5;
+  }
+  
+  .largeText {
+    font-size: larger;
+  }
+  
+  .largeTextStrong {
+    font-size: larger;
+    font-weight: bold;
   }
   

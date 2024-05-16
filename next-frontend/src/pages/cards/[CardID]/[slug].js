@@ -141,6 +141,10 @@ function CardDetails() {
                     onClick={() => addToCart({
                       id: listing.ListingID,
                       name: card.CardName,
+                      sport: card.Sport,
+                      number: card.CardNumber,
+                      variant: card.CardVariant,
+                      color: card.CardColor,
                       imageFront: listing.FrontImageURL,
                       imageBack: listing.BackImageURL,
                       storeName: listing.StoreName,
