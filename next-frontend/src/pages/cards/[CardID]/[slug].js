@@ -6,6 +6,7 @@ import Image from 'next/image';
 import styles from '../../../styles/Card.module.css';
 import ImageModal from '../../../components/ImageModal/ImageModal';
 import { useCart } from '../../../components/Cart/CartProvider';
+import Alert from '../../../components/Alert/Alert'; // Import the Alert component
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -19,9 +20,12 @@ function CardDetails() {
       }
     }
   });
-  const { addToCart } = useCart();
+  const { addToCart, isInCart } = useCart();
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success');
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleImageClick = (images, index) => {
     setModalImages(images);
@@ -30,6 +34,39 @@ function CardDetails() {
 
   const closeModal = () => {
     setModalImages([]);
+  };
+
+  const handleAddToCart = (listing) => {
+    if (isInCart(listing.ListingID)) {
+      setAlertMessage('This item is already in your cart.');
+      setAlertType('error');
+    } else {
+      addToCart({
+        id: listing.ListingID,
+        cardId: data.card.CardID, // Add cardId
+        name: data.card.CardName,
+        sport: data.card.Sport,
+        cardSet: data.card.CardSet, // Add cardSet
+        number: data.card.CardNumber,
+        variant: data.card.CardVariant,
+        color: data.card.CardColor,
+        imageFront: listing.FrontImageURL,
+        imageBack: listing.BackImageURL,
+        storeName: listing.StoreName,
+        feedback: listing.FeedbackAverage,
+        grade: listing.GradeValue,
+        certNumber: listing.CertNumber,
+        price: listing.SalePrice,
+        shippingPrice: listing.ShippingPrice,
+      });
+      setAlertMessage('Item added to cart!');
+      setAlertType('success');
+    }
+    setShowAlert(true);
+  };
+
+  const closeAlert = () => {
+    setShowAlert(false);
   };
 
   if (error) return <div>Failed to load data</div>;
@@ -138,24 +175,7 @@ function CardDetails() {
                 <div className={styles.listingAction}>
                   <button 
                     className={styles.button}
-                    onClick={() => addToCart({
-                      id: listing.ListingID,
-                      cardId: card.CardID, // Add cardId
-                      name: card.CardName,
-                      sport: card.Sport,
-                      cardSet: card.CardSet, // Add cardSet
-                      number: card.CardNumber,
-                      variant: card.CardVariant,
-                      color: card.CardColor,
-                      imageFront: listing.FrontImageURL,
-                      imageBack: listing.BackImageURL,
-                      storeName: listing.StoreName,
-                      feedback: listing.FeedbackAverage,
-                      grade: listing.GradeValue,
-                      certNumber: listing.CertNumber,
-                      price: listing.SalePrice,
-                      shippingPrice: listing.ShippingPrice,
-                    })}
+                    onClick={() => handleAddToCart(listing)}
                   >
                     Add to Cart
                   </button>
@@ -173,6 +193,8 @@ function CardDetails() {
       {modalImages.length > 0 && (
         <ImageModal images={modalImages} initialIndex={currentImageIndex} onClose={closeModal} />
       )}
+
+      {showAlert && <Alert message={alertMessage} onClose={closeAlert} type={alertType} />}
     </div>
   );
 }

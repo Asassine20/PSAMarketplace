@@ -10,6 +10,7 @@ export const CartProvider = ({ children }) => {
     }
     return [];
   });
+
   const [savedForLater, setSavedForLater] = useState(() => {
     if (typeof window !== "undefined") {
       const savedItems = localStorage.getItem('savedForLater');
@@ -53,8 +54,12 @@ export const CartProvider = ({ children }) => {
     setSavedForLater((prevSaved) => prevSaved.filter(item => item.id !== id));
   };
 
+  const isInCart = (id) => {
+    return cart.some(item => item.id === id);
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved, isInCart }}>
       {children}
     </CartContext.Provider>
   );
