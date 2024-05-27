@@ -155,7 +155,7 @@ const CartPage = () => {
           <p className={styles.largeText}><span>Items:</span> <span>{cart.reduce((count, item) => count + (item.quantity || 1), 0)}</span></p>
           <p className={styles.largeText}><span>Item Total:</span> <span>${calculateTotal()}</span></p>
           <p className={styles.largeText}><span>Shipping:</span> <span>${(cart.reduce((total, item) => total + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>
-          <p className={styles.largeText}><span>Subtotal:</span> <span>${(cart.reduce((total, item) => total + Number(item.price || 0) + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>
+          <p className={`${styles.largeText} ${styles.boldText}`}><span>Subtotal:</span> <span>${(cart.reduce((total, item) => total + Number(item.price || 0) + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>        
           <button className={styles.checkoutButton} onClick={() => alert('Checkout not implemented yet')}>Checkout</button>
           <button className={styles.clearCartButton} onClick={clearCart}>Clear Cart</button>
         </div>

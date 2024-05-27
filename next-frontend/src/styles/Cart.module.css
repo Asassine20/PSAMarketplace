@@ -110,12 +110,18 @@
   
   .cartSummary h2 {
     margin-bottom: 10px;
+    font-size: 20px;
   }
   
   .cartSummary p {
     margin: 5px 0;
     display: flex;
     justify-content: space-between; /* Align text and values to left and right */
+    font-size: 18px;
+  }
+  
+  .boldText {
+    font-weight: bold;
   }
   
   .checkoutButton {
@@ -220,6 +226,12 @@
   
     .cartItemPrices {
       padding-left: 10px;
+    }
+  }
+  
+  @media (max-width: 520px) {
+    .cartItemImages {
+      flex-direction: column; /* Stack images vertically */
     }
   }
   
