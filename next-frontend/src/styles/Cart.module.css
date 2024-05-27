@@ -2,10 +2,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 90%;
+    margin: 0 auto;
+  }
+  
+  .cartItemsWrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
   }
   
   .cartItems {
-    width: 90%;
+    width: 75%;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -15,11 +23,16 @@
   
   .cartItem {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
     border-bottom: 1px solid #ccc;
     padding: 10px 0;
     position: relative;
+  }
+  
+  .cartItemDetailsTop {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
   }
   
   .cartItemDetailsLeft {
@@ -62,7 +75,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    margin-left: 20px;
   }
   
   .cartItemPrices p {
@@ -70,11 +82,10 @@
   }
   
   .cartItemActions {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
+    margin-top: auto;
   }
   
   .cartItemActions button {
@@ -87,11 +98,14 @@
   }
   
   .cartSummary {
-    width: 90%;
+    width: 20%;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #f8f8f8; /* Same background as cart items */
+    align-self: flex-start;
+    margin-left: 20px; /* Increase margin between cart items and summary */
+    position: relative; /* For positioning the Clear Cart button */
   }
   
   .cartSummary h2 {
@@ -100,9 +114,11 @@
   
   .cartSummary p {
     margin: 5px 0;
+    display: flex;
+    justify-content: space-between; /* Align text and values to left and right */
   }
   
-  .cartSummary button {
+  .checkoutButton {
     margin-top: 10px;
     padding: 10px 20px;
     border: none;
@@ -112,7 +128,7 @@
     cursor: pointer;
   }
   
-  .cartSummary button:hover {
+  .checkoutButton:hover {
     background-color: #005bb5;
   }
   
@@ -120,10 +136,21 @@
     color: rgb(92, 92, 92) !important;
   }
   
+  .clearCartButton {
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    color: rgb(92, 92, 92); /* Set text color */
+    background: none; /* Remove background */
+    margin-top: 10px; /* Add margin to separate it from the checkout button */
+    text-align: right; /* Align the text to the right */
+  }
+  
   .largeText {
     font-size: larger;
   }
-
+  
   .largeTextStrong {
     font-size: larger;
     font-weight: bold;
@@ -132,7 +159,7 @@
   .package {
     border: 1px solid #ccc;
     border-radius: 8px;
-    padding: 10px;
+    padding: 20px;
     margin-bottom: 20px;
     background-color: #fff; /* White background for packages */
   }
@@ -148,10 +175,51 @@
   }
   
   .leftAlignedTitle {
-    width: 90%;
+    width: 100%; /* Full width for the title */
     text-align: left;
     font-size: 25px;
     padding-top: 10px;
     padding-bottom: 10px;
+  }
+  
+  @media (max-width: 700px) {
+    .cartPage {
+      flex-direction: column;
+    }
+  
+    .cartItemsWrapper {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .cartSummary {
+      width: 100%;
+      margin-left: 0;
+      margin-bottom: 20px;
+      order: 1; /* Order the summary div to be first */
+      align-self: center; /* Center the summary div */
+      padding-bottom: 50px; /* Add padding to accommodate the Clear Cart button */
+    }
+  
+    .cartItems {
+      width: 100%;
+      order: 2; /* Order the cart items div to be second */
+    }
+  
+    .cartSummary button {
+      width: 100%;
+      margin-bottom: 10px; /* Add margin between buttons */
+    }
+  
+    .clearCartButton {
+      bottom: 10px;
+      right: 10px;
+      position: absolute;
+      text-align: right;
+    }
+  
+    .cartItemPrices {
+      padding-left: 10px;
+    }
   }
   
