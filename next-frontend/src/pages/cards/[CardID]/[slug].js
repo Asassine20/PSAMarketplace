@@ -95,7 +95,7 @@ function CardDetails() {
           <p><strong>Number:</strong> {card.CardNumber}</p>
           <p><strong>Variant:</strong> {card.CardVariant || 'N/A'}</p>
           <p><strong>Color:</strong> {card.CardColor || 'N/A'}</p>
-          <p><strong>Market Price:</strong> ${card.MarketPrice}</p>
+          <p><strong>Market Price:</strong> {card.MarketPrice !== null && card.MarketPrice !== undefined ? `$${card.MarketPrice}` : 'N/A'}</p>
         </div>
         <div className={styles.latestSales}>
           <h2 style={{ textAlign: 'left' }}>Latest Sales</h2>

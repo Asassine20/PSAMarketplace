@@ -292,7 +292,13 @@ const SearchPage = () => {
                                                     <div className={styles.cardColor}>{card.CardColor || ''}</div>
                                                     <div className={styles.cardName}>{card.CardName}</div>
                                                     <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
-                                                    <div className={styles.cardMarketPrice}>Market Price: ${card.MarketPrice}</div>
+                                                    <div className={styles.cardMarketPrice}>
+                                                        {card.MarketPrice !== null && card.MarketPrice !== undefined ? (
+                                                            `Market Price: $${card.MarketPrice}`
+                                                        ) : (
+                                                            'Market Price: N/A'
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </Link>
