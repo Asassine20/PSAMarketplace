@@ -10,16 +10,21 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [agreeToTerms, setAgreeToTerms] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
     const router = useRouter();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setErrorMessage(''); // Clear any previous error messages
+        setSuccessMessage(''); // Clear any previous success messages
+
         if (password !== confirmPassword) {
-            alert("Passwords do not match!");
+            setErrorMessage("Passwords do not match!");
             return;
         }
         if (!agreeToTerms) {
-            alert("You must agree to the terms of service.");
+            setErrorMessage("You must agree to the terms of service.");
             return;
         }
         try {
@@ -29,19 +34,21 @@ export default function Register() {
                 body: JSON.stringify({
                   email, 
                   password, 
-                  passwordConfirm: confirmPassword,  // Make sure this line correctly passes the confirmPassword state
+                  passwordConfirm: confirmPassword,
                 }),
               });                        
             const data = await response.json();
-            if (data.message === 'User Created Successfully') {
-                alert('Registration successful');
-                router.push('/login');  // Redirect to login page
+            if (response.ok) {
+                setSuccessMessage('Registration successful');
+                setTimeout(() => {
+                    router.push('/login');  // Redirect to login page after a delay
+                }, 2000);
             } else {
-                alert('Error: ' + data.message);
+                setErrorMessage('Error: ' + data.message);
             }
         } catch (error) {
             console.error('An unexpected error occurred:', error);
-            alert('Error: ' + error.message);
+            setErrorMessage('Error: ' + error.message);
         }
     }
 
@@ -51,9 +58,11 @@ export default function Register() {
                 <title>Register</title>
                 <meta name="description" content="Sign up for a new account" />
             </Head>
-            <Link href="/"><Image src="/logo.png" alt="Home" width={60} height={60} /></Link>
+            <Link href="/"><Image src="/logo.png" alt="Home" width={60} height={60} className={styles.logo} /></Link>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <h1 className={styles.header}>Create Account</h1>
+                {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+                {successMessage && <div className={styles.successAlert}>{successMessage}</div>}
                 <label htmlFor="email" className={styles.label}>Email</label>
                 <input type="email" id="email" name="email" value={email}
                        onChange={(e) => setEmail(e.target.value)} required className={styles.input}/>
@@ -63,7 +72,7 @@ export default function Register() {
                 <label htmlFor="confirmPassword" className={styles.label}>Confirm Password</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" value={confirmPassword}
                        onChange={(e) => setConfirmPassword(e.target.value)} required className={styles.input}/>
-                <label>
+                <label className={styles.checkboxLabel}>
                     <input type="checkbox" checked={agreeToTerms} onChange={(e) => setAgreeToTerms(e.target.checked)} />
                     I agree to the terms of service
                 </label>

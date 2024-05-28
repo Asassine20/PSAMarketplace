@@ -13,12 +13,20 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     const checkLoginStatus = () => {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
       setIsLoggedIn(loggedIn);
+      if (loggedIn) {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const decodedToken = JSON.parse(atob(token.split('.')[1]));
+          setUserEmail(decodedToken.email);
+        }
+      }
       console.log('User is logged in:', loggedIn);
     };
 
@@ -58,9 +66,9 @@ const Navbar = () => {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isLoggedIn');
     setIsLoggedIn(false);
-    alert('You have been signed out.');
     router.push('/');
   };
+
 
   return (
     <div className={styles.navbarContainer}>
@@ -87,6 +95,9 @@ const Navbar = () => {
         <div className={styles.sidePanel}>
           {isLoggedIn ? (
             <div className={styles.panelContent}>
+              <div className={styles.userInfo}>
+                <h3>Hello, {userEmail}</h3>
+              </div>
               <div className={styles.accountSection}>
                 <h3>Account</h3>
                 <Link href="/account">Account</Link>
@@ -109,7 +120,6 @@ const Navbar = () => {
             </div>
           ) : (
             <>
-              <h2>You are not signed in</h2>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                 <button className={styles.loginButton} onClick={() => router.push('/login')}>Log In</button>
                 <button className={styles.signUpButton} onClick={() => router.push('/register')}>Sign Up</button>
@@ -118,6 +128,7 @@ const Navbar = () => {
           )}
         </div>
       )}
+
       <div className={styles.searchBarContainer}>
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <input

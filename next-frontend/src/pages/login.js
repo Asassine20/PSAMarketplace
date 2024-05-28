@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
-import styles from '../styles/Login.module.css';
+import Image from 'next/image';
+import styles from '../styles/Register.module.css'; // Reuse the Register styles
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // State for error message
   const router = useRouter();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setErrorMessage(''); // Clear any previous error messages
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -23,14 +26,13 @@ export default function Login() {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('isLoggedIn', 'true'); // Set logged-in flag
-        alert('Login successful');
         router.push('/');
       } else {
-        alert('Error: ' + data.message);
+        setErrorMessage(data.message); // Set the error message
       }
     } catch (error) {
       console.error('An unexpected error occurred:', error);
-      alert('Error: ' + error.message);
+      setErrorMessage('An unexpected error occurred. Please try again later.');
     }
   };
 
@@ -40,9 +42,10 @@ export default function Login() {
         <title>Login</title>
         <meta name="description" content="Log in to your account" />
       </Head>
-      <Link href="/">Home</Link>
+      <Link href="/"><Image src="/logo.png" alt="Home" width={60} height={60} className={styles.logo} /></Link>
       <form onSubmit={handleSubmit} className={styles.form}>
         <h1 className={styles.header}>Log In</h1>
+        {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>} {/* Ensure same class name */}
         <label htmlFor="email" className={styles.label}>Email</label>
         <input type="email" id="email" name="email" value={email}
                onChange={(e) => setEmail(e.target.value)} required className={styles.input} />

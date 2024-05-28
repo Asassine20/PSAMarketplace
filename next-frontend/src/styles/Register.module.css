@@ -63,3 +63,33 @@
     font-size: 18px;
     letter-spacing: 0.05em;
 }
+
+.errorMessage {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 90%;
+}
+
+.successAlert {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+.checkboxLabel input[type="checkbox"] {
+    margin-right: 5px; /* Space between checkbox and label */
+}
