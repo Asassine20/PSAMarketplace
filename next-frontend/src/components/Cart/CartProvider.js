@@ -27,31 +27,60 @@ export const CartProvider = ({ children }) => {
   }, [cart, savedForLater]);
 
   const addToCart = (item) => {
-    setCart((prevCart) => [...prevCart, item]);
+    setCart((prevCart) => {
+      const updatedCart = [...prevCart, item];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
   };
 
   const removeFromCart = (id) => {
-    setCart((prevCart) => prevCart.filter(item => item.id !== id));
+    setCart((prevCart) => {
+      const updatedCart = prevCart.filter(item => item.id !== id);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
   };
 
   const clearCart = () => {
     setCart([]);
+    localStorage.removeItem('cart');
   };
 
   const saveForLater = (id) => {
     const itemToSave = cart.find(item => item.id === id);
-    setCart((prevCart) => prevCart.filter(item => item.id !== id));
-    setSavedForLater((prevSaved) => [...prevSaved, itemToSave]);
+    setCart((prevCart) => {
+      const updatedCart = prevCart.filter(item => item.id !== id);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
+    setSavedForLater((prevSaved) => {
+      const updatedSaved = [...prevSaved, itemToSave];
+      localStorage.setItem('savedForLater', JSON.stringify(updatedSaved));
+      return updatedSaved;
+    });
   };
 
   const addToCartFromSaved = (id) => {
     const itemToAdd = savedForLater.find(item => item.id === id);
-    setSavedForLater((prevSaved) => prevSaved.filter(item => item.id !== id));
-    setCart((prevCart) => [...prevCart, itemToAdd]);
+    setSavedForLater((prevSaved) => {
+      const updatedSaved = prevSaved.filter(item => item.id !== id);
+      localStorage.setItem('savedForLater', JSON.stringify(updatedSaved));
+      return updatedSaved;
+    });
+    setCart((prevCart) => {
+      const updatedCart = [...prevCart, itemToAdd];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
   };
 
   const removeFromSaved = (id) => {
-    setSavedForLater((prevSaved) => prevSaved.filter(item => item.id !== id));
+    setSavedForLater((prevSaved) => {
+      const updatedSaved = prevSaved.filter(item => item.id !== id);
+      localStorage.setItem('savedForLater', JSON.stringify(updatedSaved));
+      return updatedSaved;
+    });
   };
 
   const isInCart = (id) => {

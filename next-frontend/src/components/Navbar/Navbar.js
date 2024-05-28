@@ -1,4 +1,3 @@
-// Navbar.js
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -13,12 +12,17 @@ const Navbar = () => {
   const [sports, setSports] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);  // State to track login status
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Example: Check local storage or cookie for user authentication status
-    setIsLoggedIn(!!localStorage.getItem('user'));
+    const checkLoginStatus = () => {
+      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(loggedIn);
+      console.log('User is logged in:', loggedIn);
+    };
+
+    checkLoginStatus();
 
     fetch('/api/nav-sports')
       .then(response => response.json())
@@ -31,6 +35,12 @@ const Navbar = () => {
         }
       })
       .catch(error => console.error('Error fetching sports:', error));
+
+    window.addEventListener('storage', checkLoginStatus);
+
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
   }, []);
 
   const handleSearch = (e) => {
@@ -39,7 +49,17 @@ const Navbar = () => {
   };
 
   const togglePanel = () => {
+    console.log('Panel toggled, isLoggedIn:', isLoggedIn);
     setIsPanelOpen(!isPanelOpen);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('isLoggedIn');
+    setIsLoggedIn(false);
+    alert('You have been signed out.');
+    router.push('/');
   };
 
   return (
@@ -85,6 +105,7 @@ const Navbar = () => {
                 <Link href="/protection">GemTCG Order Protection</Link>
                 <Link href="/about">About Us</Link>
               </div>
+              <button className={styles.signOutButton} onClick={handleSignOut}>Sign Out</button>
             </div>
           ) : (
             <>
