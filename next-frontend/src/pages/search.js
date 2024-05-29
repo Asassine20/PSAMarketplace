@@ -108,30 +108,36 @@ const SearchPage = () => {
     // calls the fetchFilteredCards function when the router.query is updated
     useEffect(() => {
         fetchFilteredCards();
+        fetchFilterOptions();
     }, [router.query]);
 
     // Declares fetchFilterOptions which fetches and displays all filter options in the filter section
-    useEffect(() => {
-        const fetchFilterOptions = async () => {
-            setIsLoadingFilters(true);
-            let queryParams = new URLSearchParams({
-                fetchFilters: 'true',
-                cardName: router.query.cardName || '',
-                showAll: filters.inStock ? 'false' : 'true',
-            });
+    const fetchFilterOptions = async () => {
+        setIsLoadingFilters(true);
+        let queryParams = new URLSearchParams({
+            fetchFilters: 'true',
+            cardName: router.query.cardName || '',
+            showAll: filters.inStock ? 'false' : 'true',
+        });
 
-            const response = await fetch(`/api/search?${queryParams.toString()}`);
-            if (response.ok) {
-                const data = await response.json();
-                setFilterOptions(data);
-            } else {
-                console.error('Failed to fetch filter options');
+        Object.keys(filters).forEach((filterKey) => {
+            const filterValue = filters[filterKey];
+            if (Array.isArray(filterValue) && filterValue.length > 0) {
+                filterValue.forEach((value) => {
+                    queryParams.append(`${filterKey}[]`, value);
+                });
             }
-            setIsLoadingFilters(false);
-        };
+        });
 
-        fetchFilterOptions();
-    }, [router.query, filters.inStock]);
+        const response = await fetch(`/api/search?${queryParams.toString()}`);
+        if (response.ok) {
+            const data = await response.json();
+            setFilterOptions(data);
+        } else {
+            console.error('Failed to fetch filter options');
+        }
+        setIsLoadingFilters(false);
+    };
 
     // Delays the search request for the filter search bar 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
@@ -161,6 +167,8 @@ const SearchPage = () => {
             };
             return updatedFilters;
         });
+        fetchFilteredCards(); // Call fetchFilteredCards here to update cards when filter changes
+        fetchFilterOptions(); // Call fetchFilterOptions here to update filter options when filter changes
         setIsLoadingFilters(false);
     };
 
@@ -171,6 +179,7 @@ const SearchPage = () => {
             inStock: !prevFilters.inStock,
         }));
         fetchFilteredCards(); // Call fetchFilteredCards here to update cards when filter changes
+        fetchFilterOptions(); // Call fetchFilterOptions here to update filter options when filter changes
     };
 
     const paginate = (pageNumber) => {
@@ -276,7 +285,6 @@ const SearchPage = () => {
                             <div className={styles.centeredContent}><Spinner /></div>
                         ) : (
                             <div className={styles.cardsGrid}>
-                                {console.log("Filtered Cards: ", filteredCards)}
                                 {filteredCards.length > 0 ? (
                                     filteredCards.map((card, index) => (
                                         <Link key={index} href={`/cards/${card.CardID}/${encodeURIComponent(card.CardSet + '+' + card.CardName)}`}>
