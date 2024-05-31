@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { IoCartOutline } from "react-icons/io5";
 import { FaRegUser } from "react-icons/fa";
+import { useCart } from '../Cart/CartProvider'; // Import the useCart hook
 
 const Navbar = () => {
   const [sports, setSports] = useState([]);
@@ -14,7 +15,9 @@ const Navbar = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [mounted, setMounted] = useState(false); // New state to track if component has mounted
   const router = useRouter();
+  const { cart } = useCart(); // Access the cart context
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -46,6 +49,8 @@ const Navbar = () => {
 
     window.addEventListener('storage', checkLoginStatus);
 
+    setMounted(true); // Set mounted to true when component has mounted
+
     return () => {
       window.removeEventListener('storage', checkLoginStatus);
     };
@@ -69,7 +74,6 @@ const Navbar = () => {
     router.push('/');
   };
 
-
   return (
     <div className={styles.navbarContainer}>
       <div className={styles.headerContainer}>
@@ -87,7 +91,10 @@ const Navbar = () => {
             <span className={styles.startSellingButton}>Start Selling</span>
           </a>
           <Link href="/cart" passHref>
-            <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
+            <div className={styles.cartIconWrapper}>
+              <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
+              {mounted && cart.length > 0 && <span className={styles.cartBadge}>{cart.length}</span>} {/* Only render cart badge if component has mounted */}
+            </div>
           </Link>
         </div>
       </div>
