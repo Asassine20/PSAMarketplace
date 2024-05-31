@@ -158,6 +158,10 @@
   .largeText {
     font-size: larger;
   }
+  .largeText a {
+    color: black; /* Override the default blue color */
+    text-decoration: underline !important; /* Optional: remove underline */
+  }
   
   .largeTextStrong {
     font-size: 18px;

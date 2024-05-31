@@ -43,10 +43,11 @@ function CardDetails() {
     } else {
       addToCart({
         id: listing.ListingID,
-        cardId: data.card.CardID, // Add cardId
+        cardId: data.card.CardID,
         name: data.card.CardName,
         sport: data.card.Sport,
-        cardSet: data.card.CardSet, // Add cardSet
+        cardYear: data.card.CardYear,
+        cardSet: data.card.CardSet,
         number: data.card.CardNumber,
         variant: data.card.CardVariant,
         color: data.card.CardColor,
@@ -91,6 +92,7 @@ function CardDetails() {
         <div className={styles.cardInfo}>
           <h1 style={{ fontSize: '34px' }}>{card.CardName}</h1>
           <p><strong>Sport:</strong> {card.Sport}</p>
+          {card.CardYear && <p><strong>Year:</strong> {card.CardYear}</p>}
           <p><strong>Set:</strong> {card.CardSet}</p>
           <p><strong>Number:</strong> {card.CardNumber}</p>
           <p><strong>Variant:</strong> {card.CardVariant || 'N/A'}</p>
