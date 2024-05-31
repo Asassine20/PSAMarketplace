@@ -54,7 +54,6 @@ const SearchPage = () => {
 
     const { cardName, page = '1' } = router.query;
 
-    // updates the browser url when searches and filters are updated
     const updateFiltersInUrl = () => {
         const queryParameters = new URLSearchParams({
             cardName: cardName || '',
@@ -74,12 +73,10 @@ const SearchPage = () => {
         router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
     };
 
-    // calls the updateFiltersInUrl function whenever the filters or page is changed
     useEffect(() => {
         updateFiltersInUrl();
     }, [filters, page]);
 
-    // fetches and displays the data as search results
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
         let query = `/api/search?cardName=${encodeURIComponent(cardName || '')}&page=${page}&showAll=${!filters.inStock}`;
@@ -105,13 +102,11 @@ const SearchPage = () => {
         setIsLoadingCards(false);
     };
 
-    // calls the fetchFilteredCards function when the router.query is updated
     useEffect(() => {
         fetchFilteredCards();
         fetchFilterOptions();
     }, [router.query]);
 
-    // Declares fetchFilterOptions which fetches and displays all filter options in the filter section
     const fetchFilterOptions = async () => {
         setIsLoadingFilters(true);
         let queryParams = new URLSearchParams({
@@ -139,7 +134,6 @@ const SearchPage = () => {
         setIsLoadingFilters(false);
     };
 
-    // Delays the search request for the filter search bar 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
         if (delayedSearch) {
             clearTimeout(delayedSearch);
@@ -155,7 +149,6 @@ const SearchPage = () => {
         setDelayedSearch(newTimeout);
     };
 
-    // Updates the filter state when a filter option is changed. 
     const handleFilterChange = (filterKey, value, isChecked) => {
         setIsLoadingFilters(true);
         setFilters((prevFilters) => {
@@ -167,19 +160,18 @@ const SearchPage = () => {
             };
             return updatedFilters;
         });
-        fetchFilteredCards(); // Call fetchFilteredCards here to update cards when filter changes
-        fetchFilterOptions(); // Call fetchFilterOptions here to update filter options when filter changes
+        fetchFilteredCards();
+        fetchFilterOptions();
         setIsLoadingFilters(false);
     };
 
-    // toggles the inStock filter state and fetches the filtered cards based on the new state
     const handleToggleChange = () => {
         setFilters((prevFilters) => ({
             ...prevFilters,
             inStock: !prevFilters.inStock,
         }));
-        fetchFilteredCards(); // Call fetchFilteredCards here to update cards when filter changes
-        fetchFilterOptions(); // Call fetchFilterOptions here to update filter options when filter changes
+        fetchFilteredCards();
+        fetchFilterOptions();
     };
 
     const paginate = (pageNumber) => {
@@ -221,7 +213,6 @@ const SearchPage = () => {
                                 <button onClick={toggleFilterVisibility} className={styles.closeFilterButton}>X</button>
                                 <h2 className={styles.filterTitle}>Filters</h2>
                             </div>
-                            {/* Conditionally render the "Applied Filters" heading */}
                             {Object.values(filters).some(filterArray => Array.isArray(filterArray) && filterArray.length > 0) && (
                                 <h4 className={styles.appliedFiltersHeading}>Applied Filters</h4>
                             )}
@@ -230,14 +221,13 @@ const SearchPage = () => {
                                     <div key={key}>
                                         {values.map((value, index) => (
                                             <button key={`${key}-${index}`} className={styles.filterBubble} onClick={() => handleFilterChange(key, value, false)} aria-label={`Remove ${value}`}>
-                                                <span className={styles.filterX}>X</span> {/* Decorative "X", purely for visual cue */}
+                                                <span className={styles.filterX}>X</span>
                                                 {value}
                                             </button>
                                         ))}
                                     </div>
                                 ))}
                             </div>
-                            {/* Toggle Switch and Label */}
                             <div className={styles.toggleSwitchContainer}>
                                 <div className={styles.toggleLabel}>In stock only</div>
                                 <label className={styles.switch}>
@@ -249,7 +239,6 @@ const SearchPage = () => {
                                     <span className={`${styles.slider} ${styles.round}`}></span>
                                 </label>
                             </div>
-                            {/* Filter Options */}
                             {isLoadingFilters ? <div className={styles.centeredContent}><Spinner /></div> :
                                 Object.keys(filterOptions).map((filterKey) => (
                                     <div key={filterKey} className={`${styles.filterCategory} ${isLoadingFilters ? styles.disabled : ''}`}>
@@ -260,7 +249,7 @@ const SearchPage = () => {
                                         />
                                         {filterOptions[filterKey]
                                             .filter(option =>
-                                                option && // Ensure option is not null or undefined
+                                                option &&
                                                 option.toString().toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
                                             )
                                             .map((option, index) => (
@@ -293,6 +282,7 @@ const SearchPage = () => {
                                                     <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />
                                                 </div>
                                                 <div className={styles.cardInfo}>
+                                                    <div className={styles.cardYear}>{card.CardYear}</div>
                                                     <div className={styles.cardSport}>{card.Sport}</div>
                                                     <div className={styles.cardSet}>{card.CardSet}</div>
                                                     <div className={styles.cardNumber}># {card.CardNumber}</div>
@@ -314,7 +304,6 @@ const SearchPage = () => {
                                 ) : (
                                     <div>No results found</div>
                                 )}
-
                             </div>
                         )}
                     </section>
@@ -324,7 +313,7 @@ const SearchPage = () => {
                 <button disabled={page === '1'} onClick={() => paginate(parseInt(page, 10) - 1)}>Prev</button>
                 <button onClick={() => paginate(parseInt(page, 10) + 1)}>Next</button>
             </div>
-        </div >
+        </div>
     );
 };
 
