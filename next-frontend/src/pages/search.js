@@ -53,11 +53,12 @@ const SearchPage = () => {
     const [delayedSearch, setDelayedSearch] = useState(null);
 
     const { cardName, page = '1' } = router.query;
+    const resultsPerPage = 10; // Assume a constant for results per page (can be adjusted as needed)
 
     const updateFiltersInUrl = () => {
         const queryParameters = new URLSearchParams({
             cardName: cardName || '',
-            page: page,
+            page: filters.page,
             showAll: !filters.inStock ? 'false' : 'true',
         });
 
@@ -73,13 +74,9 @@ const SearchPage = () => {
         router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
     };
 
-    useEffect(() => {
-        updateFiltersInUrl();
-    }, [filters, page]);
-
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
-        let query = `/api/search?cardName=${encodeURIComponent(cardName || '')}&page=${page}&showAll=${!filters.inStock}`;
+        let query = `/api/search?cardName=${encodeURIComponent(filters.cardName || '')}&page=${filters.page}&showAll=${!filters.inStock}`;
 
         Object.keys(filters).forEach((filterKey) => {
             const filterValue = filters[filterKey];
@@ -102,16 +99,11 @@ const SearchPage = () => {
         setIsLoadingCards(false);
     };
 
-    useEffect(() => {
-        fetchFilteredCards();
-        fetchFilterOptions();
-    }, [router.query]);
-
     const fetchFilterOptions = async () => {
         setIsLoadingFilters(true);
         let queryParams = new URLSearchParams({
             fetchFilters: 'true',
-            cardName: router.query.cardName || '',
+            cardName: filters.cardName || '',
             showAll: filters.inStock ? 'false' : 'true',
         });
 
@@ -133,6 +125,15 @@ const SearchPage = () => {
         }
         setIsLoadingFilters(false);
     };
+
+    useEffect(() => {
+        updateFiltersInUrl();
+        fetchFilteredCards();
+    }, [filters]);
+
+    useEffect(() => {
+        fetchFilterOptions();
+    }, [router.query]);
 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
         if (delayedSearch) {
@@ -160,8 +161,6 @@ const SearchPage = () => {
             };
             return updatedFilters;
         });
-        fetchFilteredCards();
-        fetchFilterOptions();
         setIsLoadingFilters(false);
     };
 
@@ -170,12 +169,13 @@ const SearchPage = () => {
             ...prevFilters,
             inStock: !prevFilters.inStock,
         }));
-        fetchFilteredCards();
-        fetchFilterOptions();
     };
 
     const paginate = (pageNumber) => {
-        router.push(`?cardName=${encodeURIComponent(cardName)}&page=${pageNumber}`);
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            page: pageNumber,
+        }));
     };
 
     const toggleFilterVisibility = () => {
@@ -189,6 +189,8 @@ const SearchPage = () => {
         cardColors: 'Color',
         cardVariants: 'Variant',
     };
+
+    const totalPages = Math.ceil(totalCount / resultsPerPage);
 
     return (
         <div>
@@ -310,8 +312,8 @@ const SearchPage = () => {
                 </div>
             </div>
             <div className={styles.pagination}>
-                <button disabled={page === '1'} onClick={() => paginate(parseInt(page, 10) - 1)}>Prev</button>
-                <button onClick={() => paginate(parseInt(page, 10) + 1)}>Next</button>
+                <button disabled={filters.page === '1'} onClick={() => paginate(parseInt(filters.page, 10) - 1)}>Prev</button>
+                <button disabled={parseInt(filters.page, 10) >= totalPages} onClick={() => paginate(parseInt(filters.page, 10) + 1)}>Next</button>
             </div>
         </div>
     );

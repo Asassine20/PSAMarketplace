@@ -42,7 +42,7 @@ export default async function handler(req, res) {
         try {
             const filtersPromises = [
                 query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values),
+                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql} LIMIT 100`, values),  // Limiting to 100 options
                 query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
@@ -79,9 +79,9 @@ export default async function handler(req, res) {
             LIMIT ? OFFSET ?`;
             
             values.push(limitNum, offset);
-    
+
             const cardsData = await query(sql, values);
-    
+
             // Assuming you still want the total count of cards matching the query (without considering pagination)
             const totalCountResult = await query(`SELECT COUNT(DISTINCT Card.CardID) as totalCount ${baseSql} ${whereSql}`, values.slice(0, -2)); // Remove limit and offset values for this count query
             const totalCount = totalCountResult[0]?.totalCount || 0;
