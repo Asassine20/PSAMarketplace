@@ -1,87 +1,94 @@
-// CartProvider.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import useAuth from '../../hooks/useAuth';
+import { v4 as uuidv4 } from 'uuid';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState(() => {
-    if (typeof window !== "undefined") {
-      const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) : [];
+  const { userId, accessToken } = useAuth();
+  const [cart, setCart] = useState([]);
+  const [savedForLater, setSavedForLater] = useState([]);
+  const [sessionId, setSessionId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      let sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) {
+        sessionId = uuidv4();
+        localStorage.setItem('sessionId', sessionId);
+      }
+      return sessionId;
     }
-    return [];
-  });
-
-  const [savedForLater, setSavedForLater] = useState(() => {
-    if (typeof window !== "undefined") {
-      const savedItems = localStorage.getItem('savedForLater');
-      return savedItems ? JSON.parse(savedItems) : [];
-    }
-    return [];
+    return null;
   });
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem('cart', JSON.stringify(cart));
-      localStorage.setItem('savedForLater', JSON.stringify(savedForLater));
+    if (userId || sessionId) {
+      fetchCart();
     }
-  }, [cart, savedForLater]);
+  }, [userId, sessionId, accessToken]);
+
+  const fetchCart = async () => {
+    const response = await fetch('/api/cart', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setCart(data.cart || []);
+      setSavedForLater(data.savedForLater || []);
+    } else {
+      console.error("Failed to fetch cart data");
+    }
+  };
+
+  const updateCart = async (cart, savedForLater) => {
+    setCart(cart);
+    setSavedForLater(savedForLater);
+    const response = await fetch('/api/cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ cart, savedForLater }),
+    });
+    if (!response.ok) {
+      console.error("Failed to update cart data");
+    }
+  };
 
   const addToCart = (item) => {
-    setCart((prevCart) => {
-      const updatedCart = [...prevCart, item];
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+    const updatedCart = [...cart, item];
+    updateCart(updatedCart, savedForLater);
   };
 
   const removeFromCart = (id) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter(item => item.id !== id);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+    const updatedCart = cart.filter(item => item.id !== id);
+    updateCart(updatedCart, savedForLater);
   };
 
   const clearCart = () => {
-    setCart([]);
-    localStorage.removeItem('cart');
+    updateCart([], savedForLater);
   };
 
   const saveForLater = (id) => {
     const itemToSave = cart.find(item => item.id === id);
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter(item => item.id !== id);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-    setSavedForLater((prevSaved) => {
-      const updatedSaved = [...prevSaved, itemToSave];
-      localStorage.setItem('savedForLater', JSON.stringify(updatedSaved));
-      return updatedSaved;
-    });
+    const updatedCart = cart.filter(item => item.id !== id);
+    const updatedSavedForLater = [...savedForLater, itemToSave];
+    updateCart(updatedCart, updatedSavedForLater);
   };
 
   const addToCartFromSaved = (id) => {
     const itemToAdd = savedForLater.find(item => item.id === id);
-    setSavedForLater((prevSaved) => {
-      const updatedSaved = prevSaved.filter(item => item.id !== id);
-      localStorage.setItem('savedForLater', JSON.stringify(updatedSaved));
-      return updatedSaved;
-    });
-    setCart((prevCart) => {
-      const updatedCart = [...prevCart, itemToAdd];
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
+    const updatedSavedForLater = savedForLater.filter(item => item.id !== id);
+    const updatedCart = [...cart, itemToAdd];
+    updateCart(updatedCart, updatedSavedForLater);
   };
 
   const removeFromSaved = (id) => {
-    setSavedForLater((prevSaved) => {
-      const updatedSaved = prevSaved.filter(item => item.id !== id);
-      localStorage.setItem('savedForLater', JSON.stringify(updatedSaved));
-      return updatedSaved;
-    });
+    const updatedSavedForLater = savedForLater.filter(item => item.id !== id);
+    updateCart(cart, updatedSavedForLater);
   };
 
   const isInCart = (id) => {

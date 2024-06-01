@@ -1,9 +1,6 @@
-import bcrypt from 'bcrypt';
-import { query } from '@/db';
 import jwt from 'jsonwebtoken';
-
-const ACCESS_TOKEN_SECRET = 'your_access_token_secret';
-const REFRESH_TOKEN_SECRET = 'your_refresh_token_secret';
+import { query } from '@/db';
+import bcrypt from 'bcrypt';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -26,8 +23,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const accessToken = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ email }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    const userId = user[0].UserID;
+    const accessToken = jwt.sign({ userId, email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ userId, email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({ accessToken, refreshToken });
   } catch (error) {
