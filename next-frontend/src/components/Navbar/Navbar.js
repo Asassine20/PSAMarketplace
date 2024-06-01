@@ -70,9 +70,13 @@ const Navbar = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('sessionId'); // Clear session ID on logout
     setIsLoggedIn(false);
-    router.push('/');
+    router.push('/').then(() => {
+      window.location.reload(); // Refresh the page after redirecting to the home page
+    });
   };
+  
 
   return (
     <div className={styles.navbarContainer}>

@@ -21,6 +21,13 @@ export const CartProvider = ({ children }) => {
   });
 
   useEffect(() => {
+    if (userId) {
+      // If user is logged in, clear sessionId from local storage to avoid conflicts
+      localStorage.removeItem('sessionId');
+    }
+  }, [userId]);
+
+  useEffect(() => {
     if (userId || sessionId) {
       fetchCart();
     }

@@ -1,6 +1,5 @@
 import { query } from '@/db';
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
 import cookie from 'cookie';
 
 const authenticate = (req) => {
@@ -20,9 +19,10 @@ export default async function handler(req, res) {
   const decoded = authenticate(req);
   const userId = decoded ? decoded.userId : null;
   const cookies = cookie.parse(req.headers.cookie || '');
-  const sessionId = cookies.sessionId || uuidv4();
+  let sessionId = cookies.sessionId;
 
-  if (!cookies.sessionId) {
+  if (!sessionId && !userId) {
+    sessionId = Math.floor(Math.random() * 1e17).toString();
     res.setHeader('Set-Cookie', cookie.serialize('sessionId', sessionId, {
       httpOnly: true,
       secure: process.env.NODE_ENV !== 'development',
@@ -33,11 +33,13 @@ export default async function handler(req, res) {
   }
 
   const idToUse = userId || sessionId;
+  console.log('idToUse:', idToUse);  // Debugging: Log the idToUse
 
   switch (method) {
     case 'GET':
       try {
-        const cartData = await query('SELECT Cart, SavedForLater FROM UserCarts WHERE UserID = ?', [idToUse]);
+        const cartData = await query('SELECT Cart, SavedForLater FROM UserCarts WHERE UserID = ?', [userId ? userId : sessionId]);
+        console.log('cartData:', cartData);  // Debugging: Log the cart data
 
         if (cartData.length > 0) {
           res.status(200).json(cartData[0]);
@@ -53,17 +55,18 @@ export default async function handler(req, res) {
     case 'POST':
       const { cart, savedForLater } = req.body;
       try {
-        const existingCart = await query('SELECT * FROM UserCarts WHERE UserID = ?', [idToUse]);
-        
+        const existingCart = await query('SELECT * FROM UserCarts WHERE UserID = ?', [userId ? userId : sessionId]);
+        console.log('existingCart:', existingCart);  // Debugging: Log the existing cart
+
         if (existingCart.length > 0) {
           await query(`
             UPDATE UserCarts SET Cart = ?, SavedForLater = ? WHERE UserID = ?
-          `, [JSON.stringify(cart), JSON.stringify(savedForLater), idToUse]);
+          `, [JSON.stringify(cart), JSON.stringify(savedForLater), userId ? userId : sessionId]);
         } else {
           await query(`
             INSERT INTO UserCarts (UserID, Cart, SavedForLater)
             VALUES (?, ?, ?)
-          `, [idToUse, JSON.stringify(cart), JSON.stringify(savedForLater)]);
+          `, [userId ? userId : sessionId, JSON.stringify(cart), JSON.stringify(savedForLater)]);
         }
 
         res.status(200).json({ message: "Cart updated" });
