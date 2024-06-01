@@ -34,11 +34,16 @@ export const CartProvider = ({ children }) => {
   }, [userId, sessionId, accessToken]);
 
   const fetchCart = async () => {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     const response = await fetch('/api/cart', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
     if (response.ok) {
       const data = await response.json();
@@ -52,12 +57,17 @@ export const CartProvider = ({ children }) => {
   const updateCart = async (cart, savedForLater) => {
     setCart(cart);
     setSavedForLater(savedForLater);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     const response = await fetch('/api/cart', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers,
       body: JSON.stringify({ cart, savedForLater }),
     });
     if (!response.ok) {

@@ -66,16 +66,30 @@ const Navbar = () => {
     setIsPanelOpen(!isPanelOpen);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    const sessionId = localStorage.getItem('sessionId');
+  
+    if (sessionId) {
+      await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify({ sessionId })
+      });
+    }
+  
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('sessionId'); // Clear session ID on logout
+    localStorage.removeItem('sessionId');
     setIsLoggedIn(false);
     router.push('/').then(() => {
       window.location.reload(); // Refresh the page after redirecting to the home page
     });
   };
+  
   
 
   return (
