@@ -42,6 +42,7 @@ function CardDetails() {
       setAlertType('error');
     } else {
       addToCart({
+        ListingID: listing.ListingID,
         id: listing.ListingID,
         cardId: data.card.CardID,
         name: data.card.CardName,
