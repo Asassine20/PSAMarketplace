@@ -5,8 +5,8 @@ import { FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 import styles from '../../../styles/Card.module.css';
 import ImageModal from '../../../components/ImageModal/ImageModal';
-import { useCart } from '../../../components/Cart/CartProvider';
 import Alert from '../../../components/Alert/Alert'; // Import the Alert component
+import { useCart } from '../../../components/Cart/CartProvider'; // Import the useCart hook
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -20,12 +20,12 @@ function CardDetails() {
       }
     }
   });
-  const { addToCart, isInCart } = useCart();
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
   const [showAlert, setShowAlert] = useState(false);
+  const { addToCart } = useCart(); // Destructure addToCart from useCart
 
   const handleImageClick = (images, index) => {
     setModalImages(images);
@@ -36,33 +36,14 @@ function CardDetails() {
     setModalImages([]);
   };
 
-  const handleAddToCart = (listing) => {
-    if (isInCart(listing.ListingID)) {
-      setAlertMessage('This item is already in your cart.');
-      setAlertType('error');
-    } else {
-      addToCart({
-        ListingID: listing.ListingID,
-        id: listing.ListingID,
-        cardId: data.card.CardID,
-        name: data.card.CardName,
-        sport: data.card.Sport,
-        cardYear: data.card.CardYear,
-        cardSet: data.card.CardSet,
-        number: data.card.CardNumber,
-        variant: data.card.CardVariant,
-        color: data.card.CardColor,
-        imageFront: listing.FrontImageURL,
-        imageBack: listing.BackImageURL,
-        storeName: listing.StoreName,
-        feedback: listing.FeedbackAverage,
-        grade: listing.GradeValue,
-        certNumber: listing.CertNumber,
-        price: listing.SalePrice,
-        shippingPrice: listing.ShippingPrice,
-      });
+  const handleAddToCart = async (listing) => {
+    const success = await addToCart(listing);
+    if (success) {
       setAlertMessage('Item added to cart!');
       setAlertType('success');
+    } else {
+      setAlertMessage('Failed to add item to cart');
+      setAlertType('error');
     }
     setShowAlert(true);
   };
@@ -197,7 +178,7 @@ function CardDetails() {
         <ImageModal images={modalImages} initialIndex={currentImageIndex} onClose={closeModal} />
       )}
 
-      {showAlert && <Alert message={alertMessage} onClose={closeAlert} type={alertType} />}
+      {showAlert && <Alert message={alertMessage} onClose={() => setShowAlert(false)} type={alertType} />}
     </div>
   );
 }

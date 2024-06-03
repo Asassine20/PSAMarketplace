@@ -1,3 +1,4 @@
+// src/pages/api/login.js
 import jwt from 'jsonwebtoken';
 import { query } from '@/db';
 import bcrypt from 'bcrypt';
@@ -14,18 +15,18 @@ export default async function handler(req, res) {
   const { email, password } = req.body;
 
   try {
-    const user = await query('SELECT * FROM Users WHERE Email = ?', [email]);
+    const [user] = await query('SELECT * FROM Users WHERE Email = ?', [email]);
 
-    if (user.length === 0) {
+    if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const validPassword = await bcrypt.compare(password, user[0].PasswordHash);
+    const validPassword = await bcrypt.compare(password, user.PasswordHash);
     if (!validPassword) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const userId = user[0].UserID;
+    const userId = user.UserID;
     const accessToken = jwt.sign({ userId, email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ userId, email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
       path: '/'
     }));
 
-    res.status(200).json({ accessToken, refreshToken });
+    res.status(200).json({ userId, accessToken, refreshToken });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: 'Server error' });

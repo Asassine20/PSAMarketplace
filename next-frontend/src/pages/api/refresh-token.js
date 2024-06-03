@@ -1,8 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-const REFRESH_TOKEN_SECRET = 'your_refresh_token_secret';
-const ACCESS_TOKEN_SECRET = 'your_access_token_secret';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -17,15 +14,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
-    const newAccessToken = jwt.sign({ email: decoded.email }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-    const newRefreshToken = jwt.sign({ email: decoded.email }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const newAccessToken = jwt.sign({ userId: decoded.userId, email: decoded.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    const newRefreshToken = jwt.sign({ userId: decoded.userId, email: decoded.email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     });
   } catch (error) {
+    console.error('Invalid refresh token', error);
     res.status(403).json({ message: 'Invalid refresh token' });
   }
 }

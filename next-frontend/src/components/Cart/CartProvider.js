@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { v4 as uuidv4 } from 'uuid';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const { userId, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const [cart, setCart] = useState([]);
   const [savedForLater, setSavedForLater] = useState([]);
   const [sessionId, setSessionId] = useState(() => {
@@ -20,20 +20,7 @@ export const CartProvider = ({ children }) => {
     return null;
   });
 
-  useEffect(() => {
-    if (userId) {
-      // If user is logged in, clear sessionId from local storage to avoid conflicts
-      localStorage.removeItem('sessionId');
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId || sessionId) {
-      fetchCart();
-    }
-  }, [userId, sessionId, accessToken]);
-
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -49,20 +36,27 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setCart(data.cart || []);
-        setSavedForLater(data.savedForLater || []);
+        const uniqueCartItems = data.cart.filter((item, index, self) =>
+          index === self.findIndex((t) => t.ListingID === item.ListingID)
+        );
+        const uniqueSavedForLaterItems = data.savedForLater.filter((item, index, self) =>
+          index === self.findIndex((t) => t.ListingID === item.ListingID)
+        );
+        setCart(uniqueCartItems || []);
+        setSavedForLater(uniqueSavedForLaterItems || []);
       } else {
         console.error("Failed to fetch cart data");
       }
     } catch (error) {
       console.error("Error fetching cart data:", error);
     }
-  };
+  }, [accessToken]);
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
 
   const updateCart = async (cart, savedForLater) => {
-    setCart(cart);
-    setSavedForLater(savedForLater);
-
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -72,72 +66,102 @@ export const CartProvider = ({ children }) => {
         headers.Authorization = `Bearer ${accessToken}`;
       }
 
-      // Filter out items with invalid ListingID
-      const validCartItems = cart.filter(item => item.ListingID);
-      const validSavedForLaterItems = savedForLater.filter(item => item.ListingID);
-
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ cart: validCartItems, savedForLater: validSavedForLaterItems }),
+        body: JSON.stringify({ cart, savedForLater }),
       });
 
       if (!response.ok) {
         console.error("Failed to update cart data");
+        return false;
+      } else {
+        // Fetch the updated cart data after updating the cart
+        fetchCart();
+        return true;
       }
     } catch (error) {
       console.error("Error updating cart data:", error);
+      return false;
     }
   };
 
-  const addToCart = (item) => {
+  const addToCart = async (item) => {
     if (!item.ListingID) {
       console.error("Invalid item: ListingID is required", item);
-      return;
+      return false;
     }
-    const updatedCart = [...cart, item];
-    updateCart(updatedCart, savedForLater);
+    if (!cart.find(cartItem => cartItem.ListingID === item.ListingID)) {
+      const updatedCart = [...cart, item];
+      setCart(updatedCart);
+      const success = await updateCart(updatedCart, savedForLater);
+      if (!success) {
+        setCart(cart);  // Revert cart state on failure
+        return false;
+      }
+      return true;
+    } else {
+      console.warn("Item already in cart:", item);
+      return false;
+    }
   };
 
-  const removeFromCart = (id) => {
+  const removeFromCart = async (id) => {
     const updatedCart = cart.filter(item => item.ListingID !== id);
-    updateCart(updatedCart, savedForLater);
+    setCart(updatedCart);
+    await updateCart(updatedCart, savedForLater);
   };
 
-  const clearCart = () => {
-    updateCart([], savedForLater);
+  const clearCart = async () => {
+    setCart([]);
+    await updateCart([], savedForLater);
   };
 
-  const saveForLater = (id) => {
+  const saveForLater = async (id) => {
     const itemToSave = cart.find(item => item.ListingID === id);
     if (!itemToSave) {
       console.error("Invalid item: Item not found in cart");
-      return;
+      return false;
     }
     const updatedCart = cart.filter(item => item.ListingID !== id);
     const updatedSavedForLater = [...savedForLater, itemToSave];
-    updateCart(updatedCart, updatedSavedForLater);
+    setCart(updatedCart);
+    setSavedForLater(updatedSavedForLater);
+    const success = await updateCart(updatedCart, updatedSavedForLater);
+    if (!success) {
+      setCart(cart);  // Revert cart state on failure
+      setSavedForLater(savedForLater);  // Revert saved for later state on failure
+      return false;
+    }
+    return true;
   };
 
-  const addToCartFromSaved = (id) => {
+  const addToCartFromSaved = async (id) => {
     const itemToAdd = savedForLater.find(item => item.ListingID === id);
     if (!itemToAdd) {
       console.error("Invalid item: Item not found in saved for later");
-      return;
+      return false;
     }
     const updatedSavedForLater = savedForLater.filter(item => item.ListingID !== id);
     const updatedCart = [...cart, itemToAdd];
-    updateCart(updatedCart, updatedSavedForLater);
+    setCart(updatedCart);
+    setSavedForLater(updatedSavedForLater);
+    const success = await updateCart(updatedCart, updatedSavedForLater);
+    if (!success) {
+      setCart(cart);  // Revert cart state on failure
+      setSavedForLater(savedForLater);  // Revert saved for later state on failure
+      return false;
+    }
+    return true;
   };
 
-  const removeFromSaved = (id) => {
+  const removeFromSaved = async (id) => {
     const updatedSavedForLater = savedForLater.filter(item => item.ListingID !== id);
-    updateCart(cart, updatedSavedForLater);
+    setSavedForLater(updatedSavedForLater);
+    await updateCart(cart, updatedSavedForLater);
   };
 
-  const isInCart = (id) => {
-    return cart.some(item => item.ListingID === id);
-  };
+  const isInCart = (id) => cart.some(item => item.ListingID === id);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved, isInCart }}>

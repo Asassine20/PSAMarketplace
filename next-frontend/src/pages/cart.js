@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCart } from '../components/Cart/CartProvider';
 import styles from '../styles/Cart.module.css';
 import Link from 'next/link';
-import ImageModal from '../components/ImageModal/ImageModal'; // Import the ImageModal component
+import ImageModal from '../components/ImageModal/ImageModal';
 
 const CartPage = () => {
   const { cart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved } = useCart();
@@ -14,20 +14,14 @@ const CartPage = () => {
     setMounted(true);
   }, []);
 
-  const calculateTotal = () => {
-    return cart.reduce((total, item) => total + Number(item.price || 0), 0).toFixed(2);
-  };
+  const calculateTotal = () => cart.reduce((total, item) => total + Number(item.price || 0), 0).toFixed(2);
 
-  const groupItemsByStore = (items) => {
-    return items.reduce((acc, item) => {
-      const key = item.storeName;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(item);
-      return acc;
-    }, {});
-  };
+  const groupItemsByStore = (items) => items.reduce((acc, item) => {
+    const key = item.storeName;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(item);
+    return acc;
+  }, {});
 
   const groupedCartItems = groupItemsByStore(cart);
   const groupedSavedItems = groupItemsByStore(savedForLater);
@@ -41,10 +35,7 @@ const CartPage = () => {
     setModalImages([]);
   };
 
-  if (!mounted) {
-    // Prevent rendering on the server to avoid hydration issues
-    return null;
-  }
+  if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
 
   return (
     <div className={styles.cartPage}>
@@ -57,7 +48,7 @@ const CartPage = () => {
                 {storeName} ({groupedCartItems[storeName][0].feedback}%)
               </h2>
               {groupedCartItems[storeName].map((item, index) => (
-                <div key={item.id} className={styles.cartItem} style={{ borderBottom: index === groupedCartItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
+                <div key={`${item.ListingID}-${index}`} className={styles.cartItem} style={{ borderBottom: index === groupedCartItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
                   <div className={styles.cartItemDetailsTop}>
                     <div className={styles.cartItemDetailsLeft}>
                       <div className={styles.cartItemImages}>
@@ -76,7 +67,7 @@ const CartPage = () => {
                       </div>
                     </div>
                     <div className={styles.cartItemDetails}>
-                      <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
+                      <Link href={`/cards/${item.CardID}/${item.name}`} className={styles.cartItemDetailsLink}>
                         <p className={styles.largeTextStrong}>
                           {item.name} - {item.sport}
                           {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
@@ -97,8 +88,8 @@ const CartPage = () => {
                     </div>
                   </div>
                   <div className={styles.cartItemActions}>
-                    <button className={styles.actionButton} onClick={() => saveForLater(item.id)}>Save for Later</button>
-                    <button className={styles.actionButton} onClick={() => removeFromCart(item.id)}>Remove</button>
+                    <button className={styles.actionButton} onClick={() => saveForLater(item.ListingID)}>Save for Later</button>
+                    <button className={styles.actionButton} onClick={() => removeFromCart(item.ListingID)}>Remove</button>
                   </div>
                 </div>
               ))}
@@ -113,7 +104,7 @@ const CartPage = () => {
                     {storeName} ({groupedSavedItems[storeName][0].feedback}%)
                   </h2>
                   {groupedSavedItems[storeName].map((item, index) => (
-                    <div key={item.id} className={styles.cartItem} style={{ borderBottom: index === groupedSavedItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
+                    <div key={`${item.ListingID}-${index}`} className={styles.cartItem} style={{ borderBottom: index === groupedSavedItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
                       <div className={styles.cartItemDetailsTop}>
                         <div className={styles.cartItemDetailsLeft}>
                           <div className={styles.cartItemImages}>
@@ -132,7 +123,7 @@ const CartPage = () => {
                           </div>
                         </div>
                         <div className={styles.cartItemDetails}>
-                          <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
+                          <Link href={`/cards/${item.CardID}/${item.name}`} className={styles.cartItemDetailsLink}>
                             <p className={styles.largeTextStrong}>
                               {item.name} - {item.sport}
                               {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
@@ -153,8 +144,8 @@ const CartPage = () => {
                         </div>
                       </div>
                       <div className={styles.cartItemActions}>
-                        <button className={styles.actionButton} onClick={() => addToCartFromSaved(item.id)}>Move to Cart</button>
-                        <button className={styles.actionButton} onClick={() => removeFromSaved(item.id)}>Remove</button>
+                        <button className={styles.actionButton} onClick={() => addToCartFromSaved(item.ListingID)}>Move to Cart</button>
+                        <button className={styles.actionButton} onClick={() => removeFromSaved(item.ListingID)}>Remove</button>
                       </div>
                     </div>
                   ))}
@@ -166,7 +157,7 @@ const CartPage = () => {
         <div className={styles.cartSummary}>
           <h2 className={styles.largeText}>Summary</h2>
           <p className={styles.largeText}><span>Packages:</span> <span>{Object.keys(groupedCartItems).length}</span></p>
-          <p className={styles.largeText}><span>Items:</span> <span>{cart.reduce((count, item) => count + (item.quantity || 1), 0)}</span></p>
+          <p className={styles.largeText}><span>Items:</span> <span>{cart.length}</span></p>
           <p className={styles.largeText}><span>Item Total:</span> <span>${calculateTotal()}</span></p>
           <p className={styles.largeText}><span>Shipping:</span> <span>${(cart.reduce((total, item) => total + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>
           <p className={`${styles.largeText} ${styles.boldText}`}><span>Subtotal:</span> <span>${(cart.reduce((total, item) => total + Number(item.price || 0) + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>        

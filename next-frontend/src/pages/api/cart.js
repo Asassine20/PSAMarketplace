@@ -1,36 +1,11 @@
 import { query } from '@/db';
-import jwt from 'jsonwebtoken';
-import cookie from 'cookie';
-
-const authenticate = (req) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return null;
-
-  const token = authHeader.split(' ')[1];
-  try {
-    return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-  } catch (err) {
-    return null;
-  }
-};
+import { authenticate, getSessionId } from '@/middleware/auth';
 
 export default async function handler(req, res) {
   const { method } = req;
   const decoded = authenticate(req);
   const userId = decoded ? decoded.userId : null;
-  const cookies = cookie.parse(req.headers.cookie || '');
-  let sessionId = cookies.sessionId;
-
-  if (!sessionId && !userId) {
-    sessionId = Math.floor(Math.random() * 1e17).toString();
-    res.setHeader('Set-Cookie', cookie.serialize('sessionId', sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      sameSite: 'strict',
-      path: '/'
-    }));
-  }
+  const sessionId = getSessionId(req, res);
 
   const idToUse = userId ? { column: 'UserID', value: userId } : { column: 'SessionID', value: sessionId };
   console.log('idToUse:', idToUse);
@@ -41,15 +16,52 @@ export default async function handler(req, res) {
         const cartData = await query(`SELECT UserCartsID FROM UserCarts WHERE ${idToUse.column} = ?`, [idToUse.value]);
         const userCartsId = cartData.length ? cartData[0].UserCartsID : null;
 
-        const [cartItems, savedForLaterItems] = await Promise.all([
-          userCartsId ? query('SELECT * FROM CartItems WHERE UserCartsID = ?', [userCartsId]) : [],
-          userCartsId ? query('SELECT * FROM SavedForLaterItems WHERE UserCartsID = ?', [userCartsId]) : [],
-        ]);
+        console.log('User cart ID for GET:', userCartsId);
 
-        res.status(200).json({
-          cart: cartItems,
-          savedForLater: savedForLaterItems,
-        });
+        if (userCartsId) {
+          const cartItems = await query(`
+            SELECT CartItems.*, Inventory.SalePrice AS price, Stores.ShippingPrice AS shippingPrice, 
+              Card.CardID, Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
+              Card.CardSet AS cardSet, Card.CardNumber AS number, Card.CardVariant AS variant, 
+              Card.CardColor AS color, Grade.GradeValue AS grade, Inventory.CertNumber AS certNumber,
+              Inventory.FrontImageURL AS imageFront, Inventory.BackImageURL AS imageBack, Stores.StoreName AS storeName,
+              Stores.FeedbackAverage AS feedback
+            FROM CartItems 
+            JOIN Inventory ON CartItems.ListingID = Inventory.ListingID
+            JOIN Card ON Inventory.CardID = Card.CardID
+            LEFT JOIN Grade ON Inventory.GradeID = Grade.GradeID
+            LEFT JOIN Stores ON Inventory.SellerID = Stores.UserID
+            WHERE CartItems.UserCartsID = ?
+          `, [userCartsId]);
+
+          const savedForLaterItems = await query(`
+            SELECT SavedForLaterItems.*, Inventory.SalePrice AS price, Stores.ShippingPrice AS shippingPrice, 
+              Card.CardID, Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
+              Card.CardSet AS cardSet, Card.CardNumber AS number, Card.CardVariant AS variant, 
+              Card.CardColor AS color, Grade.GradeValue AS grade, Inventory.CertNumber AS certNumber,
+              Inventory.FrontImageURL AS imageFront, Inventory.BackImageURL AS imageBack, Stores.StoreName AS storeName,
+              Stores.FeedbackAverage AS feedback
+            FROM SavedForLaterItems 
+            JOIN Inventory ON SavedForLaterItems.ListingID = Inventory.ListingID
+            JOIN Card ON Inventory.CardID = Card.CardID
+            LEFT JOIN Grade ON Inventory.GradeID = Grade.GradeID
+            LEFT JOIN Stores ON Inventory.SellerID = Stores.UserID
+            WHERE SavedForLaterItems.UserCartsID = ?
+          `, [userCartsId]);
+
+          console.log('Fetched cart items:', cartItems);
+          console.log('Fetched saved for later items:', savedForLaterItems);
+
+          res.status(200).json({
+            cart: cartItems,
+            savedForLater: savedForLaterItems,
+          });
+        } else {
+          res.status(200).json({
+            cart: [],
+            savedForLater: [],
+          });
+        }
       } catch (error) {
         console.error("Failed to fetch cart data:", error);
         res.status(500).json({ message: "Failed to fetch cart data" });
@@ -78,23 +90,31 @@ export default async function handler(req, res) {
         await query('DELETE FROM SavedForLaterItems WHERE UserCartsID = ?', [userCartsId]);
 
         // Insert new cart items
-        const cartPromises = cart.map(item => query(
-          'INSERT INTO CartItems (UserCartsID, ListingID) VALUES (?, ?)',
-          [userCartsId, item.ListingID]
-        ));
+        const cartPromises = cart.map(item => {
+          console.log('Inserting cart item:', item);
+          return query(
+            'INSERT INTO CartItems (UserCartsID, ListingID) VALUES (?, ?)',
+            [userCartsId, item.ListingID]
+          );
+        });
 
         // Insert new saved for later items
-        const savedForLaterPromises = savedForLater.map(item => query(
-          'INSERT INTO SavedForLaterItems (UserCartsID, ListingID) VALUES (?, ?)',
-          [userCartsId, item.ListingID]
-        ));
+        const savedForLaterPromises = savedForLater.map(item => {
+          console.log('Inserting saved for later item:', item);
+          return query(
+            'INSERT INTO SavedForLaterItems (UserCartsID, ListingID) VALUES (?, ?)',
+            [userCartsId, item.ListingID]
+          );
+        });
 
         await Promise.all([...cartPromises, ...savedForLaterPromises]);
+
+        console.log('Cart updated successfully');
 
         res.status(200).json({ message: "Cart updated" });
       } catch (error) {
         console.error("Failed to update cart data:", error);
-        res.status(500).json({ message: "Failed to update cart data" });
+        res.status500.json({ message: "Failed to update cart data" });
       }
       break;
 

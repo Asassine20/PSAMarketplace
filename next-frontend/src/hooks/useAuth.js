@@ -22,17 +22,24 @@ const useAuth = () => {
     const storedRefreshToken = localStorage.getItem('refreshToken');
     if (!storedRefreshToken) return;
 
-    const response = await fetch('/api/refresh-token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: storedRefreshToken }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-    } else {
-      // Handle refresh token failure (e.g., redirect to login)
+    try {
+      const response = await fetch('/api/refresh-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: storedRefreshToken }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+      } else {
+        // Handle refresh token failure (e.g., redirect to login)
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login'; // Redirect to login page
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       window.location.href = '/login'; // Redirect to login page
