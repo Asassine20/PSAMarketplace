@@ -1,3 +1,4 @@
+// src/pages/api/cart.js
 import { query } from '@/db';
 import { authenticate, getSessionId } from '@/middleware/auth';
 
@@ -8,7 +9,8 @@ export default async function handler(req, res) {
   const sessionId = getSessionId(req, res);
 
   const idToUse = userId ? { column: 'UserID', value: userId } : { column: 'SessionID', value: sessionId };
-  console.log('idToUse:', idToUse);
+  console.log('userId:', userId);
+  console.log('sessionId:', sessionId);
 
   switch (method) {
     case 'GET':
@@ -16,16 +18,14 @@ export default async function handler(req, res) {
         const cartData = await query(`SELECT UserCartsID FROM UserCarts WHERE ${idToUse.column} = ?`, [idToUse.value]);
         const userCartsId = cartData.length ? cartData[0].UserCartsID : null;
 
-        console.log('User cart ID for GET:', userCartsId);
-
         if (userCartsId) {
           const cartItems = await query(`
             SELECT CartItems.*, Inventory.SalePrice AS price, Stores.ShippingPrice AS shippingPrice, 
-              Card.CardID, Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
+              Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
               Card.CardSet AS cardSet, Card.CardNumber AS number, Card.CardVariant AS variant, 
               Card.CardColor AS color, Grade.GradeValue AS grade, Inventory.CertNumber AS certNumber,
               Inventory.FrontImageURL AS imageFront, Inventory.BackImageURL AS imageBack, Stores.StoreName AS storeName,
-              Stores.FeedbackAverage AS feedback
+              Stores.FeedbackAverage AS feedback, Inventory.CardID AS cardId
             FROM CartItems 
             JOIN Inventory ON CartItems.ListingID = Inventory.ListingID
             JOIN Card ON Inventory.CardID = Card.CardID
@@ -36,11 +36,11 @@ export default async function handler(req, res) {
 
           const savedForLaterItems = await query(`
             SELECT SavedForLaterItems.*, Inventory.SalePrice AS price, Stores.ShippingPrice AS shippingPrice, 
-              Card.CardID, Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
+              Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
               Card.CardSet AS cardSet, Card.CardNumber AS number, Card.CardVariant AS variant, 
               Card.CardColor AS color, Grade.GradeValue AS grade, Inventory.CertNumber AS certNumber,
               Inventory.FrontImageURL AS imageFront, Inventory.BackImageURL AS imageBack, Stores.StoreName AS storeName,
-              Stores.FeedbackAverage AS feedback
+              Stores.FeedbackAverage AS feedback, Inventory.CardID AS cardId
             FROM SavedForLaterItems 
             JOIN Inventory ON SavedForLaterItems.ListingID = Inventory.ListingID
             JOIN Card ON Inventory.CardID = Card.CardID
@@ -48,9 +48,6 @@ export default async function handler(req, res) {
             LEFT JOIN Stores ON Inventory.SellerID = Stores.UserID
             WHERE SavedForLaterItems.UserCartsID = ?
           `, [userCartsId]);
-
-          console.log('Fetched cart items:', cartItems);
-          console.log('Fetched saved for later items:', savedForLaterItems);
 
           res.status(200).json({
             cart: cartItems,
@@ -91,16 +88,14 @@ export default async function handler(req, res) {
 
         // Insert new cart items
         const cartPromises = cart.map(item => {
-          console.log('Inserting cart item:', item);
           return query(
-            'INSERT INTO CartItems (UserCartsID, ListingID) VALUES (?, ?)',
+            'INSERT INTO CartItems (UserCartsID, ListingID) VALUES (?, ?) ON DUPLICATE KEY UPDATE ListingID = VALUES(ListingID)',
             [userCartsId, item.ListingID]
           );
         });
 
         // Insert new saved for later items
         const savedForLaterPromises = savedForLater.map(item => {
-          console.log('Inserting saved for later item:', item);
           return query(
             'INSERT INTO SavedForLaterItems (UserCartsID, ListingID) VALUES (?, ?)',
             [userCartsId, item.ListingID]
@@ -114,7 +109,7 @@ export default async function handler(req, res) {
         res.status(200).json({ message: "Cart updated" });
       } catch (error) {
         console.error("Failed to update cart data:", error);
-        res.status500.json({ message: "Failed to update cart data" });
+        res.status(500).json({ message: "Failed to update cart data" });
       }
       break;
 

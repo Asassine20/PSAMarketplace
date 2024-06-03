@@ -1,6 +1,9 @@
-import { useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const useAuth = () => {
+  const [accessToken, setAccessToken] = useState(null);
+  const [userId, setUserId] = useState(null);
+
   const decodeToken = (token) => {
     try {
       const base64Url = token.split('.')[1];
@@ -32,6 +35,9 @@ const useAuth = () => {
       if (response.ok) {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
+        setAccessToken(data.accessToken);
+        const decoded = decodeToken(data.accessToken);
+        if (decoded) setUserId(decoded.userId);
       } else {
         // Handle refresh token failure (e.g., redirect to login)
         localStorage.removeItem('accessToken');
@@ -53,11 +59,16 @@ const useAuth = () => {
       if (decoded && decoded.exp * 1000 < Date.now()) {
         // Token has expired
         refreshToken();
+      } else {
+        setAccessToken(accessToken);
+        if (decoded) setUserId(decoded.userId);
       }
     }
   }, [refreshToken]);
 
   return {
+    accessToken,
+    userId,
     refreshToken,
   };
 };

@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const { accessToken } = useAuth();
+  const { userId, accessToken } = useAuth();
   const [cart, setCart] = useState([]);
   const [savedForLater, setSavedForLater] = useState([]);
   const [sessionId, setSessionId] = useState(() => {
@@ -69,7 +69,7 @@ export const CartProvider = ({ children }) => {
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ cart, savedForLater }),
+        body: JSON.stringify({ cart, savedForLater, userId }), // Include userId
       });
 
       if (!response.ok) {

@@ -33,13 +33,22 @@ export default async function handler(req, res) {
     const sessionId = uuidv4();
     await query('INSERT INTO UserSessions (SessionID, UserID) VALUES (?, ?)', [sessionId, userId]);
 
-    res.setHeader('Set-Cookie', cookie.serialize('sessionId', sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-      sameSite: 'strict',
-      path: '/'
-    }));
+    res.setHeader('Set-Cookie', [
+      cookie.serialize('sessionId', sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        sameSite: 'strict',
+        path: '/'
+      }),
+      cookie.serialize('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 60 * 15, // 15 minutes
+        sameSite: 'strict',
+        path: '/'
+      })
+    ]);
 
     res.status(200).json({ userId, accessToken, refreshToken });
   } catch (error) {
