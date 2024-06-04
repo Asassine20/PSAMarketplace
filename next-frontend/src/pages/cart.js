@@ -73,7 +73,7 @@ const CartPage = () => {
                       </div>
                     </div>
                     <div className={styles.cartItemDetails}>
-                      <Link href={`/cards/${item.CardID}/${item.name}`} className={styles.cartItemDetailsLink}>
+                      <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
                         <p className={styles.largeTextStrong}>
                           {item.name} - {item.sport}
                           {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
@@ -129,7 +129,7 @@ const CartPage = () => {
                           </div>
                         </div>
                         <div className={styles.cartItemDetails}>
-                          <Link href={`/cards/${item.CardID}/${item.name}`} className={styles.cartItemDetailsLink}>
+                          <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
                             <p className={styles.largeTextStrong}>
                               {item.name} - {item.sport}
                               {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
