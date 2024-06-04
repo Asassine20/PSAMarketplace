@@ -3,12 +3,14 @@ import { useCart } from '../components/Cart/CartProvider';
 import styles from '../styles/Cart.module.css';
 import Link from 'next/link';
 import ImageModal from '../components/ImageModal/ImageModal';
+import { useRouter } from 'next/router';
 
 const CartPage = () => {
   const { cart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved } = useCart();
   const [mounted, setMounted] = useState(false);
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -33,6 +35,10 @@ const CartPage = () => {
 
   const closeModal = () => {
     setModalImages([]);
+  };
+
+  const handleCheckout = () => {
+    router.push('/checkout');
   };
 
   if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
@@ -161,7 +167,7 @@ const CartPage = () => {
           <p className={styles.largeText}><span>Item Total:</span> <span>${calculateTotal()}</span></p>
           <p className={styles.largeText}><span>Shipping:</span> <span>${(cart.reduce((total, item) => total + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>
           <p className={`${styles.largeText} ${styles.boldText}`}><span>Subtotal:</span> <span>${(cart.reduce((total, item) => total + Number(item.price || 0) + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>        
-          <button className={styles.checkoutButton} onClick={() => alert('Checkout not implemented yet')}>Checkout</button>
+          <button className={styles.checkoutButton} onClick={handleCheckout}>Checkout</button>
           <button className={styles.clearCartButton} onClick={clearCart}>Clear Cart</button>
         </div>
       </div>
