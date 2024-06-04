@@ -26,7 +26,12 @@ export default function Login() {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('isLoggedIn', 'true'); // Set logged-in flag
-        router.push('/');
+
+        // Redirect to home page first
+        router.push('/').then(() => {
+          // Refresh the page after redirection
+          window.location.reload();
+        });
       } else {
         setErrorMessage(data.message); // Set the error message
       }
