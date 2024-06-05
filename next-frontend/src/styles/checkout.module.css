@@ -40,7 +40,6 @@
   .paymentAndSummary {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
   }
   
   .paymentMethod {
@@ -61,14 +60,69 @@
   .paymentOption input {
     margin-right: 10px;
   }
+
+  .paymentOption label {
+    display: flex;
+    align-items: center;
+  }
   
-  .summary{
-    font-size: 1.2em;
+  .paymentOption .cardIcon {
+    margin-left: 10px;
+    width: 50px;
+  }
+  
+  .paymentOption .paypalIcon {
+    margin-left: 10px;
+    width: 100px;
   }
 
-  .summary p{
+  .cardDetails {
+    display: flex;
+    flex-direction: column;
     margin-top: 10px;
   }
+  
+  .cardDetails input {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .saveCardOption {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  
+  .saveCardOption input {
+    margin-right: 10px;
+  }
+  
+  .summary {
+    font-size: 1.2em;
+    text-align: center;
+    width: 30%;
+  }
+  
+  .summary h3 {
+    text-align: center;
+  }
+  
+  .summary p {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .summaryLabel {
+    text-align: left;
+  }
+  
+  .summaryInfo {
+    text-align: right;
+  }
+  
   
   .checkoutItemsWrapper {
     width: 90%;
@@ -201,3 +255,21 @@
     background-color: #005bb5;
   }
   
+  .emptyCartMessage {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .continueShoppingButton {
+    padding: 10px 20px;
+    background-color: #0050a2;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+  
+  .continueShoppingButton:hover {
+    background-color: #005bb5;
+  }
