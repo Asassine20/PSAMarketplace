@@ -95,8 +95,8 @@ const AddressModal = ({ addressType, onClose, onSubmit }) => {
             required
           />
           <div className={styles.buttonContainer}>
-            <button type="submit" className={styles.button}>Save Address</button>
             <button type="button" className={styles.button} onClick={onClose}>Cancel</button>
+            <button type="submit" className={styles.button}>Save Address</button>
           </div>
         </form>
       </div>

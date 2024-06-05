@@ -69,33 +69,43 @@ const CheckoutPage = () => {
           <form onSubmit={handleSubmitOrder}>
             <div className={styles.addressSection}>
               <div>
-                <h2>Shipping Address</h2>
+                <h3>Shipping Address</h3>
                 <button type="button" onClick={() => handleOpenModal('shipping')} className={styles.addressButton}>Enter Shipping Address</button>
                 {shippingAddress && <p>{shippingAddress.FirstName} {shippingAddress.LastName}, {shippingAddress.Street}, {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.ZipCode}, {shippingAddress.Country}</p>}
               </div>
               <div>
-                <h2>Billing Address</h2>
+                <h3>Billing Address</h3>
                 <button type="button" onClick={() => handleOpenModal('billing')} className={styles.addressButton}>Enter Billing Address</button>
                 {billingAddress && <p>{billingAddress.FirstName} {billingAddress.LastName}, {billingAddress.Street}, {billingAddress.City}, {billingAddress.State}, {billingAddress.ZipCode}, {billingAddress.Country}</p>}
               </div>
             </div>
-            <div className={styles.paymentMethod}>
-              <h2>Payment Method</h2>
-              <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                <option value="creditCard">Credit Card</option>
-                <option value="paypal">PayPal</option>
-                <option value="bitcoin">Bitcoin</option>
-              </select>
+            <div className={styles.paymentAndSummary}>
+              <div className={styles.paymentMethod}>
+                <h3>Payment Method</h3>
+                <div className={styles.paymentOption}>
+                  <input type="radio" id="creditCard" name="paymentMethod" value="creditCard" checked={paymentMethod === 'creditCard'} onChange={(e) => setPaymentMethod(e.target.value)} />
+                  <label htmlFor="creditCard">Credit Card</label>
+                </div>
+                <div className={styles.paymentOption}>
+                  <input type="radio" id="paypal" name="paymentMethod" value="paypal" checked={paymentMethod === 'paypal'} onChange={(e) => setPaymentMethod(e.target.value)} />
+                  <label htmlFor="paypal">PayPal</label>
+                </div>
+              </div>
+              <div className={styles.summary}>
+                <h3>Summary</h3>
+                <p>Subtotal: ${(cart.reduce((total, item) => total + Number(item.price || 0), 0)).toFixed(2)}</p>
+                <p>Shipping: ${(cart.reduce((total, item) => total + Number(item.shippingPrice || 0), 0)).toFixed(2)}</p>
+                <p>Taxes: ${(cart.reduce((total, item) => total + Number(item.price || 0) * 0.1, 0)).toFixed(2)}</p>
+                <p><strong>Total: ${calculateTotal()}</strong></p>
+              </div>
             </div>
-            <button type="submit" className={styles.button}>Submit Order</button>
+            <div className={styles.formActions}>
+              <Link href="/cart">
+                <button type="button" className={styles.editCartButton}>Edit Cart</button>
+              </Link>
+              <button type="submit" className={styles.submitOrderButton}>Submit Order</button>
+            </div>
           </form>
-          <Link href="/cart">
-            <button className={styles.button}>Edit Cart</button>
-          </Link>
-        </div>
-        <div className={styles.summary}>
-          <h2>Summary</h2>
-          <p>Total: ${calculateTotal()}</p>
         </div>
       </div>
       <div className={styles.checkoutItemsWrapper}>
@@ -112,19 +122,19 @@ const CheckoutPage = () => {
                       <img src={item.imageFront} alt={item.name} />
                     </div>
                     <div className={styles.itemDetails}>
-                      <p>{item.name} - {item.sport} - {item.cardSet} #{item.number}</p>
+                      <p><strong>{item.name} - {item.sport} - {item.cardSet} #{item.number}</strong></p>
                       <p>Grade: {item.grade}</p>
                       <p>Price: ${item.price}</p>
-                      <p>Shipping: ${item.shippingPrice}</p>
                     </div>
                   </div>
                 ))}
               </div>
               <div className={styles.packageTotal}>
-                <p>Items Subtotal: ${calculatePackageTotal(groupedCartItems[storeName])}</p>
-                <p>Shipping Total: ${calculateShippingTotal(groupedCartItems[storeName])}</p>
-                <p>Taxes: ${calculateTaxes(groupedCartItems[storeName])}</p>
-                <p>Total: ${(parseFloat(calculatePackageTotal(groupedCartItems[storeName])) + parseFloat(calculateShippingTotal(groupedCartItems[storeName])) + parseFloat(calculateTaxes(groupedCartItems[storeName]))).toFixed(2)}</p>
+                <h2>{storeName}<br></br> Order Summary</h2>
+                <p><span className={styles.packageLabel}>Items Subtotal:</span> <span className={styles.packageInfo}>${calculatePackageTotal(groupedCartItems[storeName])}</span></p>
+                <p><span className={styles.packageLabel}>Shipping Total:</span> <span className={styles.packageInfo}>${calculateShippingTotal(groupedCartItems[storeName])}</span></p>
+                <p><span className={styles.packageLabel}>Taxes:</span> <span className={styles.packageInfo}>${calculateTaxes(groupedCartItems[storeName])}</span></p>
+                <p><span className={styles.packageLabel}><strong>Total:</strong></span> <span className={styles.packageInfo}><strong>${(parseFloat(calculatePackageTotal(groupedCartItems[storeName])) + parseFloat(calculateShippingTotal(groupedCartItems[storeName])) + parseFloat(calculateTaxes(groupedCartItems[storeName]))).toFixed(2)}</strong></span></p>
               </div>
             </div>
           ))}
