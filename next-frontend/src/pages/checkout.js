@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../components/Cart/CartProvider';
+import useAuth from '../hooks/useAuth';
 import styles from '../styles/checkout.module.css';
 import Link from 'next/link';
 import AddressModal from '../components/Address/AddressModal';
 
 const CheckoutPage = () => {
     const { cart } = useCart();
+    const { userId } = useAuth();
     const [mounted, setMounted] = useState(false);
     const [billingAddress, setBillingAddress] = useState(null);
     const [shippingAddress, setShippingAddress] = useState(null);
@@ -23,6 +25,23 @@ const CheckoutPage = () => {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            if (!userId) return;
+            try {
+                const response = await fetch(`/api/address?userId=${userId}`);
+                const data = await response.json();
+                const billing = data.find(address => address.IsBilling);
+                const shipping = data.find(address => !address.IsBilling);
+                if (billing) setBillingAddress(billing);
+                if (shipping) setShippingAddress(shipping);
+            } catch (error) {
+                console.error('Failed to fetch addresses:', error);
+            }
+        };
+        fetchAddresses();
+    }, [userId]);
 
     const groupItemsByStore = (items) => items.reduce((acc, item) => {
         const key = item.storeName;
@@ -50,13 +69,24 @@ const CheckoutPage = () => {
         setShowAddressModal(false);
     };
 
-    const handleAddressSubmit = (address, type) => {
-        if (type === 'billing') {
-            setBillingAddress(address);
-        } else {
-            setShippingAddress(address);
+    const handleAddressSubmit = async (address, type) => {
+        try {
+            const response = await fetch('/api/address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...address, IsBilling: type === 'billing', userId }),
+            });
+            if (!response.ok) throw new Error('Failed to save address');
+            const savedAddress = await response.json();
+            if (type === 'billing') {
+                setBillingAddress(savedAddress);
+            } else {
+                setShippingAddress(savedAddress);
+            }
+            setShowAddressModal(false);
+        } catch (error) {
+            console.error('Failed to save address:', error);
         }
-        setShowAddressModal(false);
     };
 
     const handleSubmitOrder = async (event) => {
@@ -76,13 +106,27 @@ const CheckoutPage = () => {
                         <div className={styles.addressSection}>
                             <div>
                                 <h3>Shipping Address</h3>
-                                <button type="button" onClick={() => handleOpenModal('shipping')} className={styles.addressButton}>Enter Shipping Address</button>
-                                {shippingAddress && <p>{shippingAddress.FirstName} {shippingAddress.LastName}, {shippingAddress.Street}, {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.ZipCode}, {shippingAddress.Country}</p>}
+                                <button type="button" onClick={() => handleOpenModal('shipping')} className={styles.addressButton} style={{ border: '2px solid #ccc', padding: '10px', borderRadius: '4px' }}>Enter Shipping Address</button>
+                                {shippingAddress && (
+                                    <p>
+                                        {shippingAddress.FirstName} {shippingAddress.LastName}<br />
+                                        {shippingAddress.Street}{shippingAddress.Street2 && <>, {shippingAddress.Street2}</>}<br />
+                                        {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.ZipCode}<br />
+                                        {shippingAddress.Country}
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <h3>Billing Address</h3>
-                                <button type="button" onClick={() => handleOpenModal('billing')} className={styles.addressButton}>Enter Billing Address</button>
-                                {billingAddress && <p>{billingAddress.FirstName} {billingAddress.LastName}, {billingAddress.Street}, {billingAddress.City}, {billingAddress.State}, {billingAddress.ZipCode}, {billingAddress.Country}</p>}
+                                <button type="button" onClick={() => handleOpenModal('billing')} className={styles.addressButton} style={{ border: '2px solid #ccc', padding: '10px', borderRadius: '4px' }}>Enter Billing Address</button>
+                                {billingAddress && (
+                                    <p>
+                                        {billingAddress.FirstName} {billingAddress.LastName}<br />
+                                        {billingAddress.Street}{billingAddress.Street2 && <>, {billingAddress.Street2}</>}<br />
+                                        {billingAddress.City}, {billingAddress.State}, {billingAddress.ZipCode}<br />
+                                        {billingAddress.Country}
+                                    </p>
+                                )}
                             </div>
                         </div>
                         <div className={styles.paymentAndSummary}>
@@ -96,10 +140,29 @@ const CheckoutPage = () => {
                                     <div className={styles.cardDetails}>
                                         <input type="text" placeholder="Card Number" value={cardDetails.cardNumber} onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })} />
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <input type="text" placeholder="Exp Month" value={cardDetails.expMonth} onChange={(e) => setCardDetails({ ...cardDetails, expMonth: e.target.value })} />
-                                            <input type="text" placeholder="Exp Year" value={cardDetails.expYear} onChange={(e) => setCardDetails({ ...cardDetails, expYear: e.target.value })} />
+                                            <select value={cardDetails.expMonth} onChange={(e) => setCardDetails({ ...cardDetails, expMonth: e.target.value })}>
+                                                <option value="">Exp Month</option>
+                                                <option value="01">1 - January</option>
+                                                <option value="02">2 - February</option>
+                                                <option value="03">3 - March</option>
+                                                <option value="04">4 - April</option>
+                                                <option value="05">5 - May</option>
+                                                <option value="06">6 - June</option>
+                                                <option value="07">7 - July</option>
+                                                <option value="08">8 - August</option>
+                                                <option value="09">9 - September</option>
+                                                <option value="10">10 - October</option>
+                                                <option value="11">11 - November</option>
+                                                <option value="12">12 - December</option>
+                                            </select>
+                                            <select value={cardDetails.expYear} onChange={(e) => setCardDetails({ ...cardDetails, expYear: e.target.value })}>
+                                                <option value="">Exp Year</option>
+                                                {Array.from({ length: 50 }, (_, i) => 2024 + i).map(year => (
+                                                    <option key={year} value={year}>{year}</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <input type="text" placeholder="Security Code" value={cardDetails.securityCode} onChange={(e) => setCardDetails({ ...cardDetails, securityCode: e.target.value })} />
+                                        <input type="text" placeholder="Security Code" value={cardDetails.securityCode} onChange={(e) => setCardDetails({ ...cardDetails, securityCode: e.target.value })} className={styles.securityCode} />
                                         <div className={styles.saveCardOption}>
                                             <input type="checkbox" id="saveCard" checked={cardDetails.saveCard} onChange={(e) => setCardDetails({ ...cardDetails, saveCard: e.target.checked })} />
                                             <label htmlFor="saveCard">Save this card for future purchases</label>
@@ -118,7 +181,6 @@ const CheckoutPage = () => {
                                 <p><span className={styles.summaryLabel}>Taxes:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.price || 0) * 0.1, 0)).toFixed(2)}</span></p>
                                 <p><span className={styles.summaryLabel}><strong>Total:</strong></span> <span className={styles.summaryInfo}><strong>${calculateTotal()}</strong></span></p>
                             </div>
-
                         </div>
                         <div className={styles.formActions}>
                             <Link href="/cart">
@@ -139,8 +201,8 @@ const CheckoutPage = () => {
                     </div>
                 ) : (
                     <div className={styles.checkoutItems}>
-                        {Object.keys(groupedCartItems).map((storeName) => (
-                            <div key={storeName} className={styles.package}>
+                        {Object.keys(groupedCartItems).map((storeName, storeIndex) => (
+                            <div key={storeName} className={`${styles.package} ${storeIndex === Object.keys(groupedCartItems).length - 1 ? styles.lastPackage : ''}`}>
                                 <div className={styles.packageDetails}>
                                     <h2 className={styles.packageHeader}>
                                         {storeName} ({groupedCartItems[storeName][0].feedback}%)

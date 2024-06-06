@@ -32,6 +32,7 @@ const useAuth = () => {
         body: JSON.stringify({ refreshToken: storedRefreshToken }),
       });
       const data = await response.json();
+      console.log('Refresh token response data:', data);
       if (response.ok) {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
@@ -40,6 +41,7 @@ const useAuth = () => {
         if (decoded) setUserId(decoded.userId);
       } else {
         // Handle refresh token failure (e.g., redirect to login)
+        console.error('Refresh token failed:', data.message);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         window.location.href = '/login'; // Redirect to login page
@@ -56,6 +58,7 @@ const useAuth = () => {
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       const decoded = decodeToken(accessToken);
+      console.log('Decoded access token:', decoded);
       if (decoded && decoded.exp * 1000 < Date.now()) {
         // Token has expired
         refreshToken();
