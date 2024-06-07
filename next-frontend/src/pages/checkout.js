@@ -18,7 +18,7 @@ const getCardType = (number) => {
     if (cardTypeRegex.mastercard.test(number)) return 'mastercard';
     if (cardTypeRegex.amex.test(number)) return 'amex';
     if (cardTypeRegex.discover.test(number)) return 'discover';
-    return 'unknown';
+    return 'Card';
 };
 
 const CheckoutPage = () => {
@@ -41,7 +41,7 @@ const CheckoutPage = () => {
         saveCard: false,
         cardHolderName: '',
     });
-    const [cardType, setCardType] = useState('unknown');
+    const [cardType, setCardType] = useState('Card');
     const [isSameAsBilling, setIsSameAsBilling] = useState(false);
 
     useEffect(() => {
@@ -169,7 +169,7 @@ const CheckoutPage = () => {
         mastercard: 'https://imageio.forbes.com/blogs-images/steveolenski/files/2016/07/Mastercard_new_logo-1200x865.jpg?format=jpg&width=1440',
         amex: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/1024px-American_Express_logo_%282018%29.svg.png',
         discover: 'https://www.discover.com/company/images/newsroom/media-downloads/DGN_AcceptanceMark.png',
-        unknown: '',
+        card: '',
     };
 
     if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
@@ -217,7 +217,7 @@ const CheckoutPage = () => {
                                         {savedCards.map((card) => (
                                             <label key={card.PaymentID} className={styles.cardOption}>
                                                 <input type="radio" name="savedCard" value={card.PaymentID} onChange={() => handleCardSelection(card)} />
-                                                {getCardType(card.CardNumber) !== 'unknown' && (
+                                                {getCardType(card.CardNumber) !== 'Card' && (
                                                     <img src={cardIcons[getCardType(card.CardNumber)]} alt={getCardType(card.CardNumber)} className={styles.savedCardIcon} />
                                                 )}
                                                 <span className={styles.cardType}>{getCardType(card.CardNumber)}</span> ending in {card.CardNumber.slice(-4)}
@@ -241,7 +241,7 @@ const CheckoutPage = () => {
                                     <div className={styles.cardDetails}>
                                         <div className={styles.cardInputWrapper}>
                                             <input type="text" placeholder="Card Number" value={cardDetails.cardNumber} onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })} className={styles.wideInput} />
-                                            {cardType !== 'unknown' && <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />}
+                                            {cardType !== 'Card' && <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />}
                                         </div>
                                         <div style={{ width: '50%', display: 'flex', justifyContent: 'space-between' }}>
                                             <select value={cardDetails.expMonth} onChange={(e) => setCardDetails({ ...cardDetails, expMonth: e.target.value })}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -18,6 +18,7 @@ const Navbar = () => {
   const [mounted, setMounted] = useState(false); // New state to track if component has mounted
   const router = useRouter();
   const { cart } = useCart(); // Access the cart context
+  const panelRef = useRef(null); // Ref for the side panel
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -89,8 +90,24 @@ const Navbar = () => {
       window.location.reload(); // Refresh the page after redirecting to the home page
     });
   };
-  
-  
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        setIsPanelOpen(false);
+      }
+    };
+
+    if (isPanelOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPanelOpen]);
 
   return (
     <div className={styles.navbarContainer}>
@@ -117,7 +134,7 @@ const Navbar = () => {
         </div>
       </div>
       {isPanelOpen && (
-        <div className={styles.sidePanel}>
+        <div className={styles.sidePanel} ref={panelRef}>
           {isLoggedIn ? (
             <div className={styles.panelContent}>
               <div className={styles.userInfo}>
