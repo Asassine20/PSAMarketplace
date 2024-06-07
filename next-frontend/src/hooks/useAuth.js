@@ -40,17 +40,16 @@ const useAuth = () => {
         const decoded = decodeToken(data.accessToken);
         if (decoded) setUserId(decoded.userId);
       } else {
-        // Handle refresh token failure (e.g., redirect to login)
         console.error('Refresh token failed:', data.message);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login'; // Redirect to login page
+        window.location.href = '/login';
       }
     } catch (error) {
       console.error('Error refreshing token:', error);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      window.location.href = '/login'; // Redirect to login page
+      window.location.href = '/login';
     }
   }, []);
 
@@ -60,13 +59,19 @@ const useAuth = () => {
       const decoded = decodeToken(accessToken);
       console.log('Decoded access token:', decoded);
       if (decoded && decoded.exp * 1000 < Date.now()) {
-        // Token has expired
         refreshToken();
       } else {
         setAccessToken(accessToken);
         if (decoded) setUserId(decoded.userId);
       }
     }
+  }, [refreshToken]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshToken();
+    }, 14 * 60 * 1000); // Refresh every 14 minutes
+    return () => clearInterval(interval);
   }, [refreshToken]);
 
   return {

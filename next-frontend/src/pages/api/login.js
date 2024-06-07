@@ -1,4 +1,3 @@
-// src/pages/api/login.js
 import jwt from 'jsonwebtoken';
 import { query } from '@/db';
 import bcrypt from 'bcrypt';
@@ -27,7 +26,7 @@ export default async function handler(req, res) {
     }
 
     const userId = user.UserID;
-    const accessToken = jwt.sign({ userId, email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ userId, email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
     const refreshToken = jwt.sign({ userId, email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
     const sessionId = uuidv4();
@@ -44,7 +43,14 @@ export default async function handler(req, res) {
       cookie.serialize('accessToken', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
-        maxAge: 60 * 15, // 15 minutes
+        maxAge: 60 * 1, // 1 minute
+        sameSite: 'strict',
+        path: '/'
+      }),
+      cookie.serialize('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
         sameSite: 'strict',
         path: '/'
       })
