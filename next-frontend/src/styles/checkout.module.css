@@ -4,107 +4,167 @@
     flex-direction: column;
     align-items: center;
     padding: 20px;
-  }
-  
-  .header {
+}
+
+.header {
     font-size: 2em;
     margin-bottom: 20px;
-  }
-  
-  .checkoutFormWrapper {
+}
+
+.checkoutFormWrapper {
     display: flex;
     justify-content: center;
     width: 100%;
     margin-bottom: 20px;
-  }
-  
-  .checkoutForm {
+}
+
+.checkoutForm {
     display: flex;
     flex-direction: column;
-    width: 60%;
+    width: 80%;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-  }
-  
-  .addressSection {
+}
+
+.addressSection {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
-  }
-  
-  .addressSection > div {
+}
+
+.addressSection > div {
     width: 48%;
-  }
-  
-  .paymentAndSummary {
+}
+
+.paymentAndSummary {
     display: flex;
     justify-content: space-between;
-  }
-  
-  .paymentMethod {
+}
+
+.paymentMethod {
     width: 48%;
-  }
-  
-  .paymentMethod h3 {
+}
+
+.paymentMethod h3 {
     margin-bottom: 10px;
     font-size: 1.2em;
-  }
-  
-  .paymentOption {
+}
+
+.paymentOption {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-  }
-  
-  .paymentOption input {
+}
+
+.paymentOption input {
     margin-right: 10px;
-  }
-  
-  .paymentOption label {
+}
+
+.paymentOption label {
     display: flex;
     align-items: center;
-  }
-  
-  .paymentOption .cardIcon {
+}
+
+.paymentOption .cardIcon {
     margin-left: 10px;
     width: 50px;
-  }
-  
-  .paymentOption .paypalIcon {
+}
+
+.paymentOption .paypalIcon {
     margin-left: 10px;
     width: 100px;
-  }
-  
-  .cardDetails {
+}
+
+.cardDetails {
     display: flex;
     flex-direction: column;
     margin-top: 10px;
-  }
-  
-  .cardDetails input,
-  .cardDetails select {
+}
+
+.cardDetails input,
+.cardDetails select {
     margin-bottom: 10px;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
-  
-  .cardDetails .securityCode {
+}
+
+.cardDetails .securityCode {
     width: 30%;
-  }
-  
-  .saveCardOption {
+}
+
+.cardIcon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; /* Adjust the width as needed */
+    height: auto;
+}
+
+/* CSS for the saved card icons */
+.savedCardIcon {
+    width: 30px; /* Adjust the width as needed */
+    height: auto;
+    margin-right: 10px;
+    vertical-align: middle; /* Align the icon with the text */
+}
+
+/* Ensure the card input wrapper has position relative */
+.cardInputWrapper {
+    position: relative;
+}
+
+/* Wider card number input */
+.wideInput {
+    width: calc(100% - 90px); /* Adjust as needed to make space for the icon */
+}
+
+/* Exp year select alignment */
+.expYearSelect {
+    margin-left: 10px; /* Adjust as needed to bring closer to exp month */
+}
+
+/* Make each saved card its own row */
+.savedCards {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardOption {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.cardType {
+    font-weight: bold;
+}
+
+/* CSS for the saved card icons */
+.savedCardIcon {
+    width: 60px; /* Adjust the width as needed */
+    height: auto;
+    margin-right: 10px;
+    vertical-align: middle; /* Align the icon with the text */
+}
+
+/* Ensure the card input wrapper has position relative */
+.cardInputWrapper {
+    position: relative;
+}
+
+.saveCardOption {
     display: flex;
     align-items: center;
     margin-top: 10px;
-  }
-  
-  .saveCardOption input {
-    margin-right: 10px;
-  }
+}
 
-  .addNewCardButton {
+.saveCardOption input {
+    margin-right: 10px;
+}
+
+.addNewCardButton {
     background-color: transparent;
     border: none;
     color: blue;
@@ -112,123 +172,123 @@
     cursor: pointer;
     padding: 0;
     margin-left: 5px;
-    }
+}
 
-    .addNewCardButton:hover {
-        color: darkblue;
-    }
-  
-  .summary {
+.addNewCardButton:hover {
+    color: darkblue;
+}
+
+.summary {
     font-size: 1.2em;
     text-align: center;
     width: 30%;
-  }
-  
-  .summary h3 {
+}
+
+.summary h3 {
     text-align: center;
-  }
-  
-  .summary p {
+}
+
+.summary p {
     margin-top: 10px;
     display: flex;
     justify-content: space-between;
-  }
-  
-  .summaryLabel {
+}
+
+.summaryLabel {
     text-align: left;
-  }
-  
-  .summaryInfo {
+}
+
+.summaryInfo {
     text-align: right;
-  }
-  
-  .checkoutItemsWrapper {
+}
+
+.checkoutItemsWrapper {
     width: 90%;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-  }
-  
-  .checkoutItems {
+}
+
+.checkoutItems {
     display: flex;
     flex-direction: column;
     width: 100%;
-  }
-  
-  .package {
+}
+
+.package {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
     border-bottom: 1px solid #ccc;
     padding-bottom: 10px;
-  }
-  
-  .lastPackage {
+}
+
+.lastPackage {
     border-bottom: none;
-  }
-  
-  .packageDetails {
+}
+
+.packageDetails {
     width: 70%;
-  }
-  
-  .packageHeader {
+}
+
+.packageHeader {
     font-size: 1.2em;
     margin-bottom: 20px;
-  }
-  
-  .packageTotal {
+}
+
+.packageTotal {
     width: 25%;
     padding: 20px 10px 20px 10px;
     border: 2px solid #ccc;
     border-radius: 8px;
     text-align: left;
     align-self: center;
-  }
-  
-  .packageTotal p {
+}
+
+.packageTotal p {
     margin-top: 10px;
     display: flex;
     justify-content: space-between;
-  }
-  
-  .packageTotal h2 {
+}
+
+.packageTotal h2 {
     text-align: center;
     padding-bottom: 10px;
-  }
-  
-  .packageInfo p {
+}
+
+.packageInfo p {
     text-align: right;
-  }
-  
-  .checkoutItem {
+}
+
+.checkoutItem {
     display: flex;
     margin-bottom: 10px;
-  }
-  
-  .itemImage img {
+}
+
+.itemImage img {
     width: 80px; /* Make the image smaller */
     height: auto;
-  }
-  
-  .itemDetails {
+}
+
+.itemDetails {
     flex: 1;
     padding-left: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center; /* Align card info to center */
-  }
-  
-  .itemDetails p {
+}
+
+.itemDetails p {
     margin-bottom: 5px;
-  }
-  
-  .formActions {
+}
+
+.formActions {
     display: flex;
     justify-content: space-between;
-  }
-  
-  .editCartButton {
+}
+
+.editCartButton {
     width: 100%;
     padding: 10px;
     background-color: #0050a2;
@@ -239,13 +299,13 @@
     border-radius: 4px;
     text-align: center;
     text-decoration: none;
-  }
-  
-  .editCartButton:hover {
+}
+
+.editCartButton:hover {
     background-color: #005bb5;
-  }
-  
-  .submitOrderButton {
+}
+
+.submitOrderButton {
     width: 30%;
     padding: 10px;
     background-color: #0050a2;
@@ -257,13 +317,13 @@
     font-size: 16px;
     text-align: center;
     text-decoration: none;
-  }
-  
-  .submitOrderButton:hover {
+}
+
+.submitOrderButton:hover {
     background-color: #005bb5;
-  }
-  
-  .addressButton {
+}
+
+.addressButton {
     margin-top: 10px;
     margin-bottom: 10px;
     background-color: #0050a2;
@@ -273,18 +333,18 @@
     border-radius: 4px;
     cursor: pointer;
     width: 100%;
-  }
-  
-  .addressButton:hover {
+}
+
+.addressButton:hover {
     background-color: #005bb5;
-  }
-  
-  .emptyCartMessage {
+}
+
+.emptyCartMessage {
     text-align: center;
     margin-top: 20px;
-  }
-  
-  .continueShoppingButton {
+}
+
+.continueShoppingButton {
     padding: 10px 20px;
     background-color: #0050a2;
     color: white;
@@ -292,9 +352,8 @@
     cursor: pointer;
     border-radius: 4px;
     margin-top: 10px;
-  }
-  
-  .continueShoppingButton:hover {
+}
+
+.continueShoppingButton:hover {
     background-color: #005bb5;
-  }
-  
+}

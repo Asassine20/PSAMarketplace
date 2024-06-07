@@ -163,11 +163,11 @@ const CheckoutPage = () => {
     };
 
     const cardIcons = {
-        visa: 'https://example.com/visa.png',
-        mastercard: 'https://example.com/mastercard.png',
-        amex: 'https://example.com/amex.png',
-        discover: 'https://example.com/discover.png',
-        unknown: 'https://example.com/unknown.png',
+        visa: 'https://1000logos.net/wp-content/uploads/2021/11/VISA-logo-500x281.png',
+        mastercard: 'https://imageio.forbes.com/blogs-images/steveolenski/files/2016/07/Mastercard_new_logo-1200x865.jpg?format=jpg&width=1440',
+        amex: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/1024px-American_Express_logo_%282018%29.svg.png',
+        discover: 'https://www.discover.com/company/images/newsroom/media-downloads/DGN_AcceptanceMark.png',
+        unknown: '',
     };
 
     if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
@@ -212,28 +212,33 @@ const CheckoutPage = () => {
                                         {savedCards.map((card) => (
                                             <label key={card.PaymentID} className={styles.cardOption}>
                                                 <input type="radio" name="savedCard" value={card.PaymentID} onChange={() => handleCardSelection(card)} />
-                                                {card.CardNumber} (Exp: {card.ExpMonth}/{card.ExpYear})
+                                                {getCardType(card.CardNumber) !== 'unknown' && (
+                                                    <img src={cardIcons[getCardType(card.CardNumber)]} alt={getCardType(card.CardNumber)} className={styles.savedCardIcon} />
+                                                )}
+                                                <span className={styles.cardType}>{getCardType(card.CardNumber)}</span> ending in {card.CardNumber.slice(-4)}
                                             </label>
                                         ))}
-                                        <label className={styles.cardOption}>
-                                            <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
-                                            New Card
-                                            <button type="button" className={styles.addNewCardButton}>+</button>
-                                        </label>
                                     </div>
                                 )}
-                                {!savedCards.length && (
+                                {savedCards.length === 0 || selectedCard !== null ? (
                                     <label className={styles.cardOption}>
                                         <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
                                         New Card
-                                        <button type="button" className={styles.addNewCardButton}>+</button>
                                     </label>
-                                )}
+                                ) : null}
+                                {savedCards.length === 0 || selectedCard !== null ? (
+                                    <label className={styles.cardOption}>
+                                        <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
+                                        New Card
+                                    </label>
+                                ) : null}
                                 {showCardForm && (
                                     <div className={styles.cardDetails}>
-                                        <input type="text" placeholder="Card Number" value={cardDetails.cardNumber} onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })} />
-                                        <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <div className={styles.cardInputWrapper}>
+                                            <input type="text" placeholder="Card Number" value={cardDetails.cardNumber} onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })} className={styles.wideInput} />
+                                            {cardType !== 'unknown' && <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />}
+                                        </div>
+                                        <div style={{ width: '50%', display: 'flex', justifyContent: 'space-between' }}>
                                             <select value={cardDetails.expMonth} onChange={(e) => setCardDetails({ ...cardDetails, expMonth: e.target.value })}>
                                                 <option value="">Exp Month</option>
                                                 <option value="01">1 - January</option>
@@ -249,7 +254,7 @@ const CheckoutPage = () => {
                                                 <option value="11">11 - November</option>
                                                 <option value="12">12 - December</option>
                                             </select>
-                                            <select value={cardDetails.expYear} onChange={(e) => setCardDetails({ ...cardDetails, expYear: e.target.value })}>
+                                            <select value={cardDetails.expYear} onChange={(e) => setCardDetails({ ...cardDetails, expYear: e.target.value })} className={styles.expYearSelect}>
                                                 <option value="">Exp Year</option>
                                                 {Array.from({ length: 50 }, (_, i) => 2024 + i).map(year => (
                                                     <option key={year} value={year}>{year}</option>
@@ -264,6 +269,7 @@ const CheckoutPage = () => {
                                     </div>
                                 )}
                             </div>
+
                             <div className={styles.summary}>
                                 <h3>Summary</h3>
                                 <p><span className={styles.summaryLabel}>Subtotal:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.price || 0), 0)).toFixed(2)}</span></p>
