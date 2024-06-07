@@ -218,20 +218,20 @@ const CheckoutPage = () => {
                                                 <span className={styles.cardType}>{getCardType(card.CardNumber)}</span> ending in {card.CardNumber.slice(-4)}
                                             </label>
                                         ))}
+                                        {selectedCard !== null && (
+                                            <label className={styles.cardOption}>
+                                                <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
+                                                Add a new card
+                                            </label>
+                                        )}
                                     </div>
                                 )}
-                                {savedCards.length === 0 || selectedCard !== null ? (
+                                {savedCards.length === 0 && (
                                     <label className={styles.cardOption}>
                                         <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
-                                        New Card
+                                        Add a new card
                                     </label>
-                                ) : null}
-                                {savedCards.length === 0 || selectedCard !== null ? (
-                                    <label className={styles.cardOption}>
-                                        <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
-                                        New Card
-                                    </label>
-                                ) : null}
+                                )}
                                 {showCardForm && (
                                     <div className={styles.cardDetails}>
                                         <div className={styles.cardInputWrapper}>
