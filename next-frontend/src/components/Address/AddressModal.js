@@ -5,7 +5,7 @@ const states = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
-const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses, setBillingAddress }) => {
+const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], setBillingAddress }) => {
   const [address, setAddress] = useState({
     FirstName: '',
     LastName: '',
@@ -31,7 +31,7 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses, setBi
   useEffect(() => {
     if (sameAsBilling && setBillingAddress) {
       setBillingAddress(address);
-      onClose();
+      onClose(sameAsBilling);
     }
   }, [sameAsBilling, address, onClose, setBillingAddress]);
 
@@ -50,7 +50,7 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses, setBi
       } else {
         await onSubmit(address, addressType);
       }
-      onClose();
+      onClose(sameAsBilling);
     } catch (error) {
       console.error('Failed to save address:', error);
     }
@@ -61,24 +61,26 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses, setBi
       <div className={styles.modalContent}>
         <h2 className={styles.modalHeader}>Enter {addressType === 'billing' ? 'Billing' : 'Shipping'} Address</h2>
         <form onSubmit={handleSubmit}>
-          <div className={styles.savedAddresses}>
-            {existingAddresses.map((addr) => (
-              <label key={addr.AddressID} className={styles.addressOption}>
-                <input
-                  type="radio"
-                  name="savedAddress"
-                  value={addr.AddressID}
-                  onChange={() => setSelectedAddress(addr)}
-                />
-                <span>
-                  {addr.FirstName} {addr.LastName}<br />
-                  {addr.Street}{addr.Street2 && <>, {addr.Street2}</>}<br />
-                  {addr.City}, {addr.State}, {addr.ZipCode}<br />
-                  {addr.Country}
-                </span>
-              </label>
-            ))}
-          </div>
+          {existingAddresses.length > 0 && (
+            <div className={styles.savedAddresses}>
+              {existingAddresses.map((addr) => (
+                <label key={addr.AddressID} className={styles.addressOption}>
+                  <input
+                    type="radio"
+                    name="savedAddress"
+                    value={addr.AddressID}
+                    onChange={() => setSelectedAddress(addr)}
+                  />
+                  <span>
+                    {addr.FirstName} {addr.LastName}<br />
+                    {addr.Street}{addr.Street2 && <>, {addr.Street2}</>}<br />
+                    {addr.City}, {addr.State}, {addr.ZipCode}<br />
+                    {addr.Country}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
           <div className={styles.inputGroup}>
             <input
               type="text"
@@ -181,7 +183,7 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses, setBi
             </div>
           )}
           <div className={styles.buttonContainer}>
-            <button type="button" className={styles.button} onClick={onClose}>Cancel</button>
+            <button type="button" className={styles.button} onClick={() => onClose(false)}>Cancel</button>
             <button type="submit" className={styles.button}>Save Address</button>
           </div>
         </form>

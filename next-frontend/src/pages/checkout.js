@@ -42,6 +42,7 @@ const CheckoutPage = () => {
         cardHolderName: '',
     });
     const [cardType, setCardType] = useState('unknown');
+    const [isSameAsBilling, setIsSameAsBilling] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -107,8 +108,9 @@ const CheckoutPage = () => {
         setShowAddressModal(true);
     };
 
-    const handleCloseModal = () => {
+    const handleCloseModal = (sameAsBilling) => {
         setShowAddressModal(false);
+        setIsSameAsBilling(sameAsBilling);
     };
 
     const handleAddressSubmit = async (address, type) => {
@@ -194,6 +196,9 @@ const CheckoutPage = () => {
                             <div>
                                 <h3>Billing Address</h3>
                                 <button type="button" onClick={() => handleOpenModal('billing')} className={styles.addressButton} style={{ border: '2px solid #ccc', padding: '10px', borderRadius: '4px' }}>Enter Billing Address</button>
+                                {isSameAsBilling && (
+                                    <p>Billing address is the same as shipping address</p>
+                                )}
                                 {billingAddress && (
                                     <p>
                                         {billingAddress.FirstName} {billingAddress.LastName}<br />
@@ -287,6 +292,7 @@ const CheckoutPage = () => {
                     </form>
                 </div>
             </div>
+            <h1 className={styles.header}>Packages</h1>
             <div className={styles.checkoutItemsWrapper}>
                 {cart.length === 0 ? (
                     <div className={styles.emptyCartMessage}>
