@@ -52,11 +52,18 @@ const CheckoutPage = () => {
 
     const groupedCartItems = groupItemsByStore(cart);
 
-    const calculateTotal = () => cart.reduce((total, item) => total + Number(item.price || 0) + Number(item.shippingPrice || 0), 0).toFixed(2);
+    const calculateTotal = () => {
+        const itemsTotal = cart.reduce((total, item) => total + Number(item.price || 0), 0);
+        const shippingTotal = Object.values(groupedCartItems).reduce((total, items) => total + (Number(items[0]?.shippingPrice) || 0), 0);
+        const taxes = itemsTotal * 0.1; // Assuming a 10% tax rate
+        return (itemsTotal + shippingTotal + taxes).toFixed(2);
+    };
 
     const calculatePackageTotal = (items) => items.reduce((total, item) => total + Number(item.price || 0), 0).toFixed(2);
 
-    const calculateShippingTotal = (items) => items.reduce((total, item) => total + Number(item.shippingPrice || 0), 0).toFixed(2);
+    const calculateShippingTotal = (items) => {
+        return Number(items[0]?.shippingPrice || 0);
+    };
 
     const calculateTaxes = (items) => (calculatePackageTotal(items) * 0.1).toFixed(2); // Assuming a 10% tax rate
 
@@ -177,7 +184,7 @@ const CheckoutPage = () => {
                             <div className={styles.summary}>
                                 <h3>Summary</h3>
                                 <p><span className={styles.summaryLabel}>Subtotal:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.price || 0), 0)).toFixed(2)}</span></p>
-                                <p><span className={styles.summaryLabel}>Shipping:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>
+                                <p><span className={styles.summaryLabel}>Shipping:</span> <span className={styles.summaryInfo}>${Object.values(groupedCartItems).reduce((total, items) => total + (Number(items[0]?.shippingPrice) || 0), 0).toFixed(2)}</span></p>
                                 <p><span className={styles.summaryLabel}>Taxes:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.price || 0) * 0.1, 0)).toFixed(2)}</span></p>
                                 <p><span className={styles.summaryLabel}><strong>Total:</strong></span> <span className={styles.summaryInfo}><strong>${calculateTotal()}</strong></span></p>
                             </div>
@@ -223,9 +230,9 @@ const CheckoutPage = () => {
                                 <div className={styles.packageTotal}>
                                     <h2>{storeName}<br />Order Summary</h2>
                                     <p><span className={styles.packageLabel}>Items Subtotal:</span> <span className={styles.packageInfo}>${calculatePackageTotal(groupedCartItems[storeName])}</span></p>
-                                    <p><span className={styles.packageLabel}>Shipping Total:</span> <span className={styles.packageInfo}>${calculateShippingTotal(groupedCartItems[storeName])}</span></p>
+                                    <p><span className={styles.packageLabel}>Shipping Total:</span> <span className={styles.packageInfo}>${(Number(groupedCartItems[storeName][0]?.shippingPrice) || 0).toFixed(2)}</span></p>
                                     <p><span className={styles.packageLabel}>Taxes:</span> <span className={styles.packageInfo}>${calculateTaxes(groupedCartItems[storeName])}</span></p>
-                                    <p><span className={styles.packageLabel}><strong>Total:</strong></span> <span className={styles.packageInfo}><strong>${(parseFloat(calculatePackageTotal(groupedCartItems[storeName])) + parseFloat(calculateShippingTotal(groupedCartItems[storeName])) + parseFloat(calculateTaxes(groupedCartItems[storeName]))).toFixed(2)}</strong></span></p>
+                                    <p><span className={styles.packageLabel}><strong>Total:</strong></span> <span className={styles.packageInfo}><strong>${(parseFloat(calculatePackageTotal(groupedCartItems[storeName])) + parseFloat(Number(groupedCartItems[storeName][0]?.shippingPrice) || 0) + parseFloat(calculateTaxes(groupedCartItems[storeName]))).toFixed(2)}</strong></span></p>
                                 </div>
                             </div>
                         ))}
