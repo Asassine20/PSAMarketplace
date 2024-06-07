@@ -103,6 +103,20 @@
   .saveCardOption input {
     margin-right: 10px;
   }
+
+  .addNewCardButton {
+    background-color: transparent;
+    border: none;
+    color: blue;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 5px;
+    }
+
+    .addNewCardButton:hover {
+        color: darkblue;
+    }
   
   .summary {
     font-size: 1.2em;

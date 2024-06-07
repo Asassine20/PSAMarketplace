@@ -5,6 +5,22 @@ import styles from '../styles/checkout.module.css';
 import Link from 'next/link';
 import AddressModal from '../components/Address/AddressModal';
 
+// Card type regular expressions
+const cardTypeRegex = {
+    visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
+    mastercard: /^5[1-5][0-9]{14}$/,
+    amex: /^3[47][0-9]{13}$/,
+    discover: /^6(?:011|5[0-9]{2})[0-9]{12}$/
+};
+
+const getCardType = (number) => {
+    if (cardTypeRegex.visa.test(number)) return 'visa';
+    if (cardTypeRegex.mastercard.test(number)) return 'mastercard';
+    if (cardTypeRegex.amex.test(number)) return 'amex';
+    if (cardTypeRegex.discover.test(number)) return 'discover';
+    return 'unknown';
+};
+
 const CheckoutPage = () => {
     const { cart } = useCart();
     const { userId } = useAuth();
@@ -14,13 +30,18 @@ const CheckoutPage = () => {
     const [paymentMethod, setPaymentMethod] = useState('creditCard');
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [addressType, setAddressType] = useState(''); // 'billing' or 'shipping'
+    const [savedCards, setSavedCards] = useState([]);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [showCardForm, setShowCardForm] = useState(true);
     const [cardDetails, setCardDetails] = useState({
         cardNumber: '',
         expMonth: '',
         expYear: '',
         securityCode: '',
         saveCard: false,
+        cardHolderName: '',
     });
+    const [cardType, setCardType] = useState('unknown');
 
     useEffect(() => {
         setMounted(true);
@@ -43,6 +64,24 @@ const CheckoutPage = () => {
         fetchAddresses();
     }, [userId]);
 
+    useEffect(() => {
+        const fetchSavedCards = async () => {
+            if (!userId) return;
+            try {
+                const response = await fetch(`/api/paymentInfo?userId=${userId}`);
+                const data = await response.json();
+                setSavedCards(data);
+            } catch (error) {
+                console.error('Failed to fetch saved cards:', error);
+            }
+        };
+        fetchSavedCards();
+    }, [userId]);
+
+    useEffect(() => {
+        setCardType(getCardType(cardDetails.cardNumber));
+    }, [cardDetails.cardNumber]);
+
     const groupItemsByStore = (items) => items.reduce((acc, item) => {
         const key = item.storeName;
         if (!acc[key]) acc[key] = [];
@@ -52,17 +91,13 @@ const CheckoutPage = () => {
 
     const groupedCartItems = groupItemsByStore(cart);
 
-    const calculateTotal = () => {
-        const itemsTotal = cart.reduce((total, item) => total + Number(item.price || 0), 0);
-        const shippingTotal = Object.values(groupedCartItems).reduce((total, items) => total + (Number(items[0]?.shippingPrice) || 0), 0);
-        const taxes = itemsTotal * 0.1; // Assuming a 10% tax rate
-        return (itemsTotal + shippingTotal + taxes).toFixed(2);
-    };
+    const calculateTotal = () => cart.reduce((total, item) => total + Number(item.price || 0), 0).toFixed(2);
 
     const calculatePackageTotal = (items) => items.reduce((total, item) => total + Number(item.price || 0), 0).toFixed(2);
 
-    const calculateShippingTotal = (items) => {
-        return Number(items[0]?.shippingPrice || 0);
+    const calculateShippingTotal = () => {
+        const shippingPrices = Object.values(groupedCartItems).map(items => Number(items[0]?.shippingPrice || 0));
+        return shippingPrices.reduce((total, price) => total + price, 0).toFixed(2);
     };
 
     const calculateTaxes = (items) => (calculatePackageTotal(items) * 0.1).toFixed(2); // Assuming a 10% tax rate
@@ -99,7 +134,40 @@ const CheckoutPage = () => {
     const handleSubmitOrder = async (event) => {
         event.preventDefault();
         // Handle order submission here
-        console.log("Order submitted", { billingAddress, shippingAddress, paymentMethod, cart, cardDetails });
+        console.log("Order submitted", { billingAddress, shippingAddress, paymentMethod, cart, cardDetails, selectedCard });
+    };
+
+    const handleSaveCard = async () => {
+        try {
+            const response = await fetch('/api/paymentInfo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...cardDetails, userId }),
+            });
+            if (!response.ok) throw new Error('Failed to save card');
+            const savedCard = await response.json();
+            setSavedCards([...savedCards, savedCard]);
+        } catch (error) {
+            console.error('Failed to save card:', error);
+        }
+    };
+
+    const handleCardSelection = (card) => {
+        setSelectedCard(card);
+        setShowCardForm(false);
+    };
+
+    const handleNewCard = () => {
+        setSelectedCard(null);
+        setShowCardForm(true);
+    };
+
+    const cardIcons = {
+        visa: 'https://example.com/visa.png',
+        mastercard: 'https://example.com/mastercard.png',
+        amex: 'https://example.com/amex.png',
+        discover: 'https://example.com/discover.png',
+        unknown: 'https://example.com/unknown.png',
     };
 
     if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
@@ -139,13 +207,32 @@ const CheckoutPage = () => {
                         <div className={styles.paymentAndSummary}>
                             <div className={styles.paymentMethod}>
                                 <h3>Payment Method</h3>
-                                <div className={styles.paymentOption}>
-                                    <input type="radio" id="creditCard" name="paymentMethod" value="creditCard" checked={paymentMethod === 'creditCard'} onChange={(e) => setPaymentMethod(e.target.value)} />
-                                    <label htmlFor="creditCard">Credit / Debit Card <img src="https://cart.tcgplayer.com/content/images/mc-new.png" alt="MC" className={styles.cardIcon} /><img src="https://cart.tcgplayer.com/content/images/visa-new.png" alt="Visa" className={styles.cardIcon} /></label>
-                                </div>
-                                {paymentMethod === 'creditCard' && (
+                                {savedCards.length > 0 && (
+                                    <div className={styles.savedCards}>
+                                        {savedCards.map((card) => (
+                                            <label key={card.PaymentID} className={styles.cardOption}>
+                                                <input type="radio" name="savedCard" value={card.PaymentID} onChange={() => handleCardSelection(card)} />
+                                                {card.CardNumber} (Exp: {card.ExpMonth}/{card.ExpYear})
+                                            </label>
+                                        ))}
+                                        <label className={styles.cardOption}>
+                                            <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
+                                            New Card
+                                            <button type="button" className={styles.addNewCardButton}>+</button>
+                                        </label>
+                                    </div>
+                                )}
+                                {!savedCards.length && (
+                                    <label className={styles.cardOption}>
+                                        <input type="radio" name="savedCard" value="new" onChange={handleNewCard} />
+                                        New Card
+                                        <button type="button" className={styles.addNewCardButton}>+</button>
+                                    </label>
+                                )}
+                                {showCardForm && (
                                     <div className={styles.cardDetails}>
                                         <input type="text" placeholder="Card Number" value={cardDetails.cardNumber} onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })} />
+                                        <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <select value={cardDetails.expMonth} onChange={(e) => setCardDetails({ ...cardDetails, expMonth: e.target.value })}>
                                                 <option value="">Exp Month</option>
@@ -176,15 +263,11 @@ const CheckoutPage = () => {
                                         </div>
                                     </div>
                                 )}
-                                <div className={styles.paymentOption}>
-                                    <input type="radio" id="paypal" name="paymentMethod" value="paypal" checked={paymentMethod === 'paypal'} onChange={(e) => setPaymentMethod(e.target.value)} />
-                                    <label htmlFor="paypal">PayPal <img src="https://cart.tcgplayer.com/content/images/new-paypal.png" alt="PayPal" className={styles.paypalIcon} /></label>
-                                </div>
                             </div>
                             <div className={styles.summary}>
                                 <h3>Summary</h3>
                                 <p><span className={styles.summaryLabel}>Subtotal:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.price || 0), 0)).toFixed(2)}</span></p>
-                                <p><span className={styles.summaryLabel}>Shipping:</span> <span className={styles.summaryInfo}>${Object.values(groupedCartItems).reduce((total, items) => total + (Number(items[0]?.shippingPrice) || 0), 0).toFixed(2)}</span></p>
+                                <p><span className={styles.summaryLabel}>Shipping:</span> <span className={styles.summaryInfo}>${calculateShippingTotal()}</span></p>
                                 <p><span className={styles.summaryLabel}>Taxes:</span> <span className={styles.summaryInfo}>${(cart.reduce((total, item) => total + Number(item.price || 0) * 0.1, 0)).toFixed(2)}</span></p>
                                 <p><span className={styles.summaryLabel}><strong>Total:</strong></span> <span className={styles.summaryInfo}><strong>${calculateTotal()}</strong></span></p>
                             </div>
@@ -230,9 +313,9 @@ const CheckoutPage = () => {
                                 <div className={styles.packageTotal}>
                                     <h2>{storeName}<br />Order Summary</h2>
                                     <p><span className={styles.packageLabel}>Items Subtotal:</span> <span className={styles.packageInfo}>${calculatePackageTotal(groupedCartItems[storeName])}</span></p>
-                                    <p><span className={styles.packageLabel}>Shipping Total:</span> <span className={styles.packageInfo}>${(Number(groupedCartItems[storeName][0]?.shippingPrice) || 0).toFixed(2)}</span></p>
+                                    <p><span className={styles.packageLabel}>Shipping Total:</span> <span className={styles.packageInfo}>${(Number(groupedCartItems[storeName][0]?.shippingPrice || 0)).toFixed(2)}</span></p>
                                     <p><span className={styles.packageLabel}>Taxes:</span> <span className={styles.packageInfo}>${calculateTaxes(groupedCartItems[storeName])}</span></p>
-                                    <p><span className={styles.packageLabel}><strong>Total:</strong></span> <span className={styles.packageInfo}><strong>${(parseFloat(calculatePackageTotal(groupedCartItems[storeName])) + parseFloat(Number(groupedCartItems[storeName][0]?.shippingPrice) || 0) + parseFloat(calculateTaxes(groupedCartItems[storeName]))).toFixed(2)}</strong></span></p>
+                                    <p><span className={styles.packageLabel}><strong>Total:</strong></span> <span className={styles.packageInfo}><strong>${(parseFloat(calculatePackageTotal(groupedCartItems[storeName])) + parseFloat((Number(groupedCartItems[storeName][0]?.shippingPrice || 0))) + parseFloat(calculateTaxes(groupedCartItems[storeName]))).toFixed(2)}</strong></span></p>
                                 </div>
                             </div>
                         ))}
