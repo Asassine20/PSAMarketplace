@@ -10,8 +10,8 @@
   display: flex;
   justify-content: center;
   flex-grow: 1;
-  margin-top: 5px; /* Reduced margin-top for closer alignment */
-  width: 95%; /* Make searchBarContainer take 90% of the width */
+  margin-top: 5px;
+  width: 95%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -20,7 +20,7 @@
   display: flex;
   border: 1px solid #ccc;
   border-radius: 6px;
-  width: 100%; /* Make searchForm take full width of its container */
+  width: 100%;
   margin: 0 auto;
   overflow: hidden;
 }
@@ -28,29 +28,30 @@
 .searchForm input[type="text"] {
   border: none;
   padding: 10px 15px;
-  width: calc(100% - 30px); /* Adjust width to make room for the button */
+  width: calc(100% - 30px);
   outline: none;
 }
 
 .searchForm button {
-  border: none;  /* No border by default */
+  border: none;
   padding: 10px 15px;
   background-color: white;
   color: black;
   cursor: pointer;
-  display: flex;            /* Ensures the content is properly centered */
-  justify-content: center;  /* Center content horizontally */
-  align-items: center;      /* Center content vertically */
-  position: relative;       /* Needed to position the icon if necessary */
-  overflow: hidden;         /* Keeps all content within the borders */
-  font-size: 16px;          /* Default text size. Adjust if needed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  font-size: 16px;
 }
 
 .searchForm button:hover {
-  border: 2px solid black;  /* Solid border on hover, change thickness as needed */
+  border: 2px solid black;
 }
+
 .searchForm button .faIcon {
-  color: black; /* Ensuring the icon is full black for maximum contrast */
+  color: black;
 }
 
 .navbar {
@@ -77,17 +78,17 @@
   margin: 0 10px;
   border-radius: 5px;
   display: block;
+  cursor: pointer;
 }
 
 .navLink:hover {
   background-color: #0077cc;
-  text-decoration: none;
 }
 
 .rightNav {
   display: flex;
   align-items: center;
-  justify-content: center; /* Adjusted for closer spacing */
+  justify-content: center;
   width: auto;
 }
 
@@ -106,32 +107,31 @@
   font-size: 12px;
 }
 
-
 .startSellingButton {
   color: black;
   font-weight: bold;
-  padding: 5px 10px; /* Adjusted padding for Start Selling button */
+  padding: 5px 10px;
   border-radius: 5px;
   text-decoration: none;
   margin: 0 5px;
   cursor: pointer;
 }
 
-.startSellingButton:hover, 
+.startSellingButton:hover,
 .navIcon:hover {
-  border-color: #0050a2; /* Darker color on hover */
+  border-color: #0050a2;
   color: #0050a2;
 }
 
 .navIcon {
-  color: #000000; /* Icon color */
-  margin: 0 10px; /* Reduced margin for closer icons */
+  color: #000000;
+  margin: 0 10px;
   cursor: pointer;
-  font-size: 1.5rem; /* Adjust this value as needed */
-  padding: 5px; /* Padding for icons */
-  border: 2px solid black; /* Black border for icons */
-  border-radius: 5px; /* Rounded corners for icons */
-  display: inline-flex; /* Ensures icons are aligned and treated as flex items */
+  font-size: 1.5rem;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
 }
@@ -155,24 +155,25 @@
 }
 
 .panelContent {
-  width: 100%; /* Ensure it takes full width */
+  width: 100%;
 }
 
 .userInfo {
-  margin-bottom: 20px; /* Space below the user info */
-  text-align: center; /* Center the text */
+  margin-bottom: 20px;
+  text-align: center;
   width: 100%;
 }
 
-
-.accountSection, .sellerHelpSection {
+.accountSection,
+.sellerHelpSection {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px; /* Space between sections */
+  margin-bottom: 20px;
   width: 100%;
 }
 
-.accountSection h3, .sellerHelpSection h3 {
+.accountSection h3,
+.sellerHelpSection h3 {
   font-size: 18px;
   color: #0050a2;
   margin-bottom: 10px;
@@ -180,7 +181,9 @@
   padding-bottom: 5px;
 }
 
-.accountSection a, .sellerHelpSection a, .signOutButton {
+.accountSection a,
+.sellerHelpSection a,
+.signOutButton {
   padding: 5px;
   margin: 4px 0;
   border-radius: 4px;
@@ -191,16 +194,19 @@
   text-decoration: none;
   transition: background-color 0.3s ease;
   cursor: pointer;
-  font-size: 16px; 
+  font-size: 16px;
   border: none;
-  background-color: transparent; /* Ensure no background color for sign-out button */
+  background-color: transparent;
 }
 
-.accountSection a:hover, .sellerHelpSection a:hover, .signOutButton:hover {
+.accountSection a:hover,
+.sellerHelpSection a:hover,
+.signOutButton:hover {
   background-color: #ddd;
 }
 
-.loginButton, .signUpButton {
+.loginButton,
+.signUpButton {
   background-color: #0050a2;
   color: white;
   border: none;
@@ -213,8 +219,73 @@
   display: inline-block;
 }
 
-.loginButton:hover, .signUpButton:hover {
+.loginButton:hover,
+.signUpButton:hover {
   background-color: #0077cc;
+}
+
+.navLinkContainer {
+  position: relative;
+}
+
+.miniPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 200px;
+}
+
+.miniPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+}
+
+.miniPanelSport {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.miniPanelTitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+}
+
+.miniPanelList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.miniPanelItem {
+  display: block;
+  padding: 5px 0;
+  cursor: pointer;
+  color: black;
+}
+
+.miniPanelItem:hover {
+  text-decoration: underline;
+  color: #0077cc; /* Change the hover color */
+}
+
+.shopAllButton {
+  cursor: pointer;
+  color: black; /* Change the color to black */
+}
+
+.shopAllButton:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 860px) {

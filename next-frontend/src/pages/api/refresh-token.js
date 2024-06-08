@@ -16,7 +16,6 @@ export default async function handler(req, res) {
 
   try {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    console.log('Decoded refresh token:', decoded);
     const newAccessToken = jwt.sign({ userId: decoded.userId, email: decoded.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
     const newRefreshToken = jwt.sign({ userId: decoded.userId, email: decoded.email }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 

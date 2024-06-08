@@ -57,7 +57,6 @@ const useAuth = () => {
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       const decoded = decodeToken(accessToken);
-      console.log('Decoded access token:', decoded);
       if (decoded && decoded.exp * 1000 < Date.now()) {
         refreshToken();
       } else {

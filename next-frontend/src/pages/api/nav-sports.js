@@ -1,10 +1,8 @@
-// Next.js API route for fetching distinct sports
 import db from '@/db';
 
 export default async function handler(req, res) {
   try {
     const results = await db.query('SELECT DISTINCT Sport FROM Card');
-    // Assuming results are in an array and need to be mapped to the expected structure
     const sports = results.map(row => ({ Sport: row.Sport }));
     res.status(200).json(sports);
   } catch (error) {

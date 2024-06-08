@@ -5,20 +5,22 @@ import Image from 'next/image';
 import styles from './Navbar.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-import { IoCartOutline } from "react-icons/io5";
-import { FaRegUser } from "react-icons/fa";
-import { useCart } from '../Cart/CartProvider'; // Import the useCart hook
+import { IoCartOutline } from 'react-icons/io5';
+import { FaRegUser } from 'react-icons/fa';
+import { useCart } from '../Cart/CartProvider';
 
 const Navbar = () => {
   const [sports, setSports] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [mounted, setMounted] = useState(false); // New state to track if component has mounted
+  const [mounted, setMounted] = useState(false);
+  const [activeSport, setActiveSport] = useState(null);
+  const [recentCardSets, setRecentCardSets] = useState([]);
   const router = useRouter();
-  const { cart } = useCart(); // Access the cart context
-  const panelRef = useRef(null); // Ref for the side panel
+  const { cart } = useCart();
+  const sidePanelRef = useRef(null);
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -31,7 +33,6 @@ const Navbar = () => {
           setUserEmail(decodedToken.email);
         }
       }
-      console.log('User is logged in:', loggedIn);
     };
 
     checkLoginStatus();
@@ -40,9 +41,8 @@ const Navbar = () => {
       .then(response => response.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setSports(data);
+          setSports(data.filter(sport => sport.Sport)); // Remove empty nav links
         } else {
-          console.error('Data is not an array:', data);
           setSports([]);
         }
       })
@@ -50,7 +50,7 @@ const Navbar = () => {
 
     window.addEventListener('storage', checkLoginStatus);
 
-    setMounted(true); // Set mounted to true when component has mounted
+    setMounted(true);
 
     return () => {
       window.removeEventListener('storage', checkLoginStatus);
@@ -71,14 +71,13 @@ const Navbar = () => {
     });
   };
 
-  const togglePanel = () => {
-    console.log('Panel toggled, isLoggedIn:', isLoggedIn);
-    setIsPanelOpen(!isPanelOpen);
+  const toggleSidePanel = () => {
+    setIsSidePanelOpen(!isSidePanelOpen);
   };
 
   const handleSignOut = async () => {
     const sessionId = localStorage.getItem('sessionId');
-  
+
     if (sessionId) {
       await fetch('/api/logout', {
         method: 'POST',
@@ -89,25 +88,25 @@ const Navbar = () => {
         body: JSON.stringify({ sessionId })
       });
     }
-  
+
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('sessionId');
     setIsLoggedIn(false);
     router.push('/').then(() => {
-      window.location.reload(); // Refresh the page after redirecting to the home page
+      window.location.reload();
     });
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (panelRef.current && !panelRef.current.contains(event.target)) {
-        setIsPanelOpen(false);
+      if (sidePanelRef.current && !sidePanelRef.current.contains(event.target)) {
+        setIsSidePanelOpen(false);
       }
     };
 
-    if (isPanelOpen) {
+    if (isSidePanelOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -116,7 +115,19 @@ const Navbar = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isPanelOpen]);
+  }, [isSidePanelOpen]);
+
+  const handleNavLinkClick = (sport) => {
+    if (activeSport === sport) {
+      setActiveSport(null);
+    } else {
+      setActiveSport(sport);
+      fetch(`/api/nav-cardsets?sport=${sport}`)
+        .then(response => response.json())
+        .then(data => setRecentCardSets(data))
+        .catch(error => console.error('Error fetching recent card sets:', error));
+    }
+  };
 
   return (
     <div className={styles.navbarContainer}>
@@ -130,20 +141,20 @@ const Navbar = () => {
           </a>
         </div>
         <div className={styles.rightNav}>
-          <FaRegUser onClick={togglePanel} className={`${styles.navIcon} ${styles.faIcon}`} />
+          <FaRegUser onClick={toggleSidePanel} className={`${styles.navIcon} ${styles.faIcon}`} />
           <a href="http://localhost:3001/register" target="_blank" rel="noopener noreferrer">
             <span className={styles.startSellingButton}>Start Selling</span>
           </a>
           <Link href="/cart" passHref>
             <div className={styles.cartIconWrapper}>
               <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
-              {mounted && cart.length > 0 && <span className={styles.cartBadge}>{cart.length}</span>} {/* Only render cart badge if component has mounted */}
+              {mounted && cart.length > 0 && <span className={styles.cartBadge}>{cart.length}</span>}
             </div>
           </Link>
         </div>
       </div>
-      {isPanelOpen && (
-        <div className={styles.sidePanel} ref={panelRef}>
+      {isSidePanelOpen && (
+        <div className={styles.sidePanel} ref={sidePanelRef}>
           {isLoggedIn ? (
             <div className={styles.panelContent}>
               <div className={styles.userInfo}>
@@ -197,21 +208,60 @@ const Navbar = () => {
       <nav className={styles.navbar}>
         <div className={styles.sportsLinks}>
           {Array.isArray(sports) && sports.map((sport, index) => (
-            <Link 
-              key={index} 
-              href={{
-                pathname: '/search',
-                query: { 
-                  cardName: '',
-                  page: '1',
-                  inStock: 'true',
-                  sports: sport.Sport 
-                }
-              }}
-              passHref
+            <div
+              key={index}
+              className={styles.navLinkContainer}
             >
-              <div className={styles.navLink}>{sport.Sport}</div>
-            </Link>
+              <div
+                className={styles.navLink}
+                onClick={() => handleNavLinkClick(sport.Sport)}
+              >
+                {sport.Sport}
+              </div>
+              {activeSport === sport.Sport && (
+                <div className={styles.miniPanel}>
+                  <div className={styles.miniPanelHeader}>
+                    <span className={styles.miniPanelSport}><b>{sport.Sport}</b></span>
+                    <Link
+                      href={{
+                        pathname: '/search',
+                        query: {
+                          cardName: '',
+                          page: '1',
+                          inStock: 'true',
+                          sports: sport.Sport
+                        }
+                      }}
+                      passHref
+                    >
+                      <span className={styles.shopAllButton}>Shop All</span>
+                    </Link>
+                  </div>
+                  <div className={styles.miniPanelTitle}>Recent Sets</div>
+                  <ul className={styles.miniPanelList}>
+                    {recentCardSets.map((cardSet, idx) => (
+                      <li key={idx}>
+                        <Link
+                          href={{
+                            pathname: '/search',
+                            query: {
+                              cardName: '',
+                              page: '1',
+                              inStock: 'true',
+                              sports: sport.Sport,
+                              cardSets: cardSet.CardSet
+                            }
+                          }}
+                          passHref
+                        >
+                          <span className={styles.miniPanelItem}>{cardSet.CardSet}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </nav>
