@@ -188,7 +188,19 @@ const Navbar = () => {
       <nav className={styles.navbar}>
         <div className={styles.sportsLinks}>
           {Array.isArray(sports) && sports.map((sport, index) => (
-            <Link key={index} href={`/sports/${(sport.Sport || '').toLowerCase()}`} passHref>
+            <Link 
+              key={index} 
+              href={{
+                pathname: '/search',
+                query: { 
+                  cardName: '',
+                  page: '1',
+                  showAll: 'true',
+                  sports: sport.Sport 
+                }
+              }}
+              passHref
+            >
               <div className={styles.navLink}>{sport.Sport}</div>
             </Link>
           ))}
