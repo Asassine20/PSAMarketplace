@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
-import styles from '../styles/search.module.css';
 import { FaCaretDown } from 'react-icons/fa';
+import { PiSmileySadBold } from 'react-icons/pi';
+import styles from '../styles/search.module.css';
 
 const Spinner = () => (
     <div className={styles.spinner}></div>
@@ -23,12 +24,12 @@ const SearchPage = () => {
     const { query } = router;
 
     const [filters, setFilters] = useState({
-        sports: query.sports ? Array.isArray(query.sports) ? query.sports : [query.sports] : [],
-        cardSet: query.cardSet ? Array.isArray(query.cardSet) ? query.cardSet : [query.cardSet] : [],
-        cardYear: query.cardYear ? Array.isArray(query.cardYear) ? query.cardYear : [query.cardYear] : [],
-        cardColor: query.cardColor ? Array.isArray(query.cardColor) ? query.cardColor : [query.cardColor] : [],
-        cardVariant: query.cardVariant ? Array.isArray(query.cardVariant) ? query.cardVariant : [query.cardVariant] : [],
-        inStock: query.showAll !== 'true',
+        sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
+        cardSet: query.cardSet ? (Array.isArray(query.cardSet) ? query.cardSet : [query.cardSet]) : [],
+        cardYear: query.cardYear ? (Array.isArray(query.cardYear) ? query.cardYear : [query.cardYear]) : [],
+        cardColor: query.cardColor ? (Array.isArray(query.cardColor) ? query.cardColor : [query.cardColor]) : [],
+        cardVariant: query.cardVariant ? (Array.isArray(query.cardVariant) ? query.cardVariant : [query.cardVariant]) : [],
+        inStock: query.inStock === 'true',
         cardName: query.cardName || '',
         page: query.page || '1',
     });
@@ -60,7 +61,7 @@ const SearchPage = () => {
         const queryParameters = new URLSearchParams({
             cardName: updatedFilters.cardName || '',
             page: updatedFilters.page,
-            showAll: !updatedFilters.inStock ? 'false' : 'true',
+            inStock: updatedFilters.inStock ? 'true' : 'false',
         });
 
         Object.keys(updatedFilters).forEach((filterKey) => {
@@ -77,7 +78,7 @@ const SearchPage = () => {
 
     const fetchFilteredCards = async () => {
         setIsLoadingCards(true);
-        let queryStr = `/api/search?cardName=${encodeURIComponent(filters.cardName || '')}&page=${filters.page}&showAll=${!filters.inStock}`;
+        let queryStr = `/api/search?cardName=${encodeURIComponent(filters.cardName || '')}&page=${filters.page}&inStock=${filters.inStock}`;
 
         Object.keys(filters).forEach((filterKey) => {
             const filterValue = filters[filterKey];
@@ -105,7 +106,7 @@ const SearchPage = () => {
         let queryParams = new URLSearchParams({
             fetchFilters: 'true',
             cardName: filters.cardName || '',
-            showAll: filters.inStock ? 'false' : 'true',
+            inStock: filters.inStock ? 'true' : 'false',
         });
 
         Object.keys(filters).forEach((filterKey) => {
@@ -133,12 +134,12 @@ const SearchPage = () => {
 
     useEffect(() => {
         setFilters({
-            sports: query.sports ? Array.isArray(query.sports) ? query.sports : [query.sports] : [],
-            cardSet: query.cardSet ? Array.isArray(query.cardSet) ? query.cardSet : [query.cardSet] : [],
-            cardYear: query.cardYear ? Array.isArray(query.cardYear) ? query.cardYear : [query.cardYear] : [],
-            cardColor: query.cardColor ? Array.isArray(query.cardColor) ? query.cardColor : [query.cardColor] : [],
-            cardVariant: query.cardVariant ? Array.isArray(query.cardVariant) ? query.cardVariant : [query.cardVariant] : [],
-            inStock: query.showAll !== 'true',
+            sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
+            cardSet: query.cardSet ? (Array.isArray(query.cardSet) ? query.cardSet : [query.cardSet]) : [],
+            cardYear: query.cardYear ? (Array.isArray(query.cardYear) ? query.cardYear : [query.cardYear]) : [],
+            cardColor: query.cardColor ? (Array.isArray(query.cardColor) ? query.cardColor : [query.cardColor]) : [],
+            cardVariant: query.cardVariant ? (Array.isArray(query.cardVariant) ? query.cardVariant : [query.cardVariant]) : [],
+            inStock: query.inStock === 'true',
             cardName: query.cardName || '',
             page: query.page || '1',
         });
@@ -295,36 +296,43 @@ const SearchPage = () => {
                         {isLoadingCards ? (
                             <div className={styles.centeredContent}><Spinner /></div>
                         ) : (
-                            <div className={styles.cardsGrid}>
+                            <div className={styles.cardsGridWrapper}>
                                 {filteredCards.length > 0 ? (
-                                    filteredCards.map((card, index) => (
-                                        <Link key={index} href={`/cards/${card.CardID}/${encodeURIComponent(card.CardSet + '+' + card.CardName)}`}>
-                                            <div className={styles.card}>
-                                                <div className={styles.cardImageWrapper}>
-                                                    <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />
-                                                </div>
-                                                <div className={styles.cardInfo}>
-                                                    <div className={styles.cardYear}>{card.CardYear}</div>
-                                                    <div className={styles.cardSport}>{card.Sport}</div>
-                                                    <div className={styles.cardSet}>{card.CardSet}</div>
-                                                    <div className={styles.cardNumber}># {card.CardNumber}</div>
-                                                    <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
-                                                    <div className={styles.cardColor}>{card.CardColor || ''}</div>
-                                                    <div className={styles.cardName}>{card.CardName}</div>
-                                                    <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
-                                                    <div className={styles.cardMarketPrice}>
-                                                        {card.MarketPrice !== null && card.MarketPrice !== undefined ? (
-                                                            `Market Price: $${card.MarketPrice}`
-                                                        ) : (
-                                                            'Market Price: N/A'
-                                                        )}
+                                    <div className={styles.cardsGrid}>
+                                        {filteredCards.map((card, index) => (
+                                            <Link key={index} href={`/cards/${card.CardID}/${encodeURIComponent(card.CardSet + '+' + card.CardName)}`}>
+                                                <div className={styles.card}>
+                                                    <div className={styles.cardImageWrapper}>
+                                                        <Image src={card.CardImage} alt={card.CardName} width={180} height={270} layout="intrinsic" className={styles.cardImage} />
+                                                    </div>
+                                                    <div className={styles.cardInfo}>
+                                                        <div className={styles.cardYear}>{card.CardYear}</div>
+                                                        <div className={styles.cardSport}>{card.Sport}</div>
+                                                        <div className={styles.cardSet}>{card.CardSet}</div>
+                                                        <div className={styles.cardNumber}># {card.CardNumber}</div>
+                                                        <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
+                                                        <div className={styles.cardColor}>{card.CardColor || ''}</div>
+                                                        <div className={styles.cardName}>{card.CardName}</div>
+                                                        <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
+                                                        <div className={styles.cardMarketPrice}>
+                                                            {card.MarketPrice !== null && card.MarketPrice !== undefined ? (
+                                                                `Market Price: $${card.MarketPrice}`
+                                                            ) : (
+                                                                'Market Price: N/A'
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </Link>
-                                    ))
+                                            </Link>
+                                        ))}
+                                    </div>
                                 ) : (
-                                    <div>No results found</div>
+                                    <div className={styles.noResultsWrapper}>
+                                        <div className={styles.noResults}>
+                                            <PiSmileySadBold size={250} />
+                                            <p>We're sorry but there are no items that match your criteria. Please try searching again.</p>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         )}

@@ -6,19 +6,19 @@ export default async function handler(req, res) {
         cardName = '',
         cardColor,
         cardVariant,
-        sport,
-        cardYear,
-        cardSet,
+        sports,
+        cardYears,
+        cardSets,
         page = '1',
         limit = '24',
-        showAll = 'false',
+        inStock = 'false',
     } = req.query;
 
     let baseSql = `FROM Card`;
     let whereConditions = [];
     let values = [];
 
-    if (showAll !== 'true') {
+    if (inStock === 'true') {
         whereConditions.push(`inStock = 1`);
     }
 
@@ -27,7 +27,6 @@ export default async function handler(req, res) {
         values.push(`%${cardName.trim()}%`);
     }
 
-    // Dynamic handling for array filters (e.g., cardSets, cardColors)
     ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears'].forEach(filter => {
         if (req.query[`${filter}[]`]) {
             const items = Array.isArray(req.query[`${filter}[]`]) ? req.query[`${filter}[]`] : [req.query[`${filter}[]`]];
@@ -42,14 +41,14 @@ export default async function handler(req, res) {
         try {
             const filtersPromises = [
                 query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql} LIMIT 100`, values),  // Limiting to 100 options
+                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql} LIMIT 100`, values),
                 query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
             ];
-    
+
             const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(filtersPromises);
-    
+
             res.status(200).json({
                 sports: sports.map(r => r.Sport),
                 cardSets: cardSets.map(r => r.CardSet),
@@ -60,14 +59,13 @@ export default async function handler(req, res) {
         } catch (error) {
             console.error("Failed to fetch filter options:", error);
             res.status(500).json({ message: "Failed to fetch filter options" });
-        }    
+        }
     } else {
         const pageNum = parseInt(page, 10);
         const limitNum = parseInt(limit, 10);
         const offset = (pageNum - 1) * limitNum;
-    
+
         try {
-            // Updated to include a JOIN with the Inventory table and aggregate functions
             let sql = `
             SELECT Card.*, 
                    Card.MarketPrice, 
@@ -77,15 +75,14 @@ export default async function handler(req, res) {
             ${whereSql}
             GROUP BY Card.CardID
             LIMIT ? OFFSET ?`;
-            
+
             values.push(limitNum, offset);
 
             const cardsData = await query(sql, values);
 
-            // Assuming you still want the total count of cards matching the query (without considering pagination)
-            const totalCountResult = await query(`SELECT COUNT(DISTINCT Card.CardID) as totalCount ${baseSql} ${whereSql}`, values.slice(0, -2)); // Remove limit and offset values for this count query
+            const totalCountResult = await query(`SELECT COUNT(DISTINCT Card.CardID) as totalCount ${baseSql} ${whereSql}`, values.slice(0, -2));
             const totalCount = totalCountResult[0]?.totalCount || 0;
-    
+
             res.status(200).json({
                 cards: cardsData,
                 totalCount

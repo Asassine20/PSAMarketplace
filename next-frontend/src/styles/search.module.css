@@ -523,3 +523,19 @@ input:checked + .slider:before {
   margin-bottom: 10px; 
   font-weight: bold; 
 }
+
+.noResults {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.noResults svg {
+  color: black;
+  margin-bottom: 20px;
+}
+
+.noResults p {
+  font-size: 18px;
+  color: black;
+}
+

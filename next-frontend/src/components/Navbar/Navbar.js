@@ -59,7 +59,16 @@ const Navbar = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    router.push(`/search?cardName=${encodeURIComponent(searchQuery)}`);
+    const query = searchQuery.trim();
+
+    router.push({
+      pathname: '/search',
+      query: {
+        cardName: query,
+        page: '1',
+        inStock: query ? 'false' : 'true',
+      },
+    });
   };
 
   const togglePanel = () => {
@@ -195,7 +204,7 @@ const Navbar = () => {
                 query: { 
                   cardName: '',
                   page: '1',
-                  showAll: 'true',
+                  inStock: 'true',
                   sports: sport.Sport 
                 }
               }}
