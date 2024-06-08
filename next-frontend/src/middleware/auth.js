@@ -12,7 +12,6 @@ export const authenticate = (req) => {
 
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    console.log('Decoded JWT:', decoded);
     return decoded;
   } catch (err) {
     console.error('JWT verification failed:', err);

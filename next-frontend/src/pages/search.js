@@ -25,10 +25,10 @@ const SearchPage = () => {
 
     const [filters, setFilters] = useState({
         sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
-        cardSet: query.cardSet ? (Array.isArray(query.cardSet) ? query.cardSet : [query.cardSet]) : [],
-        cardYear: query.cardYear ? (Array.isArray(query.cardYear) ? query.cardYear : [query.cardYear]) : [],
-        cardColor: query.cardColor ? (Array.isArray(query.cardColor) ? query.cardColor : [query.cardColor]) : [],
-        cardVariant: query.cardVariant ? (Array.isArray(query.cardVariant) ? query.cardVariant : [query.cardVariant]) : [],
+        cardSets: query.cardSets ? (Array.isArray(query.cardSets) ? query.cardSets : [query.cardSets]) : [],
+        cardYears: query.cardYears ? (Array.isArray(query.cardYears) ? query.cardYears : [query.cardYears]) : [],
+        cardColors: query.cardColors ? (Array.isArray(query.cardColors) ? query.cardColors : [query.cardColors]) : [],
+        cardVariants: query.cardVariants ? (Array.isArray(query.cardVariants) ? query.cardVariants : [query.cardVariants]) : [],
         inStock: query.inStock === 'true',
         cardName: query.cardName || '',
         page: query.page || '1',
@@ -58,6 +58,7 @@ const SearchPage = () => {
     const resultsPerPage = 10; // Assume a constant for results per page (can be adjusted as needed)
 
     const updateFiltersInUrl = (updatedFilters) => {
+        console.log('Updating filters in URL:', updatedFilters);
         const queryParameters = new URLSearchParams({
             cardName: updatedFilters.cardName || '',
             page: updatedFilters.page,
@@ -73,15 +74,17 @@ const SearchPage = () => {
             }
         });
 
+        console.log('Updated query parameters:', queryParameters.toString());
         router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
     };
 
-    const fetchFilteredCards = async () => {
+    const fetchFilteredCards = async (filtersToApply) => {
+        console.log('Fetching filtered cards with filters:', filtersToApply);
         setIsLoadingCards(true);
-        let queryStr = `/api/search?cardName=${encodeURIComponent(filters.cardName || '')}&page=${filters.page}&inStock=${filters.inStock}`;
+        let queryStr = `/api/search?cardName=${encodeURIComponent(filtersToApply.cardName || '')}&page=${filtersToApply.page}&inStock=${filtersToApply.inStock}`;
 
-        Object.keys(filters).forEach((filterKey) => {
-            const filterValue = filters[filterKey];
+        Object.keys(filtersToApply).forEach((filterKey) => {
+            const filterValue = filtersToApply[filterKey];
             if (Array.isArray(filterValue)) {
                 filterValue.forEach((value) => {
                     queryStr += `&${filterKey}[]=${encodeURIComponent(value)}`;
@@ -89,6 +92,7 @@ const SearchPage = () => {
             }
         });
 
+        console.log('Fetching with query:', queryStr);
         const response = await fetch(queryStr);
         if (!response.ok) {
             setIsLoadingCards(false);
@@ -99,18 +103,20 @@ const SearchPage = () => {
         setFilteredCards(cards);
         setTotalCount(totalCount);
         setIsLoadingCards(false);
+        console.log('Fetched cards:', cards);
     };
 
-    const fetchFilterOptions = async () => {
+    const fetchFilterOptions = async (filtersToApply) => {
+        console.log('Fetching filter options with filters:', filtersToApply);
         setIsLoadingFilters(true);
         let queryParams = new URLSearchParams({
             fetchFilters: 'true',
-            cardName: filters.cardName || '',
-            inStock: filters.inStock ? 'true' : 'false',
+            cardName: filtersToApply.cardName || '',
+            inStock: filtersToApply.inStock ? 'true' : 'false',
         });
 
-        Object.keys(filters).forEach((filterKey) => {
-            const filterValue = filters[filterKey];
+        Object.keys(filtersToApply).forEach((filterKey) => {
+            const filterValue = filtersToApply[filterKey];
             if (Array.isArray(filterValue) && filterValue.length > 0) {
                 filterValue.forEach((value) => {
                     queryParams.append(`${filterKey}[]`, value);
@@ -118,10 +124,12 @@ const SearchPage = () => {
             }
         });
 
+        console.log('Fetching filter options with query:', queryParams.toString());
         const response = await fetch(`/api/search?${queryParams.toString()}`);
         if (response.ok) {
             const data = await response.json();
             setFilterOptions(data);
+            console.log('Fetched filter options:', data);
         } else {
             console.error('Failed to fetch filter options');
         }
@@ -129,25 +137,31 @@ const SearchPage = () => {
     };
 
     useEffect(() => {
-        fetchFilteredCards();
-    }, [filters]);
+        console.log('useEffect - initial fetch filtered cards and filter options');
+        fetchFilteredCards(filters);
+        fetchFilterOptions(filters);
+    }, []);
 
     useEffect(() => {
-        setFilters({
-            sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
-            cardSet: query.cardSet ? (Array.isArray(query.cardSet) ? query.cardSet : [query.cardSet]) : [],
-            cardYear: query.cardYear ? (Array.isArray(query.cardYear) ? query.cardYear : [query.cardYear]) : [],
-            cardColor: query.cardColor ? (Array.isArray(query.cardColor) ? query.cardColor : [query.cardColor]) : [],
-            cardVariant: query.cardVariant ? (Array.isArray(query.cardVariant) ? query.cardVariant : [query.cardVariant]) : [],
-            inStock: query.inStock === 'true',
-            cardName: query.cardName || '',
-            page: query.page || '1',
-        });
-    }, [router.query]);
+        if (Object.keys(query).length > 0) {
+            console.log('useEffect - router query change:', query);
+            const updatedFilters = {
+                sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
+                cardSets: query.cardSets ? (Array.isArray(query.cardSets) ? query.cardSets : [query.cardSets]) : [],
+                cardYears: query.cardYears ? (Array.isArray(query.cardYears) ? query.cardYears : [query.cardYears]) : [],
+                cardColors: query.cardColors ? (Array.isArray(query.cardColors) ? query.cardColors : [query.cardColors]) : [],
+                cardVariants: query.cardVariants ? (Array.isArray(query.cardVariants) ? query.cardVariants : [query.cardVariants]) : [],
+                inStock: query.inStock === 'true',
+                cardName: query.cardName || '',
+                page: query.page || '1',
+            };
 
-    useEffect(() => {
-        fetchFilterOptions();
-    }, [router.query]);
+            console.log('Updated filters from query:', updatedFilters);
+            setFilters(updatedFilters);
+            fetchFilteredCards(updatedFilters);
+            fetchFilterOptions(updatedFilters);
+        }
+    }, [query]);
 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
         if (delayedSearch) {
@@ -165,6 +179,7 @@ const SearchPage = () => {
     };
 
     const handleFilterChange = (filterKey, value, isChecked) => {
+        console.log(`handleFilterChange - filterKey: ${filterKey}, value: ${value}, isChecked: ${isChecked}`);
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
@@ -172,34 +187,43 @@ const SearchPage = () => {
                     ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
                     : prevFilters[filterKey].filter((v) => v !== value),
             };
+            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
+            fetchFilteredCards(updatedFilters);
             return updatedFilters;
         });
     };
 
     const handleToggleChange = () => {
+        console.log('handleToggleChange');
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 inStock: !prevFilters.inStock,
             };
+            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
+            fetchFilteredCards(updatedFilters);
             return updatedFilters;
         });
     };
 
     const paginate = (pageNumber) => {
+        console.log(`paginate - pageNumber: ${pageNumber}`);
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 page: pageNumber,
             };
+            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
+            fetchFilteredCards(updatedFilters);
             return updatedFilters;
         });
     };
 
     const toggleFilterVisibility = () => {
+        console.log('toggleFilterVisibility');
         setIsFilterVisible(!isFilterVisible);
     };
 
