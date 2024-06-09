@@ -278,7 +278,7 @@ const Navbar = () => {
                       <span className={styles.shopAllButton}>Shop All</span>
                     </Link>
                   </div>
-                  <div className={styles.panelContent}>
+                  <div className={styles.miniPanelContent}>
                     <div>
                       <div className={styles.miniPanelTitle}>Recent Sets</div>
                       <ul className={styles.miniPanelList}>
