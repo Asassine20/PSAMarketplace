@@ -69,20 +69,26 @@
   display: flex;
   text-decoration: none;
 }
+ .caretIcon {
+  font-size: 24px;
+  color: red;
+ }
 
-.navLink {
+ .navLink {
   text-decoration: none;
   color: #fff;
   font-weight: bold;
   padding: 15px 15px;
   margin: 0 10px;
   border-radius: 5px;
-  display: block;
+  display: flex; 
+  align-items: center; 
   cursor: pointer;
 }
 
 .navLink:hover {
   background-color: #0077cc;
+  text-decoration: none;
 }
 
 .rightNav {
@@ -203,6 +209,7 @@
 .sellerHelpSection a:hover,
 .signOutButton:hover {
   background-color: #ddd;
+  border-radius: 6px;
 }
 
 .loginButton,
@@ -231,33 +238,41 @@
 .miniPanel {
   position: absolute;
   top: 100%;
-  left: 0;
   background: white;
-  border: 1px solid #ddd;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   z-index: 1000;
-  width: 200px;
+  width: max-content;
+  border-radius: 6px;
+  border: 1px solid #babbbc;
+  display: flex;
+  flex-direction: column;
+  left: 0; /* Default position */
+}
+
+.miniPanel.rightAligned {
+  right: 0;
+  left: auto;
+}
+
+.miniPanel.leftAligned {
+  left: 0;
+  right: auto;
 }
 
 .miniPanelHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-}
-
-.miniPanelSport {
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 20px;
 }
 
 .miniPanelTitle {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: bold;
-  margin-bottom: 5px;
+  color: #0050a2;
+  border-bottom: 1px solid #ccc;
   padding-bottom: 5px;
 }
 
@@ -268,24 +283,36 @@
 }
 
 .miniPanelItem {
-  display: block;
-  padding: 5px 0;
+  padding: 10px 0;
+  color: #333;
   cursor: pointer;
-  color: black;
+  transition: background-color 0.3s ease;
+  display: block;
 }
 
 .miniPanelItem:hover {
-  text-decoration: underline;
-  color: #0077cc; /* Change the hover color */
+  background-color: #ddd;
+  border-radius: 6px;
 }
 
 .shopAllButton {
   cursor: pointer;
-  color: black; /* Change the color to black */
+  font-size: 16px;
+  color: black;
+  text-decoration: none ;
 }
 
 .shopAllButton:hover {
-  text-decoration: underline;
+  color: #0050a2;
+}
+
+.panelContent {
+  display: flex;
+  flex-direction: row;
+}
+
+.popularSetsContainer {
+  margin-left: 20px;
 }
 
 @media (max-width: 860px) {
@@ -293,6 +320,7 @@
     display: none;
     margin-top: 20px;
   }
+
   .searchBarContainer {
     margin-bottom: 20px;
   }
