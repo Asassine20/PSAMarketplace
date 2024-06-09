@@ -1,3 +1,4 @@
+/* General Layout */
 .headerContainer {
   display: flex;
   justify-content: space-between;
@@ -69,12 +70,13 @@
   display: flex;
   text-decoration: none;
 }
- .caretIcon {
+
+.caretIcon {
   font-size: 24px;
   color: red;
- }
+}
 
- .navLink {
+.navLink {
   text-decoration: none;
   color: #fff;
   font-weight: bold;
@@ -167,7 +169,9 @@
 }
 
 .accountSection,
-.sellerHelpSection {
+.sellerSection,
+.helpSection,
+.gradingSection {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
@@ -175,7 +179,9 @@
 }
 
 .accountSection h3,
-.sellerHelpSection h3 {
+.sellerSection h3,
+.helpSection h3,
+.gradingSection h3 {
   font-size: 18px;
   color: #0050a2;
   margin-bottom: 10px;
@@ -184,7 +190,9 @@
 }
 
 .accountSection a,
-.sellerHelpSection a,
+.sellerSection a,
+.helpSection a,
+.gradingSection a,
 .signOutButton {
   padding: 5px;
   margin: 4px 0;
@@ -202,7 +210,9 @@
 }
 
 .accountSection a:hover,
-.sellerHelpSection a:hover,
+.sellerSection a:hover,
+.helpSection a:hover,
+.gradingSection a:hover,
 .signOutButton:hover {
   background-color: #ddd;
   border-radius: 6px;

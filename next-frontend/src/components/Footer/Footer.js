@@ -18,7 +18,6 @@ const Footer = () => {
         <Link href="/baseball" className={styles.link}>Baseball</Link>
         <Link href="/basketball" className={styles.link}>Basketball</Link>
         <Link href="/hockey" className={styles.link}>Hockey</Link>
-
       </div>
       <div className={styles.footerSection}>
         <h4>Articles</h4>
@@ -32,22 +31,26 @@ const Footer = () => {
         <h4>About</h4>
         <Link href="/about" className={styles.link}>About Us</Link>
       </div>
+      <div className={styles.footerSection}>
+        <h4>Reduced PSA Grading Prices</h4>
+        <Link href="/grading" className={styles.link}>Grade Through Us</Link>
+      </div>
       <div className={styles.socialMediaSection}>
         <h4>Follow us on social media</h4>
         <div className={styles.socialIcons}>
-            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer">
-                <FaTiktok className={styles.tiktokIcon} />
-            </a>
-            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
-                <FaFacebookF className={styles.facebookIcon} />
-            </a>
-            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
-                <FaInstagram className={styles.instagramIcon} />
-            </a>
-            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
-                <FaYoutube className={styles.youtubeIcon} />
-            </a>
-            </div>
+          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer">
+            <FaTiktok className={styles.tiktokIcon} />
+          </a>
+          <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+            <FaFacebookF className={styles.facebookIcon} />
+          </a>
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
+            <FaInstagram className={styles.instagramIcon} />
+          </a>
+          <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
+            <FaYoutube className={styles.youtubeIcon} />
+          </a>
+        </div>
       </div>
     </footer>
   );

@@ -9,6 +9,54 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/account',
+        destination: '/sidepanel/account',
+      },
+      {
+        source: '/address',
+        destination: '/sidepanel/address',
+      },
+      {
+        source: '/dashboard',
+        destination: '/sidepanel/dashboard',
+      },
+      {
+        source: '/grading',
+        destination: '/sidepanel/grading',
+      },
+      {
+        source: '/orders',
+        destination: '/sidepanel/orders',
+      },
+      {
+        source: '/payment',
+        destination: '/sidepanel/payment',
+      },
+      {
+        source: '/seller',
+        destination: '/sidepanel/seller',
+      },
+      {
+        source: '/contact',
+        destination: '/sidepanel/contact',
+      },
+      {
+        source: '/refund',
+        destination: '/sidepanel/refund',
+      },
+      {
+        source: '/protection',
+        destination: '/sidepanel/protection',
+      },
+      {
+        source: '/about',
+        destination: '/sidepanel/about',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -185,6 +185,9 @@ const Navbar = () => {
           </a>
         </div>
         <div className={styles.rightNav}>
+          <Link href="/grading" passHref>
+            <span className={styles.startSellingButton}>PSA Grading</span>
+          </Link>
           <FaRegUser onClick={toggleSidePanel} className={`${styles.navIcon} ${styles.faIcon}`} />
           <a href="http://localhost:3001/register" target="_blank" rel="noopener noreferrer">
             <span className={styles.startSellingButton}>Start Selling</span>
@@ -212,10 +215,15 @@ const Navbar = () => {
                 <Link href="/payment">Payment Methods</Link>
                 <Link href="/address">Address</Link>
               </div>
-              <div className={styles.sellerHelpSection}>
+              <div className={styles.gradingSection}>
+                <h3>Grading</h3>
+                <Link href="/grading">PSA Grading Middleman</Link>
+              </div>
+              <div className={styles.sellerSection}>
                 <h3>Seller</h3>
-                <Link href="/seller">Seller Account</Link>
                 <Link href="/dashboard">Seller Dashboard</Link>
+              </div>
+              <div className={styles.helpSection}>
                 <h3>Help</h3>
                 <Link href="/contact">Contact Us</Link>
                 <Link href="/refund">Refund Return Policy</Link>

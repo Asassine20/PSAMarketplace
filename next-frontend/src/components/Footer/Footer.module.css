@@ -1,30 +1,30 @@
 /* components/Footer.module.css */
 
 .footer {
-    display: flex;
-    justify-content: space-around;
-    padding: 20px;
-    margin-top: 80px;
-    background-color: #f3f3f3; /* Light grey background */
-    border-top: 1px solid #e1e1e1; /* Light grey border */
-  }
-  
-  .footerSection {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .footerSection h4 {
-    margin-bottom: 10px;
-  }
-  
-  .footerSection a {
-    text-decoration: none;
-    color: #797d86; /* Bootstrap primary blue for link color */
-    margin-bottom: 5px;
-  }
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  margin-top: 80px;
+  background-color: #f3f3f3; /* Light grey background */
+  border-top: 1px solid #e1e1e1; /* Light grey border */
+}
 
-  .socialMediaSection {
+.footerSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.footerSection h4 {
+  margin-bottom: 10px;
+}
+
+.footerSection a {
+  text-decoration: none;
+  color: #797d86; /* Bootstrap primary blue for link color */
+  margin-bottom: 5px;
+}
+
+.socialMediaSection {
   text-align: center;
 }
 
@@ -33,23 +33,48 @@
   color: inherit; /* Inherit color from parent or change as needed */
   font-size: 24px; /* Icon size, adjust as needed */
 }
+
 .socialIcons {
-    padding-top: 5px;
-    color: #797d86;
+  padding-top: 5px;
+  color: #797d86;
 }
 
 .tiktokIcon:hover {
-    color:#00f2ea
+  color: #00f2ea;
 }
 
 .facebookIcon:hover {
-    color: #316ff6;
+  color: #316ff6;
 }
 
 .instagramIcon:hover {
-    color: #d62976;
+  color: #d62976;
 }
 
 .youtubeIcon:hover {
-    color: #ff0000;
+  color: #ff0000;
+}
+
+@media (max-width: 1000px) {
+  .footer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footerSection {
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .footerSection h4 {
+    text-align: center;
+  }
+
+  .footerSection a {
+    text-align: center;
+  }
+
+  .socialMediaSection {
+    margin-top: 20px;
+  }
 }
