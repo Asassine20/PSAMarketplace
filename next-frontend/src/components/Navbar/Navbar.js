@@ -19,7 +19,7 @@ const Navbar = () => {
   const [mounted, setMounted] = useState(false);
   const [activeSport, setActiveSport] = useState(null);
   const [recentCardSets, setRecentCardSets] = useState([]);
-  const [popularCardSets, setPopularCardSets] = useState({});
+  const [popularCardSets, setPopularCardSets] = useState([]);
   const router = useRouter();
   const { cart } = useCart();
   const sidePanelRef = useRef(null);
@@ -169,6 +169,10 @@ const Navbar = () => {
     }
   };
 
+  const handleLinkClick = () => {
+    setActiveSport(null);
+  };
+
   return (
     <div className={styles.navbarContainer}>
       <div className={styles.headerContainer}>
@@ -275,7 +279,7 @@ const Navbar = () => {
                       }}
                       passHref
                     >
-                      <span className={styles.shopAllButton}>Shop All</span>
+                      <span className={styles.shopAllButton} onClick={handleLinkClick}>Shop All</span>
                     </Link>
                   </div>
                   <div className={styles.miniPanelContent}>
@@ -297,7 +301,7 @@ const Navbar = () => {
                               }}
                               passHref
                             >
-                              <span className={styles.miniPanelItem}>{cardSet.CardSet}</span>
+                              <span className={styles.miniPanelItem} onClick={handleLinkClick}>{cardSet.CardSet}</span>
                             </Link>
                           </li>
                         ))}
@@ -321,7 +325,7 @@ const Navbar = () => {
                               }}
                               passHref
                             >
-                              <span className={styles.miniPanelItem}>{cardSet}</span>
+                              <span className={styles.miniPanelItem} onClick={handleLinkClick}>{cardSet}</span>
                             </Link>
                           </li>
                         ))}
