@@ -18,6 +18,17 @@ const CartPage = () => {
 
   const calculateTotal = () => cart.reduce((total, item) => total + Number(item.price || 0), 0).toFixed(2);
 
+  const calculateShipping = () => {
+    const uniqueStores = new Set(cart.map(item => item.storeName));
+    const shippingCosts = {};
+    cart.forEach(item => {
+      if (!shippingCosts[item.storeName]) {
+        shippingCosts[item.storeName] = item.shippingPrice;
+      }
+    });
+    return Object.values(shippingCosts).reduce((total, price) => total + Number(price || 0), 0).toFixed(2);
+  };
+
   const groupItemsByStore = (items) => items.reduce((acc, item) => {
     const key = item.storeName;
     if (!acc[key]) acc[key] = [];
@@ -165,8 +176,8 @@ const CartPage = () => {
           <p className={styles.largeText}><span>Packages:</span> <span>{Object.keys(groupedCartItems).length}</span></p>
           <p className={styles.largeText}><span>Items:</span> <span>{cart.length}</span></p>
           <p className={styles.largeText}><span>Item Total:</span> <span>${calculateTotal()}</span></p>
-          <p className={styles.largeText}><span>Shipping:</span> <span>${(cart.reduce((total, item) => total + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>
-          <p className={`${styles.largeText} ${styles.boldText}`}><span>Subtotal:</span> <span>${(cart.reduce((total, item) => total + Number(item.price || 0) + Number(item.shippingPrice || 0), 0)).toFixed(2)}</span></p>        
+          <p className={styles.largeText}><span>Shipping:</span> <span>${calculateShipping()}</span></p>
+          <p className={`${styles.largeText} ${styles.boldText}`}><span>Subtotal:</span> <span>${(parseFloat(calculateTotal()) + parseFloat(calculateShipping())).toFixed(2)}</span></p>
           <button className={styles.checkoutButton} onClick={handleCheckout}>Checkout</button>
           <button className={styles.clearCartButton} onClick={clearCart}>Clear Cart</button>
         </div>

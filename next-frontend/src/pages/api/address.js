@@ -17,7 +17,6 @@ export default async function handler(req, res) {
       try {
         console.log('Fetching addresses for user ID:', userId);
         const addresses = await query('SELECT * FROM Addresses WHERE UserID = ?', [userId]);
-        console.log('Fetched addresses:', addresses);
         res.status(200).json(addresses);
       } catch (error) {
         console.error('Failed to fetch addresses:', error);
