@@ -15,7 +15,6 @@ export default async function handler(req, res) {
   switch (method) {
     case 'GET':
       try {
-        console.log('Fetching addresses for user ID:', userId);
         const addresses = await query('SELECT * FROM Addresses WHERE UserID = ?', [userId]);
         res.status(200).json(addresses);
       } catch (error) {
@@ -28,10 +27,6 @@ export default async function handler(req, res) {
         FirstName, LastName, Street, Street2, City, State, ZipCode, Country, IsPrimary, IsBilling
       } = req.body;
 
-      console.log('Received data:', {
-        FirstName, LastName, Street, Street2, City, State, ZipCode, Country, IsPrimary, IsBilling
-      });
-
       try {
         const result = await query(
           'INSERT INTO Addresses (FirstName, LastName, Street, Street2, City, State, ZipCode, Country, IsPrimary, UserID, IsBilling) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -43,7 +38,6 @@ export default async function handler(req, res) {
           FirstName, LastName, Street, Street2, City, State, ZipCode, Country, IsPrimary, IsBilling
         };
 
-        console.log('Inserted new address:', newAddress);
         res.status(201).json(newAddress);
       } catch (error) {
         console.error('Failed to save address:', error);

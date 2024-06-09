@@ -1,0 +1,105 @@
+.container {
+    padding: 20px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    margin: 0;
+  }
+  
+  .startButton {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .startButton:hover {
+    background-color: #005bb5;
+  }
+  
+  .banner {
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+  }
+  
+  .bannerImage {
+    width: 50%;
+    height: auto;
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+    margin-top: 20px;
+  }
+  
+  .tableContainer h2 {
+    margin-bottom: 10px;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .table th {
+    background-color: white; /* No background color */
+  }
+  
+  .table td:first-child,
+  .table th:first-child {
+    border-left: none;
+  }
+  
+  .table td:last-child,
+  .table th:last-child {
+    border-right: none;
+  }
+  
+  .faqSection {
+    margin-top: 40px;
+  }
+  
+  .faqSection h2 {
+    margin-bottom: 20px;
+  }
+  
+  .faqItem {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .faqQuestion {
+    font-weight: bold;
+  }
+  
+  .faqAnswer {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  
