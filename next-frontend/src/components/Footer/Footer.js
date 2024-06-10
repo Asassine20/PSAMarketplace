@@ -12,12 +12,12 @@ const Footer = () => {
       </div>
       <div className={styles.footerSection}>
         <h4>Shop Categories</h4>
-        <Link href="/pokemon-english" className={styles.link}>Pokemon (English)</Link>
-        <Link href="/pokemon-japan" className={styles.link}>Pokemon (Japan)</Link>
-        <Link href="/football" className={styles.link}>Football</Link>
         <Link href="/baseball" className={styles.link}>Baseball</Link>
         <Link href="/basketball" className={styles.link}>Basketball</Link>
+        <Link href="/football" className={styles.link}>Football</Link>
         <Link href="/hockey" className={styles.link}>Hockey</Link>
+        <Link href="/pokemon-english" className={styles.link}>Pokemon (English)</Link>
+        <Link href="/pokemon-japan" className={styles.link}>Pokemon (Japan)</Link>
       </div>
       <div className={styles.footerSection}>
         <h4>Articles</h4>
@@ -32,7 +32,7 @@ const Footer = () => {
         <Link href="/about" className={styles.link}>About Us</Link>
       </div>
       <div className={styles.footerSection}>
-        <h4>Reduced PSA Grading Prices</h4>
+        <h4>PSA Grading</h4>
         <Link href="/grading" className={styles.link}>Grade Through Us</Link>
       </div>
       <div className={styles.socialMediaSection}>

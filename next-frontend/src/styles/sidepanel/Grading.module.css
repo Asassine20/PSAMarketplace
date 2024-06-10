@@ -17,27 +17,14 @@
     background-color: #0070f3;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 15px 30px; /* Increased padding for a larger button */
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px; /* Increased font size for a larger button */
   }
   
   .startButton:hover {
     background-color: #005bb5;
-  }
-  
-  .banner {
-    width: 100%;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-  }
-  
-  .bannerImage {
-    width: 50%;
-    height: auto;
   }
   
   .tableContainer {
@@ -59,13 +46,13 @@
   }
   
   .table th, .table td {
-    border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
   }
   
   .table th {
-    background-color: white; /* No background color */
+    background-color: white; 
+    border-bottom: 1px solid #ddd;
   }
   
   .table td:first-child,

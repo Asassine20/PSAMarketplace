@@ -186,7 +186,7 @@ const Navbar = () => {
         </div>
         <div className={styles.rightNav}>
           <Link href="/grading" passHref>
-            <span className={styles.startSellingButton}>PSA Grading</span>
+            <span className={styles.startSellingButton}>Grading Services</span>
           </Link>
           <FaRegUser onClick={toggleSidePanel} className={`${styles.navIcon} ${styles.faIcon}`} />
           <a href="http://localhost:3001/register" target="_blank" rel="noopener noreferrer">
