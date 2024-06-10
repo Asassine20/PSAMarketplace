@@ -170,6 +170,7 @@ const Navbar = () => {
   };
 
   const handleLinkClick = () => {
+    setIsSidePanelOpen(false);
     setActiveSport(null);
   };
 
@@ -185,18 +186,18 @@ const Navbar = () => {
           </a>
         </div>
         <div className={styles.rightNav}>
-          <Link href="/grading" passHref>
-            <span className={styles.startSellingButton}>Grading Services</span>
+          <Link href="/grading" passHref legacyBehavior>
+            <a className={styles.startSellingButton}>Grading Services</a>
           </Link>
           <FaRegUser onClick={toggleSidePanel} className={`${styles.navIcon} ${styles.faIcon}`} />
           <a href="http://localhost:3001/register" target="_blank" rel="noopener noreferrer">
             <span className={styles.startSellingButton}>Start Selling</span>
           </a>
-          <Link href="/cart" passHref>
-            <div className={styles.cartIconWrapper}>
+          <Link href="/cart" passHref legacyBehavior>
+            <a className={styles.cartIconWrapper}>
               <IoCartOutline className={`${styles.navIcon} ${styles.mdIcon}`} />
               {mounted && cart.length > 0 && <span className={styles.cartBadge}>{cart.length}</span>}
-            </div>
+            </a>
           </Link>
         </div>
       </div>
@@ -209,26 +210,48 @@ const Navbar = () => {
               </div>
               <div className={styles.accountSection}>
                 <h3>Account</h3>
-                <Link href="/account">Account</Link>
-                <Link href="/orders">Orders History</Link>
-                <Link href="/messages">Messages</Link>
-                <Link href="/payment">Payment Methods</Link>
-                <Link href="/address">Address</Link>
+                <Link href="/account" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Account</a>
+                </Link>
+                <Link href="/orders" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Orders History</a>
+                </Link>
+                <Link href="/messages" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Messages</a>
+                </Link>
+                <Link href="/payment" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Payment Methods</a>
+                </Link>
+                <Link href="/address" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Address</a>
+                </Link>
               </div>
               <div className={styles.gradingSection}>
                 <h3>Grading</h3>
-                <Link href="/grading">PSA Grading Middleman</Link>
+                <Link href="/grading" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>PSA Grading Service</a>
+                </Link>
               </div>
               <div className={styles.sellerSection}>
                 <h3>Seller</h3>
-                <Link href="/dashboard">Seller Dashboard</Link>
+                <Link href="/dashboard" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Seller Dashboard</a>
+                </Link>
               </div>
               <div className={styles.helpSection}>
                 <h3>Help</h3>
-                <Link href="/contact">Contact Us</Link>
-                <Link href="/refund">Refund Return Policy</Link>
-                <Link href="/protection">GemTCG Order Protection</Link>
-                <Link href="/about">About Us</Link>
+                <Link href="/contact" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Contact Us</a>
+                </Link>
+                <Link href="/refund" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>Refund Return Policy</a>
+                </Link>
+                <Link href="/protection" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>GemTCG Order Protection</a>
+                </Link>
+                <Link href="/about" passHref legacyBehavior>
+                  <a onClick={handleLinkClick}>About Us</a>
+                </Link>
               </div>
               <button className={styles.signOutButton} onClick={handleSignOut}>Sign Out</button>
             </div>
@@ -286,8 +309,9 @@ const Navbar = () => {
                         }
                       }}
                       passHref
+                      legacyBehavior
                     >
-                      <span className={styles.shopAllButton} onClick={handleLinkClick}>Shop All</span>
+                      <a className={styles.shopAllButton} onClick={handleLinkClick}>Shop All</a>
                     </Link>
                   </div>
                   <div className={styles.miniPanelContent}>
@@ -308,8 +332,9 @@ const Navbar = () => {
                                 }
                               }}
                               passHref
+                              legacyBehavior
                             >
-                              <span className={styles.miniPanelItem} onClick={handleLinkClick}>{cardSet.CardSet}</span>
+                              <a className={styles.miniPanelItem} onClick={handleLinkClick}>{cardSet.CardSet}</a>
                             </Link>
                           </li>
                         ))}
@@ -332,8 +357,9 @@ const Navbar = () => {
                                 }
                               }}
                               passHref
+                              legacyBehavior
                             >
-                              <span className={styles.miniPanelItem} onClick={handleLinkClick}>{cardSet}</span>
+                              <a className={styles.miniPanelItem} onClick={handleLinkClick}>{cardSet}</a>
                             </Link>
                           </li>
                         ))}

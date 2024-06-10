@@ -17,10 +17,10 @@
     background-color: #0070f3;
     color: white;
     border: none;
-    padding: 15px 30px; /* Increased padding for a larger button */
+    padding: 15px 30px; 
     border-radius: 5px;
     cursor: pointer;
-    font-size: 18px; /* Increased font size for a larger button */
+    font-size: 20px; 
   }
   
   .startButton:hover {

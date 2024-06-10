@@ -28,6 +28,10 @@ const nextConfig = {
         destination: '/sidepanel/grading',
       },
       {
+        source: '/submission-form',
+        destination: '/sidepanel/submission-form',
+      },
+      {
         source: '/orders',
         destination: '/sidepanel/orders',
       },
