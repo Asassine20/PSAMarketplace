@@ -4,11 +4,21 @@ import styles from '../../styles/sidepanel/SubmissionForm.module.css';
 const SubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [submissionLevel, setSubmissionLevel] = useState('');
-    const [cards, setCards] = useState([{ year: '', set: '', number: '', name: '', type: '' }]);
-    const [submissionDetails, setSubmissionDetails] = useState('');
+    const [cards, setCards] = useState([{ year: '', set: '', number: '', name: '', type: '', value: '' }]);
+    const [submissionDetails, setSubmissionDetails] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        instagram: '',
+        facebook: '',
+        tracking: '',
+        hearAboutUs: '',
+    });
+    const [termsAgreed, setTermsAgreed] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [cardCount, setCardCount] = useState(0);
+    const [declaredValue, setDeclaredValue] = useState(''); // Add this line
 
     const steps = [
         { number: 1, label: 'Submission Level' },
@@ -22,61 +32,106 @@ const SubmissionForm = () => {
             setAlertMessage('Please select a submission level before continuing');
             return;
         }
-        if (currentStep === 2 && cards.length === 0) {
-            setAlertMessage('Please add at least one card before continuing');
+        if (currentStep === 2) {
+            let allFieldsFilled = true;
+    
+            if (cards.length === 0 && !cardCount) {
+                setAlertMessage('Please add at least one card or enter a card count before continuing.');
+                allFieldsFilled = false;
+            } else if (cards.length > 0) {
+                cards.forEach(card => {
+                    if (!card.year || !card.set || !card.number || !card.name || !card.value) {
+                        allFieldsFilled = false;
+                    }
+                });
+    
+                if (!allFieldsFilled) {
+                    setAlertMessage('Please fill in the required fields.');
+                    return;
+                }
+            }
+    
+            if (allFieldsFilled) {
+                setAlertMessage('');
+                setCurrentStep(currentStep + 1);
+            }
             return;
         }
-        if (currentStep === 3 && !submissionDetails) {
-            setAlertMessage('Please fill in the submission details before continuing');
-            return;
+        if (currentStep === 3) {
+            if (!submissionDetails.name || !submissionDetails.email || !submissionDetails.phone || !termsAgreed) {
+                setAlertMessage('Please fill in the required fields and agree to the terms before continuing.');
+                return;
+            }
         }
         if (currentStep < steps.length) {
             setAlertMessage('');
             setCurrentStep(currentStep + 1);
         }
     };
-
+    
     const handlePreviousStep = () => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
         }
     };
-
+    
     const handleSubmissionLevelChange = (event) => {
         setSubmissionLevel(event.target.value);
     };
-
+    
     const handleAddCard = () => {
-        setCards([...cards, { year: '', set: '', number: '', name: '', type: '' }]);
+        setCards([...cards, { year: '', set: '', number: '', name: '', type: '', value: '' }]);
     };
+    
     const handleRemoveCard = (index) => {
         const newCards = cards.filter((_, i) => i !== index);
         setCards(newCards);
-      };
-
+    };
+    
     const handleCardChange = (index, field, value) => {
         const newCards = [...cards];
         newCards[index][field] = value;
         setCards(newCards);
     };
-
+    
     const handleModalOpen = () => {
         setIsModalOpen(true);
     };
-
+    
     const handleModalClose = () => {
         setIsModalOpen(false);
     };
-
+    
     const handleCardCountChange = (event) => {
         setCardCount(event.target.value);
     };
-
-    const handleCardCountSubmit = () => {
-        setCards(Array.from({ length: cardCount }, () => ({ year: '', set: '', number: '', name: '', type: '' })));
-        handleModalClose();
+    
+    const handleDeclaredValueChange = (event) => {
+        setDeclaredValue(event.target.value);
     };
-
+    
+    const handleCardCountSubmit = () => {
+        if (cardCount <= 0 || declaredValue <= 0) {
+            setAlertMessage('Please enter valid card count and declared value.');
+            return;
+        }
+        setCards([]); // Clear cards array if using card count only
+        setAlertMessage('');
+        setIsModalOpen(false);
+        handleNextStep(); // Move to the next step
+    };
+    
+    const handleDetailsChange = (field, value) => {
+        setSubmissionDetails({ ...submissionDetails, [field]: value });
+    };
+    
+    const handleCheckboxChange = (event) => {
+        setTermsAgreed(event.target.checked);
+    };
+    
+    const totalDeclaredValue = cards.reduce((acc, card) => acc + parseFloat(card.value || 0), 0);
+    const totalValue = totalDeclaredValue > 0 ? totalDeclaredValue : parseFloat(declaredValue || 0);
+    
     const renderStepContent = () => {
         switch (currentStep) {
             case 1:
@@ -224,22 +279,65 @@ const SubmissionForm = () => {
                         <table className={styles.cardTable}>
                           <thead>
                             <tr>
-                              <th>Year</th>
-                              <th>Set</th>
-                              <th>Card Number</th>
-                              <th>Name</th>
+                              <th>Year*</th>
+                              <th>Set*</th>
+                              <th>Card Number*</th>
+                              <th>Name*</th>
                               <th>Card Type (Variant / Color)</th>
+                              <th>Declared Value*</th>
                               <th></th> {/* Column for remove button */}
                             </tr>
                           </thead>
                           <tbody>
                             {cards.map((card, index) => (
                               <tr key={index}>
-                                <td><input type="text" value={card.year} onChange={(e) => handleCardChange(index, 'year', e.target.value)} /></td>
-                                <td><input type="text" value={card.set} onChange={(e) => handleCardChange(index, 'set', e.target.value)} /></td>
-                                <td><input type="text" value={card.number} onChange={(e) => handleCardChange(index, 'number', e.target.value)} /></td>
-                                <td><input type="text" value={card.name} onChange={(e) => handleCardChange(index, 'name', e.target.value)} /></td>
-                                <td><input type="text" value={card.type} onChange={(e) => handleCardChange(index, 'type', e.target.value)} /></td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={card.year}
+                                    className={!card.year && alertMessage ? styles.errorInput : ''}
+                                    onChange={(e) => handleCardChange(index, 'year', e.target.value)}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={card.set}
+                                    className={!card.set && alertMessage ? styles.errorInput : ''}
+                                    onChange={(e) => handleCardChange(index, 'set', e.target.value)}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={card.number}
+                                    className={!card.number && alertMessage ? styles.errorInput : ''}
+                                    onChange={(e) => handleCardChange(index, 'number', e.target.value)}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={card.name}
+                                    className={!card.name && alertMessage ? styles.errorInput : ''}
+                                    onChange={(e) => handleCardChange(index, 'name', e.target.value)}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={card.type}
+                                    onChange={(e) => handleCardChange(index, 'type', e.target.value)}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    value={card.value}
+                                    className={!card.value && alertMessage ? styles.errorInput : ''}
+                                    onChange={(e) => handleCardChange(index, 'value', e.target.value)}
+                                  />
+                                </td>
                                 <td><button className={styles.removeButton} onClick={() => handleRemoveCard(index)}>Remove</button></td>
                               </tr>
                             ))}
@@ -251,13 +349,33 @@ const SubmissionForm = () => {
                         </div>
                         <div className={styles.cardCount}>
                           <p>Total Cards: {cards.length}</p>
+                          <p>Total Declared Value: ${totalValue.toFixed(2)}</p>
                         </div>
                         <div className={styles.buttonContainer}>
                           <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
                           <button className={styles.navigationButton} onClick={() => {
+                            let allFieldsFilled = true;
+                  
                             if (cards.length === 0 && !cardCount) {
                               setAlertMessage('Please add at least one card or enter a card count before continuing.');
-                            } else {
+                              allFieldsFilled = false;
+                            } else if (cards.length > 0) {
+                              const newCards = [...cards];
+                  
+                              newCards.forEach(card => {
+                                if (!card.year || !card.set || !card.number || !card.name || !card.value) {
+                                  allFieldsFilled = false;
+                                }
+                              });
+                  
+                              if (!allFieldsFilled) {
+                                setAlertMessage('Please fill in the required fields.');
+                                setCards(newCards); // Update state to trigger re-render and apply styles
+                              }
+                            }
+                  
+                            if (allFieldsFilled) {
+                              setAlertMessage('');
                               handleNextStep();
                             }
                           }}>Next</button>
@@ -267,7 +385,8 @@ const SubmissionForm = () => {
                             <div className={styles.modalContent}>
                               <h3>Submit Card Count Only</h3>
                               <p>Entering just the card count will incur an additional $2 per card.</p>
-                              <input type="number" className={styles.modalInput} value={cardCount} onChange={handleCardCountChange} />
+                              <input type="number" className={styles.modalInput} value={cardCount} onChange={handleCardCountChange} placeholder="Card Count" />
+                              <input type="number" className={styles.modalInput} value={declaredValue} onChange={handleDeclaredValueChange} placeholder="Total Declared Value" />
                               <div className={styles.modalButtonContainer}>
                                 <button className={styles.modalButton} onClick={handleModalClose}>Close</button>
                                 <button className={styles.modalButton} onClick={handleCardCountSubmit}>Submit</button>
@@ -276,19 +395,99 @@ const SubmissionForm = () => {
                           </div>
                         )}
                       </div>
-                    );                  
-            case 3:
-                return (
-                    <div>
-                        {alertMessage && <div className={styles.alert}>{alertMessage}</div>}
-                        <h2>Submission Details</h2>
-                        {/* Content for Submission Details step */}
-                        <div className={styles.buttonContainer}>
-                            <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
-                            <button className={styles.navigationButton} onClick={handleNextStep}>Next</button>
-                        </div>
-                    </div>
-                );
+                    );
+                  
+                  
+
+                    case 3:
+                        return (
+                          <div>
+                            {alertMessage && <div className={styles.alert}>{alertMessage}</div>}
+                            <h2>Submission Details</h2>
+                            <form className={styles.detailsForm}>
+                              <div className={styles.formGroup}>
+                                <label>Name*</label>
+                                <input
+                                  type="text"
+                                  value={submissionDetails.name}
+                                  onChange={(e) => handleDetailsChange('name', e.target.value)}
+                                  className={!submissionDetails.name && alertMessage ? styles.errorInput : ''}
+                                />
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>Email*</label>
+                                <input
+                                  type="email"
+                                  value={submissionDetails.email}
+                                  onChange={(e) => handleDetailsChange('email', e.target.value)}
+                                  className={!submissionDetails.email && alertMessage ? styles.errorInput : ''}
+                                />
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>Phone Number*</label>
+                                <input
+                                  type="text"
+                                  value={submissionDetails.phone}
+                                  onChange={(e) => handleDetailsChange('phone', e.target.value)}
+                                  className={!submissionDetails.phone && alertMessage ? styles.errorInput : ''}
+                                />
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>Instagram Name</label>
+                                <input
+                                  type="text"
+                                  value={submissionDetails.instagram}
+                                  onChange={(e) => handleDetailsChange('instagram', e.target.value)}
+                                />
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>Facebook Name</label>
+                                <input
+                                  type="text"
+                                  value={submissionDetails.facebook}
+                                  onChange={(e) => handleDetailsChange('facebook', e.target.value)}
+                                />
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>Tracking Number</label>
+                                <input
+                                  type="text"
+                                  value={submissionDetails.tracking}
+                                  onChange={(e) => handleDetailsChange('tracking', e.target.value)}
+                                />
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>How did you hear about us?</label>
+                                <input
+                                  type="text"
+                                  value={submissionDetails.hearAboutUs}
+                                  onChange={(e) => handleDetailsChange('hearAboutUs', e.target.value)}
+                                />
+                              </div>
+                              <div className={styles.totalPrice}>
+                                <p>Total Declared Value: ${totalValue.toFixed(2)}</p>
+                              </div>
+                              <div className={styles.formGroup}>
+                                <label>
+                                  <input type="checkbox" checked={termsAgreed} onChange={handleCheckboxChange} />
+                                  I agree that the cards I am submitting are not trimmed or altered in any way*
+                                </label>
+                              </div>
+                              <div className={styles.buttonContainer}>
+                                <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
+                                <button className={styles.navigationButton} onClick={() => {
+                                  if (!submissionDetails.name || !submissionDetails.email || !submissionDetails.phone || !termsAgreed) {
+                                    setAlertMessage('Please fill in the required fields and agree to the terms before continuing.');
+                                  } else {
+                                    setAlertMessage('');
+                                    handleNextStep();
+                                  }
+                                }}>Next</button>
+                              </div>
+                            </form>
+                          </div>
+                        );
+                      
             case 4:
                 return (
                     <div>
