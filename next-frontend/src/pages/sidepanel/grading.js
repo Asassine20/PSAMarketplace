@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import styles from '../../styles/sidepanel/Grading.module.css';
 
 const Grading = () => {
@@ -70,7 +71,9 @@ const Grading = () => {
               )
             ) : (
               <tr>
-                <td colSpan="5">Log in to view your submission history</td>
+                <td colSpan="5">
+                  <Link href="/login">Log in</Link> to view your submission history
+                </td>
               </tr>
             )}
           </tbody>

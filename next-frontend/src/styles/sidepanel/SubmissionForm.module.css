@@ -4,9 +4,9 @@
     align-items: flex-start; /* Align panel to the top */
     padding: 20px 20px 40px; /* Add padding at the bottom for the footer */
     min-height: calc(100vh - 60px); /* Ensure full height minus approximate navbar height */
-  }
-  
-  .panel {
+}
+
+.panel {
     width: 100%;
     max-width: 1000px; /* Make the panel larger */
     border: 1px solid #ddd;
@@ -15,22 +15,22 @@
     background-color: white;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-top: 20px; /* Add margin to separate from the navbar */
-  }
-  
-  .steps {
+}
+
+.steps {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
-  }
-  
-  .step {
+}
+
+.step {
     flex: 1;
     text-align: center;
     padding: 10px;
     position: relative;
-  }
-  
-  .stepNumber {
+}
+
+.stepNumber {
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -39,46 +39,46 @@
     align-items: center;
     font-size: 14px;
     margin-bottom: 5px;
-  }
-  
-  .stepLabel {
+}
+
+.stepLabel {
     font-size: 14px;
-  }
-  
-  .step.active .stepNumber {
+}
+
+.step.active .stepNumber {
     background-color: #0070f3;
     color: white;
-  }
-  
-  .step .stepNumber {
+}
+
+.step .stepNumber {
     background-color: white;
     border: 2px solid black;
-  }
-  
-  .pricingTable {
+}
+
+.pricingTable {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-  }
-  
-  .pricingTable th, .pricingTable td {
+}
+
+.pricingTable th, .pricingTable td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;
     font-size: 22px;
-  }
-  
-  .pricingTable th {
+}
+
+.pricingTable th {
     background-color: #f9f9f9;
-  }
-  
-  .buttonContainer {
+}
+
+.buttonContainer {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
-  }
-  
-  .navigationButton {
+}
+
+.navigationButton {
     background-color: #0070f3;
     color: white;
     border: none;
@@ -86,31 +86,131 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-  }
-  
-  .navigationButton:hover {
+}
+
+.navigationButton:hover {
     background-color: #005bb5;
-  }
-  
-  /* Style for larger and centered radio buttons */
-  .radioContainer {
+}
+
+/* Style for larger and centered radio buttons */
+.radioContainer {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  
-  .largeRadioButton {
+}
+
+.largeRadioButton {
     transform: scale(2);
-    margin-right: 10px;
-  }
-  
-  .headerContainer {
+}
+
+.headerContainer {
     display: flex;
     flex-direction: column;
-  }
-  
-  .subHeader {
+}
+
+.subHeader {
     font-size: 0.9em; /* Adjust the font size of the subheader */
     color: gray; /* Adjust the color of the subheader */
-  }
-  
+}
+
+/* Alert styles */
+.alert {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.modalButtonContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.cardTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.cardTable th, .cardTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    border-radius: 5px;
+}
+
+.cardTable input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.cardCount {
+    margin-top: 20px;
+    font-size: 16px;
+    text-align: right;
+}
+
+.addButton, .modalButton {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.addButton:hover, .modalButton:hover {
+    background-color: #005bb5;
+}
+
+.modalInput {
+    width: 90%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.removeButton {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.removeButton:hover {
+    background-color: #d32f2f;
+}
