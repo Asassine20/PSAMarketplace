@@ -4,7 +4,7 @@ import styles from '../../styles/sidepanel/SubmissionForm.module.css';
 const SubmissionForm = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [submissionLevel, setSubmissionLevel] = useState('');
-    const [pricePerCard, setPricePerCard] = useState(0); // Add this line
+    const [pricePerCard, setPricePerCard] = useState(0);
     const [cards, setCards] = useState([{ year: '', set: '', number: '', name: '', type: '', value: '' }]);
     const [submissionDetails, setSubmissionDetails] = useState({
         name: '',
@@ -19,7 +19,7 @@ const SubmissionForm = () => {
     const [alertMessage, setAlertMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [cardCount, setCardCount] = useState(0);
-    const [declaredValue, setDeclaredValue] = useState(''); // Add this line
+    const [declaredValue, setDeclaredValue] = useState('');
 
     const steps = [
         { number: 1, label: 'Submission Level' },
@@ -80,7 +80,7 @@ const SubmissionForm = () => {
         const selectedLevel = event.target.value;
         const selectedPrice = parseFloat(event.target.getAttribute('data-price'));
         setSubmissionLevel(selectedLevel);
-        setPricePerCard(selectedPrice); // Update this line
+        setPricePerCard(selectedPrice);
     };
 
     const handleAddCard = () => {
@@ -122,7 +122,7 @@ const SubmissionForm = () => {
         setCards([]); // Clear cards array if using card count only
         setAlertMessage('');
         setIsModalOpen(false);
-        handleNextStep(); // Move to the next step
+        setCurrentStep(3); // Move to the next step
     };
 
     const handleDetailsChange = (field, value) => {
@@ -155,7 +155,7 @@ const SubmissionForm = () => {
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Trading Card Game" data-price="13.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Trading Card Game" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="13.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Trading Card Game and Non-Sports Bulk
@@ -167,7 +167,7 @@ const SubmissionForm = () => {
                                     <td>$13.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="June 1980-Present Special" data-price="14.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="June 1980-Present Special" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="14.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             June 1980-Present Special
@@ -179,7 +179,7 @@ const SubmissionForm = () => {
                                     <td>$14.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value Bulk (1979-Older)" data-price="17.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value Bulk (1979-Older)" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="17.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Value Bulk (1979-Older)
@@ -191,7 +191,7 @@ const SubmissionForm = () => {
                                     <td>$17.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value Bulk (1980-Present)" data-price="17.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value Bulk (1980-Present)" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="17.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Value Bulk (1980-Present)
@@ -203,7 +203,7 @@ const SubmissionForm = () => {
                                     <td>$17.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value (1979-Older)" data-price="23.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value (1979-Older)" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="23.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Value (1979-Older)
@@ -214,7 +214,7 @@ const SubmissionForm = () => {
                                     <td>$23.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value (1980-Present)" data-price="23.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value (1980-Present)" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="23.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Value (1980-Present)
@@ -225,7 +225,7 @@ const SubmissionForm = () => {
                                     <td>$23.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value Plus" data-price="38.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Value Plus" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="38.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Value Plus
@@ -236,7 +236,7 @@ const SubmissionForm = () => {
                                     <td>$38.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Regular" data-price="73.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Regular" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="73.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Regular
@@ -247,7 +247,7 @@ const SubmissionForm = () => {
                                     <td>$73.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Express" data-price="124.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Express" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="124.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Express
@@ -258,7 +258,7 @@ const SubmissionForm = () => {
                                     <td>$124.99</td>
                                 </tr>
                                 <tr>
-                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Super Express" data-price="244.99" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} /></div></td>
+                                    <td><div className={styles.radioContainer}><input type="radio" name="submissionLevel" value="Super Express" className={styles.largeRadioButton} onChange={handleSubmissionLevelChange} data-price="244.99" /></div></td>
                                     <td>
                                         <div className={styles.headerContainer}>
                                             Super Express
@@ -276,7 +276,6 @@ const SubmissionForm = () => {
                         </div>
                     </div>
                 );
-
             case 2:
                 return (
                     <div>
@@ -354,9 +353,9 @@ const SubmissionForm = () => {
                             <button className={styles.addButton} onClick={handleAddCard}>+ Add Card</button>
                         </div>
                         <div className={styles.cardCount}>
-                            <p>Total Cards: {cards.length}</p>
+                            <p>Total Cards: {cards.length || cardCount}</p>
                             <p>Total Declared Value: ${totalValue.toFixed(2)}</p>
-                            <p>Total Price: ${totalPrice.toFixed(2)}</p> {/* Add this line */}
+                            <p>Total Price: ${totalPrice.toFixed(2)}</p>
                         </div>
                         <div className={styles.buttonContainer}>
                             <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
@@ -478,7 +477,7 @@ const SubmissionForm = () => {
                             </div>
                             <div className={styles.totalPrice}>
                                 <p>Total Declared Value: ${totalValue.toFixed(2)}</p>
-                                <p>Total Price: ${totalPrice.toFixed(2)}</p> {/* Add this line */}
+                                <p>Total Price: ${totalPrice.toFixed(2)}</p>
                             </div>
                             <div className={styles.buttonContainer}>
                                 <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
@@ -494,6 +493,35 @@ const SubmissionForm = () => {
                         </form>
                     </div>
                 );
+
+            case 4:
+                return (
+                    <div>
+                        <div className={styles.thankYouBox}>
+                            <h2>Thank you for your submission!</h2>
+                        </div>
+                        <h3 className={styles.thankYouHeader}>Please follow these next steps</h3>
+                        <div className={styles.stepContainer}>
+                            <h4>Step 1: Prep your cards for shipment</h4>
+                            <p>Ensure your cards are securely packaged to prevent any damage during transit.</p>
+                            <p>PSA recommends using card savers when sending grading submissions. Please use card savers to prevent any issues with your order.</p>
+                        </div>
+                        <div className={styles.stepContainer}>
+                            <h4>Step 2: Print packing slip (*Optional but preferred)</h4>
+                            <p>Include a packing slip in your shipment to help us process your submission more efficiently.</p>
+                        </div>
+                        <div className={styles.stepContainer}>
+                            <h4>Step 3: Ship your cards to:</h4>
+                            <div className={styles.addressBox}>
+                                <p>GemTCG</p>
+                                <p>7186 Primrose Lane</p>
+                                <p>Grand Blanc, MI 48439</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+
+
         }
     };
 

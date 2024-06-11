@@ -269,4 +269,46 @@
     color: gray;
     margin-top: 5px;
   }
-  
+  .finalStepContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.thankYouBox {
+    background-color: #d4edda; /* Subtle green background */
+    color: #155724; /* Darker green text color */
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    width: 80%;
+    border: 1px solid #c3e6cb; /* Border color to match the background */
+    text-align: center; /* Center the text */
+    margin: 0 auto; /* Center the box horizontally */
+}
+
+.thankYouHeader {
+    margin-top: 20px;
+    font-size: 28px;
+}
+
+.stepContainer {
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.stepContainer h4 {
+    font-size: 20px;
+}
+
+.stepContainer p {
+    font-size: 18px;
+}
+.addressBox {
+    border: 1px solid black;
+    padding: 20px;
+    width: fit-content;
+    margin-top: 10px;
+}
+
