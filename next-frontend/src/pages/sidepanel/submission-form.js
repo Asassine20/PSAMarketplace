@@ -137,6 +137,7 @@ const SubmissionForm = () => {
     const totalValue = totalDeclaredValue > 0 ? totalDeclaredValue : parseFloat(declaredValue || 0);
     const totalPrice = pricePerCard * (cards.length || cardCount);
 
+
     const renderStepContent = () => {
         switch (currentStep) {
             case 1:
@@ -403,127 +404,135 @@ const SubmissionForm = () => {
                     </div>
                 );
 
-            case 3:
-                return (
-                    <div>
-                        {alertMessage && <div className={styles.alert}>{alertMessage}</div>}
-                        <h2>Submission Details</h2>
-                        <form className={styles.detailsForm}>
-                            <div className={styles.formGroup}>
-                                <label>Name*</label>
-                                <input
-                                    type="text"
-                                    value={submissionDetails.name}
-                                    onChange={(e) => handleDetailsChange('name', e.target.value)}
-                                    className={!submissionDetails.name && alertMessage ? styles.errorInput : ''}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Email*</label>
-                                <input
-                                    type="email"
-                                    value={submissionDetails.email}
-                                    onChange={(e) => handleDetailsChange('email', e.target.value)}
-                                    className={!submissionDetails.email && alertMessage ? styles.errorInput : ''}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Phone Number*</label>
-                                <input
-                                    type="text"
-                                    value={submissionDetails.phone}
-                                    onChange={(e) => handleDetailsChange('phone', e.target.value)}
-                                    className={!submissionDetails.phone && alertMessage ? styles.errorInput : ''}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Instagram Name</label>
-                                <input
-                                    type="text"
-                                    value={submissionDetails.instagram}
-                                    onChange={(e) => handleDetailsChange('instagram', e.target.value)}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Facebook Name</label>
-                                <input
-                                    type="text"
-                                    value={submissionDetails.facebook}
-                                    onChange={(e) => handleDetailsChange('facebook', e.target.value)}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>Tracking Number</label>
-                                <input
-                                    type="text"
-                                    value={submissionDetails.tracking}
-                                    onChange={(e) => handleDetailsChange('tracking', e.target.value)}
-                                />
-                                <span className={styles.descriptor}>Add the tracking for your package so you can check in on the shipping status</span>
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>How did you hear about us?</label>
-                                <input
-                                    type="text"
-                                    value={submissionDetails.hearAboutUs}
-                                    onChange={(e) => handleDetailsChange('hearAboutUs', e.target.value)}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label>
-                                    <input type="checkbox" checked={termsAgreed} onChange={handleCheckboxChange} />
-                                    * I agree that the cards I am submitting are not trimmed or altered in any way
-                                </label>
-                            </div>
-                            <div className={styles.totalPrice}>
-                                <p>Total Declared Value: ${totalValue.toFixed(2)}</p>
-                                <p>Total Price: ${totalPrice.toFixed(2)}</p>
-                            </div>
-                            <div className={styles.buttonContainer}>
-                                <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
-                                <button className={styles.navigationButton} onClick={() => {
-                                    if (!submissionDetails.name || !submissionDetails.email || !submissionDetails.phone || !termsAgreed) {
-                                        setAlertMessage('Please fill in the required fields and agree to the terms before continuing.');
-                                    } else {
-                                        setAlertMessage('');
-                                        handleNextStep();
-                                    }
-                                }}>Next</button>
-                            </div>
-                        </form>
-                    </div>
-                );
+                case 3:
+                    return (
+                        <div>
+                            {alertMessage && <div className={styles.alert}>{alertMessage}</div>}
+                            <h2>Submission Details</h2>
+                            <form className={styles.detailsForm}>
+                                <div className={styles.formGroup}>
+                                    <label>Name*</label>
+                                    <input
+                                        type="text"
+                                        value={submissionDetails.name}
+                                        onChange={(e) => handleDetailsChange('name', e.target.value)}
+                                        className={!submissionDetails.name && alertMessage ? styles.errorInput : ''}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Email*</label>
+                                    <input
+                                        type="email"
+                                        value={submissionDetails.email}
+                                        onChange={(e) => handleDetailsChange('email', e.target.value)}
+                                        className={!submissionDetails.email && alertMessage ? styles.errorInput : ''}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Phone Number*</label>
+                                    <input
+                                        type="text"
+                                        value={submissionDetails.phone}
+                                        onChange={(e) => handleDetailsChange('phone', e.target.value)}
+                                        className={!submissionDetails.phone && alertMessage ? styles.errorInput : ''}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Instagram Name</label>
+                                    <input
+                                        type="text"
+                                        value={submissionDetails.instagram}
+                                        onChange={(e) => handleDetailsChange('instagram', e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Facebook Name</label>
+                                    <input
+                                        type="text"
+                                        value={submissionDetails.facebook}
+                                        onChange={(e) => handleDetailsChange('facebook', e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>Tracking Number</label>
+                                    <input
+                                        type="text"
+                                        value={submissionDetails.tracking}
+                                        onChange={(e) => handleDetailsChange('tracking', e.target.value)}
+                                    />
+                                    <span className={styles.descriptor}>Add the tracking for your package so you can check in on the shipping status</span>
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>How did you hear about us?</label>
+                                    <input
+                                        type="text"
+                                        value={submissionDetails.hearAboutUs}
+                                        onChange={(e) => handleDetailsChange('hearAboutUs', e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label>
+                                        <input type="checkbox" checked={termsAgreed} onChange={handleCheckboxChange} />
+                                        * I agree that the cards I am submitting are not trimmed or altered in any way
+                                    </label>
+                                </div>
+                                <div className={styles.totalPrice}>
+                                    <p>Total Declared Value: ${totalValue.toFixed(2)}</p>
+                                    <p>Total Price: ${totalPrice.toFixed(2)}</p>
+                                    <p style={{fontSize: '16px', fontWeight: 'normal'}}>* You will not be charged until your grades are ready from PSA</p>
+                                </div>
+                                <div className={styles.buttonContainer}>
+                                    <button className={styles.navigationButton} onClick={handlePreviousStep}>Previous</button>
+                                    <button className={styles.navigationButton} onClick={(e) => {
+                                        e.preventDefault();
+                                        if (!submissionDetails.name || !submissionDetails.email || !submissionDetails.phone || !termsAgreed) {
+                                            setAlertMessage('Please fill in the required fields and agree to the terms before continuing.');
+                                        } else {
+                                            setAlertMessage('');
+                                            handleNextStep();
+                                        }
+                                    }}>Next</button>
+                                </div>
+                            </form>
+                        </div>
+                    );
 
-            case 4:
-                return (
-                    <div>
-                        <div className={styles.thankYouBox}>
-                            <h2>Thank you for your submission!</h2>
-                        </div>
-                        <h3 className={styles.thankYouHeader}>Please follow these next steps</h3>
-                        <div className={styles.stepContainer}>
-                            <h4>Step 1: Prep your cards for shipment</h4>
-                            <p>Ensure your cards are securely packaged to prevent any damage during transit.</p>
-                            <p>PSA recommends using card savers when sending grading submissions. Please use card savers to prevent any issues with your order.</p>
-                        </div>
-                        <div className={styles.stepContainer}>
-                            <h4>Step 2: Print packing slip (*Optional but preferred)</h4>
-                            <p>Include a packing slip in your shipment to help us process your submission more efficiently.</p>
-                        </div>
-                        <div className={styles.stepContainer}>
-                            <h4>Step 3: Ship your cards to:</h4>
-                            <div className={styles.addressBox}>
-                                <p>GemTCG</p>
-                                <p>7186 Primrose Lane</p>
-                                <p>Grand Blanc, MI 48439</p>
+                case 4:
+                    return (
+                        <div>
+                            <div className={styles.thankYouBox}>
+                                <h2>Thank you for your submission!</h2>
+                            </div>
+                            <h3 className={styles.thankYouHeader}>Please follow these next steps</h3>
+                            <div className={styles.stepContainer}>
+                                <h4>Step 1: Prep your cards for shipment</h4>
+                                <p>Ensure your cards are securely packaged to prevent any damage during transit.</p>
+                                <p>PSA recommends using card savers when sending grading submissions. Please use card savers to prevent any issues with your order.</p>
+                            </div>
+                            <div className={styles.stepContainer}>
+                                <h4>Step 2: Print packing slip (*Optional but preferred)</h4>
+                                <p>Include a packing slip in your shipment to help us process your submission more efficiently.</p>
+                            </div>
+                            <div className={styles.stepContainer}>
+                                <h4>Step 3: Ship your cards to:</h4>
+                                <div className={styles.addressBox}>
+                                    <p>GemTCG</p>
+                                    <p>7186 Primrose Lane</p>
+                                    <p>Grand Blanc, MI 48439</p>
+                                </div>
+                            </div>
+                            <div className={styles.stepContainer}>
+                                <h4>Step 4: Track your submission as time goes on:</h4>
+                                    <p>Your order will automatically be updated in real time as it moves along the grading process. Check back on your submission history to view the progress of your submission.</p>
+                            </div>
+                            <div className={styles.stepContainer}>
+                                <h4>Step 5: Grades Ready:</h4>
+                                    <p>Once your submission is finished grading, we will send an invoice for the grading cost. You will have up to 7 days to make the payment. If you do not pay in time, we reserve the right to sell your cards for you to make up for the grading fees.</p>
                             </div>
                         </div>
-                    </div>
-                );
-
-
-        }
-    };
+                    );
+            }
+        };
 
     return (
         <div className={styles.container}>
