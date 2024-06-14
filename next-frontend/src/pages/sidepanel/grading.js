@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import useAuth from '../../hooks/useAuth'; // Import useAuth hook
 import styles from '../../styles/sidepanel/Grading.module.css';
 
 const Grading = () => {
+  const { userId, accessToken } = useAuth(); // Destructure userId and accessToken from useAuth
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [faqItems, setFaqItems] = useState([
@@ -14,17 +16,36 @@ const Grading = () => {
   ]);
   const router = useRouter();
 
+  const fetchSubmissions = useCallback(async () => {
+    if (!accessToken) return;
+
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      };
+
+      const response = await fetch('/api/sidepanel/submissions', { headers });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSubmissions(data);
+      } else {
+        console.error('Failed to fetch submissions');
+      }
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+    }
+  }, [accessToken]);
+
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    const loggedIn = !!accessToken; // Check if accessToken exists
     setIsLoggedIn(loggedIn);
 
     if (loggedIn) {
-      fetch('/api/sidepanel/submissions')
-        .then(response => response.json())
-        .then(data => setSubmissions(data))
-        .catch(error => console.error('Error fetching submissions:', error));
+      fetchSubmissions();
     }
-  }, []);
+  }, [accessToken, fetchSubmissions]);
 
   const handleStartSubmission = () => {
     router.push('/submission-form');
@@ -65,8 +86,6 @@ const Grading = () => {
               <th>Service Level</th>
               <th>Items</th>
               <th>Current Step</th>
-              
-              
               <th>Tracking #</th>
               <th>Date Submitted</th>
               <th>Status</th>
@@ -83,8 +102,6 @@ const Grading = () => {
                     <td>
                       {submission.OrderProgress ? getCurrentStep(submission.OrderProgress.orderProgressSteps) : ''}
                     </td>
-                    
-                    
                     <td>{submission.TrackingNumber}</td>
                     <td>{new Date(submission.DateSubmitted).toLocaleDateString()}</td>
                     <td>{submission.Status}</td>
@@ -92,19 +109,18 @@ const Grading = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6">No submission history</td>
+                  <td colSpan="7">No submission history</td>
                 </tr>
               )
             ) : (
               <tr>
-                <td colSpan="6">
+                <td colSpan="7">
                   <Link href="/login">Log in</Link> to view your submission history
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-
       </div>
       <div className={styles.faqSection}>
         <h2>Frequently Asked Questions</h2>
