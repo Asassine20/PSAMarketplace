@@ -146,14 +146,17 @@ const SubmissionForm = () => {
     const totalPrice = pricePerCard * (cards.length || cardCount);
 
     const handleFormSubmit = async () => {
+        const totalPrice = pricePerCard * (cards.length || cardCount);
+    
         const submissionData = {
             serviceLevel: submissionLevel,
             status: 'Pending',
             itemList: cards.length ? cards : cardCount,
             psaOrderNumber: null, // This will be null initially
-            trackingNumber: submissionDetails.tracking // Include tracking number here
+            trackingNumber: submissionDetails.tracking, // Include tracking number here
+            pricePerItem: pricePerCard,
+            totalPrice: totalPrice
         };
-    
     
         try {
             const response = await fetch('/api/sidepanel/submissions', {
@@ -176,6 +179,7 @@ const SubmissionForm = () => {
             throw error;
         }
     };
+    
     
     const renderStepContent = () => {
         switch (currentStep) {

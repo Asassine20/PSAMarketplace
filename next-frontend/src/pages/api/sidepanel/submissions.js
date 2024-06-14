@@ -14,14 +14,14 @@ export default async function handler(req, res) {
   const userId = decoded.userId;
 
   if (req.method === 'POST') {
-    const { serviceLevel, status, itemList, psaOrderNumber, trackingNumber } = req.body;
+    const { serviceLevel, status, itemList, psaOrderNumber, trackingNumber, pricePerItem, totalPrice } = req.body;
     const itemCount = Array.isArray(itemList) ? itemList.length : itemList;
 
     try {
       await query(`
-        INSERT INTO Submissions (UserID, ServiceLevel, DateSubmitted, Status, ItemCount, ItemList, PSAOrderNumber, TrackingNumber)
-        VALUES (?, ?, NOW(), ?, ?, ?, ?, ?)
-      `, [userId, serviceLevel, status, itemCount, JSON.stringify(itemList), psaOrderNumber, trackingNumber]);
+        INSERT INTO Submissions (UserID, ServiceLevel, DateSubmitted, Status, ItemCount, ItemList, PSAOrderNumber, TrackingNumber, PricePerItem, TotalPrice)
+        VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?)
+      `, [userId, serviceLevel, status, itemCount, JSON.stringify(itemList), psaOrderNumber, trackingNumber, pricePerItem, totalPrice]);
 
       res.status(201).json({ message: 'Submission created successfully' });
     } catch (error) {
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
   } else if (req.method === 'GET') {
     try {
       const submissions = await query(`
-        SELECT SubmissionID AS submissionNumber, ServiceLevel, DateSubmitted, Status, ItemCount, PSAOrderNumber, TrackingNumber
+        SELECT SubmissionID AS submissionNumber, ServiceLevel, DateSubmitted, Status, ItemCount, PSAOrderNumber, TrackingNumber, PricePerItem, TotalPrice
         FROM Submissions
         WHERE UserID = ?
       `, [userId]);
