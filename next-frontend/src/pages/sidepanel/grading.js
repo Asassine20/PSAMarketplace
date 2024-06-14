@@ -115,9 +115,10 @@ const Grading = () => {
             ) : (
               <tr>
                 <td colSpan="7">
-                  <Link href="/login">Log in</Link> to view your submission history
+                  <Link href={{ pathname: '/login', query: { redirect: '/grading' } }}>Log in</Link> to view your submission history
                 </td>
               </tr>
+
             )}
           </tbody>
         </table>

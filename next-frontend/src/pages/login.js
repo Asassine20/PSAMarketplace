@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(''); // State for error message
   const router = useRouter();
+  const { redirect } = router.query; // Get the redirect query parameter
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -27,8 +28,8 @@ export default function Login() {
         localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('isLoggedIn', 'true'); // Set logged-in flag
 
-        // Redirect to home page first
-        router.push('/').then(() => {
+        // Redirect to the specified page or home page
+        router.push(redirect || '/').then(() => {
           // Refresh the page after redirection
           window.location.reload();
         });
