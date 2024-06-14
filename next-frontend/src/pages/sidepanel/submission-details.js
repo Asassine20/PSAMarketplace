@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import useAuth from '../../hooks/useAuth';
 import styles from '../../styles/sidepanel/SubmissionDetails.module.css';
 
-// Card type regular expressions
 const cardTypeRegex = {
   visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
   mastercard: /^5[1-5][0-9]{14}$/,
@@ -86,7 +85,6 @@ const SubmissionDetails = () => {
 
   const handlePaymentSubmit = (event) => {
     event.preventDefault();
-    // Handle payment submission logic here
     alert('Payment submitted');
   };
 
@@ -100,7 +98,19 @@ const SubmissionDetails = () => {
 
   const { ItemList, ItemCount, ServiceLevel, TrackingNumber, Status, PricePerItem, TotalPrice } = submission;
 
-  const items = ItemList || [];
+  let items = [];
+  if (Array.isArray(ItemList)) {
+    items = ItemList;
+  } else if (typeof ItemList === 'string') {
+    try {
+      items = JSON.parse(ItemList);
+      if (!Array.isArray(items)) {
+        items = [];
+      }
+    } catch (error) {
+      console.error('Error parsing ItemList:', error);
+    }
+  }
 
   const formattedPricePerItem = PricePerItem ? parseFloat(PricePerItem).toFixed(2) : 'N/A';
   const formattedTotalPrice = TotalPrice ? parseFloat(TotalPrice).toFixed(2) : 'N/A';
@@ -111,10 +121,10 @@ const SubmissionDetails = () => {
       <p className={styles.paragraph}><strong className={styles.bold}>Submission Number:</strong> {id}</p>
       <p className={styles.paragraph}><strong className={styles.bold}>Service Level:</strong> {ServiceLevel}</p>
       <p className={styles.paragraph}><strong className={styles.bold}>Item Count:</strong> {ItemCount}</p>
-      {items.length > 0 && (
+      {items.length > 0 ? (
         <div>
           <h2 className={styles.subtitle}>Item List</h2>
-          <table className={styles.itemTable}>
+          <table className={styles.table}>
             <thead>
               <tr>
                 <th>Year</th>
@@ -122,6 +132,7 @@ const SubmissionDetails = () => {
                 <th>Number</th>
                 <th>Name</th>
                 <th>Type</th>
+                <th>Value</th>
               </tr>
             </thead>
             <tbody>
@@ -132,16 +143,19 @@ const SubmissionDetails = () => {
                   <td>{item.number}</td>
                   <td>{item.name}</td>
                   <td>{item.type}</td>
+                  <td>{item.value}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      ) : (
+        <p className={styles.paragraph}><strong className={styles.bold}>Declared Value:</strong> ${formattedTotalPrice}</p>
       )}
       <p className={styles.paragraph}><strong className={styles.bold}>Price per Item:</strong> ${formattedPricePerItem}</p>
       <p className={styles.paragraph}><strong className={styles.bold}>Total Price:</strong> ${formattedTotalPrice}</p>
       <div className={styles.options}>
-        <button className={`${styles.button} ${styles.optionButton}`} onClick={() => alert('Ship back to me')}>Ship back to me</button>
+        <button className={`${styles.button} ${styles.optionButton}`} onClick={() => alert('Return for $5 fee per card')}>Return for $5 Fee per Card</button>
         <button className={`${styles.button} ${styles.optionButton}`} onClick={handlePayNowClick}>Pay Now</button>
       </div>
       {showPayment && (
