@@ -38,15 +38,18 @@ const Grading = () => {
     if (!step) {
       return 'In Progress';
     }
-  
     return step
-      .split(/(?=[A-Z])/g) // Split at each uppercase letter
-      .map(word => word === 'ID' ? word : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Handle 'ID' separately
-      .join(' ') // Join the words back together
-      .replace(/\bI D\b/g, 'ID'); // Ensure "ID" is not split and fully capitalized
+      .replace(/([A-Z])/g, ' $1') // Insert space before each uppercase letter
+      .replace(/I D/g, 'ID') // Correct 'I D' to 'ID'
+      .trim() // Remove leading/trailing spaces
+      .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize the first letter of each word
   };
-  
-  
+
+  const getCurrentStep = (orderProgressSteps) => {
+    const firstIncompleteStep = orderProgressSteps.find(step => !step.completed);
+    return firstIncompleteStep ? transformStepValue(firstIncompleteStep.step) : 'Completed';
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -59,11 +62,11 @@ const Grading = () => {
           <thead>
             <tr>
               <th>Submission #</th>
+              <th>Current Step</th>
               <th>Items</th>
               <th>Service Level</th>
               <th>Date Submitted</th>
               <th>Status</th>
-              <th>Order Progress</th>
             </tr>
           </thead>
           <tbody>
@@ -72,11 +75,13 @@ const Grading = () => {
                 submissions.map((submission, index) => (
                   <tr key={index}>
                     <td>{submission.submissionNumber}</td>
+                    <td>
+                      {submission.OrderProgress ? getCurrentStep(submission.OrderProgress.orderProgressSteps) : 'N/A'}
+                    </td>
                     <td>{submission.ItemCount}</td>
                     <td>{submission.ServiceLevel}</td>
                     <td>{new Date(submission.DateSubmitted).toLocaleDateString()}</td>
                     <td>{submission.Status}</td>
-                    <td>{transformStepValue(submission.OrderProgressStep)}</td>
                   </tr>
                 ))
               ) : (
@@ -93,6 +98,7 @@ const Grading = () => {
             )}
           </tbody>
         </table>
+
       </div>
       <div className={styles.faqSection}>
         <h2>Frequently Asked Questions</h2>

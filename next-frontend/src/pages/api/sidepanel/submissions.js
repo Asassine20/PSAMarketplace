@@ -2,6 +2,9 @@ import { query } from '@/db'; // Adjust the path according to your project struc
 import { authenticate } from '@/middleware/auth';
 import fetch from 'node-fetch';
 
+const PSA_API_URL = 'https://api.psacard.com/publicapi/order/GetProgress/';
+const PSA_API_TOKEN = process.env.PSA_API_TOKEN;
+
 export default async function handler(req, res) {
   const decoded = authenticate(req);
   if (!decoded) {
@@ -17,7 +20,7 @@ export default async function handler(req, res) {
     try {
       await query(`
         INSERT INTO Submissions (UserID, ServiceLevel, DateSubmitted, Status, ItemCount, ItemList, PSAOrderNumber)
-        VALUES (?, ?, NOW(), ?, ?, ?)
+        VALUES (?, ?, NOW(), ?, ?, ?, ?)
       `, [userId, serviceLevel, status, itemCount, JSON.stringify(itemList), psaOrderNumber]);
 
       res.status(201).json({ message: 'Submission created successfully' });
@@ -36,32 +39,27 @@ export default async function handler(req, res) {
       const submissionsWithProgress = await Promise.all(submissions.map(async (submission) => {
         if (submission.PSAOrderNumber) {
           try {
-            const response = await fetch(`https://api.psacard.com/publicapi/order/GetProgress/${submission.PSAOrderNumber}`, {
+            const response = await fetch(`${PSA_API_URL}${submission.PSAOrderNumber}`, {
+              method: 'GET',
               headers: {
-                'Authorization': `Bearer ${process.env.PSA_API_TOKEN}`,
+                'Authorization': `Bearer ${PSA_API_TOKEN}`,
                 'Accept': 'application/json'
               }
             });
 
-            if (response.ok) {
-              const progressData = await response.json();
-              const highestCompletedStep = progressData.orderProgressSteps
-                .filter(step => step.completed)
-                .reduce((prev, current) => (prev.index > current.index ? prev : current), { step: 'In Progress' });
-
-              submission.OrderProgressStep = highestCompletedStep.step;
-            } else {
-              console.error('Error fetching progress:', await response.text());
-              submission.OrderProgressStep = 'Error fetching progress';
+            if (!response.ok) {
+              throw new Error(`Error fetching order progress for PSA Order Number: ${submission.PSAOrderNumber}`);
             }
-          } catch (fetchError) {
-            console.error('Fetch error:', fetchError);
-            submission.OrderProgressStep = 'Error fetching progress';
+
+            const progressData = await response.json();
+            return { ...submission, OrderProgress: progressData };
+          } catch (error) {
+            console.error(error);
+            return { ...submission, OrderProgress: null };
           }
         } else {
-          submission.OrderProgressStep = 'No PSA Order Number';
+          return { ...submission, OrderProgress: null };
         }
-        return submission;
       }));
 
       res.status(200).json(submissionsWithProgress);
