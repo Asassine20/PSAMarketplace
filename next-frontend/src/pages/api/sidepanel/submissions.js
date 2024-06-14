@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const { serviceLevel, status, itemList, psaOrderNumber } = req.body;
-    const itemCount = itemList.length;
+    const itemCount = Array.isArray(itemList) ? itemList.length : itemList;
 
     try {
       await query(`
