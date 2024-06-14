@@ -100,15 +100,7 @@ const SubmissionDetails = () => {
 
   const { ItemList, ItemCount, ServiceLevel, TrackingNumber, Status, PricePerItem, TotalPrice } = submission;
 
-  let items = [];
-  try {
-    items = JSON.parse(ItemList);
-    if (!Array.isArray(items)) {
-      items = [];
-    }
-  } catch (error) {
-    console.error('Error parsing ItemList:', error);
-  }
+  const items = ItemList || [];
 
   const formattedPricePerItem = PricePerItem ? parseFloat(PricePerItem).toFixed(2) : 'N/A';
   const formattedTotalPrice = TotalPrice ? parseFloat(TotalPrice).toFixed(2) : 'N/A';
@@ -122,24 +114,34 @@ const SubmissionDetails = () => {
       {items.length > 0 && (
         <div>
           <h2 className={styles.subtitle}>Item List</h2>
-          <ul className={styles.list}>
-            {items.map((item, index) => (
-              <li key={index} className={styles.listItem}>
-                <p className={styles.itemParagraph}><strong className={styles.bold}>Year:</strong> {item.year}</p>
-                <p className={styles.itemParagraph}><strong className={styles.bold}>Set:</strong> {item.set}</p>
-                <p className={styles.itemParagraph}><strong className={styles.bold}>Number:</strong> {item.number}</p>
-                <p className={styles.itemParagraph}><strong className={styles.bold}>Name:</strong> {item.name}</p>
-                <p className={styles.itemParagraph}><strong className={styles.bold}>Type:</strong> {item.type}</p>
-                <p className={styles.itemParagraph}><strong className={styles.bold}>Value:</strong> {item.value}</p>
-              </li>
-            ))}
-          </ul>
+          <table className={styles.itemTable}>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Set</th>
+                <th>Number</th>
+                <th>Name</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.year}</td>
+                  <td>{item.set}</td>
+                  <td>{item.number}</td>
+                  <td>{item.name}</td>
+                  <td>{item.type}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
       <p className={styles.paragraph}><strong className={styles.bold}>Price per Item:</strong> ${formattedPricePerItem}</p>
       <p className={styles.paragraph}><strong className={styles.bold}>Total Price:</strong> ${formattedTotalPrice}</p>
       <div className={styles.options}>
-        <button className={`${styles.button} ${styles.optionButton}`} onClick={() => alert('Return for $5 fee per card')}>Return for $5 Fee per Card</button>
+        <button className={`${styles.button} ${styles.optionButton}`} onClick={() => alert('Ship back to me')}>Ship back to me</button>
         <button className={`${styles.button} ${styles.optionButton}`} onClick={handlePayNowClick}>Pay Now</button>
       </div>
       {showPayment && (
