@@ -62,9 +62,12 @@ const Grading = () => {
           <thead>
             <tr>
               <th>Submission #</th>
-              <th>Current Step</th>
-              <th>Items</th>
               <th>Service Level</th>
+              <th>Items</th>
+              <th>Current Step</th>
+              
+              
+              <th>Tracking #</th>
               <th>Date Submitted</th>
               <th>Status</th>
             </tr>
@@ -75,11 +78,14 @@ const Grading = () => {
                 submissions.map((submission, index) => (
                   <tr key={index}>
                     <td>{submission.submissionNumber}</td>
-                    <td>
-                      {submission.OrderProgress ? getCurrentStep(submission.OrderProgress.orderProgressSteps) : 'N/A'}
-                    </td>
-                    <td>{submission.ItemCount}</td>
                     <td>{submission.ServiceLevel}</td>
+                    <td>{submission.ItemCount}</td>
+                    <td>
+                      {submission.OrderProgress ? getCurrentStep(submission.OrderProgress.orderProgressSteps) : ''}
+                    </td>
+                    
+                    
+                    <td>{submission.TrackingNumber}</td>
                     <td>{new Date(submission.DateSubmitted).toLocaleDateString()}</td>
                     <td>{submission.Status}</td>
                   </tr>
