@@ -34,6 +34,19 @@ const Grading = () => {
     setFaqItems(faqItems.map((item, i) => i === index ? { ...item, open: !item.open } : item));
   };
 
+  const transformStepValue = (step) => {
+    if (!step) {
+      return 'In Progress';
+    }
+  
+    return step
+      .split(/(?=[A-Z])/g) // Split at each uppercase letter
+      .map(word => word === 'ID' ? word : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Handle 'ID' separately
+      .join(' ') // Join the words back together
+      .replace(/\bI D\b/g, 'ID'); // Ensure "ID" is not split and fully capitalized
+  };
+  
+  
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -50,6 +63,7 @@ const Grading = () => {
               <th>Service Level</th>
               <th>Date Submitted</th>
               <th>Status</th>
+              <th>Order Progress</th>
             </tr>
           </thead>
           <tbody>
@@ -62,16 +76,17 @@ const Grading = () => {
                     <td>{submission.ServiceLevel}</td>
                     <td>{new Date(submission.DateSubmitted).toLocaleDateString()}</td>
                     <td>{submission.Status}</td>
+                    <td>{transformStepValue(submission.OrderProgressStep)}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5">No submission history</td>
+                  <td colSpan="6">No submission history</td>
                 </tr>
               )
             ) : (
               <tr>
-                <td colSpan="5">
+                <td colSpan="6">
                   <Link href="/login">Log in</Link> to view your submission history
                 </td>
               </tr>
