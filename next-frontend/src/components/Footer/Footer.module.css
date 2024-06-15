@@ -1,17 +1,22 @@
 /* components/Footer.module.css */
 
 .footer {
-  display: flex;
-  justify-content: space-around;
   padding: 20px;
   margin-top: 80px;
   background-color: #f3f3f3; /* Light grey background */
   border-top: 1px solid #e1e1e1; /* Light grey border */
 }
 
+.footerSections {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
 .footerSection {
   display: flex;
   flex-direction: column;
+  margin-bottom: 20px;
 }
 
 .footerSection h4 {
@@ -55,8 +60,29 @@
   color: #ff0000;
 }
 
+.creditSection {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #e1e1e1; /* Same as footer border */
+}
+
+.creditSection p {
+  font-size: 14px;
+  color: #555555;
+}
+
+.creditSection a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.creditSection a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 1000px) {
-  .footer {
+  .footerSections {
     flex-direction: column;
     align-items: center;
   }

@@ -1,0 +1,102 @@
+/* src/components/CardPaymentForm/CardPaymentForm.module.css */
+.cardDetails {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.cardDetails input,
+.cardDetails select {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.cardDetails .securityCode {
+    width: 30%;
+}
+
+.cardIcon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; /* Adjust the width as needed */
+    height: auto;
+}
+
+/* CSS for the saved card icons */
+.savedCardIcon {
+    width: 30px; /* Adjust the width as needed */
+    height: auto;
+    margin-right: 10px;
+    vertical-align: middle; /* Align the icon with the text */
+}
+
+/* Ensure the card input wrapper has position relative */
+.cardInputWrapper {
+    position: relative;
+}
+
+/* Wider card number input */
+.wideInput {
+    width: calc(100% - 90px); /* Adjust as needed to make space for the icon */
+}
+
+/* Exp year select alignment */
+.expYearSelect {
+    margin-left: 10px; /* Adjust as needed to bring closer to exp month */
+}
+
+/* Make each saved card its own row */
+.savedCards {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardOption {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.cardType {
+    font-weight: bold;
+}
+
+/* CSS for the saved card icons */
+.savedCardIcon {
+    width: 60px; /* Adjust the width as needed */
+    height: auto;
+    margin-right: 10px;
+    vertical-align: middle; /* Align the icon with the text */
+}
+
+/* Ensure the card input wrapper has position relative */
+.cardInputWrapper {
+    position: relative;
+}
+
+.saveCardOption {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.saveCardOption input {
+    margin-right: 10px;
+}
+
+.addNewCardButton {
+    background-color: transparent;
+    border: none;
+    color: blue;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 5px;
+}
+
+.addNewCardButton:hover {
+    color: darkblue;
+}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styles from './AddressModal.module.css';
+import useAuth from '../../hooks/useAuth';
 
 const states = [
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
-const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], setBillingAddress }) => {
+const AddressModal = ({ addressType, onClose, onSubmit, setBillingAddress, setShippingAddress }) => {
+  const { userId, accessToken } = useAuth();
   const [address, setAddress] = useState({
     FirstName: '',
     LastName: '',
@@ -18,6 +20,25 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], 
   });
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [sameAsBilling, setSameAsBilling] = useState(false);
+  const [existingAddresses, setExistingAddresses] = useState([]);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await fetch(`/api/address?userId=${userId}`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        const data = await response.json();
+        setExistingAddresses(data);
+      } catch (error) {
+        console.error('Failed to fetch addresses:', error);
+      }
+    };
+
+    fetchAddresses();
+  }, [userId, accessToken]);
 
   useEffect(() => {
     if (selectedAddress) {
@@ -28,13 +49,6 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], 
     }
   }, [selectedAddress]);
 
-  useEffect(() => {
-    if (sameAsBilling && setBillingAddress) {
-      setBillingAddress(address);
-      onClose(sameAsBilling);
-    }
-  }, [sameAsBilling, address, onClose, setBillingAddress]);
-
   const handleChange = (e) => {
     setAddress({
       ...address,
@@ -42,17 +56,43 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], 
     });
   };
 
+  const handleCheckboxChange = (e) => {
+    setSameAsBilling(e.target.checked);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (sameAsBilling && setBillingAddress) {
+        setBillingAddress(address);
+        setShippingAddress(address);
+      } else {
+        if (addressType === 'billing' && setBillingAddress) {
+          setBillingAddress(address);
+        } else if (addressType === 'shipping' && setShippingAddress) {
+          setShippingAddress(address);
+        }
+      }
       if (selectedAddress) {
         await onSubmit(selectedAddress, addressType);
       } else {
-        await onSubmit(address, addressType);
+        const response = await fetch('/api/address', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({ ...address, userId, IsBilling: addressType === 'billing' })
+        });
+        if (!response.ok) throw new Error('Failed to save address');
+        const newAddress = await response.json();
+        setExistingAddresses([...existingAddresses, newAddress]);
+        await onSubmit(newAddress, addressType);
       }
-      onClose(sameAsBilling);
     } catch (error) {
       console.error('Failed to save address:', error);
+    } finally {
+      onClose(); // Ensure the modal is closed regardless of success or failure
     }
   };
 
@@ -63,6 +103,7 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], 
         <form onSubmit={handleSubmit}>
           {existingAddresses.length > 0 && (
             <div className={styles.savedAddresses}>
+              <h3>Saved Addresses</h3>
               {existingAddresses.map((addr) => (
                 <label key={addr.AddressID} className={styles.addressOption}>
                   <input
@@ -72,15 +113,13 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], 
                     onChange={() => setSelectedAddress(addr)}
                   />
                   <span>
-                    {addr.FirstName} {addr.LastName}<br />
-                    {addr.Street}{addr.Street2 && <>, {addr.Street2}</>}<br />
-                    {addr.City}, {addr.State}, {addr.ZipCode}<br />
-                    {addr.Country}
+                    {addr.FirstName} {addr.LastName}, {addr.Street}{addr.Street2 && `, ${addr.Street2}`}, {addr.City}, {addr.State}, {addr.ZipCode}, {addr.Country}
                   </span>
                 </label>
               ))}
             </div>
           )}
+          <h3>New Address</h3>
           <div className={styles.inputGroup}>
             <input
               type="text"
@@ -177,13 +216,13 @@ const AddressModal = ({ addressType, onClose, onSubmit, existingAddresses = [], 
                 type="checkbox"
                 id="sameAsBilling"
                 checked={sameAsBilling}
-                onChange={(e) => setSameAsBilling(e.target.checked)}
+                onChange={handleCheckboxChange}
               />
               <label htmlFor="sameAsBilling">Shipping address is the same as Billing address</label>
             </div>
           )}
           <div className={styles.buttonContainer}>
-            <button type="button" className={styles.button} onClick={() => onClose(false)}>Cancel</button>
+            <button type="button" className={styles.button} onClick={() => onClose()}>Cancel</button>
             <button type="submit" className={styles.button}>Save Address</button>
           </div>
         </form>
