@@ -1,4 +1,3 @@
-/* src/components/CardPaymentForm/CardPaymentForm.module.css */
 .cardDetails {
     display: flex;
     flex-direction: column;
@@ -13,7 +12,7 @@
     border-radius: 4px;
 }
 
-.cardDetails .securityCode {
+.cardDetails .securityCodeInput {
     width: 30%;
 }
 
@@ -45,8 +44,9 @@
 }
 
 /* Exp year select alignment */
-.expYearSelect {
-    margin-left: 10px; /* Adjust as needed to bring closer to exp month */
+.expiryWrapper {
+    display: flex;
+    gap: 10px; /* Add margin between exp month and exp year */
 }
 
 /* Make each saved card its own row */

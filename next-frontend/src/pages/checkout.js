@@ -84,7 +84,7 @@ const CheckoutPage = () => {
                   <p>
                     {shippingAddress.FirstName} {shippingAddress.LastName}<br />
                     {shippingAddress.Street}{shippingAddress.Street2 && <>, {shippingAddress.Street2}</>}<br />
-                    {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.ZipCode}<br />
+                    {shippingAddress.City}, {shippingAddress.State} {shippingAddress.ZipCode}<br />
                     {shippingAddress.Country}
                   </p>
                 )}

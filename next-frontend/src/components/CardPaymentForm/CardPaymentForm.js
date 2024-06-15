@@ -77,6 +77,7 @@ const CardPaymentForm = ({ cardDetails, setCardDetails, setSavedCards, savedCard
       )}
       {showCardForm && (
         <div className={styles.cardDetails}>
+          <input type="text" placeholder="Card Holder Name" value={cardDetails.cardHolderName} onChange={(e) => setCardDetails({ ...cardDetails, cardHolderName: e.target.value })} className={styles.wideInput} />
           <div className={styles.cardInputWrapper}>
             <input type="text" placeholder="Card Number" value={cardDetails.cardNumber} onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })} className={styles.wideInput} />
             {cardType !== 'Card' && <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />}
@@ -105,7 +106,6 @@ const CardPaymentForm = ({ cardDetails, setCardDetails, setSavedCards, savedCard
             </select>
           </div>
           <input type="text" placeholder="Security Code" value={cardDetails.securityCode} onChange={(e) => setCardDetails({ ...cardDetails, securityCode: e.target.value })} className={styles.securityCodeInput} />
-          <input type="text" placeholder="Card Holder Name" value={cardDetails.cardHolderName} onChange={(e) => setCardDetails({ ...cardDetails, cardHolderName: e.target.value })} className={styles.wideInput} />
           <div className={styles.saveCardOption}>
             <input type="checkbox" id="saveCard" checked={cardDetails.saveCard} onChange={(e) => setCardDetails({ ...cardDetails, saveCard: e.target.checked })} />
             <label htmlFor="saveCard">Save this card for future purchases</label>

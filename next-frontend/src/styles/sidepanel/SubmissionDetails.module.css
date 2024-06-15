@@ -96,18 +96,6 @@
   flex-direction: column;
 }
 
-.cardInputWrapper {
-  position: relative;
-  margin-bottom: 10px;
-}
-
-.wideInput {
-  width: 97%;
-  padding: 10px;
-  border: 1px solid #dddddd;
-  font-size: 18px;
-  border-radius: 4px;
-}
 
 .cardIcon {
   position: absolute;
@@ -121,24 +109,6 @@
 .expiryWrapper {
   display: flex;
   justify-content: space-between;
-}
-
-.expiryInput {
-  width: 48%;
-  padding: 10px;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
-  font-size: 18px;
-}
-
-.securityCodeInput {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 10px;
-  width: 45%;
-  border: 1px solid #dddddd;
-  font-size: 18px;
-  border-radius: 4px;
 }
 
 .paymentButton {

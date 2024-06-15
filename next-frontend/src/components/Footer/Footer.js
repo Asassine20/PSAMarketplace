@@ -1,9 +1,24 @@
-// components/Footer.js
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FaFacebookF, FaTiktok, FaInstagram, FaYoutube } from 'react-icons/fa'; // Import social media icons
-import styles from './Footer.module.css'; // Path to your CSS module file
+import { FaFacebookF, FaTiktok, FaInstagram, FaYoutube } from 'react-icons/fa';
+import styles from './Footer.module.css';
 
 const Footer = () => {
+  const [sports, setSports] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/nav-sports')
+      .then(response => response.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSports(data.filter(sport => sport.Sport)); // Remove empty nav links
+        } else {
+          setSports([]);
+        }
+      })
+      .catch(error => console.error('Error fetching sports:', error));
+  }, []);
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footerSections}>
@@ -13,12 +28,23 @@ const Footer = () => {
         </div>
         <div className={styles.footerSection}>
           <h4>Shop Categories</h4>
-          <Link href="/baseball" className={styles.link}>Baseball</Link>
-          <Link href="/basketball" className={styles.link}>Basketball</Link>
-          <Link href="/football" className={styles.link}>Football</Link>
-          <Link href="/hockey" className={styles.link}>Hockey</Link>
-          <Link href="/pokemon-english" className={styles.link}>Pokemon (English)</Link>
-          <Link href="/pokemon-japan" className={styles.link}>Pokemon (Japan)</Link>
+          {sports.map((sport, index) => (
+            <Link
+              key={index}
+              href={{
+                pathname: '/search',
+                query: {
+                  cardName: '',
+                  page: '1',
+                  inStock: 'true',
+                  sports: sport.Sport
+                }
+              }}
+              className={styles.link}
+            >
+              {sport.Sport}
+            </Link>
+          ))}
         </div>
         <div className={styles.footerSection}>
           <h4>Articles</h4>

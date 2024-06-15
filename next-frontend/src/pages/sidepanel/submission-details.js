@@ -188,7 +188,10 @@ const SubmissionDetails = () => {
               <button className={styles.button} onClick={() => handleOpenModal('billing')}>Enter Billing Address</button>
               {billingAddress && (
                 <p className={styles.address}>
-                  {billingAddress.FirstName} {billingAddress.LastName}, {billingAddress.Street} {billingAddress.Street2}, {billingAddress.City}, {billingAddress.State}, {billingAddress.ZipCode}, {billingAddress.Country}
+                  {billingAddress.FirstName} {billingAddress.LastName}, <br/>
+                  {billingAddress.Street} {billingAddress.Street2} <br/>
+                  {billingAddress.City}, {billingAddress.State} {billingAddress.ZipCode} <br/>
+                  {billingAddress.Country}
                 </p>
               )}
             </div>
@@ -198,7 +201,10 @@ const SubmissionDetails = () => {
                 <button className={styles.button} onClick={() => handleOpenModal('shipping')}>Enter Shipping Address</button>
                 {shippingAddress && (
                   <p className={styles.address}>
-                    {shippingAddress.FirstName} {shippingAddress.LastName}, {shippingAddress.Street} {shippingAddress.Street2}, {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.ZipCode}, {shippingAddress.Country}
+                    {shippingAddress.FirstName} {shippingAddress.LastName}<br/>
+                     {shippingAddress.Street} {shippingAddress.Street2} <br/>
+                     {shippingAddress.City}, {shippingAddress.State} {shippingAddress.ZipCode} <br/>
+                     {shippingAddress.Country}
                   </p>
                 )}
               </div>
