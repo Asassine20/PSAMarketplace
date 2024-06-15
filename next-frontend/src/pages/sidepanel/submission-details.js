@@ -2,37 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import useAuth from '../../hooks/useAuth';
 import styles from '../../styles/sidepanel/SubmissionDetails.module.css';
-
-const cardTypeRegex = {
-  visa: /^4[0-9]{12}(?:[0-9]{3})?$/,
-  mastercard: /^5[1-5][0-9]{14}$/,
-  amex: /^3[47][0-9]{13}$/,
-  discover: /^6(?:011|5[0-9]{2})[0-9]{12}$/
-};
-
-const cardIcons = {
-  visa: 'https://1000logos.net/wp-content/uploads/2021/11/VISA-logo-500x281.png',
-  mastercard: 'https://imageio.forbes.com/blogs-images/steveolenski/files/2016/07/Mastercard_new_logo-1200x865.jpg?format=jpg&width=1440',
-  amex: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/1024px-American_Express_logo_%282018%29.svg.png',
-  discover: 'https://www.discover.com/company/images/newsroom/media-downloads/DGN_AcceptanceMark.png',
-  card: '',
-};
-
-const getCardType = (number) => {
-  if (cardTypeRegex.visa.test(number)) return 'visa';
-  if (cardTypeRegex.mastercard.test(number)) return 'mastercard';
-  if (cardTypeRegex.amex.test(number)) return 'amex';
-  if (cardTypeRegex.discover.test(number)) return 'discover';
-  return 'card';
-};
+import CardPaymentForm from '../../components/CardPaymentForm/CardPaymentForm';
+import AddressModal from '../../components/Address/AddressModal';
 
 const SubmissionDetails = () => {
-  const { accessToken, refreshToken } = useAuth();
+  const { accessToken, refreshToken, userId } = useAuth();
   const router = useRouter();
   const { id } = router.query;
   const [submission, setSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
+  const [showReturn, setShowReturn] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressType, setAddressType] = useState('');
+  const [billingAddress, setBillingAddress] = useState(null);
+  const [shippingAddress, setShippingAddress] = useState(null);
+  const [isSameAsBilling, setIsSameAsBilling] = useState(false);
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
     expMonth: '',
@@ -40,7 +25,9 @@ const SubmissionDetails = () => {
     securityCode: '',
     cardHolderName: '',
   });
-  const [cardType, setCardType] = useState('card');
+  const [savedCards, setSavedCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [showCardForm, setShowCardForm] = useState(true);
 
   useEffect(() => {
     const fetchSubmission = async () => {
@@ -75,17 +62,52 @@ const SubmissionDetails = () => {
     }
   }, [accessToken, id, refreshToken]);
 
-  useEffect(() => {
-    setCardType(getCardType(cardDetails.cardNumber));
-  }, [cardDetails.cardNumber]);
-
   const handlePayNowClick = () => {
-    setShowPayment(!showPayment);
+    setShowPayment(true);
+    setShowReturn(false);
+  };
+
+  const handleReturnClick = () => {
+    setShowPayment(false);
+    setShowReturn(true);
   };
 
   const handlePaymentSubmit = (event) => {
     event.preventDefault();
     alert('Payment submitted');
+  };
+
+  const handleOpenModal = (type) => {
+    setAddressType(type);
+    setShowAddressModal(true);
+  };
+
+  const handleCloseModal = (sameAsBilling) => {
+    setShowAddressModal(false);
+    setIsSameAsBilling(sameAsBilling);
+  };
+
+  const handleAddressSubmit = async (address, type) => {
+    try {
+      const response = await fetch('/api/address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...address, IsBilling: type === 'billing', userId }),
+      });
+      if (!response.ok) throw new Error('Failed to save address');
+      const savedAddress = await response.json();
+      if (type === 'billing') {
+        setBillingAddress(savedAddress);
+        if (isSameAsBilling) {
+          setShippingAddress(savedAddress);
+        }
+      } else {
+        setShippingAddress(savedAddress);
+      }
+      setShowAddressModal(false);
+    } catch (error) {
+      console.error('Failed to save address:', error);
+    }
   };
 
   if (loading) {
@@ -155,71 +177,55 @@ const SubmissionDetails = () => {
       <p className={styles.paragraph}><strong className={styles.bold}>Price per Item:</strong> ${formattedPricePerItem}</p>
       <p className={styles.paragraph}><strong className={styles.bold}>Total Price:</strong> ${formattedTotalPrice}</p>
       <div className={styles.options}>
-        <button className={`${styles.button} ${styles.optionButton}`} onClick={() => alert('Return for $5 fee per card')}>Return for $5 Fee per Card</button>
+        <button className={`${styles.button} ${styles.optionButton}`} onClick={handleReturnClick}>Return for $5 Fee per Card</button>
         <button className={`${styles.button} ${styles.optionButton}`} onClick={handlePayNowClick}>Pay Now</button>
       </div>
-      {showPayment && (
+      {(showPayment || showReturn) && (
         <div className={styles.paymentContainer}>
+          <div className={styles.addressButtons}>
+            <div>
+              <h3>Billing Address</h3>
+              <button className={styles.button} onClick={() => handleOpenModal('billing')}>Enter Billing Address</button>
+              {billingAddress && (
+                <p className={styles.address}>
+                  {billingAddress.FirstName} {billingAddress.LastName}, {billingAddress.Street} {billingAddress.Street2}, {billingAddress.City}, {billingAddress.State}, {billingAddress.ZipCode}, {billingAddress.Country}
+                </p>
+              )}
+            </div>
+            {showReturn && (
+              <div>
+                <h3>Shipping Address</h3>
+                <button className={styles.button} onClick={() => handleOpenModal('shipping')}>Enter Shipping Address</button>
+                {shippingAddress && (
+                  <p className={styles.address}>
+                    {shippingAddress.FirstName} {shippingAddress.LastName}, {shippingAddress.Street} {shippingAddress.Street2}, {shippingAddress.City}, {shippingAddress.State}, {shippingAddress.ZipCode}, {shippingAddress.Country}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           <h2>Payment Details</h2>
-          <form onSubmit={handlePaymentSubmit} className={styles.paymentForm}>
-            <div className={styles.cardInputWrapper}>
-              <input
-                type="text"
-                placeholder="Card Number"
-                value={cardDetails.cardNumber}
-                onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })}
-                className={styles.wideInput}
-              />
-              {cardType !== 'card' && <img src={cardIcons[cardType]} alt={cardType} className={styles.cardIcon} />}
-            </div>
-            <div className={styles.expiryWrapper}>
-              <select
-                value={cardDetails.expMonth}
-                onChange={(e) => setCardDetails({ ...cardDetails, expMonth: e.target.value })}
-                className={styles.expiryInput}
-              >
-                <option value="">Exp Month</option>
-                <option value="01">1 - January</option>
-                <option value="02">2 - February</option>
-                <option value="03">3 - March</option>
-                <option value="04">4 - April</option>
-                <option value="05">5 - May</option>
-                <option value="06">6 - June</option>
-                <option value="07">7 - July</option>
-                <option value="08">8 - August</option>
-                <option value="09">9 - September</option>
-                <option value="10">10 - October</option>
-                <option value="11">11 - November</option>
-                <option value="12">12 - December</option>
-              </select>
-              <select
-                value={cardDetails.expYear}
-                onChange={(e) => setCardDetails({ ...cardDetails, expYear: e.target.value })}
-                className={styles.expiryInput}
-              >
-                <option value="">Exp Year</option>
-                {Array.from({ length: 50 }, (_, i) => 2024 + i).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-            <input
-              type="text"
-              placeholder="Security Code"
-              value={cardDetails.securityCode}
-              onChange={(e) => setCardDetails({ ...cardDetails, securityCode: e.target.value })}
-              className={styles.securityCodeInput}
-            />
-            <input
-              type="text"
-              placeholder="Card Holder Name"
-              value={cardDetails.cardHolderName}
-              onChange={(e) => setCardDetails({ ...cardDetails, cardHolderName: e.target.value })}
-              className={styles.wideInput}
-            />
-            <button type="submit" className={styles.paymentButton}>Submit Payment</button>
-          </form>
+          <CardPaymentForm
+            cardDetails={cardDetails}
+            setCardDetails={setCardDetails}
+            setSavedCards={setSavedCards}
+            savedCards={savedCards}
+            selectedCard={selectedCard}
+            setSelectedCard={setSelectedCard}
+            showCardForm={showCardForm}
+            setShowCardForm={setShowCardForm}
+          />
+          <button type="submit" className={styles.paymentButton} onClick={handlePaymentSubmit}>Submit Payment</button>
         </div>
+      )}
+      {showAddressModal && (
+        <AddressModal
+          addressType={addressType}
+          onClose={handleCloseModal}
+          onSubmit={handleAddressSubmit}
+          setBillingAddress={setBillingAddress}
+          setShippingAddress={setShippingAddress}
+        />
       )}
     </div>
   );

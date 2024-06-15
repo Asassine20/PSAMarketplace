@@ -102,21 +102,23 @@ const AddressModal = ({ addressType, onClose, onSubmit, setBillingAddress, setSh
         <h2 className={styles.modalHeader}>Enter {addressType === 'billing' ? 'Billing' : 'Shipping'} Address</h2>
         <form onSubmit={handleSubmit}>
           {existingAddresses.length > 0 && (
-            <div className={styles.savedAddresses}>
+            <div className={styles.savedAddressesContainer}>
               <h3>Saved Addresses</h3>
-              {existingAddresses.map((addr) => (
-                <label key={addr.AddressID} className={styles.addressOption}>
-                  <input
-                    type="radio"
-                    name="savedAddress"
-                    value={addr.AddressID}
-                    onChange={() => setSelectedAddress(addr)}
-                  />
-                  <span>
-                    {addr.FirstName} {addr.LastName}, {addr.Street}{addr.Street2 && `, ${addr.Street2}`}, {addr.City}, {addr.State}, {addr.ZipCode}, {addr.Country}
-                  </span>
-                </label>
-              ))}
+              <div className={styles.savedAddresses}>
+                {existingAddresses.map((addr) => (
+                  <label key={addr.AddressID} className={styles.addressOption}>
+                    <input
+                      type="radio"
+                      name="savedAddress"
+                      value={addr.AddressID}
+                      onChange={() => setSelectedAddress(addr)}
+                    />
+                    <span>
+                      {addr.FirstName} {addr.LastName}, {addr.Street}{addr.Street2 && `, ${addr.Street2}`}, {addr.City}, {addr.State}, {addr.ZipCode}, {addr.Country}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
           )}
           <h3>New Address</h3>
