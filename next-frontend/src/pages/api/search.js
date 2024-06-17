@@ -12,6 +12,7 @@ export default async function handler(req, res) {
         page = '1',
         limit = '24',
         inStock = 'false',
+        sortOption = '',
     } = req.query;
 
     let baseSql = `FROM Card`;
@@ -37,24 +38,33 @@ export default async function handler(req, res) {
 
     let whereSql = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
 
+    let orderBySql = '';
+    if (sortOption === 'nameAsc') {
+        orderBySql = 'ORDER BY CardName ASC';
+    } else if (sortOption === 'priceHighToLow') {
+        orderBySql = 'ORDER BY MarketPrice DESC';
+    } else if (sortOption === 'priceLowToHigh') {
+        orderBySql = 'ORDER BY MarketPrice ASC';
+    }
+
     if (fetchFilters === 'true') {
         try {
             const filtersPromises = [
-                query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
+                query(`SELECT Sport, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Sport IS NOT NULL GROUP BY Sport ORDER BY count DESC`, values),
+                query(`SELECT CardSet, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardSet IS NOT NULL GROUP BY CardSet ORDER BY count DESC`, values),
+                query(`SELECT CardYear, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardYear IS NOT NULL GROUP BY CardYear ORDER BY count DESC`, values),
+                query(`SELECT CardColor, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardColor IS NOT NULL GROUP BY CardColor ORDER BY count DESC`, values),
+                query(`SELECT CardVariant, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardVariant IS NOT NULL GROUP BY CardVariant ORDER BY count DESC`, values),
             ];
 
             const [sports, cardSets, cardYears, cardColors, cardVariants] = await Promise.all(filtersPromises);
 
             res.status(200).json({
-                sports: sports.map(r => r.Sport),
-                cardSets: cardSets.map(r => r.CardSet),
-                cardYears: cardYears.map(r => r.CardYear),
-                cardColors: cardColors.map(r => r.CardColor),
-                cardVariants: cardVariants.map(r => r.CardVariant),
+                sports: sports.map(r => ({ name: r.Sport, count: r.count })),
+                cardSets: cardSets.map(r => ({ name: r.CardSet, count: r.count })),
+                cardYears: cardYears.map(r => ({ name: r.CardYear, count: r.count })),
+                cardColors: cardColors.map(r => ({ name: r.CardColor, count: r.count })),
+                cardVariants: cardVariants.map(r => ({ name: r.CardVariant, count: r.count })),
             });
         } catch (error) {
             console.error("Failed to fetch filter options:", error);
@@ -74,6 +84,7 @@ export default async function handler(req, res) {
             LEFT JOIN Inventory ON Card.CardID = Inventory.CardID
             ${whereSql}
             GROUP BY Card.CardID
+            ${orderBySql}
             LIMIT ? OFFSET ?`;
 
             values.push(limitNum, offset);

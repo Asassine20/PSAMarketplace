@@ -524,6 +524,28 @@ input:checked + .slider:before {
   font-weight: bold; 
 }
 
+.appliedFiltersContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.clearFiltersButton {
+  position: absolute;
+  right: 0;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px; /* Optional: Adjust as needed */
+}
+
+.clearFiltersButton:hover {
+  text-decoration: none;
+}
+
+
 .noResults {
   text-align: center;
   margin-top: 50px;

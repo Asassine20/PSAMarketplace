@@ -23,7 +23,7 @@ const SearchPage = () => {
     const router = useRouter();
     const { query } = router;
 
-    const [filters, setFilters] = useState({
+    const initializeFilters = (query) => ({
         sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
         cardSets: query.cardSets ? (Array.isArray(query.cardSets) ? query.cardSets : [query.cardSets]) : [],
         cardYears: query.cardYears ? (Array.isArray(query.cardYears) ? query.cardYears : [query.cardYears]) : [],
@@ -32,7 +32,10 @@ const SearchPage = () => {
         inStock: query.inStock === 'true',
         cardName: query.cardName || '',
         page: query.page || '1',
+        sortBy: query.sortBy || '',
     });
+
+    const [filters, setFilters] = useState(initializeFilters(query));
 
     const [filterOptions, setFilterOptions] = useState({
         sports: [],
@@ -63,6 +66,7 @@ const SearchPage = () => {
             cardName: updatedFilters.cardName || '',
             page: updatedFilters.page,
             inStock: updatedFilters.inStock ? 'true' : 'false',
+            sortBy: updatedFilters.sortBy || '',
         });
 
         Object.keys(updatedFilters).forEach((filterKey) => {
@@ -91,6 +95,10 @@ const SearchPage = () => {
                 });
             }
         });
+
+        if (filtersToApply.sortBy) {
+            queryStr += `&sortBy=${encodeURIComponent(filtersToApply.sortBy)}`;
+        }
 
         console.log('Fetching with query:', queryStr);
         const response = await fetch(queryStr);
@@ -136,25 +144,18 @@ const SearchPage = () => {
         setIsLoadingFilters(false);
     };
 
+    // Fetch filters and cards on initial load
     useEffect(() => {
         console.log('useEffect - initial fetch filtered cards and filter options');
-        fetchFilteredCards(filters);
-        fetchFilterOptions(filters);
+        fetchFilteredCards(initializeFilters(query));
+        fetchFilterOptions(initializeFilters(query));
     }, []);
 
+    // Update filters and cards when query changes
     useEffect(() => {
         if (Object.keys(query).length > 0) {
             console.log('useEffect - router query change:', query);
-            const updatedFilters = {
-                sports: query.sports ? (Array.isArray(query.sports) ? query.sports : [query.sports]) : [],
-                cardSets: query.cardSets ? (Array.isArray(query.cardSets) ? query.cardSets : [query.cardSets]) : [],
-                cardYears: query.cardYears ? (Array.isArray(query.cardYears) ? query.cardYears : [query.cardYears]) : [],
-                cardColors: query.cardColors ? (Array.isArray(query.cardColors) ? query.cardColors : [query.cardColors]) : [],
-                cardVariants: query.cardVariants ? (Array.isArray(query.cardVariants) ? query.cardVariants : [query.cardVariants]) : [],
-                inStock: query.inStock === 'true',
-                cardName: query.cardName || '',
-                page: query.page || '1',
-            };
+            const updatedFilters = initializeFilters(query);
 
             console.log('Updated filters from query:', updatedFilters);
             setFilters(updatedFilters);
@@ -190,7 +191,6 @@ const SearchPage = () => {
             console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
-            fetchFilterOptions(updatedFilters); // Fetch updated filter options based on current selection
             return updatedFilters;
         });
     };
@@ -205,7 +205,6 @@ const SearchPage = () => {
             console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
-            fetchFilterOptions(updatedFilters); // Fetch updated filter options based on current selection
             return updatedFilters;
         });
     };
@@ -229,6 +228,40 @@ const SearchPage = () => {
         setIsFilterVisible(!isFilterVisible);
     };
 
+    const handleSortChange = (e) => {
+        const sortBy = e.target.value;
+        console.log('handleSortChange - sortBy:', sortBy);
+        setFilters((prevFilters) => {
+            const updatedFilters = {
+                ...prevFilters,
+                sortBy,
+            };
+            console.log('Updated filters:', updatedFilters);
+            updateFiltersInUrl(updatedFilters);
+            fetchFilteredCards(updatedFilters);
+            return updatedFilters;
+        });
+    };
+
+    const clearAllFilters = () => {
+        console.log('clearAllFilters');
+        const clearedFilters = {
+            sports: [],
+            cardSets: [],
+            cardYears: [],
+            cardColors: [],
+            cardVariants: [],
+            inStock: false,
+            cardName: '',
+            page: '1',
+            sortBy: '',
+        };
+        setFilters(clearedFilters);
+        updateFiltersInUrl(clearedFilters);
+        fetchFilteredCards(clearedFilters);
+        fetchFilterOptions(clearedFilters);
+    };
+
     const filterTitles = {
         sports: 'Category',
         cardSets: 'Set',
@@ -245,11 +278,11 @@ const SearchPage = () => {
                 <div className={styles.controlSection}>
                     <button onClick={toggleFilterVisibility} className={styles.filterToggle}>Filter</button>
                     <div className={styles.dropdownContainer}>
-                        <select className={styles.sortDropdown}>
-                            <option value="name">Best Selling</option>
-                            <option value="year">A-Z</option>
-                            <option value="sport">Price: High - Low</option>
-                            <option value="sport">Price: Low - High</option>
+                        <select className={styles.sortDropdown} value={filters.sortBy} onChange={handleSortChange}>
+                            <option value="">Sort By</option>
+                            <option value="nameAsc">Card Name (A-Z)</option>
+                            <option value="priceHighToLow">Price: High to Low</option>
+                            <option value="priceLowToHigh">Price: Low to High</option>
                         </select>
                         <FaCaretDown className={styles.dropdownIcon} />
                     </div>
@@ -263,7 +296,10 @@ const SearchPage = () => {
                                 <h2 className={styles.filterTitle}>Filters</h2>
                             </div>
                             {Object.values(filters).some(filterArray => Array.isArray(filterArray) && filterArray.length > 0) && (
-                                <h4 className={styles.appliedFiltersHeading}>Applied Filters</h4>
+                                <div className={styles.appliedFiltersContainer}>
+                                    <h4 className={styles.appliedFiltersHeading}>Applied Filters</h4>
+                                    <button className={styles.clearFiltersButton} onClick={clearAllFilters}>Clear Filters</button>
+                                </div>
                             )}
                             <div className={styles.appliedFilters}>
                                 {Object.entries(filters).filter(([key, value]) => Array.isArray(value) && value.length > 0).map(([key, values]) => (
@@ -299,7 +335,7 @@ const SearchPage = () => {
                                         {filterOptions[filterKey]
                                             .filter(option =>
                                                 option &&
-                                                option.toString().toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
+                                                option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
                                             )
                                             .map((option, index) => (
                                                 <div key={index} className={styles.filterOption}>
@@ -307,10 +343,10 @@ const SearchPage = () => {
                                                         <input
                                                             type="checkbox"
                                                             disabled={isLoadingFilters}
-                                                            checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option)}
-                                                            onChange={(e) => handleFilterChange(filterKey, option, e.target.checked)}
+                                                            checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
+                                                            onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
                                                         />
-                                                        {option}
+                                                        {option.name} ({option.count})
                                                     </label>
                                                 </div>
                                             ))}
