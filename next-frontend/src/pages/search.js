@@ -190,6 +190,7 @@ const SearchPage = () => {
             console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
+            fetchFilterOptions(updatedFilters); // Fetch updated filter options based on current selection
             return updatedFilters;
         });
     };
@@ -204,6 +205,7 @@ const SearchPage = () => {
             console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
+            fetchFilterOptions(updatedFilters); // Fetch updated filter options based on current selection
             return updatedFilters;
         });
     };

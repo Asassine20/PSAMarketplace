@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         try {
             const filtersPromises = [
                 query(`SELECT DISTINCT Sport ${baseSql} ${whereSql}`, values),
-                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql} LIMIT 100`, values),
+                query(`SELECT DISTINCT CardSet ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardYear ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardColor ${baseSql} ${whereSql}`, values),
                 query(`SELECT DISTINCT CardVariant ${baseSql} ${whereSql}`, values),
