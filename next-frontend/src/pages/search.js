@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FaCaretDown } from 'react-icons/fa';
 import { PiSmileySadBold } from 'react-icons/pi';
+import { MdKeyboardArrowDown } from 'react-icons/md'; // Add this import for the down arrow
 import styles from '../styles/search.module.css';
 
 const Spinner = () => (
@@ -56,7 +57,13 @@ const SearchPage = () => {
     });
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isLoadingFilters, setIsLoadingFilters] = useState(false);
+    const [isLoadingCardSets, setIsLoadingCardSets] = useState(false);
     const [delayedSearch, setDelayedSearch] = useState(null);
+
+    const [filterPages, setFilterPages] = useState({
+        cardSets: 1,
+    }); // New state for filter pagination
+    const filterLimit = 50; // Limit for each filter fetch
 
     const resultsPerPage = 10; // Assume a constant for results per page (can be adjusted as needed)
 
@@ -114,13 +121,17 @@ const SearchPage = () => {
         console.log('Fetched cards:', cards);
     };
 
-    const fetchFilterOptions = async (filtersToApply) => {
-        console.log('Fetching filter options with filters:', filtersToApply);
-        setIsLoadingFilters(true);
+    const fetchFilterOptions = async (filterType, filtersToApply, page = 1) => {
+        console.log(`Fetching ${filterType} filter options with filters:`, filtersToApply);
+        if (filterType === 'cardSets') setIsLoadingCardSets(true);
+        else setIsLoadingFilters(true);
         let queryParams = new URLSearchParams({
             fetchFilters: 'true',
             cardName: filtersToApply.cardName || '',
             inStock: filtersToApply.inStock ? 'true' : 'false',
+            filterPage: page,
+            filterLimit: filterLimit,
+            filterType: filterType
         });
 
         Object.keys(filtersToApply).forEach((filterKey) => {
@@ -136,19 +147,27 @@ const SearchPage = () => {
         const response = await fetch(`/api/search?${queryParams.toString()}`);
         if (response.ok) {
             const data = await response.json();
-            setFilterOptions(data);
+            setFilterOptions(prevOptions => ({
+                ...prevOptions,
+                [filterType]: page === 1 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])] // Append new data for the specific filter without duplicates
+            }));
             console.log('Fetched filter options:', data);
         } else {
             console.error('Failed to fetch filter options');
         }
-        setIsLoadingFilters(false);
+        if (filterType === 'cardSets') setIsLoadingCardSets(false);
+        else setIsLoadingFilters(false);
     };
 
     // Fetch filters and cards on initial load
     useEffect(() => {
         console.log('useEffect - initial fetch filtered cards and filter options');
         fetchFilteredCards(initializeFilters(query));
-        fetchFilterOptions(initializeFilters(query));
+        fetchFilterOptions('cardSets', initializeFilters(query), 1); // Load initial cardSets
+        fetchFilterOptions('sports', initializeFilters(query));
+        fetchFilterOptions('cardYears', initializeFilters(query));
+        fetchFilterOptions('cardColors', initializeFilters(query));
+        fetchFilterOptions('cardVariants', initializeFilters(query));
     }, []);
 
     // Update filters and cards when query changes
@@ -160,7 +179,11 @@ const SearchPage = () => {
             console.log('Updated filters from query:', updatedFilters);
             setFilters(updatedFilters);
             fetchFilteredCards(updatedFilters);
-            fetchFilterOptions(updatedFilters);
+            fetchFilterOptions('cardSets', updatedFilters, 1); // Reset cardSets to initial load
+            fetchFilterOptions('sports', updatedFilters);
+            fetchFilterOptions('cardYears', updatedFilters);
+            fetchFilterOptions('cardColors', updatedFilters);
+            fetchFilterOptions('cardVariants', updatedFilters);
         }
     }, [query]);
 
@@ -259,7 +282,11 @@ const SearchPage = () => {
         setFilters(clearedFilters);
         updateFiltersInUrl(clearedFilters);
         fetchFilteredCards(clearedFilters);
-        fetchFilterOptions(clearedFilters);
+        fetchFilterOptions('cardSets', clearedFilters, 1); // Reset cardSets to initial load
+        fetchFilterOptions('sports', clearedFilters);
+        fetchFilterOptions('cardYears', clearedFilters);
+        fetchFilterOptions('cardColors', clearedFilters);
+        fetchFilterOptions('cardVariants', clearedFilters);
     };
 
     const filterTitles = {
@@ -271,6 +298,61 @@ const SearchPage = () => {
     };
 
     const totalPages = Math.ceil(totalCount / resultsPerPage);
+
+    const observers = useRef({});
+    const lastElementRefs = {
+        cardSets: useCallback(node => createObserver(node, 'cardSets'), [isLoadingCardSets]),
+    };
+
+    const createObserver = (node, filterType) => {
+        if (isLoadingCardSets) return;
+        if (observers.current[filterType]) observers.current[filterType].disconnect();
+        observers.current[filterType] = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && entries[0].intersectionRatio > 0) {
+                setTimeout(() => {
+                    setFilterPages(prevPages => ({
+                        ...prevPages,
+                        [filterType]: prevPages[filterType] + 1
+                    }));
+                }, 500);
+            }
+        }, { rootMargin: '100px' }); // Add rootMargin for stiffness
+        if (node) observers.current[filterType].observe(node);
+    };
+
+    const cardSetsScrollRef = useRef(null);
+
+    useEffect(() => {
+        if (cardSetsScrollRef.current) {
+            cardSetsScrollRef.current.scrollTop = cardSetsScrollRef.current.scrollHeight - 200; // Reload slightly above the bottom
+        }
+    }, [filterOptions.cardSets]);
+
+    useEffect(() => {
+        Object.keys(filterPages).forEach(filterType => {
+            if (filterPages[filterType] > 1) {
+                fetchFilterOptions(filterType, filters, filterPages[filterType]);
+            }
+        });
+    }, [filterPages]);
+
+    const handlePullToRefresh = () => {
+        const ref = cardSetsScrollRef.current;
+        if (ref.scrollTop + ref.clientHeight >= ref.scrollHeight - 50 && !isLoadingCardSets) {
+            setFilterPages(prevPages => ({
+                ...prevPages,
+                cardSets: prevPages.cardSets + 1
+            }));
+        }
+    };
+
+    useEffect(() => {
+        const ref = cardSetsScrollRef.current;
+        if (ref) {
+            ref.addEventListener('scroll', handlePullToRefresh);
+            return () => ref.removeEventListener('scroll', handlePullToRefresh);
+        }
+    }, []);
 
     return (
         <div>
@@ -324,25 +406,30 @@ const SearchPage = () => {
                                     <span className={`${styles.slider} ${styles.round}`}></span>
                                 </label>
                             </div>
-                            {isLoadingFilters ? <div className={styles.centeredContent}><Spinner /></div> :
-                                Object.keys(filterOptions).map((filterKey) => (
-                                    <div key={filterKey} className={`${styles.filterCategory} ${isLoadingFilters ? styles.disabled : ''}`}>
-                                        <h4>{filterTitles[filterKey]}</h4>
-                                        <SearchInput
-                                            onChange={(value) => handleFilterSearchChange(filterKey, value)}
-                                            placeholder={`Search ${filterTitles[filterKey]}`}
-                                        />
-                                        {filterOptions[filterKey]
+                            {Object.keys(filterOptions).map((filterKey) => (
+                                <div key={filterKey} className={`${styles.filterCategory}`} ref={filterKey === 'cardSets' ? cardSetsScrollRef : null}>
+                                    <h4>{filterTitles[filterKey]}</h4>
+                                    <SearchInput
+                                        onChange={(value) => handleFilterSearchChange(filterKey, value)}
+                                        placeholder={`Search ${filterTitles[filterKey]}`}
+                                    />
+                                    {isLoadingCardSets && filterKey === 'cardSets' ? <div className={styles.centeredContent}><Spinner /></div> :
+                                        filterOptions[filterKey]
                                             .filter(option =>
                                                 option &&
+                                                option.name &&
                                                 option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
                                             )
                                             .map((option, index) => (
-                                                <div key={index} className={styles.filterOption}>
+                                                <div
+                                                    key={index}
+                                                    className={styles.filterOption}
+                                                    ref={filterKey === 'cardSets' && index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null} // Set ref to the last item of cardSets only
+                                                >
                                                     <label>
                                                         <input
                                                             type="checkbox"
-                                                            disabled={isLoadingFilters}
+                                                            disabled={isLoadingCardSets && filterKey === 'cardSets'}
                                                             checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
                                                             onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
                                                         />
@@ -350,8 +437,13 @@ const SearchPage = () => {
                                                     </label>
                                                 </div>
                                             ))}
-                                    </div>
-                                ))}
+                                    {filterKey === 'cardSets' && !isLoadingCardSets && (
+                                        <div className={styles.scrollIndicator}>
+                                            <MdKeyboardArrowDown size={24} />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </aside>
                     )}
                     <section className={styles.cardsSection}>
