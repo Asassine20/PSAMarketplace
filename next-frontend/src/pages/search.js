@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaCaretDown } from 'react-icons/fa';
 import { PiSmileySadBold } from 'react-icons/pi';
-import { MdKeyboardArrowDown } from 'react-icons/md'; // Add this import for the down arrow
+import { MdKeyboardArrowDown } from 'react-icons/md';
 import styles from '../styles/search.module.css';
 
 const Spinner = () => (
@@ -45,6 +45,7 @@ const SearchPage = () => {
         cardColors: [],
         cardVariants: [],
     });
+    const [allCardSets, setAllCardSets] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
     const [isLoadingCards, setIsLoadingCards] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
@@ -58,17 +59,16 @@ const SearchPage = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isLoadingFilters, setIsLoadingFilters] = useState(false);
     const [isLoadingCardSets, setIsLoadingCardSets] = useState(false);
+    const [hasMoreCardSets, setHasMoreCardSets] = useState(true);
     const [delayedSearch, setDelayedSearch] = useState(null);
 
     const [filterPages, setFilterPages] = useState({
         cardSets: 1,
-    }); // New state for filter pagination
-    const filterLimit = 50; // Limit for each filter fetch
-
-    const resultsPerPage = 10; // Assume a constant for results per page (can be adjusted as needed)
+    });
+    const filterLimit = 50;
+    const resultsPerPage = 10;
 
     const updateFiltersInUrl = (updatedFilters) => {
-        console.log('Updating filters in URL:', updatedFilters);
         const queryParameters = new URLSearchParams({
             cardName: updatedFilters.cardName || '',
             page: updatedFilters.page,
@@ -85,12 +85,10 @@ const SearchPage = () => {
             }
         });
 
-        console.log('Updated query parameters:', queryParameters.toString());
         router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
     };
 
     const fetchFilteredCards = async (filtersToApply) => {
-        console.log('Fetching filtered cards with filters:', filtersToApply);
         setIsLoadingCards(true);
         let queryStr = `/api/search?cardName=${encodeURIComponent(filtersToApply.cardName || '')}&page=${filtersToApply.page}&inStock=${filtersToApply.inStock}`;
 
@@ -107,7 +105,6 @@ const SearchPage = () => {
             queryStr += `&sortBy=${encodeURIComponent(filtersToApply.sortBy)}`;
         }
 
-        console.log('Fetching with query:', queryStr);
         const response = await fetch(queryStr);
         if (!response.ok) {
             setIsLoadingCards(false);
@@ -118,13 +115,12 @@ const SearchPage = () => {
         setFilteredCards(cards);
         setTotalCount(totalCount);
         setIsLoadingCards(false);
-        console.log('Fetched cards:', cards);
     };
 
     const fetchFilterOptions = async (filterType, filtersToApply, page = 1) => {
-        console.log(`Fetching ${filterType} filter options with filters:`, filtersToApply);
         if (filterType === 'cardSets') setIsLoadingCardSets(true);
         else setIsLoadingFilters(true);
+
         let queryParams = new URLSearchParams({
             fetchFilters: 'true',
             cardName: filtersToApply.cardName || '',
@@ -143,15 +139,21 @@ const SearchPage = () => {
             }
         });
 
-        console.log('Fetching filter options with query:', queryParams.toString());
         const response = await fetch(`/api/search?${queryParams.toString()}`);
         if (response.ok) {
             const data = await response.json();
+            if (filterType === 'cardSets' && page === 1) {
+                setAllCardSets(data[filterType]);
+            }
+            if (data[filterType].length < filterLimit) {
+                setHasMoreCardSets(false);
+            } else {
+                setHasMoreCardSets(true);
+            }
             setFilterOptions(prevOptions => ({
                 ...prevOptions,
-                [filterType]: page === 1 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])] // Append new data for the specific filter without duplicates
+                [filterType]: page === 1 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])]
             }));
-            console.log('Fetched filter options:', data);
         } else {
             console.error('Failed to fetch filter options');
         }
@@ -159,27 +161,22 @@ const SearchPage = () => {
         else setIsLoadingFilters(false);
     };
 
-    // Fetch filters and cards on initial load
     useEffect(() => {
-        console.log('useEffect - initial fetch filtered cards and filter options');
         fetchFilteredCards(initializeFilters(query));
-        fetchFilterOptions('cardSets', initializeFilters(query), 1); // Load initial cardSets
+        fetchFilterOptions('cardSets', initializeFilters(query), 1);
         fetchFilterOptions('sports', initializeFilters(query));
         fetchFilterOptions('cardYears', initializeFilters(query));
         fetchFilterOptions('cardColors', initializeFilters(query));
         fetchFilterOptions('cardVariants', initializeFilters(query));
     }, []);
 
-    // Update filters and cards when query changes
     useEffect(() => {
         if (Object.keys(query).length > 0) {
-            console.log('useEffect - router query change:', query);
             const updatedFilters = initializeFilters(query);
 
-            console.log('Updated filters from query:', updatedFilters);
             setFilters(updatedFilters);
             fetchFilteredCards(updatedFilters);
-            fetchFilterOptions('cardSets', updatedFilters, 1); // Reset cardSets to initial load
+            fetchFilterOptions('cardSets', updatedFilters, 1);
             fetchFilterOptions('sports', updatedFilters);
             fetchFilterOptions('cardYears', updatedFilters);
             fetchFilterOptions('cardColors', updatedFilters);
@@ -203,7 +200,6 @@ const SearchPage = () => {
     };
 
     const handleFilterChange = (filterKey, value, isChecked) => {
-        console.log(`handleFilterChange - filterKey: ${filterKey}, value: ${value}, isChecked: ${isChecked}`);
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
@@ -211,7 +207,6 @@ const SearchPage = () => {
                     ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
                     : prevFilters[filterKey].filter((v) => v !== value),
             };
-            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
             return updatedFilters;
@@ -219,13 +214,11 @@ const SearchPage = () => {
     };
 
     const handleToggleChange = () => {
-        console.log('handleToggleChange');
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 inStock: !prevFilters.inStock,
             };
-            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
             return updatedFilters;
@@ -233,13 +226,11 @@ const SearchPage = () => {
     };
 
     const paginate = (pageNumber) => {
-        console.log(`paginate - pageNumber: ${pageNumber}`);
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 page: pageNumber,
             };
-            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
             return updatedFilters;
@@ -247,19 +238,16 @@ const SearchPage = () => {
     };
 
     const toggleFilterVisibility = () => {
-        console.log('toggleFilterVisibility');
         setIsFilterVisible(!isFilterVisible);
     };
 
     const handleSortChange = (e) => {
         const sortBy = e.target.value;
-        console.log('handleSortChange - sortBy:', sortBy);
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 sortBy,
             };
-            console.log('Updated filters:', updatedFilters);
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
             return updatedFilters;
@@ -267,7 +255,6 @@ const SearchPage = () => {
     };
 
     const clearAllFilters = () => {
-        console.log('clearAllFilters');
         const clearedFilters = {
             sports: [],
             cardSets: [],
@@ -282,7 +269,7 @@ const SearchPage = () => {
         setFilters(clearedFilters);
         updateFiltersInUrl(clearedFilters);
         fetchFilteredCards(clearedFilters);
-        fetchFilterOptions('cardSets', clearedFilters, 1); // Reset cardSets to initial load
+        fetchFilterOptions('cardSets', clearedFilters, 1);
         fetchFilterOptions('sports', clearedFilters);
         fetchFilterOptions('cardYears', clearedFilters);
         fetchFilterOptions('cardColors', clearedFilters);
@@ -301,11 +288,11 @@ const SearchPage = () => {
 
     const observers = useRef({});
     const lastElementRefs = {
-        cardSets: useCallback(node => createObserver(node, 'cardSets'), [isLoadingCardSets]),
+        cardSets: useCallback(node => createObserver(node, 'cardSets'), [isLoadingCardSets, hasMoreCardSets]),
     };
 
     const createObserver = (node, filterType) => {
-        if (isLoadingCardSets) return;
+        if (isLoadingCardSets || !hasMoreCardSets) return;
         if (observers.current[filterType]) observers.current[filterType].disconnect();
         observers.current[filterType] = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && entries[0].intersectionRatio > 0) {
@@ -316,7 +303,7 @@ const SearchPage = () => {
                     }));
                 }, 500);
             }
-        }, { rootMargin: '100px' }); // Add rootMargin for stiffness
+        }, { rootMargin: '100px' });
         if (node) observers.current[filterType].observe(node);
     };
 
@@ -324,7 +311,9 @@ const SearchPage = () => {
 
     useEffect(() => {
         if (cardSetsScrollRef.current) {
-            cardSetsScrollRef.current.scrollTop = cardSetsScrollRef.current.scrollHeight - 200; // Reload slightly above the bottom
+            const scrollHeight = cardSetsScrollRef.current.scrollHeight;
+            const scrollTop = cardSetsScrollRef.current.scrollTop;
+            cardSetsScrollRef.current.scrollTop = scrollTop + (cardSetsScrollRef.current.scrollHeight - scrollHeight);
         }
     }, [filterOptions.cardSets]);
 
@@ -338,7 +327,7 @@ const SearchPage = () => {
 
     const handlePullToRefresh = () => {
         const ref = cardSetsScrollRef.current;
-        if (ref.scrollTop + ref.clientHeight >= ref.scrollHeight - 50 && !isLoadingCardSets) {
+        if (ref.scrollTop + ref.clientHeight >= ref.scrollHeight - 50 && !isLoadingCardSets && hasMoreCardSets) {
             setFilterPages(prevPages => ({
                 ...prevPages,
                 cardSets: prevPages.cardSets + 1
@@ -352,7 +341,7 @@ const SearchPage = () => {
             ref.addEventListener('scroll', handlePullToRefresh);
             return () => ref.removeEventListener('scroll', handlePullToRefresh);
         }
-    }, []);
+    }, [hasMoreCardSets]);
 
     return (
         <div>
@@ -424,7 +413,7 @@ const SearchPage = () => {
                                                 <div
                                                     key={index}
                                                     className={styles.filterOption}
-                                                    ref={filterKey === 'cardSets' && index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null} // Set ref to the last item of cardSets only
+                                                    ref={filterKey === 'cardSets' && index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null}
                                                 >
                                                     <label>
                                                         <input
@@ -437,7 +426,7 @@ const SearchPage = () => {
                                                     </label>
                                                 </div>
                                             ))}
-                                    {filterKey === 'cardSets' && !isLoadingCardSets && (
+                                    {filterKey === 'cardSets' && hasMoreCardSets && !isLoadingCardSets && (
                                         <div className={styles.scrollIndicator}>
                                             <MdKeyboardArrowDown size={24} />
                                         </div>
