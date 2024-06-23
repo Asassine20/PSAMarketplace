@@ -11,15 +11,32 @@ const Spinner = () => (
     <div className={styles.spinner}></div>
 );
 
-const SearchInput = ({ onChange, placeholder, value }) => (
-    <input
-        type="text"
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        value={value}
-        className={styles.searchInput}
-    />
-);
+const SearchInput = ({ onChange, placeholder, value }) => {
+    const [inputValue, setInputValue] = useState(value);
+
+    const handleChange = (e) => {
+        setInputValue(e.target.value);
+        onChange(e.target.value);
+    };
+
+    return (
+        <input
+            type="text"
+            onChange={handleChange}
+            placeholder={placeholder}
+            value={inputValue}
+            className={styles.searchInput}
+        />
+    );
+};
+
+const debounce = (func, delay) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+};
 
 const SearchPage = () => {
     const router = useRouter();
@@ -60,7 +77,6 @@ const SearchPage = () => {
     const [isLoadingFilters, setIsLoadingFilters] = useState(false);
     const [isLoadingCardSets, setIsLoadingCardSets] = useState(false);
     const [hasMoreCardSets, setHasMoreCardSets] = useState(true);
-    const [delayedSearch, setDelayedSearch] = useState(null);
 
     const [filterPages, setFilterPages] = useState({
         cardSets: 1,
@@ -187,18 +203,14 @@ const SearchPage = () => {
     }, [query]);
 
     const handleFilterSearchChange = (filterKey, searchTerm) => {
-        if (delayedSearch) {
-            clearTimeout(delayedSearch);
-        }
-
-        const newTimeout = setTimeout(() => {
+        const debounceChange = debounce((value) => {
             setFilterSearchTerms((prevTerms) => ({
                 ...prevTerms,
-                [filterKey]: searchTerm,
+                [filterKey]: value,
             }));
-        }, 500);
+        }, 300);
 
-        setDelayedSearch(newTimeout);
+        debounceChange(searchTerm);
     };
 
     const handleFilterChange = (filterKey, value, isChecked) => {
@@ -379,7 +391,7 @@ const SearchPage = () => {
                         </select>
                         <FaCaretDown className={styles.dropdownIcon} />
                     </div>
-                    <span className={styles.resultCount}>{totalCount} Results</span>
+                    <span className={styles.resultCount}>{totalCount.toLocaleString()} Results</span>
                 </div>
                 <div className={styles.filterAndCardsContainer}>
                     {isFilterVisible && (
