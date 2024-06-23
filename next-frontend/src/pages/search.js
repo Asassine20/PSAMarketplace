@@ -228,7 +228,8 @@ const SearchPage = () => {
                     ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
                     : prevFilters[filterKey].filter((v) => v !== value),
                 page: '1',
-                cardName: ''
+                cardName: '',
+                sortBy: '', // Reset sortBy to default
             };
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
@@ -242,7 +243,8 @@ const SearchPage = () => {
                 ...prevFilters,
                 inStock: !prevFilters.inStock,
                 page: '1',
-                cardName: ''
+                cardName: '',
+                sortBy: '', // Reset sortBy to default
             };
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
@@ -382,15 +384,17 @@ const SearchPage = () => {
             <div className={styles.mainContent}>
                 <div className={styles.controlSection}>
                     <button onClick={toggleFilterVisibility} className={styles.filterToggle}>Filter</button>
-                    <div className={styles.dropdownContainer}>
-                        <select className={styles.sortDropdown} value={filters.sortBy} onChange={handleSortChange}>
-                            <option value="">Sort By</option>
-                            <option value="nameAsc">Card Name (A-Z)</option>
-                            <option value="priceHighToLow">Price: High to Low</option>
-                            <option value="priceLowToHigh">Price: Low to High</option>
-                        </select>
-                        <FaCaretDown className={styles.dropdownIcon} />
-                    </div>
+                    {filters.inStock && (
+                        <div className={styles.dropdownContainer}>
+                            <select className={styles.sortDropdown} value={filters.sortBy} onChange={handleSortChange}>
+                                <option value="">Sort By</option>
+                                <option value="nameAsc">Card Name (A-Z)</option>
+                                <option value="priceHighToLow">Price: High to Low</option>
+                                <option value="priceLowToHigh">Price: Low to High</option>
+                            </select>
+                            <FaCaretDown className={styles.dropdownIcon} />
+                        </div>
+                    )}
                     <span className={styles.resultCount}>{totalCount.toLocaleString()} Results</span>
                 </div>
                 <div className={styles.filterAndCardsContainer}>

@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         page = '1',
         limit = '24',
         inStock = 'false',
-        sortOption = '',
+        sortBy = '', // Changed to sortBy
         filterPage = '1',
         filterLimit = '50',
         filterType
@@ -42,11 +42,11 @@ export default async function handler(req, res) {
     let whereSql = whereConditions.length > 0 ? ` WHERE ${whereConditions.join(' AND ')}` : '';
 
     let orderBySql = '';
-    if (sortOption === 'nameAsc') {
+    if (sortBy === 'nameAsc') {
         orderBySql = 'ORDER BY CardName ASC';
-    } else if (sortOption === 'priceHighToLow') {
+    } else if (sortBy === 'priceHighToLow') {
         orderBySql = 'ORDER BY MarketPrice DESC';
-    } else if (sortOption === 'priceLowToHigh') {
+    } else if (sortBy === 'priceLowToHigh') {
         orderBySql = 'ORDER BY MarketPrice ASC';
     }
 

@@ -138,6 +138,14 @@
   padding: 1px 0; /* Adds padding above and below each option for more space */
 }
 
+.filterOption label:hover {
+  cursor: pointer;
+}
+
+.filterOptionCount {
+  color: pink;
+}
+
 
 /* Adjust the padding below each filter category header */
 .filterCategory h4 {
