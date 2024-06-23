@@ -422,6 +422,14 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.scrollIndicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
 .centeredContent {
   display: flex;
   justify-content: center;
@@ -545,6 +553,16 @@ input:checked + .slider:before {
   text-decoration: none;
 }
 
+.refreshSpinner {
+  position: fixed;
+  top: 50px; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .noResults {
   text-align: center;

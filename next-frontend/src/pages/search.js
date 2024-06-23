@@ -20,6 +20,10 @@ const SearchInput = ({ onChange, placeholder }) => (
     />
 );
 
+const formatNumberWithCommas = (number) => {
+    return number.toLocaleString();
+};
+
 const SearchPage = () => {
     const router = useRouter();
     const { query } = router;
@@ -296,12 +300,10 @@ const SearchPage = () => {
         if (observers.current[filterType]) observers.current[filterType].disconnect();
         observers.current[filterType] = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && entries[0].intersectionRatio > 0) {
-                setTimeout(() => {
-                    setFilterPages(prevPages => ({
-                        ...prevPages,
-                        [filterType]: prevPages[filterType] + 1
-                    }));
-                }, 500);
+                setFilterPages(prevPages => ({
+                    ...prevPages,
+                    [filterType]: prevPages[filterType] + 1
+                }));
             }
         }, { rootMargin: '100px' });
         if (node) observers.current[filterType].observe(node);
@@ -402,33 +404,32 @@ const SearchPage = () => {
                                         onChange={(value) => handleFilterSearchChange(filterKey, value)}
                                         placeholder={`Search ${filterTitles[filterKey]}`}
                                     />
-                                    {isLoadingCardSets && filterKey === 'cardSets' ? <div className={styles.centeredContent}><Spinner /></div> :
-                                        filterOptions[filterKey]
-                                            .filter(option =>
-                                                option &&
-                                                option.name &&
-                                                option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
-                                            )
-                                            .map((option, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={styles.filterOption}
-                                                    ref={filterKey === 'cardSets' && index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null}
-                                                >
-                                                    <label>
-                                                        <input
-                                                            type="checkbox"
-                                                            disabled={isLoadingCardSets && filterKey === 'cardSets'}
-                                                            checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
-                                                            onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
-                                                        />
-                                                        {option.name} ({option.count})
-                                                    </label>
-                                                </div>
-                                            ))}
-                                    {filterKey === 'cardSets' && hasMoreCardSets && !isLoadingCardSets && (
+                                    {filterOptions[filterKey]
+                                        .filter(option =>
+                                            option &&
+                                            option.name &&
+                                            option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
+                                        )
+                                        .map((option, index) => (
+                                            <div
+                                                key={index}
+                                                className={styles.filterOption}
+                                                ref={filterKey === 'cardSets' && index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null}
+                                            >
+                                                <label>
+                                                    <input
+                                                        type="checkbox"
+                                                        disabled={isLoadingCardSets && filterKey === 'cardSets'}
+                                                        checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
+                                                        onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
+                                                    />
+                                                    {option.name} ({formatNumberWithCommas(option.count)})
+                                                </label>
+                                            </div>
+                                        ))}
+                                    {filterKey === 'cardSets' && hasMoreCardSets && (
                                         <div className={styles.scrollIndicator}>
-                                            <MdKeyboardArrowDown size={24} />
+                                            {isLoadingCardSets ? <Spinner /> : <MdKeyboardArrowDown size={24} />}
                                         </div>
                                     )}
                                 </div>
