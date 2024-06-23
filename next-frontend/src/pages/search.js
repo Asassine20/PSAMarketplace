@@ -11,18 +11,15 @@ const Spinner = () => (
     <div className={styles.spinner}></div>
 );
 
-const SearchInput = ({ onChange, placeholder }) => (
+const SearchInput = ({ onChange, placeholder, value }) => (
     <input
         type="text"
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
+        value={value}
         className={styles.searchInput}
     />
 );
-
-const formatNumberWithCommas = (number) => {
-    return number.toLocaleString();
-};
 
 const SearchPage = () => {
     const router = useRouter();
@@ -41,7 +38,6 @@ const SearchPage = () => {
     });
 
     const [filters, setFilters] = useState(initializeFilters(query));
-
     const [filterOptions, setFilterOptions] = useState({
         sports: [],
         cardSets: [],
@@ -166,12 +162,14 @@ const SearchPage = () => {
     };
 
     useEffect(() => {
-        fetchFilteredCards(initializeFilters(query));
-        fetchFilterOptions('cardSets', initializeFilters(query), 1);
-        fetchFilterOptions('sports', initializeFilters(query));
-        fetchFilterOptions('cardYears', initializeFilters(query));
-        fetchFilterOptions('cardColors', initializeFilters(query));
-        fetchFilterOptions('cardVariants', initializeFilters(query));
+        const filtersToApply = initializeFilters(query);
+        setFilters(filtersToApply);
+        fetchFilteredCards(filtersToApply);
+        fetchFilterOptions('cardSets', filtersToApply, 1);
+        fetchFilterOptions('sports', filtersToApply);
+        fetchFilterOptions('cardYears', filtersToApply);
+        fetchFilterOptions('cardColors', filtersToApply);
+        fetchFilterOptions('cardVariants', filtersToApply);
     }, []);
 
     useEffect(() => {
@@ -204,12 +202,21 @@ const SearchPage = () => {
     };
 
     const handleFilterChange = (filterKey, value, isChecked) => {
+        setFilterSearchTerms({
+            sports: '',
+            cardSets: '',
+            cardYears: '',
+            cardColors: '',
+            cardVariants: '',
+        });
         setFilters((prevFilters) => {
             const updatedFilters = {
                 ...prevFilters,
                 [filterKey]: isChecked
                     ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
                     : prevFilters[filterKey].filter((v) => v !== value),
+                page: '1',
+                cardName: ''
             };
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
@@ -222,6 +229,8 @@ const SearchPage = () => {
             const updatedFilters = {
                 ...prevFilters,
                 inStock: !prevFilters.inStock,
+                page: '1',
+                cardName: ''
             };
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
@@ -251,6 +260,8 @@ const SearchPage = () => {
             const updatedFilters = {
                 ...prevFilters,
                 sortBy,
+                page: '1',
+                cardName: ''
             };
             updateFiltersInUrl(updatedFilters);
             fetchFilteredCards(updatedFilters);
@@ -270,6 +281,13 @@ const SearchPage = () => {
             page: '1',
             sortBy: '',
         };
+        setFilterSearchTerms({
+            sports: '',
+            cardSets: '',
+            cardYears: '',
+            cardColors: '',
+            cardVariants: '',
+        });
         setFilters(clearedFilters);
         updateFiltersInUrl(clearedFilters);
         fetchFilteredCards(clearedFilters);
@@ -300,10 +318,12 @@ const SearchPage = () => {
         if (observers.current[filterType]) observers.current[filterType].disconnect();
         observers.current[filterType] = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && entries[0].intersectionRatio > 0) {
-                setFilterPages(prevPages => ({
-                    ...prevPages,
-                    [filterType]: prevPages[filterType] + 1
-                }));
+                setTimeout(() => {
+                    setFilterPages(prevPages => ({
+                        ...prevPages,
+                        [filterType]: prevPages[filterType] + 1
+                    }));
+                }, 500);
             }
         }, { rootMargin: '100px' });
         if (node) observers.current[filterType].observe(node);
@@ -403,6 +423,7 @@ const SearchPage = () => {
                                     <SearchInput
                                         onChange={(value) => handleFilterSearchChange(filterKey, value)}
                                         placeholder={`Search ${filterTitles[filterKey]}`}
+                                        value={filterSearchTerms[filterKey]}
                                     />
                                     {filterOptions[filterKey]
                                         .filter(option =>
@@ -423,7 +444,7 @@ const SearchPage = () => {
                                                         checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
                                                         onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
                                                     />
-                                                    {option.name} ({formatNumberWithCommas(option.count)})
+                                                    {option.name} ({option.count.toLocaleString()})
                                                 </label>
                                             </div>
                                         ))}
