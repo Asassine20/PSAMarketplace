@@ -5,6 +5,13 @@
   align-items: center;
   padding-right: 10px;
   padding-left: 10px;
+  flex-wrap: nowrap; /* Prevent wrapping */
+}
+
+.logosContainer, .rightNav {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .searchBarContainer {
@@ -98,6 +105,7 @@
   align-items: center;
   justify-content: center;
   width: auto;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .cartIconWrapper {
@@ -329,7 +337,7 @@
   margin-left: 20px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 988px) {
   .navbar {
     display: none;
     margin-top: 20px;
@@ -337,5 +345,40 @@
 
   .searchBarContainer {
     margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 500px) {
+  .logosContainer a:nth-child(2) {
+    display: none;
+  }
+
+  .logosContainer img {
+    width: 50px; /* Smaller logo size */
+    height: 50px; /* Smaller logo size */
+  }
+
+  .rightNav .navIcon, .rightNav .startSellingButton {
+    font-size: 0.7rem; /* Smaller icon size */
+  }
+
+  .startSellingButton {
+    font-size: 0.6rem; /* Smaller font size */
+  }
+
+  .cartBadge {
+    font-size: 10px; /* Smaller badge font size */
+  }
+
+  .startSellingButton, .startSellingButton a {
+    font-size: 0.6rem; /* Smaller font size */
+  }
+
+  .startSellingButton:hover {
+    font-size: 0.6rem; /* Ensure hover state also has smaller font size */
+  }
+
+  .searchForm input[type="text"], .searchForm button {
+    font-size: 0.8rem; /* Smaller search bar font size */
   }
 }
