@@ -1,3 +1,4 @@
+/* General Layout */
 .mainContent {
   display: flex;
   flex-direction: column;
@@ -49,14 +50,16 @@
   cursor: pointer;
   border-radius: 5px;
 }
+
 .controlSection button:hover {
   border-color: #888;
 }
 
-.controlSection button:hover {
+.controlSection button:focus {
   border-color: #0056b3; /* Highlight color when focused */
   box-shadow: 0 0 5px rgba(0, 86, 179, 0.25); /* Subtle focus shadow */
 }
+
 .resultCount {
   padding-right: 30px;
 }
@@ -81,7 +84,6 @@
   width: 100%; /* Ensure it fills the container */
 }
 
-
 .sortDropdown:hover {
   border-color: #888; /* Slightly darker border on hover */
 }
@@ -90,6 +92,7 @@
   border-color: #0056b3; /* Highlight color when focused */
   box-shadow: 0 0 5px rgba(0, 86, 179, 0.25); /* Subtle focus shadow */
 }
+
 .dropdownIcon {
   position: absolute;
   right: 10px;
@@ -99,9 +102,7 @@
   color: #333; /* Match the color of the arrow to the text or as needed */
 }
 
-
-
-/* Adjust the filter section and container */
+/* Filter and Cards Container */
 .filterAndCardsContainer, .filterSection, .cardsSection {
   width: 100%; /* Ensuring these elements take up full width */
 }
@@ -124,6 +125,24 @@
   position: relative;
 }
 
+.filterVisible {
+  display: block !important; /* Override any other display settings */
+}
+
+.filterHeader {
+  position: sticky;
+  top: 0; 
+  z-index: 25;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+  margin: 0; 
+}
+
 .filterCategory {
   max-height: 400px; /* Adjust based on your needs */
   overflow-y: auto; /* Enables vertical scrolling within the category */
@@ -133,38 +152,38 @@
   width: 100%;
 }
 
+.filterCategory h4 {
+  margin-bottom: 15px; /* Increase the bottom margin below the header for more space */
+}
+
 .filterOption {
-  margin-bottom: 8px; /* Adjust the space between each filter option */
-  padding: 1px 0; /* Adds padding above and below each option for more space */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 1px 0;
+}
+
+.filterOption label {
+  display: flex;
+  align-items: center; /* Align the checkbox and label text vertically */
+  gap: 8px; /* Increase the space between the checkbox and the label text */
+  margin-bottom: 8px; /* Adjust as needed for space between each filter option */
+  flex-grow: 1; /* Make the label take up remaining space */
 }
 
 .filterOption label:hover {
   cursor: pointer;
 }
 
-.filterOptionCount {
-  color: pink;
+.filterOption .optionCount {
+  font-size: 0.8em;
+  color: grey;
+  padding-left: 2px;
+  flex-shrink: 0; /* Prevent the count from shrinking */
 }
 
-
-/* Adjust the padding below each filter category header */
-.filterCategory h4 {
-  margin-bottom: 15px; /* Increase the bottom margin below the header for more space */
-}
-
-/* Style for the labels and checkboxes within each filter option */
-.filterCategory label {
-  display: flex;
-  align-items: center; /* Align the checkbox and label text vertically */
-  gap: 8px; /* Increase the space between the checkbox and the label text */
-  margin-bottom: 8px; /* Adjust as needed for space between each filter option */
-}
-
-/* Additional styles for checkbox names to increase padding, if separate from the label styles */
-.filterCategory label span {
-  padding-left: 5px; /* Increase left padding for the checkbox name, adjust as needed */
-}
-
+/* Search Input */
 .searchInput {
   width: 100%; /* Makes the search input span the full width of its container */
   padding: 8px 10px; /* Adds some padding inside the search box for better text visibility */
@@ -188,12 +207,7 @@
   color: #aaa; /* Color of the placeholder text */
 }
 
-
-
-.filterVisible {
-  display: block !important; /* Override any other display settings */
-}
-
+/* Close Filter Button */
 .closeFilterButton {
   position: absolute;
   top: 10px;
@@ -206,92 +220,11 @@
   padding: 5px 10px;
 }
 
-@media (min-width: 1201px) {
-  .filterAndCardsContainer {
-    display: flex;
-    flex-direction: row;
-    gap: 20px; /* Adjust the gap between the filter section and the cards section as needed */
-  }
-
-  .filterSection {
-    display: block; /* Ensure the filter section is always displayed */
-    width: 400px; /* Increased width */
-    padding: 0 20px; /* Add padding to the left and right */
-    margin-top: 20px;
-    margin-left: 20px;
-    border: 1px solid #e6e6e6; /* Full border */
-    border-radius: 8px; /* Slight border-radius */
-    background-color: white; /* Slightly darker white color for the background */
-    transition: all 0.3s ease-in-out;
-    position: sticky;
-    top: 0; /* Makes the filter section stick to the top when scrolling */
-    height: auto; /* Adjust height automatically based on the content */
-  }
-
-  .cardsGrid {
-    padding-right: 20px;
-    padding-left: 20px;
-  }
-
-  /* Only target the .filterAndCardsContainer for width adjustments, don't remove padding here */
-  .filterAndCardsContainer {
-    width: 100%; /* Adjust the width to take up the full width of its container */
-  }
-}
-
-
-@media (max-width: 1200px) {
-  .filterToggleButton {
-      display: block;
-      position: fixed;
-      top: 10px;
-      left: 20px;
-      z-index: 30;
-  }
-
-  .filterSection {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 400px;
-      height: 100%;
-      overflow-y: auto;
-      z-index: 20;
-      display: none; /* Initially hidden */
-      padding-top: 0; /* Ensure no padding at the top */
-  }
-
-  .filterVisible {
-      display: block; /* Show filter section */
-  }
-
-  .filterHeader {
-      position: sticky;
-      top: 0; 
-      z-index: 25;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      border-bottom: 1px solid #ccc;
-      width: 100%;
-      margin: 0; 
-  }
-
-  .closeFilterButton {
-      margin: 0;
-  }
-
-  .filterTitle {
-      margin: 0; /* Ensure there's no default margin */
-  }
-}
+/* Cards Section */
 .cardsSection {
   width: 100%;
 }
 
-/* Cards grid layout */
 .cardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -353,6 +286,7 @@
   max-width: 90%; /* Limit width to prevent pushing layout */
   color: black;
 }
+
 .cardListings, .cardMarketPrice {
   margin-top: 5px;
   font-size: 0.9rem; /* Adjust the font size as needed */
@@ -362,7 +296,6 @@
   font-weight: bold; /* Highlight the market price */
   color: black;
 }
-
 
 .cardName, .cardSport, .cardSet, .cardYear, .cardColor, .cardVariant {
   display: block;
@@ -398,6 +331,7 @@
   cursor: not-allowed;
 }
 
+/* Spinner Styles */
 .fullPageOverlay {
   position: fixed; /* Or 'absolute' if the parent is positioned */
   top: 0;
@@ -444,6 +378,8 @@
   align-items: center;
   height: 100%; /* Or a specific height as needed */
 }
+
+/* Toggle Switch Styles */
 .toggleSwitchContainer {
   font-weight: bold;
   display: flex;
@@ -503,6 +439,7 @@ input:checked + .slider:before {
   transform: translateX(18px); /* Adjusted for smaller switch */
 }
 
+/* Applied Filters */
 .appliedFilters {
   display: flex;
   flex-wrap: wrap;
@@ -561,6 +498,7 @@ input:checked + .slider:before {
   text-decoration: none;
 }
 
+/* Refresh Spinner */
 .refreshSpinner {
   position: fixed;
   top: 50px; /* Adjust as needed */
@@ -572,6 +510,7 @@ input:checked + .slider:before {
   justify-content: center;
 }
 
+/* No Results */
 .noResults {
   text-align: center;
   margin-top: 50px;
@@ -587,3 +526,83 @@ input:checked + .slider:before {
   color: black;
 }
 
+/* Media Queries */
+@media (min-width: 1201px) {
+  .filterAndCardsContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 20px; /* Adjust the gap between the filter section and the cards section as needed */
+  }
+
+  .filterSection {
+    display: block; /* Ensure the filter section is always displayed */
+    width: 400px; /* Increased width */
+    padding: 0 20px; /* Add padding to the left and right */
+    margin-top: 20px;
+    margin-left: 20px;
+    border: 1px solid #e6e6e6; /* Full border */
+    border-radius: 8px; /* Slight border-radius */
+    background-color: white; /* Slightly darker white color for the background */
+    transition: all 0.3s ease-in-out;
+    position: sticky;
+    top: 0; /* Makes the filter section stick to the top when scrolling */
+    height: auto; /* Adjust height automatically based on the content */
+  }
+
+  .cardsGrid {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .filterAndCardsContainer {
+    width: 100%; /* Adjust the width to take up the full width of its container */
+  }
+}
+
+@media (max-width: 1200px) {
+  .filterToggleButton {
+    display: block;
+    position: fixed;
+    top: 10px;
+    left: 20px;
+    z-index: 30;
+  }
+
+  .filterSection {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 100%;
+    overflow-y: auto;
+    z-index: 20;
+    display: none; /* Initially hidden */
+    padding-top: 0; /* Ensure no padding at the top */
+  }
+
+  .filterVisible {
+    display: block; /* Show filter section */
+  }
+
+  .filterHeader {
+    position: sticky;
+    top: 0; 
+    z-index: 25;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+    margin: 0; 
+  }
+
+  .closeFilterButton {
+    margin: 0;
+  }
+
+  .filterTitle {
+    margin: 0; /* Ensure there's no default margin */
+  }
+}
