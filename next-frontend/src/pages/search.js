@@ -460,9 +460,11 @@ const SearchPage = () => {
                                                         checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
                                                         onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
                                                     />
-                                                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span className={styles.optionLabel}>
                                                         {option.name}
-                                                        <span style={{ fontSize: '0.8em', color: 'grey', paddingLeft: '2px' }}>({option.count.toLocaleString()})</span>
+                                                    </span>
+                                                    <span className={styles.optionCount}>
+                                                        ({option.count.toLocaleString()})
                                                     </span>
                                                 </label>
                                             </div>

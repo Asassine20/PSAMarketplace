@@ -131,7 +131,7 @@
 
 .filterHeader {
   position: sticky;
-  top: 0; 
+  top: 0;
   z-index: 25;
   background: #fff;
   display: flex;
@@ -140,7 +140,7 @@
   padding: 10px;
   border-bottom: 1px solid #ccc;
   width: 100%;
-  margin: 0; 
+  margin: 0;
 }
 
 .filterCategory {
@@ -158,7 +158,6 @@
 
 .filterOption {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
   padding: 1px 0;
@@ -176,11 +175,16 @@
   cursor: pointer;
 }
 
-.filterOption .optionCount {
+.optionLabel {
+  flex-grow: 1;
+}
+
+.optionCount {
   font-size: 0.8em;
   color: grey;
   padding-left: 2px;
   flex-shrink: 0; /* Prevent the count from shrinking */
+  margin-left: auto; /* Align to the right */
 }
 
 /* Search Input */
@@ -450,11 +454,11 @@ input:checked + .slider:before {
 .filterBubble {
   background-color: #f1f1f1;
   color: black;
-  border: none; 
+  border: none;
   border-radius: 20px;
   padding: 5px 10px;
   font-size: 15px;
-  cursor: pointer; 
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -462,7 +466,7 @@ input:checked + .slider:before {
 }
 
 .filterBubble:hover {
-  background-color: rgb(185, 182, 182); 
+  background-color: rgb(185, 182, 182);
 }
 
 .filterX {
@@ -473,8 +477,8 @@ input:checked + .slider:before {
 
 .appliedFiltersHeading {
   margin-top: 15px;
-  margin-bottom: 10px; 
-  font-weight: bold; 
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .appliedFiltersContainer {
@@ -525,6 +529,7 @@ input:checked + .slider:before {
   font-size: 18px;
   color: black;
 }
+
 
 /* Media Queries */
 @media (min-width: 1201px) {
