@@ -17,6 +17,8 @@ export default async function handler(req, res) {
     const { serviceLevel, status, itemList, psaOrderNumber, trackingNumber, pricePerItem, totalPrice } = req.body;
     const itemCount = Array.isArray(itemList) ? itemList.length : itemList;
 
+    console.log('Received submission data:', req.body);
+
     try {
       await query(`
         INSERT INTO Submissions (UserID, ServiceLevel, DateSubmitted, Status, ItemCount, ItemList, PSAOrderNumber, TrackingNumber, PricePerItem, TotalPrice)
