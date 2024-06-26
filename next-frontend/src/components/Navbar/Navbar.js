@@ -214,7 +214,7 @@ const Navbar = () => {
                   <a onClick={handleLinkClick}>Account</a>
                 </Link>
                 <Link href="/orders" passHref legacyBehavior>
-                  <a onClick={handleLinkClick}>Orders History</a>
+                  <a onClick={handleLinkClick}>Order History</a>
                 </Link>
                 <Link href="/messages" passHref legacyBehavior>
                   <a onClick={handleLinkClick}>Messages</a>

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 const useAuth = () => {
   const [accessToken, setAccessToken] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [email, setEmail] = useState(null);
 
   const decodeToken = (token) => {
     try {
@@ -38,7 +39,10 @@ const useAuth = () => {
         localStorage.setItem('refreshToken', data.refreshToken);
         setAccessToken(data.accessToken);
         const decoded = decodeToken(data.accessToken);
-        if (decoded) setUserId(decoded.userId);
+        if (decoded) {
+          setUserId(decoded.userId);
+          setEmail(decoded.email);
+        }
       } else {
         console.error('Refresh token failed:', data.message);
         localStorage.removeItem('accessToken');
@@ -61,7 +65,10 @@ const useAuth = () => {
         refreshToken();
       } else {
         setAccessToken(accessToken);
-        if (decoded) setUserId(decoded.userId);
+        if (decoded) {
+          setUserId(decoded.userId);
+          setEmail(decoded.email);
+        }
       }
     }
   }, [refreshToken]);
@@ -76,6 +83,7 @@ const useAuth = () => {
   return {
     accessToken,
     userId,
+    email,
     refreshToken,
   };
 };
