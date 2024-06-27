@@ -32,8 +32,8 @@ const nextConfig = {
         destination: '/sidepanel/submission-form',
       },
       {
-        source: '/orders',
-        destination: '/sidepanel/orders',
+        source: '/order-history',
+        destination: '/sidepanel/order-history',
       },
       {
         source: '/payment',

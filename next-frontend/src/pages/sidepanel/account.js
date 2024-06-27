@@ -11,11 +11,10 @@ const Account = () => {
     <div className={styles.accountContainer}>
       {email ? (
         <div className={styles.userInfo}>
-          <h1>Account Dashboard</h1>
-          <p>Hello, {email}</p>
+          <h3>Hello, {email}</h3>
           <div className={styles.linksContainer}>
             <Link href="/orders">
-              <div className={styles.dashboardLink}>Order History</div>
+              <div className={styles.dashboardLink}>Your Orders</div>
             </Link>
             <Link href="/resolution-center">
               <div className={styles.dashboardLink}>Resolution Center</div>
