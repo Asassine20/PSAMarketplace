@@ -1,7 +1,7 @@
 // src/pages/order-history.js
 import React, { useEffect, useState } from 'react';
 import useAuth from '../../hooks/useAuth';
-import styles from '../../styles/Cart.module.css'; // Reusing cart styles
+import styles from '../../styles/sidepanel/OrderHistory.module.css'; // Using new CSS file
 import Image from 'next/image';
 import Link from 'next/link';
 import ImageModal from '../../components/ImageModal/ImageModal';
@@ -67,17 +67,17 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className={styles.cartPage}>
-      <h1 className={`${styles.largeText} ${styles.leftAlignedTitle}`}>Order History</h1>
-      <div className={styles.cartItemsWrapper}>
+    <div className={styles.orderHistoryPage}>
+      <h1 className={styles.title}>Order History</h1>
+      <div className={styles.orderHistoryWrapper}>
         {loading ? (
           <p>Loading...</p>
         ) : orders.length === 0 ? (
-          <div className={styles.emptyCartMessage}>
+          <div className={styles.emptyMessage}>
             <p>No orders found.</p>
           </div>
         ) : (
-          <div className={styles.cartItems}>
+          <div className={styles.orders}>
             {orders.map(order => (
               <div key={order.OrderNumber} className={styles.package}>
                 <div className={styles.packageHeader}>
@@ -90,10 +90,10 @@ const OrderHistory = () => {
                   </div>
                 </div>
                 <div className={styles.packageDetails}>
-                  <p className={styles.orderNumber}>Order Number: {order.OrderNumber}</p>
+                  <p className={styles.OrderDate}>Order Number: {order.OrderNumber}</p>
                   <p>Order Date: {new Date(order.OrderDate).toLocaleDateString()}</p>
                   <p>Order Amount: ${order.OrderAmount}</p>
-                  <h3>Order Items</h3>
+                  <h3>Items</h3>
                   <ul>
                     {order.items.length === 0 ? (
                       <li>No items found for this order.</li>
