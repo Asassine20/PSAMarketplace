@@ -1,24 +1,41 @@
-// src/pages/order-history.js
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import useAuth from '../../hooks/useAuth';
-import styles from '../../styles/sidepanel/OrderHistory.module.css'; // Using new CSS file
+import styles from '../../styles/sidepanel/OrderHistory.module.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import ImageModal from '../../components/ImageModal/ImageModal';
 import FeedbackModal from '../../components/FeedbackModal/FeedbackModal';
 
+const subjects = [
+  'Request To Cancel',
+  'Condition Issue',
+  'Item Never Arrived',
+  'Change Address',
+  'Items Missing',
+  'Received Wrong Item(s)',
+  'General Message'
+];
+
 const OrderHistory = () => {
   const { userId } = useAuth();
+  const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [searchOrderNumber, setSearchOrderNumber] = useState('');
+  const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(subjects[0]);
+  const [selectedSeller, setSelectedSeller] = useState(null);
+  const [messageText, setMessageText] = useState('');
 
   useEffect(() => {
     if (userId) {
-      fetch(`/api/sidepanel/order-history?userId=${userId}`)
+      const { orderNumber } = router.query;
+      fetch(`/api/sidepanel/order-history?userId=${userId}&orderNumber=${orderNumber || ''}`)
         .then(response => response.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -33,7 +50,16 @@ const OrderHistory = () => {
           setLoading(false);
         });
     }
-  }, [userId]);
+  }, [userId, router.query]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchOrderNumber.trim()) {
+      router.push(`/sidepanel/order-history?orderNumber=${searchOrderNumber.trim()}`);
+    } else {
+      router.push('/sidepanel/order-history');
+    }
+  };
 
   const formatCardInfo = (item) => {
     const info = [
@@ -66,9 +92,58 @@ const OrderHistory = () => {
     setSelectedOrder(null);
   };
 
+  const handleContactSeller = (order) => {
+    setSelectedOrder(order);
+    setSelectedSeller(order.SellerID);
+    setIsSubjectModalOpen(true);
+  };
+
+  const handleStartConversation = () => {
+    fetch('/api/sidepanel/startConversation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        sellerId: selectedSeller,
+        orderNumber: selectedOrder.OrderNumber,
+        subject: selectedSubject,
+        messageText // send the message text to the server
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          router.push(`/sidepanel/messages?conversationId=${data.conversationId}`);
+        }
+      })
+      .catch(error => console.error('Error starting conversation:', error));
+  };
+
+  const handleDidntReceiveItem = (order) => {
+    setSelectedSubject('Item Never Arrived');
+    handleContactSeller(order);
+  };
+
+  const handleReturnItem = (order) => {
+    setSelectedSubject('Request To Cancel');
+    handleContactSeller(order);
+  };
+
   return (
     <div className={styles.orderHistoryPage}>
       <h1 className={styles.title}>Order History</h1>
+      <form onSubmit={handleSearch} className={styles.searchForm}>
+        <input
+          type="text"
+          value={searchOrderNumber}
+          onChange={(e) => setSearchOrderNumber(e.target.value)}
+          placeholder="Enter order number"
+          className={styles.searchInput}
+        />
+        <button type="submit" className={styles.searchButton}>Search</button>
+      </form>
       <div className={styles.orderHistoryWrapper}>
         {loading ? (
           <p>Loading...</p>
@@ -85,8 +160,10 @@ const OrderHistory = () => {
                     <span>{order.StoreName} ({order.FeedbackAverage}%)</span>
                   </div>
                   <div className={styles.actionButtons}>
-                    <button className={styles.actionButton}>Contact Seller</button>
+                    <button className={styles.actionButton} onClick={() => handleContactSeller(order)}>Contact Seller</button>
                     <button className={styles.actionButton} onClick={() => openFeedbackModal(order)}>Leave Feedback</button>
+                    <button className={styles.actionButton} onClick={() => handleDidntReceiveItem(order)}>Didn't Receive Item</button>
+                    <button className={styles.actionButton} onClick={() => handleReturnItem(order)}>Return Item</button>
                   </div>
                 </div>
                 <div className={styles.packageDetails}>
@@ -156,6 +233,31 @@ const OrderHistory = () => {
           order={selectedOrder}
           userId={userId}
         />
+      )}
+
+      {isSubjectModalOpen && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h2>Contact Seller</h2>
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className={styles.subjectSelect}
+            >
+              {subjects.map(subject => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
+            </select>
+            <textarea
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              placeholder="Type your message here"
+              className={styles.messageTextArea}
+            />
+            <button onClick={() => setIsSubjectModalOpen(false)} className={styles.cancelButton}>Cancel</button>
+            <button onClick={handleStartConversation} className={styles.actionButton}>Start Conversation</button>
+          </div>
+        </div>
       )}
     </div>
   );

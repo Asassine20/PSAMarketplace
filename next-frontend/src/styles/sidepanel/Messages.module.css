@@ -49,6 +49,21 @@
     background-color: #fff;
   }
   
+  .orderNumber {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  .orderNumberLink {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
+  .orderNumberLink:hover {
+    color: #4d4e4f;
+  }
+  
   .messageList {
     flex: 1;
     max-height: 600px;
@@ -80,10 +95,11 @@
     border: 1px solid #ddd;
     margin-right: auto;
   }
-
+  
   .messageText {
     font-size: 18px;
   }
+  
   .timestamp {
     font-size: 12px;
   }

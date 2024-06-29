@@ -1,231 +1,325 @@
-/* src/styles/OrderHistory.module.css */
 .orderHistoryPage {
-    display: flex;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.orderHistoryWrapper {
+  display: flex;
+  justify-content: center; /* Center the orders div */
+  width: 100%;
+}
+
+.orders {
+  width: 75%;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f8f8f8; /* Light grey background for orders */
+}
+
+.storeInfo span {
+  font-weight: bold;
+}
+
+.cartItem {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+  position: relative;
+}
+
+.cartItem:last-child {
+  border-bottom: none; /* Remove border-bottom for the last cart item */
+}
+
+.cartItemDetailsTop {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.cartItemDetailsLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 20px;
+}
+
+.cartItemImages {
+  display: flex;
+  gap: 10px;
+}
+
+.cartItemImage {
+  width: 100px;
+  height: auto;
+  cursor: pointer; /* Make images clickable */
+}
+
+.cartItemDetails {
+  flex-grow: 1;
+  margin-left: 20px;
+}
+
+.cartItemDetails p {
+  margin: 5px 0;
+}
+
+.cartItemDetailsLink {
+  color: black;
+  text-decoration: none;
+}
+
+.cartItemDetailsLink:hover {
+  text-decoration: underline;
+}
+
+.cartItemPrices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-left: 10px;
+}
+
+.cartItemPrices p {
+  margin: 5px 0;
+  font-size: 18px;
+}
+
+.cartItemActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.cartItemActions button {
+  padding: 5px 10px;
+  border: none;
+  background: none;
+  color: #0070f3;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.title {
+  width: 100%; /* Full width for the title */
+  text-align: left;
+  font-size: 25px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.emptyMessage {
+  text-align: center;
+  font-size: 1.5em;
+  color: #999;
+  margin: 50px 0;
+}
+
+.orderNumber {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.orderItemImageWrapper {
+  text-align: right;
+}
+
+.searchForm {
+  display: flex;
+  width: 79%;
+  margin-bottom: 20px;
+}
+
+.searchInput {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  border-right: none;
+  flex: 1;
+}
+
+.searchButton {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 0 4px 4px 0;
+  background-color: #0070f3;
+  color: white;
+  cursor: pointer;
+}
+
+.searchButton:hover {
+  background-color: #005bb5;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it appears on top of other elements */
+}
+
+.modalContent {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 400px; /* Set a fixed width for the modal */
+}
+
+.subjectSelect {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.messageTextArea {
+  width: 95%;
+  height: 100px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: none;
+}
+
+.cancelButton {
+  background-color: #ccc;
+  color: black;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.cancelButton:hover {
+  background-color: #999;
+}
+
+.actionButton {
+  background-color: #007aff;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background-color: #005bb5;
+}
+
+@media (max-width: 700px) {
+  .orderHistoryPage {
     flex-direction: column;
-    align-items: center;
-    width: 90%;
-    margin: 0 auto;
-  }
-  
-  .orderHistoryWrapper {
-    display: flex;
-    justify-content: center; /* Center the orders div */
-    width: 100%;
-  }
-  
-  .orders {
-    width: 75%;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 20px;
-    background-color: #f8f8f8; /* Light grey background for orders */
   }
 
-  .storeInfo span {
-    font-weight: bold;
-  }
-  .cartItem {
-    display: flex;
+  .orderHistoryWrapper {
     flex-direction: column;
-    border-bottom: 1px solid #ccc;
-    padding: 10px 0;
-    position: relative;
+    align-items: center;
   }
-  
-  .cartItem:last-child {
-    border-bottom: none; /* Remove border-bottom for the last cart item */
-  }
-  
-  .cartItemDetailsTop {
-    display: flex;
-    justify-content: space-between;
+
+  .cartSummary {
     width: 100%;
+    margin-left: 0;
+    margin-bottom: 20px;
+    order: 1; /* Order the summary div to be first */
+    align-self: center; /* Center the summary div */
+    padding-bottom: 50px; /* Add padding to accommodate the Clear Cart button */
   }
-  
-  .cartItemDetailsLeft {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-right: 20px;
+
+  .orders {
+    width: 100%;
+    order: 2; /* Order the orders div to be second */
   }
-  
-  .cartItemImages {
-    display: flex;
-    gap: 10px;
+
+  .cartSummary button {
+    width: 100%;
+    margin-bottom: 10px; /* Add margin between buttons */
   }
-  
-  .cartItemImage {
-    width: 100px;
-    height: auto;
-    cursor: pointer; /* Make images clickable */
-  }
-  
-  .cartItemDetails {
-    flex-grow: 1;
-    margin-left: 20px;
-  }
-  
-  .cartItemDetails p {
-    margin: 5px 0;
-  }
-  
-  .cartItemDetailsLink {
-    color: black;
-    text-decoration: none;
-  }
-  
-  .cartItemDetailsLink:hover {
-    text-decoration: underline;
-  }
-  
-  .cartItemPrices {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding-left: 10px;
-  }
-  
-  .cartItemPrices p {
-    margin: 5px 0;
-    font-size: 18px;
-  }
-  
-  .cartItemActions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: auto;
-  }
-  
-  .cartItemActions button {
-    padding: 5px 10px;
-    border: none;
-    background: none;
-    color: #0070f3;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-  
-  .title {
-    width: 100%; /* Full width for the title */
-    text-align: left;
-    font-size: 25px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
-  
-  .emptyMessage {
-    text-align: center;
-    font-size: 1.5em;
-    color: #999;
-    margin: 50px 0;
-  }
-  
-  .orderNumber {
-    font-size: 0.9em;
-    color: #555;
-  }
-  
-  .orderItemImageWrapper {
+
+  .clearCartButton {
+    bottom: 10px;
+    right: 10px;
+    position: absolute;
     text-align: right;
   }
-  
-  @media (max-width: 700px) {
-    .orderHistoryPage {
-      flex-direction: column;
-    }
-  
-    .orderHistoryWrapper {
-      flex-direction: column;
-      align-items: center;
-    }
-  
-    .cartSummary {
-      width: 100%;
-      margin-left: 0;
-      margin-bottom: 20px;
-      order: 1; /* Order the summary div to be first */
-      align-self: center; /* Center the summary div */
-      padding-bottom: 50px; /* Add padding to accommodate the Clear Cart button */
-    }
-  
-    .orders {
-      width: 100%;
-      order: 2; /* Order the orders div to be second */
-    }
-  
-    .cartSummary button {
-      width: 100%;
-      margin-bottom: 10px; /* Add margin between buttons */
-    }
-  
-    .clearCartButton {
-      bottom: 10px;
-      right: 10px;
-      position: absolute;
-      text-align: right;
-    }
-  
-    .cartItemPrices {
-      padding-left: 10px;
-    }
+
+  .cartItemPrices {
+    padding-left: 10px;
   }
-  
-  @media (max-width: 520px) {
-    .cartItemImages {
-      flex-direction: column; /* Stack images vertically */
-    }
+}
+
+@media (max-width: 520px) {
+  .cartItemImages {
+    flex-direction: column; /* Stack images vertically */
   }
-  
-  .storeInfo {
-    flex-grow: 1;
-  }
-  
-  .actionButtons {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .actionButton {
-    background-color: #0070f3;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  
-  .actionButton:hover {
-    background-color: #005bb5;
-  }
-  
-  .package {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    background-color: #fff; /* White background for packages */
-  }
-  
-  .packageHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .largeText {
-    font-size: 14px;
-  }
-  .largeText a {
-    color: black; /* Override the default blue color */
-    text-decoration: underline !important; /* Optional: remove underline */
-  }
-  
-  .largeTextStrong {
-    font-size: 15px;
-    font-weight: bold;
-  }
-  
+}
+
+.storeInfo {
+  flex-grow: 1;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 10px;
+}
+
+.actionButton {
+  background-color: #0070f3;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background-color: #005bb5;
+}
+
+.package {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #fff; /* White background for packages */
+}
+
+.packageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.largeText {
+  font-size: 14px;
+}
+
+.largeText a {
+  color: black; /* Override the default blue color */
+  text-decoration: underline !important; /* Optional: remove underline */
+}
+
+.largeTextStrong {
+  font-size: 15px;
+  font-weight: bold;
+}

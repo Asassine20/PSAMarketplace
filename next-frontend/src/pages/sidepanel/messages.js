@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import useAuth from '../../hooks/useAuth';
 import styles from '../../styles/sidepanel/Messages.module.css';
 
 const Messages = () => {
   const { userId } = useAuth();
+  const router = useRouter();
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messageText, setMessageText] = useState('');
+  const [orderNumber, setOrderNumber] = useState('');
 
   useEffect(() => {
     if (userId) {
@@ -30,6 +33,8 @@ const Messages = () => {
       .then(data => {
         if (Array.isArray(data.messages)) {
           setMessages(data.messages);
+          const selectedConv = conversations.find(conv => conv.ConversationID === conversationId);
+          setOrderNumber(selectedConv.OrderNumber);
           setConversations(prevConversations =>
             prevConversations.map(conversation =>
               conversation.ConversationID === conversationId
@@ -111,6 +116,10 @@ const Messages = () => {
     return conversation ? conversation.StoreName : 'Seller';
   };
 
+  const handleOrderNumberClick = () => {
+    router.push(`/sidepanel/order-history?orderNumber=${orderNumber}`);
+  };
+
   return (
     <div className={styles.messagesPage}>
       <h1 className={styles.title}>Messages</h1>
@@ -130,6 +139,9 @@ const Messages = () => {
         <div className={styles.messages}>
           {selectedConversation ? (
             <>
+              <div className={styles.orderNumber}>
+                <p onClick={handleOrderNumberClick} className={styles.orderNumberLink}>{orderNumber}</p>
+              </div>
               <div className={styles.messageList}>
                 {messages.map(message => (
                   <div key={message.MessageID} className={styles.message}>
