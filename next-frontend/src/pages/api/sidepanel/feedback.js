@@ -1,4 +1,3 @@
-// src/pages/api/feedback.js
 import { query } from '@/db';
 
 export default async function handler(req, res) {
@@ -9,7 +8,7 @@ export default async function handler(req, res) {
       const result = await query(`
         INSERT INTO Feedback (SellerID, BuyerID, FeedbackText, Rating, FeedbackDate, OrderNumber)
         VALUES (?, ?, ?, ?, ?, ?)
-      `, [SellerID, BuyerID, FeedbackText, Rating, FeedbackDate, OrderNumber]);
+      `, [SellerID, BuyerID, FeedbackText || null, Rating, FeedbackDate, OrderNumber]);
 
       res.status(200).json({ message: 'Feedback submitted successfully', feedbackId: result.insertId });
     } catch (error) {

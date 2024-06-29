@@ -5,9 +5,10 @@ import styles from '../styles/checkout.module.css';
 import Link from 'next/link';
 import AddressModal from '../components/Address/AddressModal';
 import CardPaymentForm from '../components/CardPaymentForm/CardPaymentForm';
+import { v4 as uuidv4 } from 'uuid';
 
 const CheckoutPage = () => {
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
   const { userId } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [billingAddress, setBillingAddress] = useState(null);
@@ -62,10 +63,95 @@ const CheckoutPage = () => {
     setIsSameAsBilling(sameAsBilling);
   };
 
+  const formatDateForMySQL = (date) => {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+  };
+
   const handleSubmitOrder = async (event) => {
     event.preventDefault();
-    // Handle order submission here
-    console.log("Order submitted", { billingAddress, shippingAddress, paymentMethod, cart, cardDetails, selectedCard });
+    if (!billingAddress || !shippingAddress || !userId || cart.length === 0) {
+      alert("Please complete all required fields.");
+      return;
+    }
+
+    const orderNumber = uuidv4(); // Generate unique order number
+
+    try {
+      // Fetch inventory details
+      const inventoryResponse = await fetch('/api/cart/inventory-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingIds: cart.map(item => item.ListingID) })
+      });
+
+      if (!inventoryResponse.ok) {
+        throw new Error('Failed to fetch inventory details');
+      }
+
+      const inventoryDetails = await inventoryResponse.json();
+
+      const orderData = {
+        OrderNumber: orderNumber,
+        AddressID: shippingAddress.AddressID,
+        SalePrice: calculateTotal(),
+        OrderDate: formatDateForMySQL(new Date()),
+        BuyerID: userId,
+        SellerID: inventoryDetails[0].SellerID, // Assuming one seller per order
+        ShippingPrice: calculateShippingTotal(),
+      };
+
+      // Insert into Orders table
+      const orderResponse = await fetch('/api/cart/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error('Failed to create order');
+      }
+
+      // Insert into OrderItems table and update Inventory
+      const orderItemsData = cart.map(item => ({
+        OrderNumber: orderNumber,
+        ListingID: item.ListingID,
+        Quantity: 1, // Assuming quantity is 1 for each item
+        Price: item.price,
+        CardID: inventoryDetails.find(detail => detail.ListingID === item.ListingID).CardID,
+        GradeID: inventoryDetails.find(detail => detail.ListingID === item.ListingID).GradeID
+      }));
+
+      const orderItemsResponse = await fetch('/api/cart/order-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: orderItemsData })
+      });
+
+      if (!orderItemsResponse.ok) {
+        throw new Error('Failed to create order items');
+      }
+
+      // Update Inventory to mark items as sold
+      const inventoryUpdateResponse = await fetch('/api/cart/update-sold', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingIds: cart.map(item => item.ListingID) })
+      });
+
+      if (!inventoryUpdateResponse.ok) {
+        throw new Error('Failed to update inventory');
+      }
+
+      // Clear the cart
+      clearCart();
+
+      // Redirect to a confirmation page or show a success message
+      alert("Order submitted successfully!");
+
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      alert("Failed to submit order. Please try again.");
+    }
   };
 
   if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues

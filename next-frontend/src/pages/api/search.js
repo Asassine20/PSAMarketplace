@@ -93,7 +93,7 @@ export default async function handler(req, res) {
                    Card.MarketPrice, 
                    COUNT(Inventory.CardID) as ListingsCount
             ${baseSql}
-            LEFT JOIN Inventory ON Card.CardID = Inventory.CardID
+            LEFT JOIN Inventory ON Card.CardID = Inventory.CardID AND Inventory.Sold = 0
             ${whereSql}
             GROUP BY Card.CardID
             ${orderBySql}
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
 
             const cardsData = await query(sql, values);
 
-            const totalCountResult = await query(`SELECT COUNT(DISTINCT Card.CardID) as totalCount ${baseSql} ${whereSql}`, values.slice(0, -2));
+            const totalCountResult = await query(`SELECT COUNT(DISTINCT Card.CardID) as totalCount ${baseSql} LEFT JOIN Inventory ON Card.CardID = Inventory.CardID AND Inventory.Sold = 0 ${whereSql}`, values.slice(0, -2));
             const totalCount = totalCountResult[0]?.totalCount || 0;
 
             res.status(200).json({

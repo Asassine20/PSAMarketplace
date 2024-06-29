@@ -1,4 +1,3 @@
-// src/components/FeedbackModal/FeedbackModal.js
 import React, { useState } from 'react';
 import styles from './FeedbackModal.module.css';
 
@@ -12,7 +11,7 @@ const FeedbackModal = ({ isOpen, onClose, order, userId }) => {
     const feedbackData = {
       SellerID: order.SellerID,
       BuyerID: userId,
-      FeedbackText: feedbackText,
+      FeedbackText: feedbackText || null,
       Rating: rating,
       FeedbackDate: new Date().toISOString(),
       OrderNumber: order.OrderNumber
@@ -46,9 +45,8 @@ const FeedbackModal = ({ isOpen, onClose, order, userId }) => {
           <textarea
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
-            placeholder="Enter your feedback"
+            placeholder="Enter your feedback (optional)"
             maxLength={maxCharacters}
-            required
             className={styles.feedbackTextarea}
           />
           <p className={styles.characterLimit}>

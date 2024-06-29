@@ -1,4 +1,3 @@
-// src/pages/api/cards/[CardID].js
 import { query } from '@/db';
 
 export default async function handler(req, res) {
@@ -12,13 +11,13 @@ export default async function handler(req, res) {
       WHERE CardID = ?;
     `;
 
-    // Listings details query including joins with Stores and Grade tables
+    // Listings details query including joins with Stores and Grade tables, and filtering out sold items
     const listingsSql = `
       SELECT Inventory.*, Stores.StoreName, Stores.ShippingPrice, Stores.FeedbackAverage, Grade.GradeValue
       FROM Inventory
       LEFT JOIN Stores ON Inventory.SellerID = Stores.UserID  
       LEFT JOIN Grade ON Inventory.GradeID = Grade.GradeID  
-      WHERE Inventory.CardID = ?
+      WHERE Inventory.CardID = ? AND Inventory.Sold = 0
       ORDER BY Inventory.SalePrice DESC;
     `;
 
@@ -36,7 +35,7 @@ export default async function handler(req, res) {
     const listingsCountSql = `
       SELECT COUNT(*) AS ListingCount
       FROM Inventory
-      WHERE CardID = ?;
+      WHERE CardID = ? AND Sold = 0;
     `;
 
     // Execute all queries
