@@ -36,6 +36,10 @@ const nextConfig = {
         destination: '/sidepanel/order-history',
       },
       {
+        source: '/messages',
+        destination: '/sidepanel/messages',
+      },
+      {
         source: '/payment',
         destination: '/sidepanel/payment',
       },
