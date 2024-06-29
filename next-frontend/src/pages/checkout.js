@@ -228,7 +228,7 @@ const CheckoutPage = () => {
         {cart.length === 0 ? (
           <div className={styles.emptyCartMessage}>
             <p>Your cart is empty. Shop now!</p>
-            <Link href="/search?cardName=&page=1&showAll=true">
+            <Link href="/search?cardName=&page=1&inStock=true">
               <button className={styles.continueShoppingButton}>Continue Shopping</button>
             </Link>
           </div>

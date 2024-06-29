@@ -178,8 +178,8 @@ const CartPage = () => {
           <p className={styles.largeText}><span>Item Total:</span> <span>${calculateTotal()}</span></p>
           <p className={styles.largeText}><span>Shipping:</span> <span>${calculateShipping()}</span></p>
           <p className={`${styles.largeText} ${styles.boldText}`}><span>Subtotal:</span> <span>${(parseFloat(calculateTotal()) + parseFloat(calculateShipping())).toFixed(2)}</span></p>
-          <button className={styles.checkoutButton} onClick={handleCheckout}>Checkout</button>
           <button className={styles.clearCartButton} onClick={clearCart}>Clear Cart</button>
+          <button className={styles.checkoutButton} onClick={handleCheckout}>Checkout</button>
         </div>
       </div>
 
