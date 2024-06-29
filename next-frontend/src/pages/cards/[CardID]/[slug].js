@@ -1,3 +1,4 @@
+// CardDetails.js
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import useSWR from 'swr';
@@ -5,27 +6,21 @@ import { FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 import styles from '../../../styles/Card.module.css';
 import ImageModal from '../../../components/ImageModal/ImageModal';
-import Alert from '../../../components/Alert/Alert'; // Import the Alert component
-import { useCart } from '../../../components/Cart/CartProvider'; // Import the useCart hook
+import Alert from '../../../components/Alert/Alert';
+import { useCart } from '../../../components/Cart/CartProvider';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 function CardDetails() {
   const router = useRouter();
   const { CardID, slug } = router.query;
-  const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher, {
-    onSuccess: (data) => {
-      if (data.card && data.card.listings) {
-        data.card.listings = Array.from(new Set(data.card.listings.map(JSON.stringify))).map(JSON.parse);
-      }
-    }
-  });
+  const { data, error } = useSWR(CardID ? `/api/cards/${CardID}` : null, fetcher);
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
   const [showAlert, setShowAlert] = useState(false);
-  const { addToCart } = useCart(); // Destructure addToCart from useCart
+  const { addToCart } = useCart();
 
   const handleImageClick = (images, index) => {
     setModalImages(images);
@@ -37,14 +32,9 @@ function CardDetails() {
   };
 
   const handleAddToCart = async (listing) => {
-    const success = await addToCart(listing);
-    if (success) {
-      setAlertMessage('Item added to cart!');
-      setAlertType('success');
-    } else {
-      setAlertMessage('Failed to add item to cart');
-      setAlertType('error');
-    }
+    const { success, message } = await addToCart(listing);
+    setAlertMessage(message);
+    setAlertType(success ? 'success' : 'error');
     setShowAlert(true);
   };
 
@@ -61,13 +51,13 @@ function CardDetails() {
   return (
     <div className={styles.cardDetail}>
       <div className={styles.cardImageWrapper}>
-        <Image 
-          src={card.CardImage} 
-          alt={card.CardName} 
-          width={400} 
-          height={600} 
-          layout="intrinsic" 
-          className={styles.cardImage} 
+        <Image
+          src={card.CardImage}
+          alt={card.CardName}
+          width={400}
+          height={600}
+          layout="intrinsic"
+          className={styles.cardImage}
         />
       </div>
       <div className={styles.cardContent}>
@@ -121,17 +111,17 @@ function CardDetails() {
             {data.card.listings.map((listing) => (
               <div key={listing.ListingID} className={styles.listingCard}>
                 <div className={styles.listingImages}>
-                  <img 
-                    src={listing.FrontImageURL} 
-                    alt="Front" 
+                  <img
+                    src={listing.FrontImageURL}
+                    alt="Front"
                     className={styles.listingImage}
-                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 0)}  
+                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 0)}
                   />
-                  <img 
-                    src={listing.BackImageURL} 
-                    alt="Back" 
+                  <img
+                    src={listing.BackImageURL}
+                    alt="Back"
                     className={styles.listingImage}
-                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 1)}  
+                    onClick={() => handleImageClick([listing.FrontImageURL, listing.BackImageURL], 1)}
                   />
                 </div>
                 <div className={styles.listingDetails}>
@@ -157,7 +147,7 @@ function CardDetails() {
                   </div>
                 </div>
                 <div className={styles.listingAction}>
-                  <button 
+                  <button
                     className={styles.button}
                     onClick={() => handleAddToCart(listing)}
                   >

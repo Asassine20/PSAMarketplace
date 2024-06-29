@@ -1,3 +1,4 @@
+// CartProvider.js
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import { v4 as uuidv4 } from 'uuid';
@@ -89,7 +90,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (item) => {
     if (!item.ListingID) {
       console.error("Invalid item: ListingID is required", item);
-      return false;
+      return { success: false, message: "Invalid item" };
     }
     if (!cart.find(cartItem => cartItem.ListingID === item.ListingID)) {
       const updatedCart = [...cart, item];
@@ -97,12 +98,11 @@ export const CartProvider = ({ children }) => {
       const success = await updateCart(updatedCart, savedForLater);
       if (!success) {
         setCart(cart);  // Revert cart state on failure
-        return false;
+        return { success: false, message: "Failed to update cart" };
       }
-      return true;
+      return { success: true, message: "Item added to cart" };
     } else {
-      console.warn("Item already in cart:", item);
-      return false;
+      return { success: false, message: "Item already in cart" };
     }
   };
 
