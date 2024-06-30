@@ -223,7 +223,7 @@ const Navbar = () => {
                   <a onClick={handleLinkClick}>Payment Methods</a>
                 </Link>
                 <Link href="/addresses" passHref legacyBehavior>
-                  <a onClick={handleLinkClick}>Address</a>
+                  <a onClick={handleLinkClick}>Addresses</a>
                 </Link>
               </div>
               <div className={styles.gradingSection}>
