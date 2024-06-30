@@ -1,4 +1,3 @@
-// /api/paymentInfo.js
 import { query } from '@/db';
 import { authenticate } from '@/middleware/auth';
 
@@ -12,7 +11,9 @@ export default async function handler(req, res) {
       try {
         if (!userId) throw new Error('Not authenticated');
         const paymentInfo = await query(`
-          SELECT * FROM PaymentInfo WHERE UserID = ?
+          SELECT PaymentID, CardNumber, ExpMonth, ExpYear, CardHolderName, SecurityCode, DateCreated
+          FROM PaymentInfo
+          WHERE UserID = ?
         `, [userId]);
         res.status(200).json(paymentInfo);
       } catch (error) {
@@ -24,11 +25,11 @@ export default async function handler(req, res) {
     case 'POST':
       try {
         if (!userId) throw new Error('Not authenticated');
-        const { cardNumber, expMonth, expYear, cardHolderName } = req.body;
+        const { cardNumber, expMonth, expYear, cardHolderName, securityCode } = req.body;
         const result = await query(`
-          INSERT INTO PaymentInfo (UserID, CardNumber, ExpMonth, ExpYear, CardHolderName, DateCreated) 
-          VALUES (?, ?, ?, ?, ?, NOW())
-        `, [userId, cardNumber, expMonth, expYear, cardHolderName]);
+          INSERT INTO PaymentInfo (UserID, CardNumber, ExpMonth, ExpYear, CardHolderName, SecurityCode, DateCreated)
+          VALUES (?, ?, ?, ?, ?, ?, NOW())
+        `, [userId, cardNumber, expMonth, expYear, cardHolderName, securityCode]);
         res.status(200).json({ PaymentID: result.insertId });
       } catch (error) {
         console.error("Failed to save payment info:", error);

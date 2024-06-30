@@ -59,59 +59,68 @@ const CartPage = () => {
       <h1 className={`${styles.largeText} ${styles.leftAlignedTitle}`}>Shopping Cart</h1>
       <div className={styles.cartItemsWrapper}>
         <div className={styles.cartItems}>
-          {Object.keys(groupedCartItems).map((storeName) => (
-            <div key={storeName} className={styles.package}>
-              <h2 className={styles.packageHeader}>
-                {storeName} ({groupedCartItems[storeName][0].feedback}%)
-              </h2>
-              {groupedCartItems[storeName].map((item, index) => (
-                <div key={`${item.ListingID}-${index}`} className={styles.cartItem} style={{ borderBottom: index === groupedCartItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
-                  <div className={styles.cartItemDetailsTop}>
-                    <div className={styles.cartItemDetailsLeft}>
-                      <div className={styles.cartItemImages}>
-                        <img
-                          src={item.imageFront}
-                          alt={item.name}
-                          className={styles.cartItemImage}
-                          onClick={() => handleImageClick([item.imageFront, item.imageBack], 0)}
-                        />
-                        <img
-                          src={item.imageBack}
-                          alt={item.name}
-                          className={styles.cartItemImage}
-                          onClick={() => handleImageClick([item.imageFront, item.imageBack], 1)}
-                        />
+          {cart.length === 0 ? (
+            <div className={styles.emptyCartMessage}>
+              <h2>Your cart is empty</h2>
+              <Link href="/search?cardName=&page=1&inStock=true" passHref>
+                <button className={styles.shopNowButton}>Shop Now</button>
+              </Link>
+            </div>
+          ) : (
+            Object.keys(groupedCartItems).map((storeName) => (
+              <div key={storeName} className={styles.package}>
+                <h2 className={styles.packageHeader}>
+                  {storeName} ({groupedCartItems[storeName][0].feedback}%)
+                </h2>
+                {groupedCartItems[storeName].map((item, index) => (
+                  <div key={`${item.ListingID}-${index}`} className={styles.cartItem} style={{ borderBottom: index === groupedCartItems[storeName].length - 1 ? 'none' : '1px solid #ccc' }}>
+                    <div className={styles.cartItemDetailsTop}>
+                      <div className={styles.cartItemDetailsLeft}>
+                        <div className={styles.cartItemImages}>
+                          <img
+                            src={item.imageFront}
+                            alt={item.name}
+                            className={styles.cartItemImage}
+                            onClick={() => handleImageClick([item.imageFront, item.imageBack], 0)}
+                          />
+                          <img
+                            src={item.imageBack}
+                            alt={item.name}
+                            className={styles.cartItemImage}
+                            onClick={() => handleImageClick([item.imageFront, item.imageBack], 1)}
+                          />
+                        </div>
+                      </div>
+                      <div className={styles.cartItemDetails}>
+                        <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
+                          <p className={styles.largeTextStrong}>
+                            {item.name} - {item.sport}
+                            {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
+                          </p>
+                        </Link>
+                        <p className={styles.largeText}>Grade: {item.grade}</p>
+                        <p className={styles.largeText}>
+                          <a href={`https://www.psacard.com/cert/${item.certNumber}`} target="_blank" rel="noopener noreferrer">
+                            Cert Number: {item.certNumber}
+                          </a>
+                        </p>
+                      </div>
+                      <div className={styles.cartItemPrices}>
+                        <p className={styles.largeTextStrong}><strong>${(Number(item.price || 0)).toFixed(2)}</strong></p>
+                        <p className={`${styles.largeText} ${styles.shippingIncluded}`}>
+                          {index === 0 ? `+ ${(Number(item.shippingPrice || 0)).toFixed(2)}` : "Shipping included"}
+                        </p>
                       </div>
                     </div>
-                    <div className={styles.cartItemDetails}>
-                      <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
-                        <p className={styles.largeTextStrong}>
-                          {item.name} - {item.sport}
-                          {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
-                        </p>
-                      </Link>
-                      <p className={styles.largeText}>Grade: {item.grade}</p>
-                      <p className={styles.largeText}>
-                        <a href={`https://www.psacard.com/cert/${item.certNumber}`} target="_blank" rel="noopener noreferrer">
-                          Cert Number: {item.certNumber}
-                        </a>
-                      </p>
-                    </div>
-                    <div className={styles.cartItemPrices}>
-                      <p className={styles.largeTextStrong}><strong>${(Number(item.price || 0)).toFixed(2)}</strong></p>
-                      <p className={`${styles.largeText} ${styles.shippingIncluded}`}>
-                        {index === 0 ? `+ ${(Number(item.shippingPrice || 0)).toFixed(2)}` : "Shipping included"}
-                      </p>
+                    <div className={styles.cartItemActions}>
+                      <button className={styles.actionButton} onClick={() => saveForLater(item.ListingID)}>Save for Later</button>
+                      <button className={styles.actionButton} onClick={() => removeFromCart(item.ListingID)}>Remove</button>
                     </div>
                   </div>
-                  <div className={styles.cartItemActions}>
-                    <button className={styles.actionButton} onClick={() => saveForLater(item.ListingID)}>Save for Later</button>
-                    <button className={styles.actionButton} onClick={() => removeFromCart(item.ListingID)}>Remove</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+                ))}
+              </div>
+            ))
+          )}
           {savedForLater.length > 0 && (
             <>
               <h1 className={styles.largeText}>Saved for Later</h1>

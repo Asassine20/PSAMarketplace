@@ -40,8 +40,8 @@ const nextConfig = {
         destination: '/sidepanel/messages',
       },
       {
-        source: '/payment',
-        destination: '/sidepanel/payment',
+        source: '/payments',
+        destination: '/sidepanel/payment-methods',
       },
       {
         source: '/seller',

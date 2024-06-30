@@ -219,7 +219,7 @@ const Navbar = () => {
                 <Link href="/messages" passHref legacyBehavior>
                   <a onClick={handleLinkClick}>Messages</a>
                 </Link>
-                <Link href="/payment" passHref legacyBehavior>
+                <Link href="/payments" passHref legacyBehavior>
                   <a onClick={handleLinkClick}>Payment Methods</a>
                 </Link>
                 <Link href="/address" passHref legacyBehavior>
