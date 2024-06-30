@@ -4,12 +4,15 @@ import styles from '../styles/Cart.module.css';
 import Link from 'next/link';
 import ImageModal from '../components/ImageModal/ImageModal';
 import { useRouter } from 'next/router';
+import Alert from '../components/Alert/Alert';
 
 const CartPage = () => {
   const { cart, removeFromCart, clearCart, saveForLater, savedForLater, addToCartFromSaved, removeFromSaved } = useCart();
   const [mounted, setMounted] = useState(false);
   const [modalImages, setModalImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [message, setMessage] = useState('');
+  const [alertType, setAlertType] = useState('success');
   const router = useRouter();
 
   useEffect(() => {
@@ -49,6 +52,11 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
+    if (cart.length === 0) {
+      setMessage('Your cart is empty. Add cards to your cart before checking out.');
+      setAlertType('error');
+      return;
+    }
     router.push('/checkout');
   };
 
@@ -195,6 +203,8 @@ const CartPage = () => {
       {modalImages.length > 0 && (
         <ImageModal images={modalImages} initialIndex={currentImageIndex} onClose={closeModal} />
       )}
+
+      {message && <Alert message={message} onClose={() => setMessage('')} type={alertType} />}
     </div>
   );
 };

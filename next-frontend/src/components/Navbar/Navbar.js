@@ -222,7 +222,7 @@ const Navbar = () => {
                 <Link href="/payments" passHref legacyBehavior>
                   <a onClick={handleLinkClick}>Payment Methods</a>
                 </Link>
-                <Link href="/address" passHref legacyBehavior>
+                <Link href="/addresses" passHref legacyBehavior>
                   <a onClick={handleLinkClick}>Address</a>
                 </Link>
               </div>

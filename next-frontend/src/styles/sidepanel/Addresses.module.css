@@ -1,0 +1,127 @@
+.addresses {
+    padding: 20px;
+}
+
+.addButton {
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.addButton:hover {
+    background-color: #005bb5;
+}
+
+.addressForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.addressForm input,
+.addressForm select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.addresses label {
+    font-size: 14px;
+}
+
+.checkboxGroup {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.checkbox {
+    transform: scale(1.2);
+    margin: 0;
+}
+
+.addressList {
+    list-style-type: none;
+    padding: 0;
+}
+
+.addressItem {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.addressItem p {
+    margin: 5px 0;
+}
+
+.primaryAddress {
+    border: 2px solid #0070f3;
+    background-color: #e6f7ff;
+}
+
+.primaryBubble {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #0070f3;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.deleteButton {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: grey;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deleteButton:hover {
+    color: rgb(78, 78, 78);
+}
+
+.setPrimaryButton {
+    background-color: #206b00;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    position: absolute;
+    top: 75px;
+    right: 10px;
+}
+
+.setPrimaryButton:hover {
+    background-color: #005bb5;
+}

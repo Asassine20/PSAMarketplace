@@ -16,8 +16,8 @@ const nextConfig = {
         destination: '/sidepanel/account',
       },
       {
-        source: '/address',
-        destination: '/sidepanel/address',
+        source: '/addresses',
+        destination: '/sidepanel/addresses',
       },
       {
         source: '/dashboard',
