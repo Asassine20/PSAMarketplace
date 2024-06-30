@@ -76,8 +76,6 @@ const CheckoutPage = () => {
       return;
     }
 
-    const orderNumber = uuidv4(); // Generate unique order number
-
     try {
       // Fetch inventory details
       const inventoryResponse = await fetch('/api/cart/inventory-details', {
@@ -92,64 +90,73 @@ const CheckoutPage = () => {
 
       const inventoryDetails = await inventoryResponse.json();
 
-      const orderData = {
-        OrderNumber: orderNumber,
-        AddressID: shippingAddress.AddressID,
-        SalePrice: calculateTotal(),
-        OrderDate: formatDateForMySQL(new Date()),
-        BuyerID: userId,
-        SellerID: inventoryDetails[0].SellerID, // Assuming one seller per order
-        ShippingPrice: calculateShippingTotal(),
-        email: email
-      };
+      const orders = Object.keys(groupedCartItems).map(storeName => {
+        const orderNumber = uuidv4();
+        const items = groupedCartItems[storeName];
 
-      // Insert into Orders table
+        return {
+          OrderNumber: orderNumber,
+          AddressID: shippingAddress.AddressID,
+          SalePrice: calculatePackageTotal(items),
+          OrderDate: formatDateForMySQL(new Date()),
+          BuyerID: userId,
+          SellerID: inventoryDetails.find(detail => detail.StoreName === storeName).SellerID,
+          ShippingPrice: items[0].shippingPrice,
+          email: email,
+          items: items.map(item => ({
+            OrderNumber: orderNumber,
+            ListingID: item.ListingID,
+            Quantity: 1, // Assuming quantity is 1 for each item
+            Price: item.price,
+            CardID: inventoryDetails.find(detail => detail.ListingID === item.ListingID).CardID,
+            GradeID: inventoryDetails.find(detail => detail.ListingID === item.ListingID).GradeID
+          }))
+        };
+      });
+
+      // Insert orders
       const orderResponse = await fetch('/api/cart/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify({ orders })
       });
 
       if (!orderResponse.ok) {
-        throw new Error('Failed to create order');
+        throw new Error('Failed to create orders');
       }
 
-      // Insert into OrderItems table and update Inventory
-      const orderItemsData = cart.map(item => ({
-        OrderNumber: orderNumber,
-        ListingID: item.ListingID,
-        Quantity: 1, // Assuming quantity is 1 for each item
-        Price: item.price,
-        CardID: inventoryDetails.find(detail => detail.ListingID === item.ListingID).CardID,
-        GradeID: inventoryDetails.find(detail => detail.ListingID === item.ListingID).GradeID
-      }));
+      // Insert order items and update inventory
+      for (const order of orders) {
+        const orderItemsResponse = await fetch('/api/cart/order-items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: order.items })
+        });
 
-      const orderItemsResponse = await fetch('/api/cart/order-items', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: orderItemsData })
-      });
+        if (!orderItemsResponse.ok) {
+          throw new Error('Failed to create order items');
+        }
 
-      if (!orderItemsResponse.ok) {
-        throw new Error('Failed to create order items');
-      }
+        const inventoryUpdateResponse = await fetch('/api/cart/update-sold', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listingIds: order.items.map(item => item.ListingID) })
+        });
 
-      // Update Inventory to mark items as sold
-      const inventoryUpdateResponse = await fetch('/api/cart/update-sold', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ listingIds: cart.map(item => item.ListingID) })
-      });
-
-      if (!inventoryUpdateResponse.ok) {
-        throw new Error('Failed to update inventory');
+        if (!inventoryUpdateResponse.ok) {
+          throw new Error('Failed to update inventory');
+        }
       }
 
       // Clear the cart
       clearCart();
 
+      // Extract order numbers and store names
+      const orderNumbers = orders.map(order => order.OrderNumber);
+      const storeNames = orders.map(order => order.items[0].storeName);
+
       // Redirect to the order-confirmed page
-      router.push(`/order-confirmed?orderNumber=${orderNumber}&storeName=${inventoryDetails[0].StoreName}`);
+      router.push(`/order-confirmed?orderNumbers=${orderNumbers.join(',')}&storeNames=${storeNames.join(',')}`);
 
     } catch (error) {
       console.error('Error submitting order:', error);
