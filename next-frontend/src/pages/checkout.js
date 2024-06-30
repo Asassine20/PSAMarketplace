@@ -6,10 +6,11 @@ import Link from 'next/link';
 import AddressModal from '../components/Address/AddressModal';
 import CardPaymentForm from '../components/CardPaymentForm/CardPaymentForm';
 import { v4 as uuidv4 } from 'uuid';
+import { useRouter } from 'next/router';
 
 const CheckoutPage = () => {
   const { cart, clearCart } = useCart();
-  const { userId } = useAuth();
+  const { userId, email } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [billingAddress, setBillingAddress] = useState(null);
   const [shippingAddress, setShippingAddress] = useState(null);
@@ -28,6 +29,7 @@ const CheckoutPage = () => {
     cardHolderName: '',
   });
   const [isSameAsBilling, setIsSameAsBilling] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -98,6 +100,7 @@ const CheckoutPage = () => {
         BuyerID: userId,
         SellerID: inventoryDetails[0].SellerID, // Assuming one seller per order
         ShippingPrice: calculateShippingTotal(),
+        email: email
       };
 
       // Insert into Orders table
@@ -145,8 +148,8 @@ const CheckoutPage = () => {
       // Clear the cart
       clearCart();
 
-      // Redirect to a confirmation page or show a success message
-      alert("Order submitted successfully!");
+      // Redirect to the order-confirmed page
+      router.push(`/order-confirmed?orderNumber=${orderNumber}&storeName=${inventoryDetails[0].StoreName}`);
 
     } catch (error) {
       console.error('Error submitting order:', error);

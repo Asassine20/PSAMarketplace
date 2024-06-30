@@ -6,9 +6,10 @@ export default async function handler(req, res) {
 
     try {
       const inventoryDetails = await query(`
-        SELECT ListingID, SellerID, CardID, GradeID
+        SELECT Inventory.ListingID, Inventory.SellerID, Inventory.CardID, Inventory.GradeID, Stores.StoreName
         FROM Inventory
-        WHERE ListingID IN (?)
+        JOIN Stores ON Inventory.SellerID = Stores.UserID
+        WHERE Inventory.ListingID IN (?)
       `, [listingIds]);
 
       res.status(200).json(inventoryDetails);

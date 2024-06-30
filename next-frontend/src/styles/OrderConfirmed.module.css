@@ -1,0 +1,31 @@
+.container {
+    display: flex;
+    justify-content: center;
+    background-color: #f7f7f7;
+    padding: 20px;
+  }
+  
+  .card {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .card h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .card p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .orderLink {
+    color: #0070f3;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
