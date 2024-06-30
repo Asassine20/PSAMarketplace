@@ -1,0 +1,75 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80%;
+    overflow-y: auto;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    float: right;
+  }
+  
+  .modalHeader {
+    margin-top: 0;
+  }
+  
+  .salesTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .salesTable thead th {
+    border-bottom: 2px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .salesTable tbody tr {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .salesTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .salesTable td {
+    padding: 10px;
+  }
+  
+  .loadMoreButton {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .loadMoreButton:hover {
+    background-color: #005bb5;
+  }
+  

@@ -1,4 +1,3 @@
-// CardDetails.js
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import useSWR from 'swr';
@@ -8,6 +7,7 @@ import styles from '../../../styles/Card.module.css';
 import ImageModal from '../../../components/ImageModal/ImageModal';
 import Alert from '../../../components/Alert/Alert';
 import { useCart } from '../../../components/Cart/CartProvider';
+import SalesModal from '../../../components/SalesModal/SalesModal';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -20,6 +20,7 @@ function CardDetails() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
   const [showAlert, setShowAlert] = useState(false);
+  const [showSalesModal, setShowSalesModal] = useState(false);
   const { addToCart } = useCart();
 
   const handleImageClick = (images, index) => {
@@ -40,6 +41,14 @@ function CardDetails() {
 
   const closeAlert = () => {
     setShowAlert(false);
+  };
+
+  const handleShowSalesModal = () => {
+    setShowSalesModal(true);
+  };
+
+  const closeSalesModal = () => {
+    setShowSalesModal(false);
   };
 
   if (error) return <div>Failed to load data</div>;
@@ -72,7 +81,7 @@ function CardDetails() {
           <p><strong>Market Price:</strong> {card.MarketPrice !== null && card.MarketPrice !== undefined ? `$${card.MarketPrice}` : 'N/A'}</p>
         </div>
         <div className={styles.latestSales}>
-          <h2 style={{ textAlign: 'left' }}>Latest Sales</h2>
+          <h2 style={{ textAlign: 'left', fontSize: '20px' }}>Latest Sales</h2>
           <div className={data?.card?.sales?.length ? '' : styles.blurEffect}>
             <table>
               <thead>
@@ -83,19 +92,20 @@ function CardDetails() {
                 </tr>
               </thead>
               <tbody>
-                {data?.card?.sales?.length > 0 ? (
-                  data.card.sales.map((sale, index) => (
-                    <tr key={index} className={index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd}>
-                      <td>{new Date(sale.OrderDate).toLocaleDateString()}</td>
-                      <td>{sale.GradeValue}</td>
-                      <td>${sale.Price}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr style={{ display: 'none' }}></tr>
-                )}
+                {data?.card?.sales?.slice(0, 3).map((sale, index) => (
+                  <tr key={index} className={index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd}>
+                    <td>{new Date(sale.OrderDate).toLocaleDateString()}</td>
+                    <td>{sale.GradeValue}</td>
+                    <td>${sale.Price}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
+            {data.card.sales.length > 3 && (
+              <button onClick={handleShowSalesModal} className={styles.seeMoreButton}>
+                See More Sales
+              </button>
+            )}
           </div>
           {data?.card?.sales?.length === 0 && (
             <div className={styles.noSalesOverlay}>No sales yet for this card</div>
@@ -169,6 +179,8 @@ function CardDetails() {
       )}
 
       {showAlert && <Alert message={alertMessage} onClose={() => setShowAlert(false)} type={alertType} />}
+
+      {showSalesModal && <SalesModal cardID={CardID} onClose={closeSalesModal} />}
     </div>
   );
 }

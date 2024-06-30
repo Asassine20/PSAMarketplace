@@ -1,7 +1,9 @@
+// /api/cards/[CardID].js
 import { query } from '@/db';
 
 export default async function handler(req, res) {
   const { CardID } = req.query;
+  const { offset = 0, limit = 10 } = req.query;
 
   try {
     // Card details query
@@ -21,14 +23,15 @@ export default async function handler(req, res) {
       ORDER BY Inventory.SalePrice DESC;
     `;
 
-    // Sales details query
+    // Sales details query with pagination
     const salesSql = `
       SELECT OrderItems.Price as Price, Orders.OrderDate as OrderDate, Grade.GradeValue as GradeValue
       FROM OrderItems
       JOIN Orders ON OrderItems.OrderNumber = Orders.OrderNumber
       JOIN Grade ON OrderItems.GradeID = Grade.GradeID
       WHERE OrderItems.CardID = ?
-      ORDER BY Orders.OrderDate DESC;
+      ORDER BY Orders.OrderDate DESC
+      LIMIT ?, ?;
     `;
 
     // Query to count the number of listings
@@ -43,7 +46,7 @@ export default async function handler(req, res) {
       query(cardSql, [CardID]),
       query(listingsSql, [CardID]),
       query(listingsCountSql, [CardID]),
-      query(salesSql, [CardID])
+      query(salesSql, [CardID, parseInt(offset), parseInt(limit)])
     ]);
 
     if (cardResults.length > 0) {

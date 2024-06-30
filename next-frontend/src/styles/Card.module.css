@@ -287,7 +287,22 @@
     background: white;
     border-radius: 8px;
 }
-
+.seeMoreButton {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    float: right;  /* Align the button to the right */
+  }
+  
+  .seeMoreButton:hover {
+    color: #5d5d5d;
+  }
 
 @media (max-width: 768px) {
     .listingCard {
