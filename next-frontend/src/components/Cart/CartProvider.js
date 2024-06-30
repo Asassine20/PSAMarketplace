@@ -22,6 +22,7 @@ export const CartProvider = ({ children }) => {
   });
 
   const fetchCart = useCallback(async () => {
+    console.log("Fetching cart data...");
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -45,6 +46,7 @@ export const CartProvider = ({ children }) => {
         );
         setCart(uniqueCartItems || []);
         setSavedForLater(uniqueSavedForLaterItems || []);
+        console.log("Cart data fetched successfully", data);
       } else {
         console.error("Failed to fetch cart data");
       }
@@ -58,6 +60,7 @@ export const CartProvider = ({ children }) => {
   }, [fetchCart]);
 
   const updateCart = async (cart, savedForLater) => {
+    console.log("Updating cart data...", cart, savedForLater);
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -88,6 +91,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCart = async (item) => {
+    console.log("Adding item to cart...", item);
     if (!item.ListingID) {
       console.error("Invalid item: ListingID is required", item);
       return { success: false, message: "Invalid item" };
@@ -100,6 +104,7 @@ export const CartProvider = ({ children }) => {
         setCart(cart);  // Revert cart state on failure
         return { success: false, message: "Failed to update cart" };
       }
+      console.log("Item added to cart successfully");
       return { success: true, message: "Item added to cart" };
     } else {
       return { success: false, message: "Item already in cart" };
@@ -107,17 +112,20 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (id) => {
+    console.log("Removing item from cart...", id);
     const updatedCart = cart.filter(item => item.ListingID !== id);
     setCart(updatedCart);
     await updateCart(updatedCart, savedForLater);
   };
 
   const clearCart = async () => {
+    console.log("Clearing cart...");
     setCart([]);
     await updateCart([], savedForLater);
   };
 
   const saveForLater = async (id) => {
+    console.log("Saving item for later...", id);
     const itemToSave = cart.find(item => item.ListingID === id);
     if (!itemToSave) {
       console.error("Invalid item: Item not found in cart");
@@ -137,6 +145,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const addToCartFromSaved = async (id) => {
+    console.log("Adding item from saved for later to cart...", id);
     const itemToAdd = savedForLater.find(item => item.ListingID === id);
     if (!itemToAdd) {
       console.error("Invalid item: Item not found in saved for later");
@@ -156,6 +165,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromSaved = async (id) => {
+    console.log("Removing item from saved for later...", id);
     const updatedSavedForLater = savedForLater.filter(item => item.ListingID !== id);
     setSavedForLater(updatedSavedForLater);
     await updateCart(cart, updatedSavedForLater);

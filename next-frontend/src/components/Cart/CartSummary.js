@@ -1,3 +1,5 @@
+// CartSummary.js
+import React from 'react';
 import useCart from './UseCart';
 
 const CartSummary = () => {
@@ -5,6 +7,7 @@ const CartSummary = () => {
 
   const itemCount = cart.length;
   const itemTotalPrice = cart.reduce((total, item) => total + item.price, 0);
+  const shippingPrice = 0; // Define or calculate shipping price as needed
   const subtotal = itemTotalPrice + shippingPrice;
 
   return (

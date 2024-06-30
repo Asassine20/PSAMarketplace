@@ -1,3 +1,5 @@
+// Cart.js
+import React from 'react';
 import useCart from './UseCart';
 import CartItem from './CartItem';
 import CartSummary from './CartSummary';
@@ -14,7 +16,7 @@ const Cart = () => {
         <>
           <div>
             {cart.map(item => (
-              <CartItem key={item.id} item={item} />
+              <CartItem key={item.ListingID} item={item} />
             ))}
           </div>
           <CartSummary />
