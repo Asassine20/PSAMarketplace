@@ -33,6 +33,11 @@ const About = () => {
             was founded with the goal of connecting buyers and sellers in a seamless and efficient manner.
           </p>
           <p>
+            The creator of the GemTCG Marketplace, Andrew Sassine, began selling Pokemon cards in 2020. Since then, he has moved on to selling sports cards, graded cards, and many other collectibles. 
+            His goal with GemTCG is to create a trusted marketplace that can provide accurate data on PSA graded card values, and to allow sellers to list cards quickly,
+            and for buyers to be able to browse millions of unique cards.
+          </p>
+          <p>
             Our team is passionate about creating a community where users can discover unique items, 
             support independent sellers, and enjoy a personalized shopping experience. Thank you for 
             choosing our marketplace, and we look forward to serving you!

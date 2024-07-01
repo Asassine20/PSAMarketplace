@@ -48,11 +48,11 @@ const nextConfig = {
       },
       {
         source: '/refund',
-        destination: '/sidepanel/refund',
+        destination: '/sidepanel/refund-return-policy',
       },
       {
         source: '/protection',
-        destination: '/sidepanel/protection',
+        destination: '/sidepanel/gemtcg-order-protection',
       },
       {
         source: '/about',
