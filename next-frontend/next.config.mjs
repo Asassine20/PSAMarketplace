@@ -2,7 +2,16 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['d1htnxwo4o0jhw.cloudfront.net', 'media.licdn.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'd1htnxwo4o0jhw.cloudfront.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.licdn.com',
+      },
+    ],
   },
   async rewrites() {
     return [
