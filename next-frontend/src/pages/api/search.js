@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
     if (cardName) {
         whereConditions.push(`CardName LIKE ?`);
-        values.push(`%${cardName.trim()}%`);
+        values.push(`${cardName.trim()}%`);
     }
 
     ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears'].forEach(filter => {
