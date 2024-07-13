@@ -178,17 +178,6 @@ const SearchPage = () => {
     };
 
     useEffect(() => {
-        const filtersToApply = initializeFilters(query);
-        setFilters(filtersToApply);
-        fetchFilteredCards(filtersToApply);
-        fetchFilterOptions('cardSets', filtersToApply, 1);
-        fetchFilterOptions('sports', filtersToApply);
-        fetchFilterOptions('cardYears', filtersToApply);
-        fetchFilterOptions('cardColors', filtersToApply);
-        fetchFilterOptions('cardVariants', filtersToApply);
-    }, []);
-
-    useEffect(() => {
         if (Object.keys(query).length > 0) {
             const updatedFilters = initializeFilters(query);
 
