@@ -1,0 +1,47 @@
+Last login: Fri Jul 12 16:11:14 on ttys008
+andrewsassine@MacBook-Pro-122 ~ % crontab -e
+
+crontab: no crontab for andrewsassine - using an empty one
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+0 0 * * 0 /usr/local/bin/node /Users/andrewsassine/PSAMarketplace/sql/cardboardconnection.js
+
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+

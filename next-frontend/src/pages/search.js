@@ -106,8 +106,9 @@ const SearchPage = () => {
 
   const fetchFilteredCards = async (filtersToApply) => {
     setIsLoadingCards(true);
-    let queryStr = `/api/search?cardName=${encodeURIComponent(filtersToApply.cardName || '')}&page=${filtersToApply.page}&inStock=true`;
-
+  
+    let queryStr = `/api/search?cardName=${encodeURIComponent(filtersToApply.cardName || '')}&page=${filtersToApply.page}&inStock=${filtersToApply.inStock ? 'true' : 'false'}`;
+  
     Object.keys(filtersToApply).forEach((filterKey) => {
       const filterValue = filtersToApply[filterKey];
       if (Array.isArray(filterValue)) {
@@ -116,33 +117,23 @@ const SearchPage = () => {
         });
       }
     });
-
+  
     if (filtersToApply.sortBy) {
       queryStr += `&sortBy=${encodeURIComponent(filtersToApply.sortBy)}`;
     }
-
+  
     const response = await fetch(queryStr);
     if (!response.ok) {
       setIsLoadingCards(false);
       return;
     }
-
+  
     const { cards, totalCount } = await response.json();
-    if (cards.length === 0 && filtersToApply.inStock) {
-      setFilters((prevFilters) => ({
-        ...prevFilters,
-        inStock: false,
-      }));
-      setIsLoadingCards(false);
-      setFilteredCards([]);
-      setTotalCount(0);
-      return;
-    }
-
     setFilteredCards(cards);
     setTotalCount(totalCount);
     setIsLoadingCards(false);
   };
+  
 
   const fetchFilterOptions = async (filterType, filtersToApply, page = 1) => {
     if (filterType === 'cardSets') setIsLoadingCardSets(true);
@@ -391,7 +382,6 @@ const SearchPage = () => {
       return updatedFilters;
     });
   };
-
 
   return (
     <div>
