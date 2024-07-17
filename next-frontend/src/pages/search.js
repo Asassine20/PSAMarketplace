@@ -84,14 +84,17 @@ const SearchPage = () => {
   const filterLimit = 50;
   const resultsPerPage = 10;
 
+  // Handles the filters when they are changes. Updates url to include filter parameters.
   const updateFiltersInUrl = (updatedFilters) => {
     const queryParameters = new URLSearchParams({
       cardName: updatedFilters.cardName || '',
       page: updatedFilters.page,
       inStock: updatedFilters.inStock ? 'true' : 'false',
-      sortBy: updatedFilters.sortBy || '',
     });
-
+    if (updatedFilters.inStock && updatedFilters.sortBy) {
+      queryParameters.append('sortBy', updatedFilters.sortBy);
+    }
+    // Loops through each filter and appends the selected values to the url
     Object.keys(updatedFilters).forEach((filterKey) => {
       const filterValue = updatedFilters[filterKey];
       if (Array.isArray(filterValue) && filterValue.length) {
@@ -100,15 +103,14 @@ const SearchPage = () => {
         });
       }
     });
-
     router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
   };
-
+  
+  // Updates the card results based on the filters selected
   const fetchFilteredCards = async (filtersToApply) => {
     setIsLoadingCards(true);
-  
+
     let queryStr = `/api/search?cardName=${encodeURIComponent(filtersToApply.cardName || '')}&page=${filtersToApply.page}&inStock=${filtersToApply.inStock ? 'true' : 'false'}`;
-  
     Object.keys(filtersToApply).forEach((filterKey) => {
       const filterValue = filtersToApply[filterKey];
       if (Array.isArray(filterValue)) {
@@ -117,23 +119,22 @@ const SearchPage = () => {
         });
       }
     });
-  
-    if (filtersToApply.sortBy) {
+
+    if (filtersToApply.inStock && filtersToApply.sortBy) {
       queryStr += `&sortBy=${encodeURIComponent(filtersToApply.sortBy)}`;
     }
-  
+
     const response = await fetch(queryStr);
     if (!response.ok) {
       setIsLoadingCards(false);
       return;
     }
-  
+
     const { cards, totalCount } = await response.json();
     setFilteredCards(cards);
     setTotalCount(totalCount);
     setIsLoadingCards(false);
   };
-  
 
   const fetchFilterOptions = async (filterType, filtersToApply, page = 1) => {
     if (filterType === 'cardSets') setIsLoadingCardSets(true);
@@ -199,6 +200,18 @@ const SearchPage = () => {
         ...prevTerms,
         [filterKey]: value,
       }));
+
+      setFilters((prevFilters) => {
+        const updatedFilters = {
+          ...prevFilters,
+          [filterKey]: value,
+          page: '1',
+          sortBy: prevFilters.inStock ? prevFilters.sortBy : '', // Reset sortBy if inStock is false
+        };
+        updateFiltersInUrl(updatedFilters);
+        fetchFilteredCards(updatedFilters);
+        return updatedFilters;
+      });
     }, 300);
 
     debounceChange(searchTerm);
@@ -212,6 +225,7 @@ const SearchPage = () => {
       cardColors: '',
       cardVariants: '',
     });
+
     setFilters((prevFilters) => {
       const updatedFilters = {
         ...prevFilters,
@@ -219,8 +233,6 @@ const SearchPage = () => {
           ? [...(Array.isArray(prevFilters[filterKey]) ? prevFilters[filterKey] : []), value]
           : prevFilters[filterKey].filter((v) => v !== value),
         page: '1',
-        cardName: '',
-        sortBy: '', // Reset sortBy to default
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
@@ -234,8 +246,23 @@ const SearchPage = () => {
         ...prevFilters,
         inStock: !prevFilters.inStock,
         page: '1',
-        cardName: '',
+        cardName: prevFilters.cardName, // Preserve the cardName parameter
         sortBy: '', // Reset sortBy to default
+      };
+      updateFiltersInUrl(updatedFilters);
+      fetchFilteredCards(updatedFilters);
+      return updatedFilters;
+    });
+  };
+  
+
+  const handleCardNameChange = (cardName) => {
+    setFilters((prevFilters) => {
+      const updatedFilters = {
+        ...prevFilters,
+        cardName: cardName,
+        page: '1',
+        inStock: prevFilters.inStock, // Preserve inStock value
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
