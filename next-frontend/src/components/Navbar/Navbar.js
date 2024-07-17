@@ -70,7 +70,7 @@ const Navbar = () => {
       query: {
         cardName: query,
         page: '1',
-        inStock: query ? 'true' : 'false', // Preserve the inStock value based on the current state
+        inStock: router.query.inStock || 'true',
       },
     });
   };  
