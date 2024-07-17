@@ -4,13 +4,30 @@ const nodemailer = require('nodemailer');
 require('dotenv').config(); // Ensure you have dotenv to load .env variables
 const db = require('../db'); // Ensure this is your promise-based connection module
 
-const baseUrl = 'https://www.cardboardconnection.com/sports-cards-sets/page/';
+const specificSetLinks = [
+  // Add your specific set links here
+  'https://www.cardboardconnection.com/specific-set-link-1',
+  'https://www.cardboardconnection.com/specific-set-link-2',
+  // Add more links as needed
+];
+
 const validSports = ['Baseball', 'Basketball', 'Football', 'Hockey', 'Soccer', 'UFC', 'Golf'];
 const MAX_CARD_COLOR_LENGTH = 255; // Adjust according to your database schema
 const MAX_CARD_NAME_LENGTH = 255; // Adjust according to your database schema
 const MAX_CARD_VARIANT_LENGTH = 255; // Adjust according to your database schema
 const MAX_CARD_SET_LENGTH = 255; // Adjust according to your database schema
 const MAX_TEAM_LENGTH = 255; // Adjust according to your database schema
+
+const patterns = [
+  'Prizm', 'Refractor', 'RayWave', 'Wave', 'Artist Proof', 'Atomic', 'Spectrum',
+  'Circles', 'Seismic', 'Squares', 'Starball', 'Checker', 'Ice', 'Icy',
+  'Die-Cut', 'Glossy', 'Asia', 'Difractor', 'X-Fractor', 'Disco',
+  'Etch', 'Finite', 'Flash', 'FOTL', 'Laser', 'Lava', 'Mojo', 'Mosaic', 'Pulsar',
+  'Shimmer', 'Tiger', 'Velocity', 'Cosmic', 'Camo', 'Bubbles', 'Vapor', 'Glow',
+  'Press Proof', 'Foil', 'Diffractor', 'Prism', 'Die-Cut', 'Holo', 'Sonic Pulse',
+  'Spectra', 'Galactic', 'Golazo', 'Kaboom', 'Laundry Tag', 'Prime', 'Printing Plates',
+  'SuperFractor', 'Speckle'
+];
 
 // Setup nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -70,153 +87,143 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
-function parseTitle(title) {
-  const parts = title.split(' ');
-  const year = parts.shift();
-  let sport = validSports.find(sport => title.toLowerCase().includes(sport.toLowerCase())) || '';
-  if (sport) {
-    sport = capitalizeFirstLetter(sport);
-  }
-  const sportIndex = parts.findIndex(part => validSports.includes(capitalizeFirstLetter(part)));
-  if (sportIndex !== -1) {
-    parts.splice(sportIndex, 1);
-  }
-  const cardSet = parts.join(' ').replace(/Cards|Checklist/gi, '').trim();
-  return { year, sport, cardSet };
-}
-
-async function checkIfSetExists(cardSet, year, sport) {
-  const query = 'SELECT COUNT(*) as count FROM Card2 WHERE CardSet = ? AND CardYear = ? AND Sport = ?';
-  const [rows] = await db.query(query, [cardSet, year, sport]);
-  console.log(rows); // Log the result to understand its structure
-  return rows && rows[0] && rows[0].count > 0;
-}
-
 function trimToMaxLength(value, maxLength) {
   if (value == null) return value; // Return null or undefined as is
   return value.length > maxLength ? value.substring(0, maxLength) : value;
 }
 
-async function scrapePage(pageNumber, newSets) {
-  const url = `${baseUrl}${pageNumber}`;
-  const $ = await fetchHTML(url);
-  if (!$) return;
+function containsAutographTerms(text) {
+  const terms = ['auto', 'autograph', 'autographs', 'autographed'];
+  return terms.some(term => text.toLowerCase().includes(term));
+}
 
-  let cards = [];
-
-  $('.archive-post-left .entry').each((i, el) => {
-    const title = $(el).find('.post-title a').attr('title') || '';
-    const link = $(el).find('.post-title a').attr('href') || '';
-
-    if (
-      title &&
-      link &&
-      (validSports.some(sport => title.toLowerCase().includes(sport.toLowerCase())) ||
-        title.toLowerCase().endsWith('cards') ||
-        title.toLowerCase().endsWith('checklist'))
-    ) {
-      const { year, sport, cardSet } = parseTitle(title);
-      cards.push({ year, sport, cardSet, title, link });
+function extractColorPattern(text) {
+  let colorPattern = '';
+  for (const pattern of patterns) {
+    if (text.toLowerCase().includes(pattern.toLowerCase())) {
+      colorPattern = pattern;
+      text = text.replace(new RegExp(pattern, 'gi'), '').trim();
+      break;
     }
-  });
+  }
+  return { text, colorPattern };
+}
 
-  for (const card of cards) {
-    const exists = await checkIfSetExists(card.cardSet, card.year, card.sport);
-    if (exists) {
-      console.log(`Set ${card.cardSet} (${card.year} - ${card.sport}) already exists. Skipping...`);
-      continue;
-    }
+function extractNumberedValue(text) {
+  const match = text.match(/#\/\s*\d+/);
+  if (match) {
+    return { text: text.replace(match[0], '').trim(), numbered: match[0].trim() };
+  }
+  return { text, numbered: '' };
+}
 
-    const $$ = await fetchHTML(card.link);
-    if (!$$) continue;
+async function scrapeSet(link) {
+  const $$ = await fetchHTML(link);
+  if (!$$) return;
 
-    const players = new Set();
-    let currentVariant = null;
-    let parallels = [];
+  const title = $$('.post-title').text().trim();
+  const { year, sport, cardSet } = parseTitle(title);
 
-    $$('h3.hot-title, .checklistdesc, .tablechecklist').each((i, el) => {
-      if ($$(el).is('h3.hot-title')) {
-        currentVariant = $$(el).text().replace(/Set Checklist/i, '').replace(/Checklist/i, '').trim();
-      } else if ($$(el).is('.checklistdesc') && /Parallel/i.test($$(el).text())) {
-        const parallelText = $$(el).text().replace(/PARALLEL CARDS:|SPECTRUM PARALLELS:/g, '').trim();
-        parallels = parallelText.split(',').map(parallel => trimToMaxLength(parallel.trim(), MAX_CARD_COLOR_LENGTH));
-      } else if ($$(el).is('.tablechecklist')) {
-        const playerTexts = $$(el).html().split('<br>');
-        playerTexts.forEach(playerText => {
-          const { cardNumber, cardName, team } = parsePlayerText(playerText);
-          if (cardName && !/^\d+$/.test(cardName)) {
-            players.add(JSON.stringify({
-              cardName: trimToMaxLength(cardName, MAX_CARD_NAME_LENGTH),
-              cardNumber,
-              cardColor: 'Base',
-              cardVariant: trimToMaxLength(currentVariant, MAX_CARD_VARIANT_LENGTH),
-              sport: card.sport,
-              year: card.year,
-              cardSet: trimToMaxLength(card.cardSet, MAX_CARD_SET_LENGTH),
-              team: trimToMaxLength(team, MAX_TEAM_LENGTH)
-            }));
-            parallels.forEach(parallel => {
+  const players = new Set();
+  let currentVariant = null;
+  let parallels = [];
+
+  $$('h3.hot-title, .checklistdesc, .tablechecklist').each((i, el) => {
+    if ($$(el).is('h3.hot-title')) {
+      currentVariant = $$(el).text().replace(/Set Checklist/i, '').replace(/Checklist/i, '').trim();
+    } else if ($$(el).is('.checklistdesc') && /Parallel/i.test($$(el).text())) {
+      const parallelText = $$(el).text().replace(/PARALLEL CARDS:|SPECTRUM PARALLELS:/g, '').trim();
+      parallels = parallelText.split(',').map(parallel => trimToMaxLength(parallel.trim(), MAX_CARD_COLOR_LENGTH));
+    } else if ($$(el).is('.tablechecklist')) {
+      const playerTexts = $$(el).html().split('<br>');
+      playerTexts.forEach(playerText => {
+        const { cardNumber, cardName, team } = parsePlayerText(playerText);
+        if (cardName && !/^\d+$/.test(cardName)) {
+          let auto = 0;
+          if (containsAutographTerms(cardName) || containsAutographTerms(currentVariant) || parallels.some(parallel => containsAutographTerms(parallel))) {
+            auto = 1;
+            currentVariant = containsAutographTerms(currentVariant) ? '' : currentVariant;
+            parallels = parallels.map(parallel => containsAutographTerms(parallel) ? '' : parallel);
+          }
+
+          let { text: newCardColor, colorPattern } = extractColorPattern('Base');
+          let { text: finalCardColor, numbered } = extractNumberedValue(newCardColor);
+          players.add(JSON.stringify({
+            cardName: trimToMaxLength(cardName, MAX_CARD_NAME_LENGTH),
+            cardNumber,
+            cardColor: trimToMaxLength(finalCardColor, MAX_CARD_COLOR_LENGTH),
+            cardVariant: trimToMaxLength(currentVariant, MAX_CARD_VARIANT_LENGTH),
+            sport,
+            year,
+            cardSet: trimToMaxLength(cardSet, MAX_CARD_SET_LENGTH),
+            team: trimToMaxLength(team, MAX_TEAM_LENGTH),
+            auto,
+            colorPattern: trimToMaxLength(colorPattern, MAX_CARD_COLOR_LENGTH),
+            numbered: trimToMaxLength(numbered, MAX_CARD_COLOR_LENGTH)
+          }));
+          parallels.forEach(parallel => {
+            if (parallel) {
+              let { text: parallelColor, colorPattern: parallelPattern } = extractColorPattern(parallel);
+              let { text: finalParallelColor, numbered: parallelNumbered } = extractNumberedValue(parallelColor);
               players.add(JSON.stringify({
                 cardName: trimToMaxLength(cardName, MAX_CARD_NAME_LENGTH),
                 cardNumber,
-                cardColor: trimToMaxLength(parallel, MAX_CARD_COLOR_LENGTH),
+                cardColor: trimToMaxLength(finalParallelColor, MAX_CARD_COLOR_LENGTH),
                 cardVariant: trimToMaxLength(currentVariant, MAX_CARD_VARIANT_LENGTH),
-                sport: card.sport,
-                year: card.year,
-                cardSet: trimToMaxLength(card.cardSet, MAX_CARD_SET_LENGTH),
-                team: trimToMaxLength(team, MAX_TEAM_LENGTH)
+                sport,
+                year,
+                cardSet: trimToMaxLength(cardSet, MAX_CARD_SET_LENGTH),
+                team: trimToMaxLength(team, MAX_TEAM_LENGTH),
+                auto,
+                colorPattern: trimToMaxLength(parallelPattern, MAX_CARD_COLOR_LENGTH),
+                numbered: trimToMaxLength(parallelNumbered, MAX_CARD_COLOR_LENGTH)
               }));
-            });
-          }
-        });
-      }
-    });
-
-    const playersArray = Array.from(players).map(playerText => {
-      const { cardName, cardNumber, cardColor, cardVariant, sport, year, cardSet, team } = JSON.parse(playerText);
-      return [cardName, cardNumber, cardColor, cardVariant, sport, year, cardSet, team];
-    });
-
-    if (playersArray.length > 0) {
-      const query = 'INSERT INTO Card2 (CardName, CardNumber, CardColor, CardVariant, Sport, CardYear, CardSet, Team) VALUES ?';
-      await db.query(query, [playersArray]).then(() => {
-        console.log(`Inserted ${playersArray.length} cards from set ${card.title} into the Card2 table`);
-        newSets.push(card.title);
-      }).catch(error => {
-        console.error(`Error inserting data into the Card2 table for set ${card.title}:`, error);
+            }
+          });
+        }
       });
     }
+  });
+
+  const playersArray = Array.from(players).map(playerText => {
+    const { cardName, cardNumber, cardColor, cardVariant, sport, year, cardSet, team, auto, colorPattern, numbered } = JSON.parse(playerText);
+    return [cardName, cardNumber, cardColor, cardVariant, sport, year, cardSet, team, auto, colorPattern, numbered];
+  });
+
+  if (playersArray.length > 0) {
+    const query = 'INSERT INTO Card2 (CardName, CardNumber, CardColor, CardVariant, Sport, CardYear, CardSet, Team, Auto, ColorPattern, Numbered) VALUES ?';
+    await db.query(query, [playersArray]).then(() => {
+      console.log(`Inserted ${playersArray.length} cards from set ${title} into the Card2 table`);
+    }).catch(error => {
+      console.error(`Error inserting data into the Card2 table for set ${title}:`, error);
+    });
   }
 }
 
-async function scrapeAllPages() {
-  let currentPage = 1;
-  let hasMorePages = true;
-  let newSets = [];
-
-  while (hasMorePages) {
-    console.log(`Scraping page ${currentPage}...`);
-    const url = `${baseUrl}${currentPage}`;
-    const $ = await fetchHTML(url);
-
-    if (!$) {
-      hasMorePages = false;
-    } else {
-      const isEmptyPage = $('.archive-post-left .entry').length === 0;
-      if (isEmptyPage) {
-        hasMorePages = false;
-      } else {
-        await scrapePage(currentPage, newSets);
-        currentPage++;
-      }
-    }
+async function scrapeSpecificSets() {
+  for (const link of specificSetLinks) {
+    console.log(`Scraping set: ${link}`);
+    await scrapeSet(link);
   }
 
-  if (newSets.length > 0) {
-    sendEmailNotification(newSets);
-  }
+  console.log("Completed scraping specific sets.");
+}
 
-  console.log("Completed scraping all pages.");
+async function cleanUpCardColors() {
+  const query = `
+    UPDATE Card2
+    SET CardColor = NULL
+    WHERE CardColor NOT REGEXP 'blue|blank|burgundy|peacock|genesis|fusion|clear|dragon|electric|fire|fuchsia|graphite|gray|grey|jade|inferno|lavender|
+    |leather|magenta|marble|nebula|neon|negative|onyx|black|yellow|green|gold|red|white|pink|cream|teal|orange|purple|silver|bronze|copper|
+    |papradascha|quartz|ruby|tie-dye|wood|metal|base|brown|diamond|lava|sepia|international|asia|rainbow|emerald|chrome|amethyst|platinum|sapphire|aqua';
+  `;
+
+  try {
+    const [result] = await db.query(query);
+    console.log(`Updated ${result.affectedRows} rows.`);
+  } catch (error) {
+    console.error('Error executing update query:', error);
+  }
 }
 
 function sendEmailNotification(newSets) {
@@ -235,4 +242,6 @@ function sendEmailNotification(newSets) {
   });
 }
 
-scrapeAllPages().catch(console.error);
+scrapeSpecificSets()
+  .then(cleanUpCardColors)
+  .catch(console.error);
