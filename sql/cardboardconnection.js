@@ -26,7 +26,9 @@ const patterns = [
   'Shimmer', 'Tiger', 'Velocity', 'Cosmic', 'Camo', 'Bubbles', 'Vapor', 'Glow',
   'Press Proof', 'Foil', 'Diffractor', 'Prism', 'Die-Cut', 'Holo', 'Sonic Pulse',
   'Spectra', 'Galactic', 'Golazo', 'Kaboom', 'Laundry Tag', 'Prime', 'Printing Plates',
-  'SuperFractor', 'Speckle'
+  'SuperFractor', 'Speckle', 'PRESS PROOF', 'Gradient', 'Metallic', 'LASER',
+  'Hyper', 'Mirror', 'MIRROR', 'MINI', 'Mini', 'MOSAIC', 'Mosaic', 'Reactive',
+  'Lazer', 'Jumbo', 'foil', 'Retail', 'Rainbow'
 ];
 
 // Setup nodemailer transporter
@@ -215,7 +217,7 @@ async function cleanUpCardColors() {
     SET CardColor = NULL
     WHERE CardColor NOT REGEXP 'blue|blank|burgundy|peacock|genesis|fusion|clear|dragon|electric|fire|fuchsia|graphite|gray|grey|jade|inferno|lavender|
     |leather|magenta|marble|nebula|neon|negative|onyx|black|yellow|green|gold|red|white|pink|cream|teal|orange|purple|silver|bronze|copper|
-    |papradascha|quartz|ruby|tie-dye|wood|metal|base|brown|diamond|lava|sepia|international|asia|rainbow|emerald|chrome|amethyst|platinum|sapphire|aqua';
+    |papradascha|quartz|graphite|lavender|ruby|tie-dye|wood|onyx|copper|imperial jade|inferno|leather|blank back|clear cut|metal|base|brown|diamond|lava|sepia|international|asia|rainbow|emerald|chrome|amethyst|platinum|sapphire|aqua';
   `;
 
   try {
