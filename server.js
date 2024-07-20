@@ -131,6 +131,13 @@ hbs.registerHelper('formatCurrency', function(value) {
     return "N/A"; // Or any appropriate fallback value
 });
 
+hbs.registerHelper('inc', function(value) {
+    return parseInt(value) + 1;
+});
+hbs.registerHelper('encodeURIComponent', function(context) {
+    return encodeURIComponent(context);
+});
+
 
 hbs.registerHelper('slice', function(content, options) {
     const limit = options.hash.limit;

@@ -30,7 +30,6 @@
                 <button class="table-button" id="contactBuyerBtn">Contact Buyer</button>
             </div>
         </div>
-
     </div>
 
     <div class="shipping-box">
@@ -76,8 +75,6 @@
                 <button class="table-button" id="submitTrackingBtn">Save</button>
             </div>
         </div>
-
-
         <div class="info-row">
             <div class="info-label">Shipment Date:</div>
             <div class="info-data">{{formatDate shipping.ShipmentDate}}</div>
@@ -121,29 +118,32 @@
     </div>
 </div>
 <!-- Itemized List -->
-    <table>
-        <thead>
-            <tr>
-                <th>Card Details</th>
-                <th>Quantity</th>
-                <th>Price per Item</th>
-            </tr>
-        </thead>
-        <tbody >
-            {{#each items}}
-            <tr>
-                <td class="card-details">{{CardDetails}}</td>
-                <td>{{Quantity}}</td>
-                <td>${{Price}}</td>
-            </tr>
-            {{/each}}
-        </tbody>
-        <tfoot>
-            <th colspan="2"> Total Price</th>
-            <th>${{order.SalePrice}}</th>
-        </tfoot>
-    </table>
-
+<table>
+    <thead>
+        <tr>
+            <th>Card Details</th>
+            <th>Quantity</th>
+            <th>Price per Item</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each items}}
+        <tr>
+            <td class="card-details">
+                <a href="http://localhost:3000/cards/{{CardID}}/{{encodeURIComponent CardDetails}}" target="_blank">
+                    {{CardDetails}}
+                </a>
+            </td>
+            <td>{{Quantity}}</td>
+            <td>${{Price}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+    <tfoot>
+        <th colspan="2"> Total Price</th>
+        <th>${{order.SalePrice}}</th>
+    </tfoot>
+</table>
 </body>
 <script>
     function detectCarrierAndGenerateTrackingInfo(trackingNumber) {
@@ -194,6 +194,7 @@
         }
         updateShippingSelection(true, trackingNumber);
     });
+
     function updateOrder(data) {
         fetch('/admin/update-shipping-details', {
             method: 'POST',
@@ -224,7 +225,6 @@
         }
     }
 
-
     document.getElementById('contactBuyerBtn').addEventListener('click', function() {
         const orderId = '{{order.OrderNumber}}'; // Make sure you have the order ID available
         const buyerId = '{{order.BuyerID}}'; // Assume you have buyer ID
@@ -247,11 +247,10 @@
         })
         .catch(error => console.error('Error:', error));
     });
+
     function downloadPackingSlip(orderNumber) {
         const url = `/admin/download-order?orderNumber=${orderNumber}`;
         window.location.href = url;
     }
-
-
 </script>
 </html>

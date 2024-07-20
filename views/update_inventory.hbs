@@ -1,217 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {{> head}}
     <title>Update Inventory</title>
 </head>
+
 <body>
     {{> navbar}}
-<form action="/admin/submit-inventory" method="post">
-    <div class="flex-container">
-        <div class="product-info">
-            {{#if cardDetails.CardImage}}
-            <img src="{{cardDetails.CardImage}}" alt="Card Image" class="update-inventory-card-image">
-            {{/if}}
-            <p>Card Name: {{cardDetails.CardName}}</p>
-            <p>Card Set: {{cardDetails.CardSet}}</p>
-            <p>Card Year: {{cardDetails.CardYear}}</p>
-            <p>Card Number: {{cardDetails.CardNumber}}</p>
-            <p>Card Color: {{cardDetails.CardColor}}</p>
-            <p>Card Variant: {{cardDetails.CardVariant}}</p>
-        </div>
-
-        <div class="table-container" id="grades-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Grade</th>
-                        <th>Market Price</th>
-                        <th>Your Sale Price</th>
-                        <th>Cert Number</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each existingInventory}}
-                    <tr data-listing-id="{{this.ListingID}}" data-front-image-url="{{this.FrontImageUrl}}">
-                        <td>
-                            <!-- Use the CardImage if available, otherwise hide the image -->
-                            <img src="{{this.FrontImageURL}}" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: block;">
-                        </td>
-                        <td>
-                            <select name="gradeIds[]">
-                                {{#each ../grades}}
-                                <option value="{{this.GradeID}}" {{#if (eq this.GradeID ../this.GradeID)}}selected{{/if}}>{{this.GradeValue}}</option>
-                                {{/each}}
-                            </select>
-                        </td>
-                        <td>
-                            <!-- Market Price can be dynamically filled or left for manual entry -->
-                        </td>
-                        <td>
-                            <input type="text" name="salePrices[]" value="{{this.SalePrice}}">
-                        </td>
-                        <td>
-                            <input type="text" name="certNumbers[]" value="{{this.CertNumber}}">
-                        </td>
-                        <td>
-                            <button type="button" onclick="removeRow(this)">-</button>
-                        </td>
-                        <!-- Include hidden input for listingId/InventoryID -->
-                        <input type="hidden" name="listingIds[]" value="{{this.InventoryID}}">
-                    </tr>
-                    {{/each}}
-                </tbody>
-
-            </table>
-            <div class="add-row-button-container">
-                <button type="button" onclick="addRow()" style="border-radius: 4px;">+ Add More</button>
+    <form action="/admin/submit-inventory" method="post">
+        <div class="flex-container">
+            <div class="product-info">
+                {{#if cardDetails.CardImage}}
+                <img src="{{cardDetails.CardImage}}" alt="Card Image" class="update-inventory-card-image">
+                {{/if}}
+                {{#if cardDetails.CardName}}
+                <p>Card Name: {{cardDetails.CardName}}</p>
+                {{/if}}
+                {{#if cardDetails.CardSet}}
+                <p>Card Set: {{cardDetails.CardSet}}</p>
+                {{/if}}
+                {{#if cardDetails.CardYear}}
+                <p>Card Year: {{cardDetails.CardYear}}</p>
+                {{/if}}
+                {{#if cardDetails.CardNumber}}
+                <p>Card Number: {{cardDetails.CardNumber}}</p>
+                {{/if}}
+                {{#if cardDetails.CardColor}}
+                <p>Card Color: {{cardDetails.CardColor}}</p>
+                {{/if}}
+                {{#if cardDetails.CardVariant}}
+                <p>Card Variant: {{cardDetails.CardVariant}}</p>
+                {{/if}}
+                {{#if cardDetails.Team}}
+                <p>Team: {{cardDetails.Team}}</p>
+                {{/if}}
+                {{#if cardDetails.Numbered}}
+                <p>Numbered: {{cardDetails.Numbered}}</p>
+                {{/if}}
+                {{#if cardDetails.ColorPattern}}
+                <p>Color Pattern: {{cardDetails.ColorPattern}}</p>
+                {{/if}}
+                {{#if cardDetails.Auto}}
+                {{#if (eq cardDetails.Auto 1)}}
+                <p>Auto: Yes</p>
+                {{/if}}
+                {{/if}}
             </div>
-            <div class="button-container">
-                <button type="submit" name="action" value="clearInventory" style="border-radius: 4px;" class="clear-inventory-button">Clear Inventory</button>
-                <button type="submit" name="action" value="updateInventory" style="border-radius: 4px;">{{#if existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
+            <div class="table-container" id="grades-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Grade</th>
+                            <th>Market Price</th>
+                            <th>Your Sale Price</th>
+                            <th>Cert Number</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each existingInventory}}
+                        <tr data-listing-id="{{this.ListingID}}" data-front-image-url="{{this.FrontImageUrl}}">
+                            <td>
+                                <!-- Use the CardImage if available, otherwise hide the image -->
+                                <img src="{{this.FrontImageURL}}" alt="Card Image" class="card-image"
+                                    style="width: 50px; height: auto; display: block;">
+                            </td>
+                            <td>
+                                <select name="gradeIds[]">
+                                    {{#each ../grades}}
+                                    <option value="{{this.GradeID}}" {{#if (eq this.GradeID
+                                        ../this.GradeID)}}selected{{/if}}>{{this.GradeValue}}</option>
+                                    {{/each}}
+                                </select>
+                            </td>
+                            <td>
+                                <!-- Market Price can be dynamically filled or left for manual entry -->
+                            </td>
+                            <td>
+                                <input type="text" name="salePrices[]" value="{{this.SalePrice}}">
+                            </td>
+                            <td>
+                                <input type="text" name="certNumbers[]" value="{{this.CertNumber}}">
+                            </td>
+                            <td>
+                                <button type="button" onclick="removeRow(this)">-</button>
+                            </td>
+                            <!-- Include hidden input for listingId/InventoryID -->
+                            <input type="hidden" name="listingIds[]" value="{{this.InventoryID}}">
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <div class="add-row-button-container">
+                    <button type="button" onclick="addRow()" style="border-radius: 4px;">+ Add More</button>
+                </div>
+                <div class="button-container">
+                    <button type="submit" name="action" value="clearInventory" style="border-radius: 4px;"
+                        class="clear-inventory-button">Clear Inventory</button>
+                    <button type="submit" name="action" value="updateInventory" style="border-radius: 4px;">{{#if
+                        existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
+                </div>
             </div>
         </div>
-    </div>
+        <script>
+            var existingInventory = {{{ json existingInventory }}};
+        </script>
+
+        <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
+        <!-- Adjusted logic to avoid using array index directly -->
+        {{#with existingInventory.[0]}}
+        <input type="hidden" name="listingId" value="{{this.ListingID}}">
+        {{/with}}
+    </form>
+
     <script>
-        var existingInventory = {{{json existingInventory}}};
-    </script>
+        console.log(existingInventory); // Temporarily log to verify structure
 
-    <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
-    <!-- Adjusted logic to avoid using array index directly -->
-    {{#with existingInventory.[0]}}
-    <input type="hidden" name="listingId" value="{{this.ListingID}}">
-    {{/with}}
-</form>
+        function addRow() {
+            const tableBody = document.querySelector("#grades-table tbody");
+            const newRow = document.createElement("tr");
+            const existingSelect = document.querySelector('select[name="gradeIds[]"]');
 
-<script>
-    console.log(existingInventory); // Temporarily log to verify structure
+            // Clone the options from the existing select
+            const options = existingSelect ? existingSelect.innerHTML : '';
 
-    function addRow() {
-        const tableBody = document.querySelector("#grades-table tbody");
-        const newRow = document.createElement("tr");
-        const existingSelect = document.querySelector('select[name="gradeIds[]"]');
-        
-        // Clone the options from the existing select
-        const options = existingSelect ? existingSelect.innerHTML : '';
-
-        newRow.innerHTML = `
-            <td>
-                <img src="" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: none;">
-            </td>
-            <td>
-                <select name="gradeIds[]">
-                    {{#each grades}}
-                        <option value="{{this.GradeID}}">{{this.GradeValue}}</option>
-                    {{/each}}
-                </select>
-            </td>
-            <td>
-                <!-- Market Price placeholder or dynamic content -->
-            </td>
-            <td>
-                <input type="text" name="salePrices[]" value="">
-            </td>
-            <td>
-                <input type="text" name="certNumbers[]" class="certNumberInput" value="">
-            </td>
-            <td>
-                <button type="button" onclick="removeRow(this)">-</button>
-            </td>
-        `;
-        tableBody.appendChild(newRow);
-    }
-
-    function removeRow(button) {
-        button.parentElement.parentElement.remove();
-    }
-
-    async function fetchAndDisplayImage(certNumber) {
-        if (!certNumber) return; // Skip if certNumber is empty
-        try {
-            const response = await fetch(`/api/fetch-image?certNumber=${certNumber}`);
-            const data = await response.json();
-            if (data.frontImageUrl) {
-                // Assuming you have a dedicated place to show the image
-                document.querySelector(".update-inventory-card-image").src = data.frontImageUrl;
-                document.querySelector(".update-inventory-card-image").alt = "Fetched Card Image";
-            }
-        } catch (error) {
-            console.error('Error fetching image:', error);
+            newRow.innerHTML = `
+                <td>
+                    <img src="" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: none;">
+                </td>
+                <td>
+                    <select name="gradeIds[]">
+                        ${options}
+                    </select>
+                </td>
+                <td>
+                    <!-- Market Price placeholder or dynamic content -->
+                </td>
+                <td>
+                    <input type="text" name="salePrices[]" value="">
+                </td>
+                <td>
+                    <input type="text" name="certNumbers[]" class="certNumberInput" value="">
+                </td>
+                <td>
+                    <button type="button" onclick="removeRow(this)">-</button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
         }
-    }
-    document.addEventListener("DOMContentLoaded", function() {
-        const hasRows = document.querySelector("#grades-table tbody").childElementCount > 0;
-        if (!hasRows) {
-            // Call addRow() function if no rows exist
-            addRow();
+
+        function removeRow(button) {
+            button.parentElement.parentElement.remove();
         }
-    // Listen for changes on the grades table to update card images in rows
-    document.querySelector("#grades-table").addEventListener('change', async function(event) {
-        if (event.target.classList.contains('certNumberInput')) {
-            const certNumber = event.target.value;
-            const row = event.target.closest('tr');
-            const imgElement = row.querySelector('.card-image');
-            const frontImageUrl = row.getAttribute('data-front-image-url'); // Get embedded front image URL
 
-            // Hide image if certNumber is empty
-            if (!certNumber) {
-                imgElement.style.display = 'none';
-                return;
-            }
-
-            // Use the existing FrontImageUrl if available and certNumber hasn't changed
-            if (frontImageUrl && frontImageUrl !== 'undefined') {
-                imgElement.src = frontImageUrl;
-                imgElement.alt = "Card Image";
-                imgElement.style.display = 'block';
-                return; // Skip the fetch if we already have an image URL
-            }
-
-            // Fetch new image from API if no existing FrontImageUrl
+        async function fetchAndDisplayImage(certNumber) {
+            if (!certNumber) return; // Skip if certNumber is empty
             try {
-                const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
+                const response = await fetch(`/api/fetch-image?certNumber=${certNumber}`);
                 const data = await response.json();
                 if (data.frontImageUrl) {
-                    imgElement.src = data.frontImageUrl;
-                    imgElement.alt = "Card Image";
-                    imgElement.style.display = 'block';
-                } else {
-                    imgElement.style.display = 'none';
+                    // Assuming you have a dedicated place to show the image
+                    document.querySelector(".update-inventory-card-image").src = data.frontImageUrl;
+                    document.querySelector(".update-inventory-card-image").alt = "Fetched Card Image";
                 }
             } catch (error) {
                 console.error('Error fetching image:', error);
-                imgElement.style.display = 'none';
             }
         }
-    });
 
+        document.addEventListener("DOMContentLoaded", function () {
+            const hasRows = document.querySelector("#grades-table tbody").childElementCount > 0;
+            if (!hasRows) {
+                // Call addRow() function if no rows exist
+                addRow();
+            }
 
-    // Add event listener to cert number input fields for the main card image
-    document.querySelectorAll('input[name="certNumbers[]"]').forEach(input => {
-        input.addEventListener('change', async function() {
-            const certNumber = this.value;
-            if (!certNumber) return; // Skip if certNumber is empty
+            // Listen for changes on the grades table to update card images in rows
+            document.querySelector("#grades-table").addEventListener('change', async function (event) {
+                if (event.target.classList.contains('certNumberInput')) {
+                    const certNumber = event.target.value;
+                    const row = event.target.closest('tr');
+                    const imgElement = row.querySelector('.card-image');
+                    const frontImageUrl = row.getAttribute('data-front-image-url'); // Get embedded front image URL
 
-            try {
-                const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
-                const data = await response.json();
-                if (data.frontImageUrl) {
-                    // Update the src of the main card image element to show the fetched image
-                    const imgElement = document.querySelector(".update-inventory-card-image");
-                    if (imgElement) {
-                        imgElement.src = data.frontImageUrl;
-                        imgElement.style.display = 'block'; // Make sure to display the image if it was hidden
+                    // Hide image if certNumber is empty
+                    if (!certNumber) {
+                        imgElement.style.display = 'none';
+                        return;
+                    }
+
+                    // Use the existing FrontImageUrl if available and certNumber hasn't changed
+                    if (frontImageUrl && frontImageUrl !== 'undefined') {
+                        imgElement.src = frontImageUrl;
+                        imgElement.alt = "Card Image";
+                        imgElement.style.display = 'block';
+                        return; // Skip the fetch if we already have an image URL
+                    }
+
+                    // Fetch new image from API if no existing FrontImageUrl
+                    try {
+                        const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
+                        const data = await response.json();
+                        if (data.frontImageUrl) {
+                            imgElement.src = data.frontImageUrl;
+                            imgElement.alt = "Card Image";
+                            imgElement.style.display = 'block';
+                        } else {
+                            imgElement.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Error fetching image:', error);
+                        imgElement.style.display = 'none';
                     }
                 }
-            } catch (error) {
-                console.error('Error fetching image:', error);
-            }
+            });
+
+            // Add event listener to cert number input fields for the main card image
+            document.querySelectorAll('input[name="certNumbers[]"]').forEach(input => {
+                input.addEventListener('change', async function () {
+                    const certNumber = this.value;
+                    if (!certNumber) return; // Skip if certNumber is empty
+
+                    try {
+                        const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
+                        const data = await response.json();
+                        if (data.frontImageUrl) {
+                            // Update the src of the main card image element to show the fetched image
+                            const imgElement = document.querySelector(".update-inventory-card-image");
+                            if (imgElement) {
+                                imgElement.src = data.frontImageUrl;
+                                imgElement.style.display = 'block'; // Make sure to display the image if it was hidden
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching image:', error);
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 
 </body>
 

@@ -737,14 +737,12 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
         const inventoryItems = await db.query(inventoryQuery, [cardId, sellerId]);
 
         // Fetch the card details
-        const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage FROM Card WHERE CardID = ?';
+        const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage, Team, Numbered, ColorPattern, Auto FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
 
         // Fetch grade options
         const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
         const grades = await db.query(gradeQuery, [cardId]);
-
-
 
         // Render the page with fetched data
         res.render('update_inventory', {
@@ -758,6 +756,7 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
         res.status(500).send('Server error');
     }
 });
+
 
 router.post('/admin/submit-inventory', authenticateToken, notificationCounts, async (req, res) => {
     const { action, cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
@@ -888,20 +887,6 @@ async function updateCardImage(cardId, newImageUrl, defaultImageUrl) {
     }
 }
 
-router.get('/admin/quick-list-inventory', authenticateToken, notificationCounts, async (req, res) => {
-    try {
-        // Example: sending user info or configurations
-        res.render('quick-list-inventory', {
-            userInfo: req.user, // Assuming req.user is available and contains user info
-            config: { /* some configuration data if needed */ }
-        });
-    } catch (error) {
-        console.error('Error loading add multiple inventory page:', error);
-        res.status(500).send('Server error');
-    }
-});
-
-
 router.get('/api/fetch-card-data', authenticateToken, notificationCounts, async (req, res) => {
     const { certNumber } = req.query;
     if (!certNumber) {
@@ -1007,12 +992,17 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
                 OrderItems.ListingID, 
                 OrderItems.Quantity, 
                 OrderItems.Price,
+                Card.CardID,
                 Card.Sport, 
                 Card.CardSet, 
                 Card.CardYear, 
                 Card.CardName, 
                 Card.CardColor, 
-                Card.CardVariant
+                Card.CardVariant,
+                Card.Team, 
+                Card.Numbered, 
+                Card.ColorPattern, 
+                Card.Auto
             FROM OrderItems
             JOIN Orders ON OrderItems.OrderNumber = Orders.OrderNumber
             LEFT JOIN Card ON OrderItems.CardID = Card.CardID
@@ -1026,7 +1016,11 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
                 item.CardYear,
                 item.CardName,
                 item.CardColor,
-                item.CardVariant
+                item.CardVariant,
+                item.Team,
+                item.Numbered,
+                item.ColorPattern,
+                item.Auto ? "Auto" : ""
             ].filter(part => part).join(' - ');
             return { ...item, CardDetails: cardDetailsParts };
         });
@@ -1058,7 +1052,6 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
         res.status(500).send('Error fetching order details');
     }
 });
-
 
 router.post('/admin/update-shipping-details', authenticateToken, notificationCounts, async (req, res) => {
     const { orderNumber, ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus } = req.body;
@@ -1276,7 +1269,8 @@ async function getOrderDetails(orderNumber) {
         // Fetch details for each item in the order
         let itemsSql = `
             SELECT oi.Quantity, oi.Price, c.CardName, c.CardNumber, c.CardColor,
-                   c.CardVariant, c.Sport, c.CardYear, c.CardSet
+                   c.CardVariant, c.Sport, c.CardYear, c.CardSet,
+                   c.Team, c.Numbered, c.ColorPattern, c.Auto
             FROM OrderItems oi
             JOIN Card c ON oi.CardID = c.CardID
             WHERE oi.OrderNumber = ?`;
@@ -1371,7 +1365,19 @@ router.get('/admin/download-order', authenticateToken, notificationCounts, async
         // Loop through items and add them to the table
         orderDetails.items.forEach(item => {
             const itemTotalPrice = (item.Quantity * parseFloat(item.Price)).toFixed(2);
-            const cardDescription = `${item.CardName} ${item.CardNumber} ${item.CardColor || ''} ${item.CardVariant || ''} ${item.Sport} ${item.CardYear} ${item.CardSet}`.trim();
+            const cardDescription = [
+                item.CardName, 
+                item.CardNumber, 
+                item.CardColor, 
+                item.CardVariant, 
+                item.Sport, 
+                item.CardYear, 
+                item.CardSet, 
+                item.Team, 
+                item.Numbered, 
+                item.ColorPattern, 
+                item.Auto ? "Auto" : ""
+            ].filter(part => part).join(' ');
 
             // Check if the card description exceeds the description width and wrap it accordingly
             const wrappedDescription = doc.widthOfString(cardDescription) > descriptionWidth
