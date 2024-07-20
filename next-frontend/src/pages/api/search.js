@@ -9,6 +9,10 @@ export default async function handler(req, res) {
         sports,
         cardYears,
         cardSets,
+        teams,
+        colorPatterns,
+        numbered,
+        auto,
         page = '1',
         limit = '24',
         inStock = 'false',
@@ -31,7 +35,7 @@ export default async function handler(req, res) {
         values.push(`${cardName.trim()}%`);
     }
 
-    ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears'].forEach(filter => {
+    ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears', 'teams', 'colorPatterns', 'numbered', 'auto'].forEach(filter => {
         if (req.query[`${filter}[]`]) {
             const items = Array.isArray(req.query[`${filter}[]`]) ? req.query[`${filter}[]`] : [req.query[`${filter}[]`]];
             whereConditions.push(`${filter.slice(0, -1)} IN (${items.map(() => '?').join(',')})`);
@@ -60,26 +64,46 @@ export default async function handler(req, res) {
                 query(`SELECT Sport, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Sport IS NOT NULL GROUP BY Sport ORDER BY count DESC`, values),
             ];
 
-            let cardYearsPromise, cardColorsPromise, cardSetsPromise, cardVariantsPromise;
+            let cardYearsPromise, cardColorsPromise, cardSetsPromise, cardVariantsPromise, teamsPromise, colorPatternsPromise, numberedPromise, autoPromise;
             
             if (filterType === 'cardYears' || !filterType) {
-                cardYearsPromise = query(`SELECT CardYear, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardYear IS NOT NULL GROUP BY CardYear ORDER BY CardYear DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardYearsPromise = query(`SELECT CardYear as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardYear IS NOT NULL GROUP BY CardYear ORDER BY CardYear DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardYearsPromise);
             }
 
             if (filterType === 'cardColors' || !filterType) {
-                cardColorsPromise = query(`SELECT CardColor, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardColor IS NOT NULL GROUP BY CardColor ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardColorsPromise = query(`SELECT CardColor as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardColor IS NOT NULL GROUP BY CardColor ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardColorsPromise);
             }
 
             if (filterType === 'cardSets' || !filterType) {
-                cardSetsPromise = query(`SELECT CardSet, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardSet IS NOT NULL GROUP BY CardSet ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardSetsPromise = query(`SELECT CardSet as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardSet IS NOT NULL GROUP BY CardSet ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardSetsPromise);
             }
 
             if (filterType === 'cardVariants' || !filterType) {
-                cardVariantsPromise = query(`SELECT CardVariant, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardVariant IS NOT NULL GROUP BY CardVariant ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardVariantsPromise = query(`SELECT CardVariant as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardVariant IS NOT NULL GROUP BY CardVariant ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardVariantsPromise);
+            }
+
+            if (filterType === 'teams' || !filterType) {
+                teamsPromise = query(`SELECT Team as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Team IS NOT NULL GROUP BY Team ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                filtersPromises.push(teamsPromise);
+            }
+
+            if (filterType === 'colorPatterns' || !filterType) {
+                colorPatternsPromise = query(`SELECT ColorPattern as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} ColorPattern IS NOT NULL GROUP BY ColorPattern ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                filtersPromises.push(colorPatternsPromise);
+            }
+
+            if (filterType === 'numbered' || !filterType) {
+                numberedPromise = query(`SELECT Numbered as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Numbered IS NOT NULL GROUP BY Numbered ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                filtersPromises.push(numberedPromise);
+            }
+
+            if (filterType === 'auto' || !filterType) {
+                autoPromise = query(`SELECT Auto as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Auto IS NOT NULL GROUP BY Auto ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                filtersPromises.push(autoPromise);
             }
 
             const results = await Promise.all(filtersPromises);
@@ -89,6 +113,10 @@ export default async function handler(req, res) {
             let cardColors = [];
             let cardSets = [];
             let cardVariants = [];
+            let teams = [];
+            let colorPatterns = [];
+            let numbered = [];
+            let auto = [];
 
             if (cardYearsPromise) {
                 cardYears = restResults.shift();
@@ -106,12 +134,32 @@ export default async function handler(req, res) {
                 cardVariants = restResults.shift();
             }
 
+            if (teamsPromise) {
+                teams = restResults.shift();
+            }
+
+            if (colorPatternsPromise) {
+                colorPatterns = restResults.shift();
+            }
+
+            if (numberedPromise) {
+                numbered = restResults.shift();
+            }
+
+            if (autoPromise) {
+                auto = restResults.shift();
+            }
+
             res.status(200).json({
                 sports: sports.map(r => ({ name: r.Sport, count: r.count })),
                 cardYears: cardYears.map(r => ({ name: r.CardYear, count: r.count })),
                 cardColors: cardColors.map(r => ({ name: r.CardColor, count: r.count })),
                 cardSets: cardSets.map(r => ({ name: r.CardSet, count: r.count })),
                 cardVariants: cardVariants.map(r => ({ name: r.CardVariant, count: r.count })),
+                teams: teams.map(r => ({ name: r.Team, count: r.count })),
+                colorPatterns: colorPatterns.map(r => ({ name: r.ColorPattern, count: r.count })),
+                numbered: numbered.map(r => ({ name: r.Numbered, count: r.count })),
+                auto: auto.map(r => ({ name: r.Auto, count: r.count })),
             });
         } catch (error) {
             console.error("Failed to fetch filter options:", error);

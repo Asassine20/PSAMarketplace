@@ -48,6 +48,10 @@ const SearchPage = () => {
     cardYears: query.cardYears ? (Array.isArray(query.cardYears) ? query.cardYears : [query.cardYears]) : [],
     cardColors: query.cardColors ? (Array.isArray(query.cardColors) ? query.cardColors : [query.cardColors]) : [],
     cardVariants: query.cardVariants ? (Array.isArray(query.cardVariants) ? query.cardVariants : [query.cardVariants]) : [],
+    teams: query.teams ? (Array.isArray(query.teams) ? query.teams : [query.teams]) : [],
+    colorPatterns: query.colorPatterns ? (Array.isArray(query.colorPatterns) ? query.colorPatterns : [query.colorPatterns]) : [],
+    numbered: query.numbered ? (Array.isArray(query.numbered) ? query.numbered : [query.numbered]) : [],
+    auto: query.auto ? (Array.isArray(query.auto) ? query.auto : [query.auto]) : [],
     inStock: query.inStock === 'true',
     cardName: query.cardName || '',
     page: query.page || '1',
@@ -61,6 +65,10 @@ const SearchPage = () => {
     cardYears: [],
     cardColors: [],
     cardVariants: [],
+    teams: [],
+    colorPatterns: [],
+    numbered: [],
+    auto: [],
   });
   const [allCardSets, setAllCardSets] = useState([]);
   const [filteredCards, setFilteredCards] = useState([]);
@@ -72,6 +80,10 @@ const SearchPage = () => {
     cardYears: '',
     cardColors: '',
     cardVariants: '',
+    teams: '',
+    colorPatterns: '',
+    numbered: '',
+    auto: '',
   });
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
@@ -79,16 +91,28 @@ const SearchPage = () => {
   const [isLoadingCardVariants, setIsLoadingCardVariants] = useState(false);
   const [isLoadingCardYears, setIsLoadingCardYears] = useState(false);
   const [isLoadingCardColors, setIsLoadingCardColors] = useState(false);
+  const [isLoadingTeams, setIsLoadingTeams] = useState(false);
+  const [isLoadingColorPatterns, setIsLoadingColorPatterns] = useState(false);
+  const [isLoadingNumbered, setIsLoadingNumbered] = useState(false);
+  const [isLoadingAuto, setIsLoadingAuto] = useState(false);
   const [hasMoreCardSets, setHasMoreCardSets] = useState(true);
   const [hasMoreCardVariants, setHasMoreCardVariants] = useState(true);
   const [hasMoreCardYears, setHasMoreCardYears] = useState(true);
   const [hasMoreCardColors, setHasMoreCardColors] = useState(true);
+  const [hasMoreTeams, setHasMoreTeams] = useState(true);
+  const [hasMoreColorPatterns, setHasMoreColorPatterns] = useState(true);
+  const [hasMoreNumbered, setHasMoreNumbered] = useState(true);
+  const [hasMoreAuto, setHasMoreAuto] = useState(true);
 
   const [filterPages, setFilterPages] = useState({
     cardSets: 1,
     cardVariants: 1,
     cardYears: 1,
     cardColors: 1,
+    teams: 1,
+    colorPatterns: 1,
+    numbered: 1,
+    auto: 1,
   });
   const filterLimit = 50;
   const resultsPerPage = 10;
@@ -150,6 +174,10 @@ const SearchPage = () => {
     else if (filterType === 'cardVariants') setIsLoadingCardVariants(true);
     else if (filterType === 'cardYears') setIsLoadingCardYears(true);
     else if (filterType === 'cardColors') setIsLoadingCardColors(true);
+    else if (filterType === 'teams') setIsLoadingTeams(true);
+    else if (filterType === 'colorPatterns') setIsLoadingColorPatterns(true);
+    else if (filterType === 'numbered') setIsLoadingNumbered(true);
+    else if (filterType === 'auto') setIsLoadingAuto(true);
     else setIsLoadingFilters(true);
 
     let queryParams = new URLSearchParams({
@@ -191,6 +219,14 @@ const SearchPage = () => {
           setHasMoreCardYears(false);
         } else if (filterType === 'cardColors') {
           setHasMoreCardColors(false);
+        } else if (filterType === 'teams') {
+          setHasMoreTeams(false);
+        } else if (filterType === 'colorPatterns') {
+          setHasMoreColorPatterns(false);
+        } else if (filterType === 'numbered') {
+          setHasMoreNumbered(false);
+        } else if (filterType === 'auto') {
+          setHasMoreAuto(false);
         }
       } else {
         if (filterType === 'cardSets') {
@@ -201,6 +237,14 @@ const SearchPage = () => {
           setHasMoreCardYears(true);
         } else if (filterType === 'cardColors') {
           setHasMoreCardColors(true);
+        } else if (filterType === 'teams') {
+          setHasMoreTeams(true);
+        } else if (filterType === 'colorPatterns') {
+          setHasMoreColorPatterns(true);
+        } else if (filterType === 'numbered') {
+          setHasMoreNumbered(true);
+        } else if (filterType === 'auto') {
+          setHasMoreAuto(true);
         }
       }
       setFilterOptions(prevOptions => ({
@@ -214,6 +258,10 @@ const SearchPage = () => {
     else if (filterType === 'cardVariants') setIsLoadingCardVariants(false);
     else if (filterType === 'cardYears') setIsLoadingCardYears(false);
     else if (filterType === 'cardColors') setIsLoadingCardColors(false);
+    else if (filterType === 'teams') setIsLoadingTeams(false);
+    else if (filterType === 'colorPatterns') setIsLoadingColorPatterns(false);
+    else if (filterType === 'numbered') setIsLoadingNumbered(false);
+    else if (filterType === 'auto') setIsLoadingAuto(false);
     else setIsLoadingFilters(false);
   };
 
@@ -228,6 +276,10 @@ const SearchPage = () => {
       fetchFilterOptions('cardYears', updatedFilters, 1);
       fetchFilterOptions('cardColors', updatedFilters, 1);
       fetchFilterOptions('cardVariants', updatedFilters, 1);
+      fetchFilterOptions('teams', updatedFilters, 1);
+      fetchFilterOptions('colorPatterns', updatedFilters, 1);
+      fetchFilterOptions('numbered', updatedFilters, 1);
+      fetchFilterOptions('auto', updatedFilters, 1);
     }
   }, [query]);
 
@@ -261,6 +313,10 @@ const SearchPage = () => {
       cardYears: '',
       cardColors: '',
       cardVariants: '',
+      teams: '',
+      colorPatterns: '',
+      numbered: '',
+      auto: '',
     });
 
     setFilters((prevFilters) => {
@@ -344,6 +400,10 @@ const SearchPage = () => {
       cardYears: [],
       cardColors: [],
       cardVariants: [],
+      teams: [],
+      colorPatterns: [],
+      numbered: [],
+      auto: [],
       inStock: false,
       cardName: '',
       page: '1',
@@ -355,6 +415,10 @@ const SearchPage = () => {
       cardYears: '',
       cardColors: '',
       cardVariants: '',
+      teams: '',
+      colorPatterns: '',
+      numbered: '',
+      auto: '',
     });
     setFilters(clearedFilters);
     updateFiltersInUrl(clearedFilters);
@@ -364,6 +428,10 @@ const SearchPage = () => {
     fetchFilterOptions('cardYears', clearedFilters, 1);
     fetchFilterOptions('cardColors', clearedFilters, 1);
     fetchFilterOptions('cardVariants', clearedFilters, 1);
+    fetchFilterOptions('teams', clearedFilters, 1);
+    fetchFilterOptions('colorPatterns', clearedFilters, 1);
+    fetchFilterOptions('numbered', clearedFilters, 1);
+    fetchFilterOptions('auto', clearedFilters, 1);
   };
 
   const filterTitles = {
@@ -372,6 +440,10 @@ const SearchPage = () => {
     cardYears: 'Year',
     cardColors: 'Color',
     cardVariants: 'Variant',
+    teams: 'Team',
+    colorPatterns: 'Color Pattern',
+    numbered: 'Numbered',
+    auto: 'Auto',
   };
 
   const totalPages = Math.ceil(totalCount / resultsPerPage);
@@ -382,6 +454,10 @@ const SearchPage = () => {
     cardVariants: useCallback(node => createObserver(node, 'cardVariants'), [isLoadingCardVariants, hasMoreCardVariants]),
     cardYears: useCallback(node => createObserver(node, 'cardYears'), [isLoadingCardYears, hasMoreCardYears]),
     cardColors: useCallback(node => createObserver(node, 'cardColors'), [isLoadingCardColors, hasMoreCardColors]),
+    teams: useCallback(node => createObserver(node, 'teams'), [isLoadingTeams, hasMoreTeams]),
+    colorPatterns: useCallback(node => createObserver(node, 'colorPatterns'), [isLoadingColorPatterns, hasMoreColorPatterns]),
+    numbered: useCallback(node => createObserver(node, 'numbered'), [isLoadingNumbered, hasMoreNumbered]),
+    auto: useCallback(node => createObserver(node, 'auto'), [isLoadingAuto, hasMoreAuto]),
   };
 
   const createObserver = (node, filterType) => {
@@ -389,7 +465,11 @@ const SearchPage = () => {
       (isLoadingCardSets && filterType === 'cardSets') ||
       (isLoadingCardVariants && filterType === 'cardVariants') ||
       (isLoadingCardYears && filterType === 'cardYears') ||
-      (isLoadingCardColors && filterType === 'cardColors')
+      (isLoadingCardColors && filterType === 'cardColors') ||
+      (isLoadingTeams && filterType === 'teams') ||
+      (isLoadingColorPatterns && filterType === 'colorPatterns') ||
+      (isLoadingNumbered && filterType === 'numbered') ||
+      (isLoadingAuto && filterType === 'auto')
     ) return;
     if (observers.current[filterType]) observers.current[filterType].disconnect();
     observers.current[filterType] = new IntersectionObserver(entries => {
@@ -409,6 +489,10 @@ const SearchPage = () => {
   const cardVariantsScrollRef = useRef(null);
   const cardYearsScrollRef = useRef(null);
   const cardColorsScrollRef = useRef(null);
+  const teamsScrollRef = useRef(null);
+  const colorPatternsScrollRef = useRef(null);
+  const numberedScrollRef = useRef(null);
+  const autoScrollRef = useRef(null);
 
   useEffect(() => {
     if (cardSetsScrollRef.current) {
@@ -443,6 +527,38 @@ const SearchPage = () => {
   }, [filterOptions.cardColors]);
 
   useEffect(() => {
+    if (teamsScrollRef.current) {
+      const scrollHeight = teamsScrollRef.current.scrollHeight;
+      const scrollTop = teamsScrollRef.current.scrollTop;
+      teamsScrollRef.current.scrollTop = scrollTop + (teamsScrollRef.current.scrollHeight - scrollHeight);
+    }
+  }, [filterOptions.teams]);
+
+  useEffect(() => {
+    if (colorPatternsScrollRef.current) {
+      const scrollHeight = colorPatternsScrollRef.current.scrollHeight;
+      const scrollTop = colorPatternsScrollRef.current.scrollTop;
+      colorPatternsScrollRef.current.scrollTop = scrollTop + (colorPatternsScrollRef.current.scrollHeight - scrollHeight);
+    }
+  }, [filterOptions.colorPatterns]);
+
+  useEffect(() => {
+    if (numberedScrollRef.current) {
+      const scrollHeight = numberedScrollRef.current.scrollHeight;
+      const scrollTop = numberedScrollRef.current.scrollTop;
+      numberedScrollRef.current.scrollTop = scrollTop + (numberedScrollRef.current.scrollHeight - scrollHeight);
+    }
+  }, [filterOptions.numbered]);
+
+  useEffect(() => {
+    if (autoScrollRef.current) {
+      const scrollHeight = autoScrollRef.current.scrollHeight;
+      const scrollTop = autoScrollRef.current.scrollTop;
+      autoScrollRef.current.scrollTop = scrollTop + (autoScrollRef.current.scrollHeight - scrollHeight);
+    }
+  }, [filterOptions.auto]);
+
+  useEffect(() => {
     Object.keys(filterPages).forEach(filterType => {
       if (filterPages[filterType] > 1) {
         fetchFilterOptions(filterType, filters, filterPages[filterType]);
@@ -475,6 +591,30 @@ const SearchPage = () => {
         cardColors: prevPages.cardColors + 1
       }));
     }
+    if ((teamsScrollRef.current.scrollTop + teamsScrollRef.current.clientHeight >= teamsScrollRef.current.scrollHeight - 50) && !isLoadingTeams && hasMoreTeams) {
+      setFilterPages(prevPages => ({
+        ...prevPages,
+        teams: prevPages.teams + 1
+      }));
+    }
+    if ((colorPatternsScrollRef.current.scrollTop + colorPatternsScrollRef.current.clientHeight >= colorPatternsScrollRef.current.scrollHeight - 50) && !isLoadingColorPatterns && hasMoreColorPatterns) {
+      setFilterPages(prevPages => ({
+        ...prevPages,
+        colorPatterns: prevPages.colorPatterns + 1
+      }));
+    }
+    if ((numberedScrollRef.current.scrollTop + numberedScrollRef.current.clientHeight >= numberedScrollRef.current.scrollHeight - 50) && !isLoadingNumbered && hasMoreNumbered) {
+      setFilterPages(prevPages => ({
+        ...prevPages,
+        numbered: prevPages.numbered + 1
+      }));
+    }
+    if ((autoScrollRef.current.scrollTop + autoScrollRef.current.clientHeight >= autoScrollRef.current.scrollHeight - 50) && !isLoadingAuto && hasMoreAuto) {
+      setFilterPages(prevPages => ({
+        ...prevPages,
+        auto: prevPages.auto + 1
+      }));
+    }
   };
 
   useEffect(() => {
@@ -504,6 +644,34 @@ const SearchPage = () => {
       return () => cardColorsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
   }, [hasMoreCardColors]);
+
+  useEffect(() => {
+    if (teamsScrollRef.current) {
+      teamsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
+      return () => teamsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
+    }
+  }, [hasMoreTeams]);
+
+  useEffect(() => {
+    if (colorPatternsScrollRef.current) {
+      colorPatternsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
+      return () => colorPatternsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
+    }
+  }, [hasMoreColorPatterns]);
+
+  useEffect(() => {
+    if (numberedScrollRef.current) {
+      numberedScrollRef.current.addEventListener('scroll', handlePullToRefresh);
+      return () => numberedScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
+    }
+  }, [hasMoreNumbered]);
+
+  useEffect(() => {
+    if (autoScrollRef.current) {
+      autoScrollRef.current.addEventListener('scroll', handlePullToRefresh);
+      return () => autoScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
+    }
+  }, [hasMoreAuto]);
 
   const handleOutOfStockClick = () => {
     setFilters((prevFilters) => {
@@ -577,7 +745,11 @@ const SearchPage = () => {
                   filterKey === 'cardSets' ? cardSetsScrollRef :
                     filterKey === 'cardVariants' ? cardVariantsScrollRef :
                       filterKey === 'cardYears' ? cardYearsScrollRef :
-                        filterKey === 'cardColors' ? cardColorsScrollRef : null}>
+                        filterKey === 'cardColors' ? cardColorsScrollRef :
+                          filterKey === 'teams' ? teamsScrollRef :
+                            filterKey === 'colorPatterns' ? colorPatternsScrollRef :
+                              filterKey === 'numbered' ? numberedScrollRef :
+                                filterKey === 'auto' ? autoScrollRef : null}>
                   <h4>{filterTitles[filterKey]}</h4>
                   <SearchInput
                     onChange={(value) => handleFilterSearchChange(filterKey, value)}
@@ -587,7 +759,7 @@ const SearchPage = () => {
                   {filterOptions[filterKey]
                     .filter(option =>
                       option &&
-                      option.name &&
+                      typeof option.name === 'string' &&
                       option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
                     )
                     .map((option, index) => (
@@ -595,7 +767,8 @@ const SearchPage = () => {
                         key={index}
                         className={styles.filterOption}
                         ref={
-                          (filterKey === 'cardSets' || filterKey === 'cardVariants' || filterKey === 'cardYears' || filterKey === 'cardColors') &&
+                          (filterKey === 'cardSets' || filterKey === 'cardVariants' || filterKey === 'cardYears' || filterKey === 'cardColors' ||
+                            filterKey === 'teams' || filterKey === 'colorPatterns' || filterKey === 'numbered' || filterKey === 'auto') &&
                             index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null
                         }
                       >
@@ -606,7 +779,11 @@ const SearchPage = () => {
                               (isLoadingCardSets && filterKey === 'cardSets') ||
                               (isLoadingCardVariants && filterKey === 'cardVariants') ||
                               (isLoadingCardYears && filterKey === 'cardYears') ||
-                              (isLoadingCardColors && filterKey === 'cardColors')
+                              (isLoadingCardColors && filterKey === 'cardColors') ||
+                              (isLoadingTeams && filterKey === 'teams') ||
+                              (isLoadingColorPatterns && filterKey === 'colorPatterns') ||
+                              (isLoadingNumbered && filterKey === 'numbered') ||
+                              (isLoadingAuto && filterKey === 'auto')
                             }
                             checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
                             onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
@@ -623,12 +800,20 @@ const SearchPage = () => {
                   {(filterKey === 'cardSets' && hasMoreCardSets) ||
                     (filterKey === 'cardVariants' && hasMoreCardVariants) ||
                     (filterKey === 'cardYears' && hasMoreCardYears) ||
-                    (filterKey === 'cardColors' && hasMoreCardColors) ? (
+                    (filterKey === 'cardColors' && hasMoreCardColors) ||
+                    (filterKey === 'teams' && hasMoreTeams) ||
+                    (filterKey === 'colorPatterns' && hasMoreColorPatterns) ||
+                    (filterKey === 'numbered' && hasMoreNumbered) ||
+                    (filterKey === 'auto' && hasMoreAuto) ? (
                     <div className={styles.scrollIndicator}>
                       {isLoadingCardSets ||
                         isLoadingCardVariants ||
                         isLoadingCardYears ||
-                        isLoadingCardColors ? <Spinner /> : <MdKeyboardArrowDown size={24} />}
+                        isLoadingCardColors ||
+                        isLoadingTeams ||
+                        isLoadingColorPatterns ||
+                        isLoadingNumbered ||
+                        isLoadingAuto ? <Spinner /> : <MdKeyboardArrowDown size={24} />}
                     </div>
                   ) : null}
                 </div>
@@ -655,6 +840,10 @@ const SearchPage = () => {
                           <div className={styles.cardVariant}>{card.CardVariant || ''}</div>
                           <div className={styles.cardColor}>{card.CardColor || ''}</div>
                           <div className={styles.cardName}>{card.CardName}</div>
+                          <div className={styles.cardTeam}>{card.Team || ''}</div>
+                          <div className={styles.cardColorPattern}>{card.ColorPattern || ''}</div>
+                          <div className={styles.cardNumbered}>{card.Numbered || ''}</div>
+                          <div className={styles.cardAuto}>{card.Auto || ''}</div>
                           <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
                           <div className={styles.cardMarketPrice}>
                             {card.MarketPrice !== null && card.MarketPrice !== undefined ? (
