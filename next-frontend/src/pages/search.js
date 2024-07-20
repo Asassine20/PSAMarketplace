@@ -87,22 +87,16 @@ const SearchPage = () => {
   });
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
-  const [isLoadingCardSets, setIsLoadingCardSets] = useState(false);
-  const [isLoadingCardVariants, setIsLoadingCardVariants] = useState(false);
-  const [isLoadingCardYears, setIsLoadingCardYears] = useState(false);
-  const [isLoadingCardColors, setIsLoadingCardColors] = useState(false);
-  const [isLoadingTeams, setIsLoadingTeams] = useState(false);
-  const [isLoadingColorPatterns, setIsLoadingColorPatterns] = useState(false);
-  const [isLoadingNumbered, setIsLoadingNumbered] = useState(false);
-  const [isLoadingAuto, setIsLoadingAuto] = useState(false);
-  const [hasMoreCardSets, setHasMoreCardSets] = useState(true);
-  const [hasMoreCardVariants, setHasMoreCardVariants] = useState(true);
-  const [hasMoreCardYears, setHasMoreCardYears] = useState(true);
-  const [hasMoreCardColors, setHasMoreCardColors] = useState(true);
-  const [hasMoreTeams, setHasMoreTeams] = useState(true);
-  const [hasMoreColorPatterns, setHasMoreColorPatterns] = useState(true);
-  const [hasMoreNumbered, setHasMoreNumbered] = useState(true);
-  const [hasMoreAuto, setHasMoreAuto] = useState(true);
+  const [hasMore, setHasMore] = useState({
+    cardSets: true,
+    cardVariants: true,
+    cardYears: true,
+    cardColors: true,
+    teams: true,
+    colorPatterns: true,
+    numbered: true,
+    auto: true,
+  });
 
   const [filterPages, setFilterPages] = useState({
     cardSets: 1,
@@ -117,7 +111,6 @@ const SearchPage = () => {
   const filterLimit = 50;
   const resultsPerPage = 10;
 
-  // Handles the filters when they are changes. Updates url to include filter parameters.
   const updateFiltersInUrl = (updatedFilters) => {
     const queryParameters = new URLSearchParams({
       cardName: updatedFilters.cardName || '',
@@ -127,7 +120,6 @@ const SearchPage = () => {
     if (updatedFilters.inStock && updatedFilters.sortBy) {
       queryParameters.append('sortBy', updatedFilters.sortBy);
     }
-    // Loops through each filter and appends the selected values to the url
     Object.keys(updatedFilters).forEach((filterKey) => {
       const filterValue = updatedFilters[filterKey];
       if (Array.isArray(filterValue) && filterValue.length) {
@@ -139,7 +131,6 @@ const SearchPage = () => {
     router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
   };
 
-  // Updates the card results based on the filters selected
   const fetchFilteredCards = async (filtersToApply) => {
     setIsLoadingCards(true);
 
@@ -170,15 +161,7 @@ const SearchPage = () => {
   };
 
   const fetchFilterOptions = async (filterType, filtersToApply, page = 1) => {
-    if (filterType === 'cardSets') setIsLoadingCardSets(true);
-    else if (filterType === 'cardVariants') setIsLoadingCardVariants(true);
-    else if (filterType === 'cardYears') setIsLoadingCardYears(true);
-    else if (filterType === 'cardColors') setIsLoadingCardColors(true);
-    else if (filterType === 'teams') setIsLoadingTeams(true);
-    else if (filterType === 'colorPatterns') setIsLoadingColorPatterns(true);
-    else if (filterType === 'numbered') setIsLoadingNumbered(true);
-    else if (filterType === 'auto') setIsLoadingAuto(true);
-    else setIsLoadingFilters(true);
+    setIsLoadingFilters(true);
 
     let queryParams = new URLSearchParams({
       fetchFilters: 'true',
@@ -201,85 +184,33 @@ const SearchPage = () => {
     const response = await fetch(`/api/search?${queryParams.toString()}`);
     if (response.ok) {
       const data = await response.json();
-      if (filterType === 'cardSets' && page === 1) {
-        setAllCardSets(data[filterType]);
-      }
-      if (filterType === 'cardVariants' && page === 1) {
-        setFilterOptions((prevOptions) => ({
-          ...prevOptions,
-          cardVariants: data.cardVariants
-        }));
-      }
-      if (data[filterType].length < filterLimit) {
-        if (filterType === 'cardSets') {
-          setHasMoreCardSets(false);
-        } else if (filterType === 'cardVariants') {
-          setHasMoreCardVariants(false);
-        } else if (filterType === 'cardYears') {
-          setHasMoreCardYears(false);
-        } else if (filterType === 'cardColors') {
-          setHasMoreCardColors(false);
-        } else if (filterType === 'teams') {
-          setHasMoreTeams(false);
-        } else if (filterType === 'colorPatterns') {
-          setHasMoreColorPatterns(false);
-        } else if (filterType === 'numbered') {
-          setHasMoreNumbered(false);
-        } else if (filterType === 'auto') {
-          setHasMoreAuto(false);
-        }
-      } else {
-        if (filterType === 'cardSets') {
-          setHasMoreCardSets(true);
-        } else if (filterType === 'cardVariants') {
-          setHasMoreCardVariants(true);
-        } else if (filterType === 'cardYears') {
-          setHasMoreCardYears(true);
-        } else if (filterType === 'cardColors') {
-          setHasMoreCardColors(true);
-        } else if (filterType === 'teams') {
-          setHasMoreTeams(true);
-        } else if (filterType === 'colorPatterns') {
-          setHasMoreColorPatterns(true);
-        } else if (filterType === 'numbered') {
-          setHasMoreNumbered(true);
-        } else if (filterType === 'auto') {
-          setHasMoreAuto(true);
-        }
-      }
       setFilterOptions(prevOptions => ({
         ...prevOptions,
         [filterType]: page === 1 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])]
       }));
+      setHasMore(prevHasMore => ({
+        ...prevHasMore,
+        [filterType]: data[filterType].length >= filterLimit
+      }));
     } else {
       console.error('Failed to fetch filter options');
     }
-    if (filterType === 'cardSets') setIsLoadingCardSets(false);
-    else if (filterType === 'cardVariants') setIsLoadingCardVariants(false);
-    else if (filterType === 'cardYears') setIsLoadingCardYears(false);
-    else if (filterType === 'cardColors') setIsLoadingCardColors(false);
-    else if (filterType === 'teams') setIsLoadingTeams(false);
-    else if (filterType === 'colorPatterns') setIsLoadingColorPatterns(false);
-    else if (filterType === 'numbered') setIsLoadingNumbered(false);
-    else if (filterType === 'auto') setIsLoadingAuto(false);
-    else setIsLoadingFilters(false);
+    setIsLoadingFilters(false);
+  };
+
+  const fetchAllFilterOptions = (filtersToApply) => {
+    const filterTypes = Object.keys(filterOptions);
+    filterTypes.forEach(filterType => {
+      fetchFilterOptions(filterType, filtersToApply, 1);
+    });
   };
 
   useEffect(() => {
     if (Object.keys(query).length > 0) {
       const updatedFilters = initializeFilters(query);
-
       setFilters(updatedFilters);
       fetchFilteredCards(updatedFilters);
-      fetchFilterOptions('cardSets', updatedFilters, 1);
-      fetchFilterOptions('sports', updatedFilters);
-      fetchFilterOptions('cardYears', updatedFilters, 1);
-      fetchFilterOptions('cardColors', updatedFilters, 1);
-      fetchFilterOptions('cardVariants', updatedFilters, 1);
-      fetchFilterOptions('teams', updatedFilters, 1);
-      fetchFilterOptions('colorPatterns', updatedFilters, 1);
-      fetchFilterOptions('numbered', updatedFilters, 1);
-      fetchFilterOptions('auto', updatedFilters, 1);
+      fetchAllFilterOptions(updatedFilters);
     }
   }, [query]);
 
@@ -289,13 +220,12 @@ const SearchPage = () => {
         ...prevTerms,
         [filterKey]: value,
       }));
-
       setFilters((prevFilters) => {
         const updatedFilters = {
           ...prevFilters,
           [filterKey]: value,
           page: '1',
-          sortBy: prevFilters.inStock ? prevFilters.sortBy : '', // Reset sortBy if inStock is false
+          sortBy: prevFilters.inStock ? prevFilters.sortBy : '',
         };
         updateFiltersInUrl(updatedFilters);
         fetchFilteredCards(updatedFilters);
@@ -339,8 +269,8 @@ const SearchPage = () => {
         ...prevFilters,
         inStock: !prevFilters.inStock,
         page: '1',
-        cardName: prevFilters.cardName, // Preserve the cardName parameter
-        sortBy: '', // Reset sortBy to default
+        cardName: prevFilters.cardName,
+        sortBy: '',
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
@@ -354,7 +284,7 @@ const SearchPage = () => {
         ...prevFilters,
         cardName: cardName,
         page: '1',
-        inStock: prevFilters.inStock, // Preserve inStock value
+        inStock: prevFilters.inStock,
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
@@ -423,15 +353,7 @@ const SearchPage = () => {
     setFilters(clearedFilters);
     updateFiltersInUrl(clearedFilters);
     fetchFilteredCards(clearedFilters);
-    fetchFilterOptions('cardSets', clearedFilters, 1);
-    fetchFilterOptions('sports', clearedFilters);
-    fetchFilterOptions('cardYears', clearedFilters, 1);
-    fetchFilterOptions('cardColors', clearedFilters, 1);
-    fetchFilterOptions('cardVariants', clearedFilters, 1);
-    fetchFilterOptions('teams', clearedFilters, 1);
-    fetchFilterOptions('colorPatterns', clearedFilters, 1);
-    fetchFilterOptions('numbered', clearedFilters, 1);
-    fetchFilterOptions('auto', clearedFilters, 1);
+    fetchAllFilterOptions(clearedFilters);
   };
 
   const filterTitles = {
@@ -449,28 +371,10 @@ const SearchPage = () => {
   const totalPages = Math.ceil(totalCount / resultsPerPage);
 
   const observers = useRef({});
-  const lastElementRefs = {
-    cardSets: useCallback(node => createObserver(node, 'cardSets'), [isLoadingCardSets, hasMoreCardSets]),
-    cardVariants: useCallback(node => createObserver(node, 'cardVariants'), [isLoadingCardVariants, hasMoreCardVariants]),
-    cardYears: useCallback(node => createObserver(node, 'cardYears'), [isLoadingCardYears, hasMoreCardYears]),
-    cardColors: useCallback(node => createObserver(node, 'cardColors'), [isLoadingCardColors, hasMoreCardColors]),
-    teams: useCallback(node => createObserver(node, 'teams'), [isLoadingTeams, hasMoreTeams]),
-    colorPatterns: useCallback(node => createObserver(node, 'colorPatterns'), [isLoadingColorPatterns, hasMoreColorPatterns]),
-    numbered: useCallback(node => createObserver(node, 'numbered'), [isLoadingNumbered, hasMoreNumbered]),
-    auto: useCallback(node => createObserver(node, 'auto'), [isLoadingAuto, hasMoreAuto]),
-  };
+  const lastElementRefs = useRef({});
 
   const createObserver = (node, filterType) => {
-    if (
-      (isLoadingCardSets && filterType === 'cardSets') ||
-      (isLoadingCardVariants && filterType === 'cardVariants') ||
-      (isLoadingCardYears && filterType === 'cardYears') ||
-      (isLoadingCardColors && filterType === 'cardColors') ||
-      (isLoadingTeams && filterType === 'teams') ||
-      (isLoadingColorPatterns && filterType === 'colorPatterns') ||
-      (isLoadingNumbered && filterType === 'numbered') ||
-      (isLoadingAuto && filterType === 'auto')
-    ) return;
+    if (isLoadingFilters) return;
     if (observers.current[filterType]) observers.current[filterType].disconnect();
     observers.current[filterType] = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && entries[0].intersectionRatio > 0) {
@@ -495,126 +399,33 @@ const SearchPage = () => {
   const autoScrollRef = useRef(null);
 
   useEffect(() => {
-    if (cardSetsScrollRef.current) {
-      const scrollHeight = cardSetsScrollRef.current.scrollHeight;
-      const scrollTop = cardSetsScrollRef.current.scrollTop;
-      cardSetsScrollRef.current.scrollTop = scrollTop + (cardSetsScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.cardSets]);
-
-  useEffect(() => {
-    if (cardVariantsScrollRef.current) {
-      const scrollHeight = cardVariantsScrollRef.current.scrollHeight;
-      const scrollTop = cardVariantsScrollRef.current.scrollTop;
-      cardVariantsScrollRef.current.scrollTop = scrollTop + (cardVariantsScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.cardVariants]);
-
-  useEffect(() => {
-    if (cardYearsScrollRef.current) {
-      const scrollHeight = cardYearsScrollRef.current.scrollHeight;
-      const scrollTop = cardYearsScrollRef.current.scrollTop;
-      cardYearsScrollRef.current.scrollTop = scrollTop + (cardYearsScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.cardYears]);
-
-  useEffect(() => {
-    if (cardColorsScrollRef.current) {
-      const scrollHeight = cardColorsScrollRef.current.scrollHeight;
-      const scrollTop = cardColorsScrollRef.current.scrollTop;
-      cardColorsScrollRef.current.scrollTop = scrollTop + (cardColorsScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.cardColors]);
-
-  useEffect(() => {
-    if (teamsScrollRef.current) {
-      const scrollHeight = teamsScrollRef.current.scrollHeight;
-      const scrollTop = teamsScrollRef.current.scrollTop;
-      teamsScrollRef.current.scrollTop = scrollTop + (teamsScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.teams]);
-
-  useEffect(() => {
-    if (colorPatternsScrollRef.current) {
-      const scrollHeight = colorPatternsScrollRef.current.scrollHeight;
-      const scrollTop = colorPatternsScrollRef.current.scrollTop;
-      colorPatternsScrollRef.current.scrollTop = scrollTop + (colorPatternsScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.colorPatterns]);
-
-  useEffect(() => {
-    if (numberedScrollRef.current) {
-      const scrollHeight = numberedScrollRef.current.scrollHeight;
-      const scrollTop = numberedScrollRef.current.scrollTop;
-      numberedScrollRef.current.scrollTop = scrollTop + (numberedScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.numbered]);
-
-  useEffect(() => {
-    if (autoScrollRef.current) {
-      const scrollHeight = autoScrollRef.current.scrollHeight;
-      const scrollTop = autoScrollRef.current.scrollTop;
-      autoScrollRef.current.scrollTop = scrollTop + (autoScrollRef.current.scrollHeight - scrollHeight);
-    }
-  }, [filterOptions.auto]);
-
-  useEffect(() => {
-    Object.keys(filterPages).forEach(filterType => {
-      if (filterPages[filterType] > 1) {
-        fetchFilterOptions(filterType, filters, filterPages[filterType]);
+    Object.keys(filterOptions).forEach(filterKey => {
+      if (filterPages[filterKey] > 1) {
+        fetchFilterOptions(filterKey, filters, filterPages[filterKey]);
       }
     });
   }, [filterPages]);
 
   const handlePullToRefresh = () => {
-    if ((cardSetsScrollRef.current.scrollTop + cardSetsScrollRef.current.clientHeight >= cardSetsScrollRef.current.scrollHeight - 50) && !isLoadingCardSets && hasMoreCardSets) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        cardSets: prevPages.cardSets + 1
-      }));
-    }
-    if ((cardVariantsScrollRef.current.scrollTop + cardVariantsScrollRef.current.clientHeight >= cardVariantsScrollRef.current.scrollHeight - 50) && !isLoadingCardVariants && hasMoreCardVariants) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        cardVariants: prevPages.cardVariants + 1
-      }));
-    }
-    if ((cardYearsScrollRef.current.scrollTop + cardYearsScrollRef.current.clientHeight >= cardYearsScrollRef.current.scrollHeight - 50) && !isLoadingCardYears && hasMoreCardYears) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        cardYears: prevPages.cardYears + 1
-      }));
-    }
-    if ((cardColorsScrollRef.current.scrollTop + cardColorsScrollRef.current.clientHeight >= cardColorsScrollRef.current.scrollHeight - 50) && !isLoadingCardColors && hasMoreCardColors) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        cardColors: prevPages.cardColors + 1
-      }));
-    }
-    if ((teamsScrollRef.current.scrollTop + teamsScrollRef.current.clientHeight >= teamsScrollRef.current.scrollHeight - 50) && !isLoadingTeams && hasMoreTeams) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        teams: prevPages.teams + 1
-      }));
-    }
-    if ((colorPatternsScrollRef.current.scrollTop + colorPatternsScrollRef.current.clientHeight >= colorPatternsScrollRef.current.scrollHeight - 50) && !isLoadingColorPatterns && hasMoreColorPatterns) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        colorPatterns: prevPages.colorPatterns + 1
-      }));
-    }
-    if ((numberedScrollRef.current.scrollTop + numberedScrollRef.current.clientHeight >= numberedScrollRef.current.scrollHeight - 50) && !isLoadingNumbered && hasMoreNumbered) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        numbered: prevPages.numbered + 1
-      }));
-    }
-    if ((autoScrollRef.current.scrollTop + autoScrollRef.current.clientHeight >= autoScrollRef.current.scrollHeight - 50) && !isLoadingAuto && hasMoreAuto) {
-      setFilterPages(prevPages => ({
-        ...prevPages,
-        auto: prevPages.auto + 1
-      }));
-    }
+    Object.keys(filterOptions).forEach(filterKey => {
+      if (observers.current[filterKey]) {
+        if (
+          (filterKey === 'cardSets' && cardSetsScrollRef.current && cardSetsScrollRef.current.scrollTop + cardSetsScrollRef.current.clientHeight >= cardSetsScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'cardVariants' && cardVariantsScrollRef.current && cardVariantsScrollRef.current.scrollTop + cardVariantsScrollRef.current.clientHeight >= cardVariantsScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'cardYears' && cardYearsScrollRef.current && cardYearsScrollRef.current.scrollTop + cardYearsScrollRef.current.clientHeight >= cardYearsScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'cardColors' && cardColorsScrollRef.current && cardColorsScrollRef.current.scrollTop + cardColorsScrollRef.current.clientHeight >= cardColorsScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'teams' && teamsScrollRef.current && teamsScrollRef.current.scrollTop + teamsScrollRef.current.clientHeight >= teamsScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'colorPatterns' && colorPatternsScrollRef.current && colorPatternsScrollRef.current.scrollTop + colorPatternsScrollRef.current.clientHeight >= colorPatternsScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'numbered' && numberedScrollRef.current && numberedScrollRef.current.scrollTop + numberedScrollRef.current.clientHeight >= numberedScrollRef.current.scrollHeight - 50) ||
+          (filterKey === 'auto' && autoScrollRef.current && autoScrollRef.current.scrollTop + autoScrollRef.current.clientHeight >= autoScrollRef.current.scrollHeight - 50)
+        ) {
+          setFilterPages(prevPages => ({
+            ...prevPages,
+            [filterKey]: prevPages[filterKey] + 1
+          }));
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -622,56 +433,56 @@ const SearchPage = () => {
       cardSetsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => cardSetsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreCardSets]);
+  }, [hasMore.cardSets]);
 
   useEffect(() => {
     if (cardVariantsScrollRef.current) {
       cardVariantsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => cardVariantsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreCardVariants]);
+  }, [hasMore.cardVariants]);
 
   useEffect(() => {
     if (cardYearsScrollRef.current) {
       cardYearsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => cardYearsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreCardYears]);
+  }, [hasMore.cardYears]);
 
   useEffect(() => {
     if (cardColorsScrollRef.current) {
       cardColorsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => cardColorsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreCardColors]);
+  }, [hasMore.cardColors]);
 
   useEffect(() => {
     if (teamsScrollRef.current) {
       teamsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => teamsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreTeams]);
+  }, [hasMore.teams]);
 
   useEffect(() => {
     if (colorPatternsScrollRef.current) {
       colorPatternsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => colorPatternsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreColorPatterns]);
+  }, [hasMore.colorPatterns]);
 
   useEffect(() => {
     if (numberedScrollRef.current) {
       numberedScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => numberedScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreNumbered]);
+  }, [hasMore.numbered]);
 
   useEffect(() => {
     if (autoScrollRef.current) {
       autoScrollRef.current.addEventListener('scroll', handlePullToRefresh);
       return () => autoScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
     }
-  }, [hasMoreAuto]);
+  }, [hasMore.auto]);
 
   const handleOutOfStockClick = () => {
     setFilters((prevFilters) => {
@@ -760,7 +571,7 @@ const SearchPage = () => {
                     .filter(option =>
                       option &&
                       typeof option.name === 'string' &&
-                      option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
+                      option.name.toLowerCase().includes(filterSearchTerms[filterKey]?.toLowerCase() || '')
                     )
                     .map((option, index) => (
                       <div
@@ -769,22 +580,12 @@ const SearchPage = () => {
                         ref={
                           (filterKey === 'cardSets' || filterKey === 'cardVariants' || filterKey === 'cardYears' || filterKey === 'cardColors' ||
                             filterKey === 'teams' || filterKey === 'colorPatterns' || filterKey === 'numbered' || filterKey === 'auto') &&
-                            index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null
+                            index === filterOptions[filterKey].length - 1 ? (node) => createObserver(node, filterKey) : null
                         }
                       >
                         <label>
                           <input
                             type="checkbox"
-                            disabled={
-                              (isLoadingCardSets && filterKey === 'cardSets') ||
-                              (isLoadingCardVariants && filterKey === 'cardVariants') ||
-                              (isLoadingCardYears && filterKey === 'cardYears') ||
-                              (isLoadingCardColors && filterKey === 'cardColors') ||
-                              (isLoadingTeams && filterKey === 'teams') ||
-                              (isLoadingColorPatterns && filterKey === 'colorPatterns') ||
-                              (isLoadingNumbered && filterKey === 'numbered') ||
-                              (isLoadingAuto && filterKey === 'auto')
-                            }
                             checked={Array.isArray(filters[filterKey]) && filters[filterKey].includes(option.name)}
                             onChange={(e) => handleFilterChange(filterKey, option.name, e.target.checked)}
                           />
@@ -797,26 +598,11 @@ const SearchPage = () => {
                         </label>
                       </div>
                     ))}
-
-                  {(filterKey === 'cardSets' && hasMoreCardSets) ||
-                    (filterKey === 'cardVariants' && hasMoreCardVariants) ||
-                    (filterKey === 'cardYears' && hasMoreCardYears) ||
-                    (filterKey === 'cardColors' && hasMoreCardColors) ||
-                    (filterKey === 'teams' && hasMoreTeams) ||
-                    (filterKey === 'colorPatterns' && hasMoreColorPatterns) ||
-                    (filterKey === 'numbered' && hasMoreNumbered) ||
-                    (filterKey === 'auto' && hasMoreAuto) ? (
+                  {hasMore[filterKey] && (
                     <div className={styles.scrollIndicator}>
-                      {isLoadingCardSets ||
-                        isLoadingCardVariants ||
-                        isLoadingCardYears ||
-                        isLoadingCardColors ||
-                        isLoadingTeams ||
-                        isLoadingColorPatterns ||
-                        isLoadingNumbered ||
-                        isLoadingAuto ? <Spinner /> : <MdKeyboardArrowDown size={24} />}
+                      {isLoadingFilters ? <Spinner /> : <MdKeyboardArrowDown size={24} />}
                     </div>
-                  ) : null}
+                  )}
                 </div>
               ))}
             </aside>
