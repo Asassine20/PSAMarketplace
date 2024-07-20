@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {{> head}}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <title>Inventory</title>
 </head>
+
 <body>
     <div id="spinner" style="display:none;">
         <div class="spinner-border" role="status">
@@ -16,7 +18,8 @@
         <form action="/admin/inventory" method="get" style="flex-grow 1">
             <div>
                 <label for="searchTerm">Player:</label>
-                <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown" placeholder="Player Name" value="{{searchTerm}}">
+                <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown"
+                    placeholder="Player Name" value="{{searchTerm}}">
             </div>
             <div>
                 <label for="sport">Sport:</label>
@@ -29,10 +32,14 @@
             </div>
             <div class="dropdown">
                 <label for="cardSet">Card Set:</label>
-                <input type="text" id="cardSetSearch" placeholder="Search sets..." onkeyup="debouncedSearchCardSets(this.value)" class="filter-input fixed-width-input" />
+                <input type="text" id="cardSetSearch" placeholder="Search sets..."
+                    onkeyup="debouncedSearchCardSets(this.value)" class="filter-input fixed-width-input" />
                 <div class="dropdown-content consistent-width-dropdown">
                     <select id="cardSet" name="cardSet" class="filter-input fixed-width-dropdown">
                         <option value="">All Sets</option>
+                        {{#each cardSets}}
+                        <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
+                        {{/each}}
                     </select>
                 </div>
             </div>
@@ -64,6 +71,42 @@
                     {{/each}}
                 </select>
             </div>
+            <div>
+                <label for="team">Team:</label>
+                <select id="team" name="team" class="filter-input fixed-width-dropdown">
+                    <option value="">All Teams</option>
+                    {{#each teams}}
+                    <option value="{{this}}" {{#if (eq this ../team)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <label for="numbered">Numbered:</label>
+                <select id="numbered" name="numbered" class="filter-input fixed-width-dropdown">
+                    <option value="">All Numbered</option>
+                    {{#each numberedOptions}}
+                    <option value="{{this}}" {{#if (eq this ../numbered)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <label for="colorPattern">Color Pattern:</label>
+                <select id="colorPattern" name="colorPattern" class="filter-input fixed-width-dropdown">
+                    <option value="">All Color Patterns</option>
+                    {{#each colorPatterns}}
+                    <option value="{{this}}" {{#if (eq this ../colorPattern)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div>
+                <label for="auto">Auto:</label>
+                <select id="auto" name="auto" class="filter-input fixed-width-dropdown">
+                    <option value="">All Auto</option>
+                    {{#each autoOptions}}
+                    <option value="{{this}}" {{#if (eq this ../auto)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <button id="resetButton" type="reset" class="table-button" onclick="resetFilters()">Reset</button>
@@ -71,533 +114,655 @@
                 <div style="padding-right: 12px;">
                     <button type="submit" id="searchButton" class="table-button">Search</button>
                 </div>
-
             </div>
         </form>
     </div>
-<div id="loadingIndicator" style="display: none;">Loading...</div>
-<div class="table-container">
-    <table>
-        <!-- Table Title and Results as Caption -->
-        <caption>
-            <div class="table-header">
-                <h2>Product Catalog</h2>
-                <span id="totalItems">{{totalItems}} Results</span>
-                <div class="page-size-selector">
-                    <label for="pageSize">Items per page:</label>
-                    <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
-                        <option value="10" {{#if (eq pageSize '10')}}selected{{/if}}>10</option>
-                        <option value="25" {{#if (eq pageSize '25')}}selected{{/if}}>25</option>
-                        <option value="50" {{#if (eq pageSize '50')}}selected{{/if}}>50</option>
-                        <option value="100" {{#if (eq pageSize '100')}}selected{{/if}}>100</option>
-                        <option value="250" {{#if (eq pageSize '250')}}selected{{/if}}>250</option>
-                        <option value="500" {{#if (eq pageSize '500')}}selected{{/if}}>500</option>
-                    </select>
-
+    <div id="loadingIndicator" style="display: none;">Loading...</div>
+    <div class="table-container">
+        <table>
+            <!-- Table Title and Results as Caption -->
+            <caption>
+                <div class="table-header">
+                    <h2>Product Catalog</h2>
+                    <span id="totalItems">{{totalItems}} Results</span>
+                    <div class="page-size-selector">
+                        <label for="pageSize">Items per page:</label>
+                        <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
+                            <option value="10" {{#if (eq pageSize '10' )}}selected{{/if}}>10</option>
+                            <option value="25" {{#if (eq pageSize '25' )}}selected{{/if}}>25</option>
+                            <option value="50" {{#if (eq pageSize '50' )}}selected{{/if}}>50</option>
+                            <option value="100" {{#if (eq pageSize '100' )}}selected{{/if}}>100</option>
+                            <option value="250" {{#if (eq pageSize '250' )}}selected{{/if}}>250</option>
+                            <option value="500" {{#if (eq pageSize '500' )}}selected{{/if}}>500</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </caption>
-
-        <thead>
-            <tr>
-                <th >Sport</th>
-                <th>Image</th>
-                <th >Name</th>
-                <th >Set</th>
-                <th >Year</th>
-                <th >Number</th>
-                <th >Color</th>
-                <th >Variant</th>
-                <th style="width:100px;"></th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {{#each cards}}
-            <tr class="{{#if this.isInStock}}in-stock{{/if}}">
-                <td>{{this.Sport}}</td>
-                <td><img src="{{this.CardImage}}" class="card-image" alt="Card Image"></td>
-                <td>{{this.CardName}}</td>
-                <td>{{this.CardSet}}</td>
-                <td>{{this.CardYear}}</td>
-                <td>{{this.CardNumber}}</td>
-                <td>{{this.CardColor}}</td>
-                <td>{{this.CardVariant}}</td>
-                <td class="button-cell">
-                    <button type="button" onclick="window.location.href='/admin/update-inventory-pricing?cardId={{this.CardID}}'" class="table-button">Add</button>
-                </td>
-            </tr>            
-            {{else}}
-            <tr><td colspan="9">No cards found</td></tr>
-            {{/each}}
-        </tbody>
-    </table>
-    <!-- Placeholder for the hovered image -->
-    <div id="image-preview">
-        <img id="preview-img" src="" alt="Preview">
+            </caption>
+            <thead>
+                <tr>
+                    <th>Sport</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Set</th>
+                    <th>Year</th>
+                    <th>Number</th>
+                    <th>Color</th>
+                    <th>Variant</th>
+                    <th>Team</th>
+                    <th>Numbered</th>
+                    <th>Color Pattern</th>
+                    <th>Auto</th>
+                    <th style="width:100px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each cards}}
+                <tr class="{{#if this.isInStock}}in-stock{{/if}}">
+                    <td>{{this.Sport}}</td>
+                    <td><img src="{{this.CardImage}}" class="card-image" alt="Card Image"></td>
+                    <td>{{this.CardName}}</td>
+                    <td>{{this.CardSet}}</td>
+                    <td>{{this.CardYear}}</td>
+                    <td>{{this.CardNumber}}</td>
+                    <td>{{this.CardColor}}</td>
+                    <td>{{this.CardVariant}}</td>
+                    <td>{{this.Team}}</td>
+                    <td>{{this.Numbered}}</td>
+                    <td>{{this.ColorPattern}}</td>
+                    <td>{{this.Auto}}</td>
+                    <td class="button-cell">
+                        <button type="button"
+                            onclick="window.location.href='/admin/update-inventory-pricing?cardId={{this.CardID}}'"
+                            class="table-button">Add</button>
+                    </td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="13">No cards found</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <!-- Placeholder for the hovered image -->
+        <div id="image-preview">
+            <img id="preview-img" src="" alt="Preview">
+        </div>
+        <nav aria-label="Page navigation" class="pagination-bottom">
+            <ul class="pagination">
+                {{#if showFirst}}
+                <li class="page-item">
+                    <button class="page-link" onclick="changePage(1)">First</button>
+                </li>
+                {{/if}}
+                {{#if showPrevious}}
+                <li class="page-item">
+                    <button class="page-link" onclick="changePage({{minus currentPage 1}})">Previous</button>
+                </li>
+                {{/if}}
+                {{#each pages}}
+                <li class="page-item {{#if (eq ../currentPage this)}}active{{/if}}">
+                    <button class="page-link" onclick="changePage({{this}})">{{this}}</button>
+                </li>
+                {{/each}}
+                {{#if showNext}}
+                <li class="page-item">
+                    <button class="page-link" onclick="changePage({{plus currentPage 1}})">Next</button>
+                </li>
+                {{/if}}
+                {{#if showLast}}
+                <li class="page-item">
+                    <button class="page-link" onclick="changePage({{totalPages}})">Last</button>
+                </li>
+                {{/if}}
+            </ul>
+        </nav>
     </div>
-
-    <nav aria-label="Page navigation" class="pagination-bottom">
-        <ul class="pagination">
-            {{#if showFirst}}
-            <li class="page-item">
-                <button class="page-link" onclick="changePage(1)">First</button>
-            </li>
-            {{/if}}
-            {{#if showPrevious}}
-            <li class="page-item">
-                <button class="page-link" onclick="changePage({{minus currentPage 1}})">Previous</button>
-            </li>
-            {{/if}}
-
-            {{#each pages}}
-            <li class="page-item {{#if (eq ../currentPage this)}}active{{/if}}">
-                <button class="page-link" onclick="changePage({{this}})">{{this}}</button>
-            </li>
-            {{/each}}
-
-            {{#if showNext}}
-            <li class="page-item">
-                <button class="page-link" onclick="changePage({{plus currentPage 1}})">Next</button>
-            </li>
-            {{/if}}
-            {{#if showLast}}
-            <li class="page-item">
-                <button class="page-link" onclick="changePage({{totalPages}})">Last</button>
-            </li>
-            {{/if}}
-        </ul>
-    </nav>
-
-
-</div>
-
-<script>
-    // Disables dropdowns
-    function disableDropdowns() {
-        document.getElementById('sport').disabled = true;
-        document.getElementById('cardSet').disabled = true;
-        document.getElementById('cardYear').disabled = true;
-        document.getElementById('cardVariant').disabled = true;
-        document.getElementById('cardColor').disabled = true;
-    }
-
-    // Shows loading spinner
-    function showSpinner() {
-        document.getElementById('spinner').style.display = 'flex';
-    }
-
-    // Fetches and updates sports options
-    function fetchSports(sport, cardSet, year, cardColor, cardVariant) {
-        $.ajax({
-            url: '/admin/sports',
-            type: 'GET',
-            data: {
-                cardSet: cardSet,
-                year: year,
-                cardColor: cardColor,
-                cardVariant: cardVariant
-            },
-            dataType: 'json',
-            success: function(sports) {
-                const select = document.getElementById('sport');
-                select.innerHTML = '<option value="">All Sports</option>';
-                updateDropdown('sport', sports, sport);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading sports:', error);
-            }
-        });
-    }
-
-    // Fetches and updates card sets options
-    function fetchCardSets(sport, cardSet, year, cardColor, cardVariant) {
-        $.ajax({
-            url: '/admin/cardsets',
-            type: 'GET',
-            data: {
-                sport: sport,
-                cardSet: cardSet,
-                year: year,
-                cardColor: cardColor,
-                cardVariant: cardVariant
-            },
-            dataType: 'json',
-            success: function(sets) {
-                const select = document.getElementById('cardSet');
-                select.innerHTML = '<option value="">All Sets</option>';
-                updateDropdown('cardSet', sets, cardSet);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading card sets:', error);
-            }
-        });
-    }
-
-
-    // Fetches and updates years options
-    function fetchYears(sport, cardSet, year, cardColor, cardVariant) {
-        $.ajax({
-            url: '/admin/years',
-            type: 'GET',
-            data: {
-                sport: sport,
-                cardSet: cardSet,
-                year: year,
-                cardColor: cardColor,
-                cardVariant: cardVariant
-            },
-            dataType: 'json',
-            success: function(years) {
-                const select = document.getElementById('cardYear');
-                select.innerHTML = '<option value="">All Years</option>';
-                updateDropdown('cardYear', years, year);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading years:', error);
-            }
-        });
-}
-
-
-    // Fetches and updates card colors options
-    function fetchCardColors(sport, cardSet, year, cardColor, cardVariant) {
-        $.ajax({
-            url: '/admin/cardcolors',
-            type: 'GET',
-            data: {
-                sport: sport,
-                cardSet: cardSet,
-                year: year,
-                cardColor: cardColor,
-                cardVariant: cardVariant
-            },
-            dataType: 'json',
-            success: function(colors) {
-                const select = document.getElementById('cardColor');
-                select.innerHTML = '<option value="">All Colors</option>';
-                updateDropdown('cardColor', colors, cardColor);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading card colors:', error);
-            }
-        });
-    }
-
-
-    // Fetches and updates card variants options
-    function fetchCardVariants(sport, cardSet, year, cardColor, cardVariant) {
-        $.ajax({
-            url: '/admin/cardvariants',
-            type: 'GET',
-            data: {
-                sport: sport,
-                cardSet: cardSet,
-                year: year,
-                cardColor: cardColor,
-                cardVariant: cardVariant
-            },
-            dataType: 'json',
-            success: function(variants) {
-                const select = document.getElementById('cardVariant');
-                select.innerHTML = '<option value="">All Variants</option>';
-                updateDropdown('cardVariant', variants, cardVariant);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading card variants:', error);
-            }
-        });
-    }
-
-
-    // Updates dropdown options
-    function updateDropdown(dropdownId, items, selectedItem) {
-        const select = document.getElementById(dropdownId);
-        items.forEach(item => {
-            if (item && item.trim() !== '') {
-                const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
-                if (item === selectedItem) {
-                    option.selected = true;
+    <script>
+        // Disables dropdowns
+        function disableDropdowns() {
+            document.getElementById('sport').disabled = true;
+            document.getElementById('cardSet').disabled = true;
+            document.getElementById('cardYear').disabled = true;
+            document.getElementById('cardVariant').disabled = true;
+            document.getElementById('cardColor').disabled = true;
+            document.getElementById('team').disabled = true;
+            document.getElementById('numbered').disabled = true;
+            document.getElementById('colorPattern').disabled = true;
+            document.getElementById('auto').disabled = true;
+        }
+        // Shows loading spinner
+        function showSpinner() {
+            document.getElementById('spinner').style.display = 'flex';
+        }
+        // Fetches and updates sports options
+        function fetchSports(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/sports',
+                type: 'GET',
+                data: {
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (sports) {
+                    const select = document.getElementById('sport');
+                    select.innerHTML = '<option value="">All Sports</option>';
+                    updateDropdown('sport', sports, sport);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading sports:', error);
                 }
-                select.appendChild(option);
+            });
+        }
+        // Fetches and updates card sets options
+        function fetchCardSets(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/cardsets',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (sets) {
+                    const select = document.getElementById('cardSet');
+                    select.innerHTML = '<option value="">All Sets</option>';
+                    updateDropdown('cardSet', sets, cardSet);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading card sets:', error);
+                }
+            });
+        }
+        // Fetches and updates years options
+        function fetchYears(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/years',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (years) {
+                    const select = document.getElementById('cardYear');
+                    select.innerHTML = '<option value="">All Years</option>';
+                    updateDropdown('cardYear', years, year);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading years:', error);
+                }
+            });
+        }
+        // Fetches and updates card colors options
+        function fetchCardColors(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/cardcolors',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (colors) {
+                    const select = document.getElementById('cardColor');
+                    select.innerHTML = '<option value="">All Colors</option>';
+                    updateDropdown('cardColor', colors, cardColor);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading card colors:', error);
+                }
+            });
+        }
+        // Fetches and updates card variants options
+        function fetchCardVariants(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/cardvariants',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (variants) {
+                    const select = document.getElementById('cardVariant');
+                    select.innerHTML = '<option value="">All Variants</option>';
+                    updateDropdown('cardVariant', variants, cardVariant);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading card variants:', error);
+                }
+            });
+        }
+        // Fetches and updates teams options
+        function fetchTeams(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/teams',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (teams) {
+                    const select = document.getElementById('team');
+                    select.innerHTML = '<option value="">All Teams</option>';
+                    updateDropdown('team', teams, team);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading teams:', error);
+                }
+            });
+        }
+        // Fetches and updates numbered options
+        function fetchNumberedOptions(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/numbered',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (numberedOptions) {
+                    const select = document.getElementById('numbered');
+                    select.innerHTML = '<option value="">All Numbered</option>';
+                    updateDropdown('numbered', numberedOptions, numbered);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading numbered options:', error);
+                }
+            });
+        }
+        // Fetches and updates color patterns options
+        function fetchColorPatterns(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/colorpatterns',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (colorPatterns) {
+                    const select = document.getElementById('colorPattern');
+                    select.innerHTML = '<option value="">All Color Patterns</option>';
+                    updateDropdown('colorPattern', colorPatterns, colorPattern);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading color patterns:', error);
+                }
+            });
+        }
+        // Fetches and updates auto options
+        function fetchAutoOptions(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
+            $.ajax({
+                url: '/admin/auto',
+                type: 'GET',
+                data: {
+                    sport: sport,
+                    cardSet: cardSet,
+                    year: year,
+                    cardColor: cardColor,
+                    cardVariant: cardVariant,
+                    team: team,
+                    numbered: numbered,
+                    colorPattern: colorPattern,
+                    auto: auto
+                },
+                dataType: 'json',
+                success: function (autoOptions) {
+                    const select = document.getElementById('auto');
+                    select.innerHTML = '<option value="">All Auto</option>';
+                    updateDropdown('auto', autoOptions, auto);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading auto options:', error);
+                }
+            });
+        }
+        // Updates dropdown options
+        function updateDropdown(dropdownId, items, selectedItem) {
+            const select = document.getElementById(dropdownId);
+            items.forEach(item => {
+                if (item && item.trim() !== '') {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    if (item === selectedItem) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                }
+            });
+        }
+        // Re-enables dropdowns and hides spinner
+        function finalizeLoading() {
+            document.getElementById('sport').disabled = false;
+            document.getElementById('cardSet').disabled = false;
+            document.getElementById('cardYear').disabled = false;
+            document.getElementById('cardVariant').disabled = false;
+            document.getElementById('cardColor').disabled = false;
+            document.getElementById('team').disabled = false;
+            document.getElementById('numbered').disabled = false;
+            document.getElementById('colorPattern').disabled = false;
+            document.getElementById('auto').disabled = false;
+            document.getElementById('spinner').style.display = 'none';
+        }
+        async function loadSetsAndYears(caller) {
+            disableDropdowns();
+            showSpinner();
+            const sport = document.getElementById('sport').value;
+            const cardSet = document.getElementById('cardSet').value;
+            const year = document.getElementById('cardYear').value;
+            const cardColor = document.getElementById('cardColor').value;
+            const cardVariant = document.getElementById('cardVariant').value;
+            const team = document.getElementById('team').value;
+            const numbered = document.getElementById('numbered').value;
+            const colorPattern = document.getElementById('colorPattern').value;
+            const auto = document.getElementById('auto').value;
+            try {
+                await Promise.all([
+                    fetchSports(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchCardSets(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchYears(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchCardColors(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchCardVariants(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchTeams(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchNumberedOptions(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchColorPatterns(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto),
+                    fetchAutoOptions(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto)
+                ]);
+            } catch (error) {
+                console.error('Error with one of the fetch calls:', error);
+            } finally {
+                finalizeLoading();
             }
-        });
-    }
-
-    // Re-enables dropdowns and hides spinner
-    function finalizeLoading() {
-        document.getElementById('sport').disabled = false;
-        document.getElementById('cardSet').disabled = false;
-        document.getElementById('cardYear').disabled = false;
-        document.getElementById('cardVariant').disabled = false;
-        document.getElementById('cardColor').disabled = false;
-        document.getElementById('spinner').style.display = 'none';
-    }
-
-    async function loadSetsAndYears(caller) {
-        disableDropdowns();
-        showSpinner();
-
-        const sport = document.getElementById('sport').value;
-        const cardSet = document.getElementById('cardSet').value;
-        const year = document.getElementById('cardYear').value;
-        const cardColor = document.getElementById('cardColor').value;
-        const cardVariant = document.getElementById('cardVariant').value;
-
-        try {
-            await Promise.all([
-                fetchSports(sport, cardSet, year, cardColor, cardVariant),
-                fetchCardSets(sport, cardSet, year, cardColor, cardVariant),
-                fetchYears(sport, cardSet, year, cardColor, cardVariant),
-                fetchCardColors(sport, cardSet, year, cardColor, cardVariant),
-                fetchCardVariants(sport, cardSet, year, cardColor, cardVariant)
-            ]);
-        } catch (error) {
-            console.error('Error with one of the fetch calls:', error);
-        } finally {
-            finalizeLoading();
         }
-    }
-
-
-
-    document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
-    document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
-    document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
-    document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
-    document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
-
-
-    // JavaScript function to filter card set options
-    function filterCardSets() {
-        var input, filter, ul, li, a, i;
-        input = document.getElementById('cardSetSearch');
-        filter = input.value.toUpperCase();
-        var select = document.getElementById("cardSet");
-        var options = select.getElementsByTagName('option');
-        for (i = 1; i < options.length; i++) { 
-            txtValue = options[i].textContent;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                options[i].style.display = "";
-            } else {
-                options[i].style.display = "none";
+        document.getElementById('sport').addEventListener('change', () => loadSetsAndYears('sport'));
+        document.getElementById('cardSet').addEventListener('change', () => loadSetsAndYears('set'));
+        document.getElementById('cardYear').addEventListener('change', () => loadSetsAndYears('year'));
+        document.getElementById('cardColor').addEventListener('change', () => loadSetsAndYears('cardColor'));
+        document.getElementById('cardVariant').addEventListener('change', () => loadSetsAndYears('cardVariant'));
+        document.getElementById('team').addEventListener('change', () => loadSetsAndYears('team'));
+        document.getElementById('numbered').addEventListener('change', () => loadSetsAndYears('numbered'));
+        document.getElementById('colorPattern').addEventListener('change', () => loadSetsAndYears('colorPattern'));
+        document.getElementById('auto').addEventListener('change', () => loadSetsAndYears('auto'));
+        // JavaScript function to filter card set options
+        function filterCardSets() {
+            var input, filter, ul, li, a, i;
+            input = document.getElementById('cardSetSearch');
+            filter = input.value.toUpperCase();
+            var select = document.getElementById("cardSet");
+            var options = select.getElementsByTagName('option');
+            for (i = 1; i < options.length; i++) {
+                txtValue = options[i].textContent;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    options[i].style.display = "";
+                } else {
+                    options[i].style.display = "none";
+                }
             }
         }
-    }
-
-    
-    // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
-    function searchCardSets(searchTerm) {
-        showSpinner();
-        const sport = document.getElementById('sport').value;
-        const year = document.getElementById('cardYear').value;
-        const cardColor = document.getElementById('cardColor').value;
-        const cardVariant = document.getElementById('cardVariant').value;
-
-        // Starts constructing the URL for the API call and appends the search term as a query
-        let url = `/admin/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
-        if (sport) {
-            url += `&sport=${encodeURIComponent(sport)}`;
+        // Makes an API call to fetch card sets based on search term and optionally filtered by sport and year
+        function searchCardSets(searchTerm) {
+            showSpinner();
+            const sport = document.getElementById('sport').value;
+            const year = document.getElementById('cardYear').value;
+            const cardColor = document.getElementById('cardColor').value;
+            const cardVariant = document.getElementById('cardVariant').value;
+            const team = document.getElementById('team').value;
+            const numbered = document.getElementById('numbered').value;
+            const colorPattern = document.getElementById('colorPattern').value;
+            const auto = document.getElementById('auto').value;
+            // Starts constructing the URL for the API call and appends the search term as a query
+            let url = `/admin/search-card-sets?term=${encodeURIComponent(searchTerm)}`;
+            if (sport) {
+                url += `&sport=${encodeURIComponent(sport)}`;
+            }
+            if (year) {
+                url += `&year=${encodeURIComponent(year)}`;
+            }
+            if (cardColor) {
+                url += `&cardColor=${encodeURIComponent(cardColor)}`;
+            }
+            if (cardVariant) {
+                url += `&cardVariant=${encodeURIComponent(cardVariant)}`;
+            }
+            if (team) {
+                url += `&team=${encodeURIComponent(team)}`;
+            }
+            if (numbered) {
+                url += `&numbered=${encodeURIComponent(numbered)}`;
+            }
+            if (colorPattern) {
+                url += `&colorPattern=${encodeURIComponent(colorPattern)}`;
+            }
+            if (auto) {
+                url += `&auto=${encodeURIComponent(auto)}`;
+            }
+            // Sends a request to the server at the constructed URL
+            fetch(url)
+                // Processes the response by converting it to JSON
+                .then(response => response.json())
+                // Takes the data (array of card sets) and calls the populateDropdown function to update the dropdown with the values
+                .then(sets => {
+                    populateDropdown(sets);
+                    document.getElementById('spinner').style.display = 'none';
+                })
+                .catch(error => console.error('Error:', error));
         }
-        if (year) {
-            url += `&year=${encodeURIComponent(year)}`;
+        // This function populates the dropdown with the results from the set search 
+        function populateDropdown(sets) {
+            const setSelect = document.getElementById('cardSet');
+            setSelect.innerHTML = '<option value="">All Sets</option>';
+            sets.forEach(set => {
+                const option = document.createElement('option');
+                option.value = set;
+                option.textContent = set;
+                setSelect.appendChild(option);
+            });
         }
-        if (cardColor) {
-            url += `&cardColor=${encodeURIComponent(cardColor)}`;
+        // The debounce function
+        function debounce(callback, delay) {
+            let timeout;
+            // Returns a new function that can take any number of arguments
+            return (...args) => {
+                // Clears any existing timeout associated with the timeout variable
+                clearTimeout(timeout);
+                // Sets a new timeout that will execute the function after the specified delay 
+                timeout = setTimeout(() => {
+                    // The apply method allows us to invoke callback with a specific 'this' value and 'args' array
+                    callback.apply(this, args);
+                }, delay);
+            };
         }
-        if (cardVariant) {
-            url += `&cardVariant=${encodeURIComponent(cardVariant)}`;
-        }
-        // Sends a request to the server at the constructed URL
-        fetch(url)
-            // Processes the response by converting it to JSON
-            .then(response => response.json())
-            // Takes the data (array of card sets) and calls the populateDropdown function to update the dropdown with the values
-            .then(sets => {
-                populateDropdown(sets);
-                document.getElementById('spinner').style.display = 'none';
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // This function populates the dropdown with the results from the set search 
-    function populateDropdown(sets) {
-        const setSelect = document.getElementById('cardSet');
-        setSelect.innerHTML = '<option value="">All Sets</option>'; 
-        sets.forEach(set => {
-            const option = document.createElement('option');
-            option.value = set;
-            option.textContent = set;
-            setSelect.appendChild(option);
+        // Debounce function to limit the number of searches during typing
+        var debouncedSearchCardSets = debounce(function (searchTerm) {
+            searchCardSets(searchTerm);
+        }, 400);
+        // Attach the debounced function to the keyup event
+        document.getElementById('cardSetSearch').addEventListener('keyup', function (e) {
+            debouncedSearchCardSets(e.target.value);
         });
-    }
-
-    // The debounce function
-    function debounce(callback, delay) {
-        let timeout;
-        // Returns a new function that can take any number of arguments
-        return (...args) => {
-            // Clears any existing timeout associated with the timeout variable
-            clearTimeout(timeout);
-            // Sets a new timeout that will execute the function after the specified delay 
-            timeout = setTimeout(() => {
-                // The apply method allows us to invoke callback with a specific 'this' value and 'args' array
-                callback.apply(this, args);
-            }, delay);
-        };
-    }
-
-    // Debounce function to limit the number of searches during typing
-    var debouncedSearchCardSets = debounce(function(searchTerm) {
-        searchCardSets(searchTerm);
-    }, 400);
-
-    // Attach the debounced function to the keyup event
-    document.getElementById('cardSetSearch').addEventListener('keyup', function(e) {
-        debouncedSearchCardSets(e.target.value);
-    });
-    var debouncedLoadDataWithFilters = debounce(loadDataWithFilters, 400);
-
-    function resetFilters() {
-        showSpinner();
-        // Clear the player search term
-        document.getElementById('searchTerm').value = '';
-
-        // Reset dropdowns to their default option
-        document.getElementById('sport').selectedIndex = 0;
-        document.getElementById('cardSet').selectedIndex = 0;
-        document.getElementById('cardYear').selectedIndex = 0;
-        document.getElementById('cardColor').selectedIndex = 0;
-        document.getElementById('cardVariant').selectedIndex = 0;
-        document.getElementById('spinner').style.display = 'none';
-
-        loadSetsAndYears(null);
-        loadDataWithFilters(); 
-
-    }
-    document.getElementById('resetButton').addEventListener('click', resetFilters);
-
-    function changePageSize() {
-        currentPage = 1; // Reset to page 1 whenever page size changes
-        var pageSize = document.getElementById('pageSize').value;
-        localStorage.setItem('pageSize', pageSize);
-        loadDataWithFilters(); // This will now use the updated pageSize and reset currentPage
-    }
-
-    let isLoadingData = false;
-
-    let currentPage = 1; // Initial page
-    const pageSize = localStorage.getItem('pageSize') || '25'; // Default page size
-
-    function changePage(page) {
-        currentPage = page;
-        loadDataWithFilters();
-    }
-
-    document.getElementById('pageSize').addEventListener('change', changePageSize);
-
-    async function loadDataWithFilters() {
-        if (isLoadingData) return;
-        isLoadingData = true;
-        showSpinner();
-
-        let pageSize = document.getElementById('pageSize').value || localStorage.getItem('pageSize') || '25';
-
-        const data = {
-            page: currentPage,
-            pageSize,
-            searchTerm: document.getElementById('searchTerm').value,
-            sport: document.getElementById('sport').value,
-            cardSet: document.getElementById('cardSet').value,
-            cardYear: document.getElementById('cardYear').value,
-            cardColor: document.getElementById('cardColor').value,
-            cardVariant: document.getElementById('cardVariant').value,
-            //sortColumn: currentSortColumn,
-            //sortOrder: currentSortOrder
-        };
-        console.log('Sending AJAX request with data:', data);
-
-        try {
-            await fetchInventoryData(data);
-        } catch (error) {
-            console.error('Error loading data with filters:', error);
-        } finally {
-            isLoadingData = false;
+        var debouncedLoadDataWithFilters = debounce(loadDataWithFilters, 400);
+        function resetFilters() {
+            showSpinner();
+            // Clear the player search term
+            document.getElementById('searchTerm').value = '';
+            // Reset dropdowns to their default option
+            document.getElementById('sport').selectedIndex = 0;
+            document.getElementById('cardSet').selectedIndex = 0;
+            document.getElementById('cardYear').selectedIndex = 0;
+            document.getElementById('cardColor').selectedIndex = 0;
+            document.getElementById('cardVariant').selectedIndex = 0;
+            document.getElementById('team').selectedIndex = 0;
+            document.getElementById('numbered').selectedIndex = 0;
+            document.getElementById('colorPattern').selectedIndex = 0;
+            document.getElementById('auto').selectedIndex = 0;
+            document.getElementById('spinner').style.display = 'none';
+            loadSetsAndYears(null);
+            loadDataWithFilters();
         }
-    }
-
-    function fetchInventoryData(data) {
-        $.ajax({
-            url: `/admin/inventory`,
-            type: 'GET',
-            data: data, // Automatically converts data object to query string
-            dataType: 'json',
-            success: function(response) {
-                updateTableAndTotalItemsWithData(response.cards, response.totalItems);
-                updatePaginationControls(response.showPrevious, response.showNext, response.currentPage, response.totalPages);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading data:', error);
-            },
-            complete: function() {
-                document.getElementById('spinner').style.display = 'none';
+        document.getElementById('resetButton').addEventListener('click', resetFilters);
+        function changePageSize() {
+            currentPage = 1; // Reset to page 1 whenever page size changes
+            var pageSize = document.getElementById('pageSize').value;
+            localStorage.setItem('pageSize', pageSize);
+            loadDataWithFilters(); // This will now use the updated pageSize and reset currentPage
+        }
+        let isLoadingData = false;
+        let currentPage = 1; // Initial page
+        const pageSize = localStorage.getItem('pageSize') || '25'; // Default page size
+        function changePage(page) {
+            currentPage = page;
+            loadDataWithFilters();
+        }
+        document.getElementById('pageSize').addEventListener('change', changePageSize);
+        async function loadDataWithFilters() {
+            if (isLoadingData) return;
+            isLoadingData = true;
+            showSpinner();
+            let pageSize = document.getElementById('pageSize').value || localStorage.getItem('pageSize') || '25';
+            const data = {
+                page: currentPage,
+                pageSize,
+                searchTerm: document.getElementById('searchTerm').value,
+                sport: document.getElementById('sport').value,
+                cardSet: document.getElementById('cardSet').value,
+                cardYear: document.getElementById('cardYear').value,
+                cardColor: document.getElementById('cardColor').value,
+                cardVariant: document.getElementById('cardVariant').value,
+                team: document.getElementById('team').value,
+                numbered: document.getElementById('numbered').value,
+                colorPattern: document.getElementById('colorPattern').value,
+                auto: document.getElementById('auto').value,
+            };
+            console.log('Sending AJAX request with data:', data);
+            try {
+                await fetchInventoryData(data);
+            } catch (error) {
+                console.error('Error loading data with filters:', error);
+            } finally {
                 isLoadingData = false;
             }
-        });
-    }
-
-    function updatePaginationControls(showPrevious, showNext, currentPage, totalPages) {
-        // Calculate start and end page numbers for surrounding pages
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(currentPage + 2, totalPages);
-        let paginationHtml = '';
-
-        // Add "First" button
-        if (currentPage > 1) {
-            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(1)">First</button></li>`;
         }
-
-        // Add "Previous" button
-        if (showPrevious) {
-            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage - 1})">Previous</button></li>`;
+        function fetchInventoryData(data) {
+            $.ajax({
+                url: `/admin/inventory`,
+                type: 'GET',
+                data: data, // Automatically converts data object to query string
+                dataType: 'json',
+                success: function (response) {
+                    updateTableAndTotalItemsWithData(response.cards, response.totalItems);
+                    updatePaginationControls(response.showPrevious, response.showNext, response.currentPage, response.totalPages);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading data:', error);
+                },
+                complete: function () {
+                    document.getElementById('spinner').style.display = 'none';
+                    isLoadingData = false;
+                }
+            });
         }
-
-        // Generate direct page number buttons
-        for (let page = startPage; page <= endPage; page++) {
-            paginationHtml += `
+        function updatePaginationControls(showPrevious, showNext, currentPage, totalPages) {
+            // Calculate start and end page numbers for surrounding pages
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(currentPage + 2, totalPages);
+            let paginationHtml = '';
+            // Add "First" button
+            if (currentPage > 1) {
+                paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(1)">First</button></li>`;
+            }
+            // Add "Previous" button
+            if (showPrevious) {
+                paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage - 1})">Previous</button></li>`;
+            }
+            // Generate direct page number buttons
+            for (let page = startPage; page <= endPage; page++) {
+                paginationHtml += `
                 <li class="page-item ${page === currentPage ? 'active' : ''}">
                     <button class="page-link" onclick="changePage(${page})">${page}</button>
                 </li>
             `;
-        }
-
-        // Add "Next" button
-        if (showNext) {
-            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage + 1})">Next</button></li>`;
-        }
-
-        // Add "Last" button
-        if (currentPage < totalPages) {
-            paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${totalPages})">Last</button></li>`;
-        }
-
-        // Update the pagination container with the new HTML
-        document.querySelector('.pagination').innerHTML = paginationHtml;
-    }
-    
-    function updateTableAndTotalItemsWithData(cards, totalItems) {
-        const tableBody = document.querySelector('.table-container table tbody');
-        tableBody.innerHTML = ''; // Clear existing rows
-
-        cards.forEach(card => {
-            const row = document.createElement('tr');
-            // Ensure the 'in-stock' class is applied if card.isInStock is true
-            if (card.isInStock) {
-                row.classList.add('in-stock');
             }
-            row.innerHTML = `
+            // Add "Next" button
+            if (showNext) {
+                paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${currentPage + 1})">Next</button></li>`;
+            }
+            // Add "Last" button
+            if (currentPage < totalPages) {
+                paginationHtml += `<li class="page-item"><button class="page-link" onclick="changePage(${totalPages})">Last</button></li>`;
+            }
+            // Update the pagination container with the new HTML
+            document.querySelector('.pagination').innerHTML = paginationHtml;
+        }
+        function updateTableAndTotalItemsWithData(cards, totalItems) {
+            const tableBody = document.querySelector('.table-container table tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+            cards.forEach(card => {
+                const row = document.createElement('tr');
+                // Ensure the 'in-stock' class is applied if card.isInStock is true
+                if (card.isInStock) {
+                    row.classList.add('in-stock');
+                }
+                row.innerHTML = `
                 <td>${card.Sport}</td>
                 <td><img src="${card.CardImage ? card.CardImage : ''}" class="card-image" alt="Card Image"></td>
                 <td>${card.CardName || ''}</td>
@@ -606,108 +771,100 @@
                 <td>${card.CardNumber || ''}</td>
                 <td>${card.CardColor || ''}</td>
                 <td>${card.CardVariant ? card.CardVariant : ''}</td>
+                <td>${card.Team || ''}</td>
+                <td>${card.Numbered || ''}</td>
+                <td>${card.ColorPattern || ''}</td>
+                <td>${card.Auto || ''}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/admin/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
             `;
-            tableBody.appendChild(row);
-        });
-
-        // Update total items count
-        document.getElementById('totalItems').textContent = `${totalItems} Results`;
-    }
-/*
-    let currentSortColumn = 'CardSet'; // Default sort column
-    let currentSortOrder = 'asc'; // Default sort order
-    function sortInventory(sortColumn) {
-        // Toggle sort order if the same column is clicked again, otherwise set to 'asc'
-        if (currentSortColumn === sortColumn) {
-            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSortOrder = 'asc';
+                tableBody.appendChild(row);
+            });
+            // Update total items count
+            document.getElementById('totalItems').textContent = `${totalItems} Results`;
         }
-        currentSortColumn = sortColumn;
-        loadDataWithFilters(); // Reload data with new sort settings
-    }
-*/
-    document.addEventListener('DOMContentLoaded', function() {
-        // Load initial data
-        loadDataWithFilters();
-
-        // Event listeners for filter changes, resetting currentPage as needed
-        document.getElementById('cardSet').addEventListener('change', function() {
-            currentPage = 1;
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load initial data
             loadDataWithFilters();
-        });
-
-        document.getElementById('sport').addEventListener('change', function() {
-            currentPage = 1;
-            if (this.value === '') {
-                resetFilters();
-            } else {
+            // Event listeners for filter changes, resetting currentPage as needed
+            document.getElementById('cardSet').addEventListener('change', function () {
+                currentPage = 1;
                 loadDataWithFilters();
+            });
+            document.getElementById('sport').addEventListener('change', function () {
+                currentPage = 1;
+                if (this.value === '') {
+                    resetFilters();
+                } else {
+                    loadDataWithFilters();
+                }
+            });
+            document.getElementById('searchTerm').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('cardYear').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('cardColor').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('cardVariant').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('team').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('numbered').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('colorPattern').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('auto').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            // Handling form submission to prevent default behavior and manually handle data loading
+            document.getElementById('inventorySearchForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                loadDataWithFilters();
+            });
+            document.getElementById('searchButton').addEventListener('click', function (e) {
+                e.preventDefault();
+                loadDataWithFilters();
+            });
+            // Set the page size dropdown based on the stored value and attach change event listener
+            const pageSizeSelector = document.getElementById('pageSize');
+            const savedPageSize = localStorage.getItem('pageSize');
+            if (savedPageSize) {
+                pageSizeSelector.value = savedPageSize;
             }
+            pageSizeSelector.addEventListener('change', function () {
+                localStorage.setItem('pageSize', this.value);
+                loadDataWithFilters();
+            });
+            // Adding mouseenter and mouseleave event listeners for card image preview functionality
+            document.querySelector('.table-container table').addEventListener('mouseenter', function (event) {
+                if (event.target.classList.contains('card-image')) {
+                    const previewDiv = document.getElementById('image-preview');
+                    const previewImg = document.getElementById('preview-img');
+                    previewImg.src = event.target.getAttribute('src'); // Set src for preview image
+                    previewDiv.style.display = 'block'; // Show the preview
+                }
+            }, true); // Using event capturing
+            document.querySelector('.table-container table').addEventListener('mouseleave', function (event) {
+                if (event.target.classList.contains('card-image')) {
+                    document.getElementById('image-preview').style.display = 'none'; // Hide the preview
+                }
+            }, true); // Using event capturing
         });
-
-        document.getElementById('searchTerm').addEventListener('change', function() {
-            currentPage = 1;
-            loadDataWithFilters();
-        });
-
-        document.getElementById('cardYear').addEventListener('change', function() {
-            currentPage = 1;
-            loadDataWithFilters();
-        });
-
-        document.getElementById('cardColor').addEventListener('change', function() {
-            currentPage = 1;
-            loadDataWithFilters();
-        });
-
-        document.getElementById('cardVariant').addEventListener('change', function() {
-            currentPage = 1;
-            loadDataWithFilters();
-        });
-
-        // Handling form submission to prevent default behavior and manually handle data loading
-        document.getElementById('inventorySearchForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            loadDataWithFilters();
-        });
-
-        document.getElementById('searchButton').addEventListener('click', function(e) {
-            e.preventDefault();
-            loadDataWithFilters();
-        });
-
-        // Set the page size dropdown based on the stored value and attach change event listener
-        const pageSizeSelector = document.getElementById('pageSize');
-        const savedPageSize = localStorage.getItem('pageSize');
-        if(savedPageSize) {
-            pageSizeSelector.value = savedPageSize;
-        }
-        pageSizeSelector.addEventListener('change', function() {
-            localStorage.setItem('pageSize', this.value);
-            loadDataWithFilters();
-        });
-
-        // Adding mouseenter and mouseleave event listeners for card image preview functionality
-        document.querySelector('.table-container table').addEventListener('mouseenter', function(event) {
-            if (event.target.classList.contains('card-image')) {
-                const previewDiv = document.getElementById('image-preview');
-                const previewImg = document.getElementById('preview-img');
-                previewImg.src = event.target.getAttribute('src'); // Set src for preview image
-                previewDiv.style.display = 'block'; // Show the preview
-            }
-        }, true); // Using event capturing
-
-        document.querySelector('.table-container table').addEventListener('mouseleave', function(event) {
-            if (event.target.classList.contains('card-image')) {
-                document.getElementById('image-preview').style.display = 'none'; // Hide the preview
-            }
-        }, true); // Using event capturing
-    });
-
-</script>
-
+    </script>
 </body>
