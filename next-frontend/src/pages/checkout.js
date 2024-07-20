@@ -166,6 +166,24 @@ const CheckoutPage = () => {
 
   if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
 
+  const formatCardDetails = (item) => {
+    const details = [
+      item.name,
+      item.sport,
+      item.cardYear,
+      item.cardSet,
+      `#${item.number}`,
+      item.variant,
+      item.color,
+      item.numbered ? `Numbered: ${item.numbered}` : '',
+      item.team,
+      item.auto === 1 ? 'Auto' : '',
+      item.colorPattern
+    ];
+
+    return details.filter(detail => detail).join(' - ');
+  };
+
   return (
     <div className={styles.checkoutPage}>
       <h1 className={styles.header}>Checkout</h1>
@@ -256,7 +274,7 @@ const CheckoutPage = () => {
                         <img src={item.imageFront} alt={item.name} />
                       </div>
                       <div className={styles.itemDetails}>
-                        <p><strong>{item.name} - {item.sport} - {item.cardSet} #{item.number}</strong></p>
+                        <p><strong>{formatCardDetails(item)}</strong></p>
                         <p>Grade: {item.grade}</p>
                         <p>Price: ${item.price}</p>
                       </div>

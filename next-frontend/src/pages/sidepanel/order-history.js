@@ -67,7 +67,11 @@ const OrderHistory = () => {
       item.CardSet,
       item.CardYear,
       item.CardColor,
-      item.CardVariant
+      item.CardVariant,
+      item.Numbered ? `Numbered: ${item.Numbered}` : '',
+      item.Team,
+      item.Auto === 1 ? 'Auto' : '',
+      item.ColorPattern
     ].filter(Boolean).join(' - ');
 
     return info;

@@ -62,6 +62,24 @@ const CartPage = () => {
 
   if (!mounted) return null; // Prevent rendering on the server to avoid hydration issues
 
+  const formatCardDetails = (item) => {
+    const details = [
+      item.name,
+      item.sport,
+      item.cardYear,
+      item.cardSet,
+      `#${item.number}`,
+      item.variant,
+      item.color,
+      item.numbered ? `Numbered: ${item.numbered}` : '',
+      item.team,
+      item.auto === 1 ? 'Auto' : '',
+      item.colorPattern
+    ];
+
+    return details.filter(detail => detail).join(' - ');
+  };
+
   return (
     <div className={styles.cartPage}>
       <h1 className={`${styles.largeText} ${styles.leftAlignedTitle}`}>Shopping Cart</h1>
@@ -102,8 +120,7 @@ const CartPage = () => {
                       <div className={styles.cartItemDetails}>
                         <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
                           <p className={styles.largeTextStrong}>
-                            {item.name} - {item.sport}
-                            {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
+                            {formatCardDetails(item)}
                           </p>
                         </Link>
                         <p className={styles.largeText}>Grade: {item.grade}</p>
@@ -159,8 +176,7 @@ const CartPage = () => {
                         <div className={styles.cartItemDetails}>
                           <Link href={`/cards/${item.cardId}/${item.name}`} className={styles.cartItemDetailsLink}>
                             <p className={styles.largeTextStrong}>
-                              {item.name} - {item.sport}
-                              {item.cardYear ? ` - ${item.cardYear}` : ''} - {item.cardSet} - #{item.number} - {item.variant} - {item.color}
+                              {formatCardDetails(item)}
                             </p>
                           </Link>
                           <p className={styles.largeText}>Grade: {item.grade}</p>

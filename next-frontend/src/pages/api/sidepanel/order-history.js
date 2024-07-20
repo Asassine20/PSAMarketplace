@@ -71,6 +71,10 @@ export default async function handler(req, res) {
         c.CardYear, 
         c.CardColor, 
         c.CardVariant,
+        c.Numbered,
+        c.Team,
+        c.Auto,
+        c.ColorPattern,
         i.FrontImageUrl,
         i.CertNumber,
         g.GradeValue 

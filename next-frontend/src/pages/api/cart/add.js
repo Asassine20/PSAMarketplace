@@ -1,3 +1,4 @@
+// /api/cart/add.js
 import { query } from '@/db';
 import { authenticate, getSessionId } from '@/middleware/auth';
 
@@ -30,7 +31,9 @@ export default async function handler(req, res) {
       SELECT CartItems.*, Inventory.SalePrice AS price, Stores.ShippingPrice AS shippingPrice, 
         Card.CardName AS name, Card.Sport AS sport, Card.CardYear AS cardYear, 
         Card.CardSet AS cardSet, Card.CardNumber AS number, Card.CardVariant AS variant, 
-        Card.CardColor AS color, Grade.GradeValue AS grade, Inventory.CertNumber AS certNumber,
+        Card.CardColor AS color, Card.Numbered AS numbered, Card.Team AS team, 
+        Card.Auto AS auto, Card.ColorPattern AS colorPattern, 
+        Grade.GradeValue AS grade, Inventory.CertNumber AS certNumber,
         Inventory.FrontImageURL AS imageFront, Inventory.BackImageURL AS imageBack, Stores.StoreName AS storeName,
         Stores.FeedbackAverage AS feedback
       FROM CartItems 

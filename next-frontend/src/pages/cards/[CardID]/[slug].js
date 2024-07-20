@@ -1,3 +1,4 @@
+// pages/cards/[CardID]/[slug].js
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import useSWR from 'swr';
@@ -76,8 +77,12 @@ function CardDetails() {
           {card.CardYear && <p><strong>Year:</strong> {card.CardYear}</p>}
           <p><strong>Set:</strong> {card.CardSet}</p>
           <p><strong>Number:</strong> {card.CardNumber}</p>
-          <p><strong>Variant:</strong> {card.CardVariant || 'N/A'}</p>
-          <p><strong>Color:</strong> {card.CardColor || 'N/A'}</p>
+          {card.CardVariant && <p><strong>Variant:</strong> {card.CardVariant}</p>}
+          {card.CardColor && <p><strong>Color:</strong> {card.CardColor}</p>}
+          {card.Numbered && <p><strong>Numbered:</strong> {card.Numbered}</p>}
+          {card.Team && <p><strong>Team:</strong> {card.Team}</p>}
+          {card.Auto === 1 && <p><strong>Auto:</strong> Yes</p>}
+          {card.ColorPattern && <p><strong>Color Pattern:</strong> {card.ColorPattern}</p>}
           <p><strong>Market Price:</strong> {card.MarketPrice !== null && card.MarketPrice !== undefined ? `$${card.MarketPrice}` : 'N/A'}</p>
         </div>
         <div className={styles.latestSales}>
