@@ -165,7 +165,7 @@ const SearchPage = () => {
     setIsLoadingCards(false);
   };
 
-  const fetchFilterOptions = async (filterType, filtersToApply, page = 1) => {
+  const fetchFilterOptions = async (filterType, filtersToApply, page = 1, searchTerm = '') => {
     setIsLoadingFilters(true);
 
     let queryParams = new URLSearchParams({
@@ -173,7 +173,7 @@ const SearchPage = () => {
       cardName: filtersToApply.cardName || '',
       inStock: filtersToApply.inStock ? 'true' : 'false',
       filterPage: page,
-      filterLimit: filterLimit,
+      filterLimit: searchTerm.length >= 3 ? 10000 : filterLimit, // Load all if searchTerm has 3 or more characters
       filterType: filterType
     });
 
@@ -191,11 +191,11 @@ const SearchPage = () => {
       const data = await response.json();
       setFilterOptions(prevOptions => ({
         ...prevOptions,
-        [filterType]: page === 1 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])]
+        [filterType]: page === 1 || searchTerm.length >= 3 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])]
       }));
       setHasMore(prev => ({
         ...prev,
-        [filterType]: data[filterType].length >= filterLimit
+        [filterType]: data[filterType].length >= filterLimit && searchTerm.length < 3
       }));
     } else {
       console.error('Failed to fetch filter options');
@@ -222,7 +222,11 @@ const SearchPage = () => {
         ...prevTerms,
         [filterKey]: value,
       }));
-      fetchFilterOptions(filterKey, filters, 1);
+      setFilterPages(prevPages => ({
+        ...prevPages,
+        [filterKey]: 1
+      }));
+      fetchFilterOptions(filterKey, filters, 1, value);
     }, 300);
     debounceChange(searchTerm);
   };
@@ -377,7 +381,7 @@ const SearchPage = () => {
   };
 
   const createObserver = (node, filterType) => {
-    if (!node || isLoadingFilters || !hasMore[filterType]) return;
+    if (!node || isLoadingFilters || !hasMore[filterType] || filterSearchTerms[filterType].length >= 3) return;
     if (observers.current[filterType]) observers.current[filterType].disconnect();
     observers.current[filterType] = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
@@ -392,7 +396,7 @@ const SearchPage = () => {
 
   useEffect(() => {
     Object.keys(filterPages).forEach(filterType => {
-      if (filterPages[filterType] > 1) {
+      if (filterPages[filterType] > 1 && filterSearchTerms[filterType].length < 3) {
         fetchFilterOptions(filterType, filters, filterPages[filterType]);
       }
     });
