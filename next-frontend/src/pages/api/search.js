@@ -67,42 +67,42 @@ export default async function handler(req, res) {
             let cardYearsPromise, cardColorsPromise, cardSetsPromise, cardVariantsPromise, teamsPromise, colorPatternsPromise, numberedPromise, autoPromise;
             
             if (filterType === 'cardYears' || !filterType) {
-                cardYearsPromise = query(`SELECT CardYear as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardYear IS NOT NULL GROUP BY CardYear ORDER BY CardYear DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardYearsPromise = query(`SELECT CardYear, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardYear IS NOT NULL GROUP BY CardYear ORDER BY CardYear DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardYearsPromise);
             }
 
             if (filterType === 'cardColors' || !filterType) {
-                cardColorsPromise = query(`SELECT CardColor as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardColor IS NOT NULL GROUP BY CardColor ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardColorsPromise = query(`SELECT CardColor, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardColor IS NOT NULL GROUP BY CardColor ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardColorsPromise);
             }
 
             if (filterType === 'cardSets' || !filterType) {
-                cardSetsPromise = query(`SELECT CardSet as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardSet IS NOT NULL GROUP BY CardSet ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardSetsPromise = query(`SELECT CardSet, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardSet IS NOT NULL GROUP BY CardSet ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardSetsPromise);
             }
 
             if (filterType === 'cardVariants' || !filterType) {
-                cardVariantsPromise = query(`SELECT CardVariant as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardVariant IS NOT NULL GROUP BY CardVariant ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                cardVariantsPromise = query(`SELECT CardVariant, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} CardVariant IS NOT NULL GROUP BY CardVariant ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(cardVariantsPromise);
             }
 
             if (filterType === 'teams' || !filterType) {
-                teamsPromise = query(`SELECT Team as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Team IS NOT NULL GROUP BY Team ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                teamsPromise = query(`SELECT Team, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Team IS NOT NULL GROUP BY Team ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(teamsPromise);
             }
 
             if (filterType === 'colorPatterns' || !filterType) {
-                colorPatternsPromise = query(`SELECT ColorPattern as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} ColorPattern IS NOT NULL GROUP BY ColorPattern ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                colorPatternsPromise = query(`SELECT ColorPattern, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} ColorPattern IS NOT NULL GROUP BY ColorPattern ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(colorPatternsPromise);
             }
 
             if (filterType === 'numbered' || !filterType) {
-                numberedPromise = query(`SELECT Numbered as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Numbered IS NOT NULL GROUP BY Numbered ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                numberedPromise = query(`SELECT Numbered, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Numbered IS NOT NULL GROUP BY Numbered ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(numberedPromise);
             }
 
             if (filterType === 'auto' || !filterType) {
-                autoPromise = query(`SELECT Auto as name, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Auto IS NOT NULL GROUP BY Auto ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
+                autoPromise = query(`SELECT Auto, COUNT(*) as count ${baseSql} ${whereSql} ${whereSql ? 'AND' : 'WHERE'} Auto IS NOT NULL GROUP BY Auto ORDER BY count DESC LIMIT ? OFFSET ?`, [...values, filterLimitNum, filterOffset]);
                 filtersPromises.push(autoPromise);
             }
 

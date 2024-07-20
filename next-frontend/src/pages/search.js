@@ -797,6 +797,7 @@ const SearchPage = () => {
                         </label>
                       </div>
                     ))}
+
                   {(filterKey === 'cardSets' && hasMoreCardSets) ||
                     (filterKey === 'cardVariants' && hasMoreCardVariants) ||
                     (filterKey === 'cardYears' && hasMoreCardYears) ||
