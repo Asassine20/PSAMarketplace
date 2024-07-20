@@ -88,10 +88,11 @@ const SearchPage = () => {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isLoadingFilters, setIsLoadingFilters] = useState(false);
   const [hasMore, setHasMore] = useState({
+    sports: true,
     cardSets: true,
-    cardVariants: true,
     cardYears: true,
     cardColors: true,
+    cardVariants: true,
     teams: true,
     colorPatterns: true,
     numbered: true,
@@ -99,10 +100,11 @@ const SearchPage = () => {
   });
 
   const [filterPages, setFilterPages] = useState({
+    sports: 1,
     cardSets: 1,
-    cardVariants: 1,
     cardYears: 1,
     cardColors: 1,
+    cardVariants: 1,
     teams: 1,
     colorPatterns: 1,
     numbered: 1,
@@ -111,6 +113,7 @@ const SearchPage = () => {
   const filterLimit = 50;
   const resultsPerPage = 10;
 
+  // Handles the filters when they are changes. Updates url to include filter parameters.
   const updateFiltersInUrl = (updatedFilters) => {
     const queryParameters = new URLSearchParams({
       cardName: updatedFilters.cardName || '',
@@ -120,6 +123,7 @@ const SearchPage = () => {
     if (updatedFilters.inStock && updatedFilters.sortBy) {
       queryParameters.append('sortBy', updatedFilters.sortBy);
     }
+    // Loops through each filter and appends the selected values to the url
     Object.keys(updatedFilters).forEach((filterKey) => {
       const filterValue = updatedFilters[filterKey];
       if (Array.isArray(filterValue) && filterValue.length) {
@@ -131,6 +135,7 @@ const SearchPage = () => {
     router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
   };
 
+  // Updates the card results based on the filters selected
   const fetchFilteredCards = async (filtersToApply) => {
     setIsLoadingCards(true);
 
@@ -188,8 +193,8 @@ const SearchPage = () => {
         ...prevOptions,
         [filterType]: page === 1 ? data[filterType] : [...new Set([...prevOptions[filterType], ...data[filterType]])]
       }));
-      setHasMore(prevHasMore => ({
-        ...prevHasMore,
+      setHasMore(prev => ({
+        ...prev,
         [filterType]: data[filterType].length >= filterLimit
       }));
     } else {
@@ -198,11 +203,8 @@ const SearchPage = () => {
     setIsLoadingFilters(false);
   };
 
-  const fetchAllFilterOptions = (filtersToApply) => {
-    const filterTypes = Object.keys(filterOptions);
-    filterTypes.forEach(filterType => {
-      fetchFilterOptions(filterType, filtersToApply, 1);
-    });
+  const fetchAllFilterOptions = async (filtersToApply) => {
+    await Promise.all(Object.keys(filterOptions).map(filterType => fetchFilterOptions(filterType, filtersToApply, 1)));
   };
 
   useEffect(() => {
@@ -220,19 +222,8 @@ const SearchPage = () => {
         ...prevTerms,
         [filterKey]: value,
       }));
-      setFilters((prevFilters) => {
-        const updatedFilters = {
-          ...prevFilters,
-          [filterKey]: value,
-          page: '1',
-          sortBy: prevFilters.inStock ? prevFilters.sortBy : '',
-        };
-        updateFiltersInUrl(updatedFilters);
-        fetchFilteredCards(updatedFilters);
-        return updatedFilters;
-      });
+      fetchFilterOptions(filterKey, filters, 1);
     }, 300);
-
     debounceChange(searchTerm);
   };
 
@@ -248,7 +239,6 @@ const SearchPage = () => {
       numbered: '',
       auto: '',
     });
-
     setFilters((prevFilters) => {
       const updatedFilters = {
         ...prevFilters,
@@ -259,6 +249,7 @@ const SearchPage = () => {
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
+      fetchAllFilterOptions(updatedFilters);
       return updatedFilters;
     });
   };
@@ -269,11 +260,12 @@ const SearchPage = () => {
         ...prevFilters,
         inStock: !prevFilters.inStock,
         page: '1',
-        cardName: prevFilters.cardName,
-        sortBy: '',
+        cardName: prevFilters.cardName, // Preserve the cardName parameter
+        sortBy: '', // Reset sortBy to default
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
+      fetchAllFilterOptions(updatedFilters);
       return updatedFilters;
     });
   };
@@ -284,10 +276,11 @@ const SearchPage = () => {
         ...prevFilters,
         cardName: cardName,
         page: '1',
-        inStock: prevFilters.inStock,
+        inStock: prevFilters.inStock, // Preserve inStock value
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
+      fetchAllFilterOptions(updatedFilters);
       return updatedFilters;
     });
   };
@@ -371,118 +364,39 @@ const SearchPage = () => {
   const totalPages = Math.ceil(totalCount / resultsPerPage);
 
   const observers = useRef({});
-  const lastElementRefs = useRef({});
-
-  const createObserver = (node, filterType) => {
-    if (isLoadingFilters) return;
-    if (observers.current[filterType]) observers.current[filterType].disconnect();
-    observers.current[filterType] = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && entries[0].intersectionRatio > 0) {
-        setTimeout(() => {
-          setFilterPages(prevPages => ({
-            ...prevPages,
-            [filterType]: prevPages[filterType] + 1
-          }));
-        }, 500);
-      }
-    }, { rootMargin: '100px' });
-    if (node) observers.current[filterType].observe(node);
+  const lastElementRefs = {
+    sports: useCallback(node => createObserver(node, 'sports'), [isLoadingFilters, hasMore.sports]),
+    cardSets: useCallback(node => createObserver(node, 'cardSets'), [isLoadingFilters, hasMore.cardSets]),
+    cardYears: useCallback(node => createObserver(node, 'cardYears'), [isLoadingFilters, hasMore.cardYears]),
+    cardColors: useCallback(node => createObserver(node, 'cardColors'), [isLoadingFilters, hasMore.cardColors]),
+    cardVariants: useCallback(node => createObserver(node, 'cardVariants'), [isLoadingFilters, hasMore.cardVariants]),
+    teams: useCallback(node => createObserver(node, 'teams'), [isLoadingFilters, hasMore.teams]),
+    colorPatterns: useCallback(node => createObserver(node, 'colorPatterns'), [isLoadingFilters, hasMore.colorPatterns]),
+    numbered: useCallback(node => createObserver(node, 'numbered'), [isLoadingFilters, hasMore.numbered]),
+    auto: useCallback(node => createObserver(node, 'auto'), [isLoadingFilters, hasMore.auto]),
   };
 
-  const cardSetsScrollRef = useRef(null);
-  const cardVariantsScrollRef = useRef(null);
-  const cardYearsScrollRef = useRef(null);
-  const cardColorsScrollRef = useRef(null);
-  const teamsScrollRef = useRef(null);
-  const colorPatternsScrollRef = useRef(null);
-  const numberedScrollRef = useRef(null);
-  const autoScrollRef = useRef(null);
+  const createObserver = (node, filterType) => {
+    if (!node || isLoadingFilters || !hasMore[filterType]) return;
+    if (observers.current[filterType]) observers.current[filterType].disconnect();
+    observers.current[filterType] = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setFilterPages(prevPages => ({
+          ...prevPages,
+          [filterType]: prevPages[filterType] + 1
+        }));
+      }
+    }, { rootMargin: '100px' });
+    observers.current[filterType].observe(node);
+  };
 
   useEffect(() => {
-    Object.keys(filterOptions).forEach(filterKey => {
-      if (filterPages[filterKey] > 1) {
-        fetchFilterOptions(filterKey, filters, filterPages[filterKey]);
+    Object.keys(filterPages).forEach(filterType => {
+      if (filterPages[filterType] > 1) {
+        fetchFilterOptions(filterType, filters, filterPages[filterType]);
       }
     });
   }, [filterPages]);
-
-  const handlePullToRefresh = () => {
-    Object.keys(filterOptions).forEach(filterKey => {
-      if (observers.current[filterKey]) {
-        if (
-          (filterKey === 'cardSets' && cardSetsScrollRef.current && cardSetsScrollRef.current.scrollTop + cardSetsScrollRef.current.clientHeight >= cardSetsScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'cardVariants' && cardVariantsScrollRef.current && cardVariantsScrollRef.current.scrollTop + cardVariantsScrollRef.current.clientHeight >= cardVariantsScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'cardYears' && cardYearsScrollRef.current && cardYearsScrollRef.current.scrollTop + cardYearsScrollRef.current.clientHeight >= cardYearsScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'cardColors' && cardColorsScrollRef.current && cardColorsScrollRef.current.scrollTop + cardColorsScrollRef.current.clientHeight >= cardColorsScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'teams' && teamsScrollRef.current && teamsScrollRef.current.scrollTop + teamsScrollRef.current.clientHeight >= teamsScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'colorPatterns' && colorPatternsScrollRef.current && colorPatternsScrollRef.current.scrollTop + colorPatternsScrollRef.current.clientHeight >= colorPatternsScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'numbered' && numberedScrollRef.current && numberedScrollRef.current.scrollTop + numberedScrollRef.current.clientHeight >= numberedScrollRef.current.scrollHeight - 50) ||
-          (filterKey === 'auto' && autoScrollRef.current && autoScrollRef.current.scrollTop + autoScrollRef.current.clientHeight >= autoScrollRef.current.scrollHeight - 50)
-        ) {
-          setFilterPages(prevPages => ({
-            ...prevPages,
-            [filterKey]: prevPages[filterKey] + 1
-          }));
-        }
-      }
-    });
-  };
-
-  useEffect(() => {
-    if (cardSetsScrollRef.current) {
-      cardSetsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => cardSetsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.cardSets]);
-
-  useEffect(() => {
-    if (cardVariantsScrollRef.current) {
-      cardVariantsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => cardVariantsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.cardVariants]);
-
-  useEffect(() => {
-    if (cardYearsScrollRef.current) {
-      cardYearsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => cardYearsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.cardYears]);
-
-  useEffect(() => {
-    if (cardColorsScrollRef.current) {
-      cardColorsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => cardColorsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.cardColors]);
-
-  useEffect(() => {
-    if (teamsScrollRef.current) {
-      teamsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => teamsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.teams]);
-
-  useEffect(() => {
-    if (colorPatternsScrollRef.current) {
-      colorPatternsScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => colorPatternsScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.colorPatterns]);
-
-  useEffect(() => {
-    if (numberedScrollRef.current) {
-      numberedScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => numberedScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.numbered]);
-
-  useEffect(() => {
-    if (autoScrollRef.current) {
-      autoScrollRef.current.addEventListener('scroll', handlePullToRefresh);
-      return () => autoScrollRef.current.removeEventListener('scroll', handlePullToRefresh);
-    }
-  }, [hasMore.auto]);
 
   const handleOutOfStockClick = () => {
     setFilters((prevFilters) => {
@@ -493,6 +407,7 @@ const SearchPage = () => {
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
+      fetchAllFilterOptions(updatedFilters);
       return updatedFilters;
     });
   };
@@ -552,15 +467,7 @@ const SearchPage = () => {
                 </label>
               </div>
               {Object.keys(filterOptions).map((filterKey) => (
-                <div key={filterKey} className={`${styles.filterCategory}`} ref={
-                  filterKey === 'cardSets' ? cardSetsScrollRef :
-                    filterKey === 'cardVariants' ? cardVariantsScrollRef :
-                      filterKey === 'cardYears' ? cardYearsScrollRef :
-                        filterKey === 'cardColors' ? cardColorsScrollRef :
-                          filterKey === 'teams' ? teamsScrollRef :
-                            filterKey === 'colorPatterns' ? colorPatternsScrollRef :
-                              filterKey === 'numbered' ? numberedScrollRef :
-                                filterKey === 'auto' ? autoScrollRef : null}>
+                <div key={filterKey} className={`${styles.filterCategory}`}>
                   <h4>{filterTitles[filterKey]}</h4>
                   <SearchInput
                     onChange={(value) => handleFilterSearchChange(filterKey, value)}
@@ -571,17 +478,13 @@ const SearchPage = () => {
                     .filter(option =>
                       option &&
                       typeof option.name === 'string' &&
-                      option.name.toLowerCase().includes(filterSearchTerms[filterKey]?.toLowerCase() || '')
+                      option.name.toLowerCase().includes(filterSearchTerms[filterKey].toLowerCase())
                     )
                     .map((option, index) => (
                       <div
                         key={index}
                         className={styles.filterOption}
-                        ref={
-                          (filterKey === 'cardSets' || filterKey === 'cardVariants' || filterKey === 'cardYears' || filterKey === 'cardColors' ||
-                            filterKey === 'teams' || filterKey === 'colorPatterns' || filterKey === 'numbered' || filterKey === 'auto') &&
-                            index === filterOptions[filterKey].length - 1 ? (node) => createObserver(node, filterKey) : null
-                        }
+                        ref={index === filterOptions[filterKey].length - 1 ? lastElementRefs[filterKey] : null}
                       >
                         <label>
                           <input
@@ -598,6 +501,7 @@ const SearchPage = () => {
                         </label>
                       </div>
                     ))}
+
                   {hasMore[filterKey] && (
                     <div className={styles.scrollIndicator}>
                       {isLoadingFilters ? <Spinner /> : <MdKeyboardArrowDown size={24} />}
