@@ -228,33 +228,39 @@
         }
     }
 
-    document.getElementById('contactBuyerBtn').addEventListener('click', function () {
-        const orderId = '{{order.OrderNumber}}';
-        const buyerId = this.getAttribute('data-buyer-id'); // Get buyer ID from data attribute
-        const sellerId = '{{user.id}}';
+document.getElementById('contactBuyerBtn').addEventListener('click', function () {
+    const orderId = '{{order.OrderNumber}}';
+    const buyerId = this.getAttribute('data-buyer-id'); // Get buyer ID from data attribute
+    const sellerId = '{{user.id}}';
+    const message = prompt('Enter your message:'); // Prompt for the message
 
-        if (!buyerId) {
-            alert('Buyer ID is missing');
-            return;
+    if (!buyerId) {
+        alert('Buyer ID is missing');
+        return;
+    }
+
+    if (!message) {
+        alert('Message cannot be empty');
+        return;
+    }
+
+    fetch('/admin/create-or-find-conversation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ orderNumber: orderId, buyerId: buyerId, subject: 'General Message', message }) // Include subject and message
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.conversationId) {
+            window.location.href = `/admin/message-details/${data.conversationId}`; // Redirect to the conversation details page
+        } else {
+            alert('Failed to create or find conversation');
         }
-
-        fetch('/admin/create-or-find-conversation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ orderNumber: orderId, buyerId: buyerId, subject: 'General Message' }) // Include subject
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.conversationId) {
-                window.location.href = `/admin/message-details/${data.conversationId}`; // Redirect to the conversation details page
-            } else {
-                alert('Failed to create or find conversation');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
+    })
+    .catch(error => console.error('Error:', error));
+});
 
     function downloadPackingSlip(orderNumber) {
         const url = `/admin/download-order?orderNumber=${orderNumber}`;

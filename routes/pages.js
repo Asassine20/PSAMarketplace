@@ -1167,7 +1167,7 @@ router.get('/admin/message-details/:conversationId', authenticateToken, notifica
         const conversationAndMessagesQuery = `
             SELECT m.MessageID, m.SenderID, m.MessageText, m.Timestamp, 
                    CONCAT(a.FirstName, ' ', a.LastName) AS SenderName,
-                   c.Subject, o.OrderNumber
+                   c.Subject, c.SellerID, c.BuyerID, o.OrderNumber
             FROM Messages m
             JOIN Users u ON m.SenderID = u.UserID
             JOIN Addresses a ON u.UserID = a.UserID AND a.IsPrimary = 1  
@@ -1178,17 +1178,24 @@ router.get('/admin/message-details/:conversationId', authenticateToken, notifica
 
         let messages = await db.query(conversationAndMessagesQuery, [conversationId]);
 
-        const orderNumber = messages.length > 0 ? messages[0].OrderNumber : null;
-        const [conversation] = messages.length > 0 ? [{ Subject: messages[0].Subject }] : [{}];
+        if (!messages.length) {
+            return res.status(404).send('Conversation not found');
+        }
+
+        const conversation = {
+            Subject: messages[0].Subject,
+            SellerID: messages[0].SellerID,
+            BuyerID: messages[0].BuyerID,
+            OrderNumber: messages[0].OrderNumber
+        };
 
         res.render('message-details', {
             userId,
             conversationId,
-            conversation: conversation,
-            orderNumber,
+            conversation,
             messages: messages.map(message => ({
                 ...message,
-                isFromSeller: message.SenderID === userId,
+                isFromSeller: message.SenderID === conversation.SellerID, // Check if the message is from the seller
             }))
         });
     } catch (error) {
@@ -1197,20 +1204,25 @@ router.get('/admin/message-details/:conversationId', authenticateToken, notifica
     }
 });
 
-
 router.post('/admin/send-message', authenticateToken, notificationCounts, async (req, res) => {
     const { conversationId, messageText } = req.body;
-    const sellerId = req.user.id; // Assuming this is your seller's ID
+    const userId = req.user.id;
 
     try {
-        // Assume BuyerID needs to be fetched based on the conversationId
-        const { BuyerID } = await fetchBuyerIdFromConversation(conversationId);
+        // Fetch the conversation to get BuyerID and SellerID
+        const conversationQuery = `SELECT SellerID, BuyerID FROM Conversations WHERE ConversationID = ?`;
+        const [conversation] = await db.query(conversationQuery, [conversationId]);
+
+        if (!conversation) {
+            return res.status(404).send('Conversation not found');
+        }
+
+        const senderId = userId; // Sender is the current logged-in user
 
         const insertMessageQuery = `
-            INSERT INTO Messages (ConversationID, SenderID, MessageText, Timestamp, ResponseNeeded)
-            VALUES (?, ?, ?, NOW(), FALSE)`;
-        await db.query(insertMessageQuery, [conversationId, sellerId, messageText]);
-
+            INSERT INTO Messages (ConversationID, SenderID, MessageText, Timestamp, IsRead, ResponseNeeded)
+            VALUES (?, ?, ?, NOW(), 0, FALSE)`;
+        await db.query(insertMessageQuery, [conversationId, senderId, messageText]);
 
         // Redirect back to the message-details page or handle as needed
         res.redirect(`/admin/message-details/${conversationId}`);
@@ -1228,7 +1240,7 @@ async function fetchBuyerIdFromConversation(conversationId) {
 }
 
 router.post('/admin/create-or-find-conversation', authenticateToken, notificationCounts, async (req, res) => {
-    const { orderNumber, buyerId, subject: receivedSubject } = req.body;
+    const { orderNumber, buyerId, subject: receivedSubject, message } = req.body;
     const sellerId = req.user.id;
 
     const allowedSubjects = ['General Message', 'Request To Cancel', 'Condition Issue', 'Item Never Arrived', 'Change Address', 'Items Missing', 'Received Wrong Item(s)'];
@@ -1238,15 +1250,21 @@ router.post('/admin/create-or-find-conversation', authenticateToken, notificatio
         let query = `SELECT ConversationID FROM Conversations WHERE OrderNumber = ? AND BuyerID = ? AND SellerID = ? LIMIT 1`;
         let [existingConversation] = await db.query(query, [orderNumber, buyerId, sellerId]);
 
+        let conversationId;
         if (!existingConversation) {
             query = `INSERT INTO Conversations (OrderNumber, SellerID, BuyerID, Subject) VALUES (?, ?, ?, ?)`;
             const result = await db.query(query, [orderNumber, sellerId, buyerId, subject]);
-            const newConversationId = result.insertId;
-
-            res.json({ conversationId: newConversationId });
+            conversationId = result.insertId;
         } else {
-            res.json({ conversationId: existingConversation.ConversationID });
+            conversationId = existingConversation.ConversationID;
         }
+
+        // Insert the message with isRead set to 1 and correct SenderID
+        query = `INSERT INTO Messages (ConversationID, SenderID, MessageText, IsRead) VALUES (?, ?, ?, ?)`;
+        const senderId = req.user.id === sellerId ? sellerId : buyerId;
+        await db.query(query, [conversationId, senderId, message, 1]);
+
+        res.json({ conversationId });
     } catch (error) {
         console.error('Error creating or finding conversation:', error);
         res.status(500).send('Error processing request');
@@ -1321,11 +1339,9 @@ async function getOrderDetails(orderNumber) {
 
 router.get('/admin/download-order', authenticateToken, notificationCounts, async (req, res) => {
     const orderNumber = req.query.orderNumber;
-    console.log('Requested orderNumber:', orderNumber);
 
     try {
         const orderDetails = await getOrderDetails(orderNumber);
-        console.log('Order details:', orderDetails);
         if (!orderDetails) {
             return res.status(404).send('Order not found');
         }

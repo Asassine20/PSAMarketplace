@@ -11,6 +11,8 @@ const cookieParser = require('cookie-parser');
 const articlesRoutes = require('./routes/articles');
 const homePageRoutes = require('./routes/homepage');
 const hbs = require('hbs');
+const handlebars = require('handlebars');
+
 server.use(session({
     secret: '123',  // This is a secret key used to sign the session ID cookie.
     resave: false,              // Forces the session to be saved back to the session store, even if the session was never modified during the request.
@@ -19,9 +21,7 @@ server.use(session({
 }));
 
 server.use(cookieParser());
-
 server.use(compression());
-
 server.use(express.static(publicDirectory));
 server.use(express.static('public'));
 
@@ -34,16 +34,17 @@ server.use(express.urlencoded({ extended: true }));
 server.use(express.json());
 server.use(authRoutes);
 server.use(homePageRoutes);
-//Define routes
+
+// Define routes
 server.use('/', require('./routes/pages'));
 server.use('/articles', articlesRoutes);
-
 server.use('/auth', require('./routes/auth'));
 
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
+// Handlebars helpers registration
 hbs.registerHelper('plus', function(value, increment) {
     return value + increment;
 });
@@ -65,7 +66,7 @@ hbs.registerHelper('formatDate', function(date) {
       minute: '2-digit'
     };
     return new Date(date).toLocaleDateString('en-US', options);
-  });
+});
 
 hbs.registerHelper('formatDateNoTime', function(date) {
     const options = { 
@@ -74,8 +75,8 @@ hbs.registerHelper('formatDateNoTime', function(date) {
       day: 'numeric',
     };
     return new Date(date).toLocaleDateString('en-US', options);
-  });
-  
+});
+
 hbs.registerHelper('displayShippingMethod', function(shippedWithTracking) {
     return shippedWithTracking ? "Shipped with tracking" : "Shipped without tracking";
 });
@@ -134,16 +135,39 @@ hbs.registerHelper('formatCurrency', function(value) {
 hbs.registerHelper('inc', function(value) {
     return parseInt(value) + 1;
 });
+
 hbs.registerHelper('encodeURIComponent', function(context) {
     return encodeURIComponent(context);
 });
-
 
 hbs.registerHelper('slice', function(content, options) {
     const limit = options.hash.limit;
     return content.length > limit ? content.substring(0, limit) + "..." : content;
 });
 
+// Register the ifCond helper
+hbs.registerHelper('ifCond', function (v1, operator, v2, options) {
+    switch (operator) {
+        case '==':
+            return (v1 == v2) ? options.fn(this) : options.inverse(this);
+        case '===':
+            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+        case '!=':
+            return (v1 != v2) ? options.fn(this) : options.inverse(this);
+        case '!==':
+            return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+        case '<':
+            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+        case '<=':
+            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+        case '>':
+            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+        case '>=':
+            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+        default:
+            return options.inverse(this);
+    }
+});
+
 hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views');
 hbs.registerPartials('/Users/andrewsassine/PSAMarketplace/views/articles');
-
