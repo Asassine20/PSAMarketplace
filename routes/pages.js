@@ -953,10 +953,9 @@ router.get('/admin/orders', authenticateToken, notificationCounts, async (req, r
             SELECT Orders.OrderNumber, Orders.SalePrice, Orders.OrderDate, 
                    Addresses.FirstName, Addresses.LastName, Shipping.ShipmentStatus
             FROM Orders
-            LEFT JOIN Users ON Orders.BuyerID = Users.UserID
-            LEFT JOIN Addresses ON Users.UserID = Addresses.UserID
+            LEFT JOIN Addresses ON Orders.AddressID = Addresses.AddressID
             LEFT JOIN Shipping ON Orders.OrderNumber = Shipping.OrderNumber
-            WHERE Orders.SellerID = ? AND Addresses.IsPrimary = 1  
+            WHERE Orders.SellerID = ?
             ORDER BY 
                 CASE 
                     WHEN Shipping.ShipmentStatus = 'Awaiting shipment' THEN 1
@@ -966,6 +965,8 @@ router.get('/admin/orders', authenticateToken, notificationCounts, async (req, r
             LIMIT ? OFFSET ?
         `;
         const orders = await db.query(query, [sellerId, limit, offset]);
+
+        console.log("Fetched Orders:", orders);  // Log the fetched orders for debugging
 
         const countQuery = 'SELECT COUNT(*) AS totalOrders FROM Orders WHERE SellerID = ?';
         const totalResult = await db.query(countQuery, [sellerId]);
@@ -997,7 +998,7 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
             Addresses.State, Addresses.ZipCode, Addresses.Country
         FROM Orders
         JOIN Addresses ON Orders.AddressID = Addresses.AddressID
-        WHERE Orders.OrderNumber = ? AND Addresses.IsPrimary = 1
+        WHERE Orders.OrderNumber = ?
     `;
 
         const orderDetails = await db.query(orderDetailsQuery, [orderNumber]);
@@ -1067,6 +1068,7 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
         res.status(500).send('Error fetching order details');
     }
 });
+
 
 router.post('/admin/update-shipping-details', authenticateToken, notificationCounts, async (req, res) => {
     const { orderNumber, ShippedWithTracking, TrackingNumber, EstimatedDeliveryDate, Carrier, CarrierTrackingURL, ShipmentStatus } = req.body;
