@@ -255,15 +255,15 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
         const showPrevious = page > 1;
         const showNext = page < totalPages;
 
-        const cardSetsData = await db.query('SELECT DISTINCT CardSet FROM Card');
+        const cardSetsData = await db.query('SELECT DISTINCT CardSet FROM Card WHERE CardSet IS NOT NULL AND CardSet != \'\' ORDER BY CardSet DESC');
         const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card WHERE CardYear IS NOT NULL AND CardYear != \'\' ORDER BY CardYear DESC');
-        const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');
+        const sportsData = await db.query('SELECT DISTINCT Sport FROM Card WHERE Sport IS NOT NULL AND Sport != \'\' ORDER BY Sport DESC');
         const cardColorsData = await db.query('SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL AND CardColor != \'\'');
-        const cardVariantsData = await db.query('SELECT DISTINCT CardVariant FROM Card WHERE CardVariant IS NOT NULL');
+        const cardVariantsData = await db.query('SELECT DISTINCT CardVariant FROM Card WHERE CardVariant IS NOT NULL AND CardVariant != \'\'');
         const teamsData = await db.query('SELECT DISTINCT Team FROM Card WHERE Team IS NOT NULL AND Team != \'\''); 
         const numberedData = await db.query('SELECT DISTINCT Numbered FROM Card WHERE Numbered IS NOT NULL AND Numbered != \'\'');
         const colorPatternsData = await db.query('SELECT DISTINCT ColorPattern FROM Card WHERE ColorPattern IS NOT NULL AND ColorPattern != \'\'');
-        const autoData = await db.query('SELECT DISTINCT Auto FROM Card');
+        const autoData = await db.query('SELECT DISTINCT Auto FROM Card WHERE Auto IS NOT NULL AND Auto != \'\'');
 
         const inventoryQuery = 'SELECT *, (ListingID IS NOT NULL) AS isInStock FROM Inventory WHERE SellerID = ? AND Sold != 1';
         const inventoryItems = await db.query(inventoryQuery, [sellerId]);
@@ -278,19 +278,16 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             username: req.user.username,
             cards: updatedCards,
             searchTerm,
-            cardSet,
-            sport,
-            auto,
             inStock: inStock,
-            cardSets: cardSetsData.map(row => row.CardSet),
+            cardSets: cardSetsData.map(row => row.CardSet).filter(cardSet => cardSet.trim() !==''),
             cardYears: cardYearsData.map(row => row.CardYear).filter(cardYear => cardYear.trim() !==''),
-            sports: sportsData.map(row => row.Sport),
+            sports: sportsData.map(row => row.Sport).filter(sport => sport.trim() !==''),
             cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
-            cardVariants: cardVariantsData.map(row => row.CardVariant),
+            cardVariants: cardVariantsData.map(row => row.CardVariant).filter(cardVariant => cardVariant.trim() !== ''),
             teams: teamsData.map(row => row.Team).filter(team => team.trim() !== ''),
             numberedOptions: numberedData.map(row => row.Numbered).filter(numbered => numbered.trim() !== ''),
             colorPatterns: colorPatternsData.map(row => row.ColorPattern).filter(colorPattern => colorPattern.trim() !==''),
-            autoOptions: autoData.map(row => row.Auto),
+            autoOptions: autoData.map(row => row.Auto).filter(auto => auto.trim() !== ''),
             pages: pages,
             currentPage: page,
             totalPages,
