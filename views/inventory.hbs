@@ -102,9 +102,8 @@
                 <label for="auto">Auto:</label>
                 <select id="auto" name="auto" class="filter-input fixed-width-dropdown">
                     <option value="">All Auto</option>
-                    {{#each autoOptions}}
-                    <option value="{{this}}" {{#if (eq this ../auto)}}selected{{/if}}>{{this}}</option>
-                    {{/each}}
+                    <option value="1" {{#if (eq auto '1')}}selected{{/if}}>Auto</option>
+                    <option value="0" {{#if (eq auto '0')}}selected{{/if}}>Non Auto</option>
                 </select>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -128,12 +127,12 @@
                     <div class="page-size-selector">
                         <label for="pageSize">Items per page:</label>
                         <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
-                            <option value="10" {{#if (eq pageSize '10' )}}selected{{/if}}>10</option>
-                            <option value="25" {{#if (eq pageSize '25' )}}selected{{/if}}>25</option>
-                            <option value="50" {{#if (eq pageSize '50' )}}selected{{/if}}>50</option>
-                            <option value="100" {{#if (eq pageSize '100' )}}selected{{/if}}>100</option>
-                            <option value="250" {{#if (eq pageSize '250' )}}selected{{/if}}>250</option>
-                            <option value="500" {{#if (eq pageSize '500' )}}selected{{/if}}>500</option>
+                            <option value="10" {{#if (eq pageSize '10')}}selected{{/if}}>10</option>
+                            <option value="25" {{#if (eq pageSize '25')}}selected{{/if}}>25</option>
+                            <option value="50" {{#if (eq pageSize '50')}}selected{{/if}}>50</option>
+                            <option value="100" {{#if (eq pageSize '100')}}selected{{/if}}>100</option>
+                            <option value="250" {{#if (eq pageSize '250')}}selected{{/if}}>250</option>
+                            <option value="500" {{#if (eq pageSize '500')}}selected{{/if}}>500</option>
                         </select>
                     </div>
                 </div>
@@ -169,7 +168,7 @@
                     <td>{{this.Team}}</td>
                     <td>{{this.Numbered}}</td>
                     <td>{{this.ColorPattern}}</td>
-                    <td>{{this.Auto}}</td>
+                    <td>{{#if (eq this.Auto '1')}}Auto{{else}}Non Auto{{/if}}</td>
                     <td class="button-cell">
                         <button type="button"
                             onclick="window.location.href='/admin/update-inventory-pricing?cardId={{this.CardID}}'"
@@ -774,7 +773,7 @@
                 <td>${card.Team || ''}</td>
                 <td>${card.Numbered || ''}</td>
                 <td>${card.ColorPattern || ''}</td>
-                <td>${card.Auto || ''}</td>
+                <td>${card.Auto === '1' ? 'Auto' : 'Non Auto'}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/admin/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
@@ -868,3 +867,5 @@
         });
     </script>
 </body>
+
+</html>

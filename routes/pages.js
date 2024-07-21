@@ -216,9 +216,9 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
         const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');
         const cardColorsData = await db.query('SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL AND CardColor != \'\'');
         const cardVariantsData = await db.query('SELECT DISTINCT CardVariant FROM Card WHERE CardVariant IS NOT NULL');
-        const teamsData = await db.query('SELECT DISTINCT Team FROM Card');
-        const numberedData = await db.query('SELECT DISTINCT Numbered FROM Card');
-        const colorPatternsData = await db.query('SELECT DISTINCT ColorPattern FROM Card');
+        const teamsData = await db.query('SELECT DISTINCT Team FROM Card WHERE Team IS NOT NULL AND Team != \'\''); 
+        const numberedData = await db.query('SELECT DISTINCT Numbered FROM Card WHERE Numbered IS NOT NULL AND Numbered != \'\'');
+        const colorPatternsData = await db.query('SELECT DISTINCT ColorPattern FROM Card WHERE ColorPattern IS NOT NULL AND ColorPattern != \'\'');
         const autoData = await db.query('SELECT DISTINCT Auto FROM Card');
 
         const inventoryQuery = 'SELECT *, (ListingID IS NOT NULL) AS isInStock FROM Inventory WHERE SellerID = ?';
@@ -237,18 +237,15 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             cardSet,
             cardYear,
             sport,
-            team,
-            numbered,
-            colorPattern,
             auto,
             cardSets: cardSetsData.map(row => row.CardSet),
             cardYears: cardYearsData.map(row => row.CardYear),
             sports: sportsData.map(row => row.Sport),
             cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
             cardVariants: cardVariantsData.map(row => row.CardVariant),
-            teams: teamsData.map(row => row.Team),
-            numberedOptions: numberedData.map(row => row.Numbered),
-            colorPatterns: colorPatternsData.map(row => row.ColorPattern),
+            teams: teamsData.map(row => row.Team).filter(team => team.trim() !== ''),
+            numberedOptions: numberedData.map(row => row.Numbered).filter(numbered => numbered.trim() !== ''),
+            colorPatterns: colorPatternsData.map(row => row.ColorPattern).filter(colorPattern => colorPattern.trim() !==''),
             autoOptions: autoData.map(row => row.Auto),
             pages: pages,
             currentPage: page,
