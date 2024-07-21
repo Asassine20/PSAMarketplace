@@ -67,6 +67,7 @@ exports.notificationCounts = async (req, res, next) => {
     }
 
     try {
+        // Query to count orders that have not been shipped with tracking
         const ordersQuery = `
             SELECT COUNT(*) AS count
             FROM Shipping
@@ -77,8 +78,9 @@ exports.notificationCounts = async (req, res, next) => {
         const ordersCount = ordersResults[0]?.count || 0;
         res.locals.ordersCount = ordersCount;
 
+        // Query to count distinct conversations with unread messages
         const messagesQuery = `
-            SELECT COUNT(*) AS count
+            SELECT COUNT(DISTINCT Conversations.ConversationID) AS count
             FROM Messages
             INNER JOIN Conversations ON Messages.ConversationID = Conversations.ConversationID
             WHERE Conversations.SellerID = ? AND Messages.IsRead = 0
@@ -93,6 +95,7 @@ exports.notificationCounts = async (req, res, next) => {
         next(err);
     }
 };
+
 
 
 
