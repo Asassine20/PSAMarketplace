@@ -205,40 +205,38 @@ exports.login = (req, res) => {
 
         // Create Refresh Token
         const refreshToken = jwt.sign(user, process.env.JWT_REFRESH_SECRET, {
-            expiresIn: '7d'  // e.g., 7 days
+            expiresIn: '30d'  // e.g., 30 days
         });
 
         // Send tokens to client
         res.cookie('jwt', accessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
-        res.cookie('refreshJwt', refreshToken, { httpOnly: true, maxAge: 604800000 }); // 7 days
+        res.cookie('refreshJwt', refreshToken, { httpOnly: true, maxAge: 2592000000 }); // 30 days
 
         res.status(200).redirect("/admin/dashboard");
     });
 };
 
-
-
 exports.refreshToken = (req, res) => {
-    const { token } = req.cookies.refreshJwt;
-    if (!token) {
-        return res.status(403).json({ message: "Access Denied" });
+    const refreshToken = req.cookies.refreshJwt;
+    if (!refreshToken) {
+        return res.redirect('/login');
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
         const user = {
             id: decoded.id,
             storeName: decoded.storeName
         };
 
-        const newToken = jwt.sign(user, process.env.JWT_SECRET, {
+        const newAccessToken = jwt.sign(user, process.env.JWT_SECRET, {
             expiresIn: '15m'
         });
 
-        res.cookie('jwt', newToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
+        res.cookie('jwt', newAccessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
         res.status(200).json({ message: "Token refreshed" });
     } catch (error) {
         console.error('Error refreshing token:', error);
-        res.status(403).json({ message: "Invalid Token" });
+        res.redirect('/login');
     }
 };

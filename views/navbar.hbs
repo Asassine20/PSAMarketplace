@@ -24,3 +24,27 @@
         <li class="nav-item-container"><a href="/logout">Logout</a></li>
     </ul>
 </nav>
+
+<script>
+    // Function to refresh the token
+    async function refreshToken() {
+        try {
+            const response = await fetch('/refresh-token', {
+                method: 'POST',
+                credentials: 'include' // To include cookies in the request
+            });
+            if (response.ok) {
+                console.log('Token refreshed successfully');
+            } else {
+                console.error('Failed to refresh token');
+                window.location.href = '/login'; // Redirect to login if refresh fails
+            }
+        } catch (error) {
+            console.error('Error refreshing token:', error);
+            window.location.href = '/login'; // Redirect to login if an error occurs
+        }
+    }
+
+    // Call refreshToken every 14 minutes (before the token expires)
+    setInterval(refreshToken, 14 * 60 * 1000); // 14 minutes in milliseconds
+</script>

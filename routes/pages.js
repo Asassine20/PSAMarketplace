@@ -65,7 +65,30 @@ router.post('/check-store-name', async (req, res) => {
 router.get('/login', (req, res) => {
     res.render('login')
 });
+router.post('/refresh-token', (req, res) => {
+    const refreshToken = req.cookies.refreshJwt;
+    if (!refreshToken) {
+        return res.status(403).json({ message: "Access Denied" });
+    }
 
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const user = {
+            id: decoded.id,
+            storeName: decoded.storeName
+        };
+
+        const newAccessToken = jwt.sign(user, process.env.JWT_SECRET, {
+            expiresIn: '15m'
+        });
+
+        res.cookie('jwt', newAccessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
+        res.status(200).json({ message: "Token refreshed" });
+    } catch (error) {
+        console.error('Error refreshing token:', error);
+        res.status(403).json({ message: "Invalid Token" });
+    }
+});
 router.get('/admin/dashboard', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id; // Assuming authentication middleware sets req.user.id
 
@@ -1105,9 +1128,16 @@ router.get('/admin/messages', authenticateToken, notificationCounts, async (req,
     const offset = (page - 1) * limit;
 
     try {
-        // Query to get the conversations count for the active user as a seller
-        const countQuery = `SELECT COUNT(*) AS conversationCount FROM Conversations WHERE SellerID = ?`;
-        const [countResult] = await db.query(countQuery, [userId]);
+        // Query to get the conversations count for the active user as a seller or buyer
+        const countQuery = `
+            SELECT COUNT(DISTINCT c.ConversationID) AS conversationCount
+            FROM Conversations c
+            INNER JOIN Messages m ON c.ConversationID = m.ConversationID
+            INNER JOIN Users u ON m.SenderID = u.UserID
+            INNER JOIN Addresses a ON u.UserID = a.UserID
+            WHERE c.SellerID = ? OR c.BuyerID = ?
+        `;
+        const [countResult] = await db.query(countQuery, [userId, userId]);
         const conversationCount = Array.isArray(countResult) ? countResult[0].conversationCount : countResult.conversationCount;
         const totalPages = Math.ceil(conversationCount / limit);
 
@@ -1132,7 +1162,7 @@ router.get('/admin/messages', authenticateToken, notificationCounts, async (req,
             ) lm ON c.ConversationID = lm.ConversationID
             INNER JOIN Messages m ON lm.LatestMessageID = m.MessageID
             INNER JOIN Users u ON m.SenderID = u.UserID
-            INNER JOIN Addresses a ON u.UserID = a.UserID AND a.IsPrimary = 1  -- Joining Addresses table
+            INNER JOIN Addresses a ON u.UserID = a.UserID
             WHERE c.SellerID = ? OR c.BuyerID = ?
             ORDER BY m.Timestamp DESC
             LIMIT ? OFFSET ?`;

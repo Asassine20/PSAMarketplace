@@ -1,51 +1,59 @@
 const jwt = require('jsonwebtoken');
 const db = require('../db'); // Ensure this points to your database connection module
 
-exports.authenticateToken = (req, res, next) => {
+exports.authenticateToken = async (req, res, next) => {
     const accessToken = req.cookies.jwt;
-    if (!accessToken) {
-        return res.status(401).send('Access Denied: No Token Provided!');
+    const refreshToken = req.cookies.refreshJwt;
+
+    if (!accessToken && !refreshToken) {
+        return res.redirect('/login');
     }
 
-    jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-            // If token is expired, try to refresh it
-            if (err.name === 'TokenExpiredError') {
-                const refreshToken = req.cookies.refreshJwt;
-                if (!refreshToken) {
-                    return res.status(401).send('Session expired, please log in again');
-                }
-                jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
-                    if (err) {
-                        return res.status(403).send('Invalid refresh token');
+    if (accessToken) {
+        jwt.verify(accessToken, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                if (err.name === 'TokenExpiredError') {
+                    if (!refreshToken) {
+                        return res.redirect('/login');
                     }
-                    // Generate a new access token
-                    const newAccessToken = jwt.sign({ id: decoded.id, storeName: decoded.storeName }, process.env.JWT_SECRET, {
-                        expiresIn: '15m'
+                    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+                        if (err) {
+                            return res.redirect('/login');
+                        }
+                        const newAccessToken = jwt.sign({ id: decoded.id, storeName: decoded.storeName }, process.env.JWT_SECRET, { expiresIn: '15m' });
+                        res.cookie('jwt', newAccessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
+                        req.user = decoded;
+                        return next();
                     });
-                    res.cookie('jwt', newAccessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
-                    req.user = decoded;
-                    return next();
-                });
+                } else {
+                    return res.redirect('/login');
+                }
             } else {
-                return res.status(403).send('Invalid token');
+                req.user = decoded;
+                return next();
             }
-        } else {
+        });
+    } else {
+        jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+            if (err) {
+                return res.redirect('/login');
+            }
+            const newAccessToken = jwt.sign({ id: decoded.id, storeName: decoded.storeName }, process.env.JWT_SECRET, { expiresIn: '15m' });
+            res.cookie('jwt', newAccessToken, { httpOnly: true, maxAge: 900000 }); // 15 minutes
             req.user = decoded;
-            next();
-        }
-    });
+            return next();
+        });
+    }
 };
 
 exports.authenticateAdmin = async (req, res, next) => {
-    const token = req.cookies.jwt; // Assuming the token is stored in cookies
+    const token = req.cookies.jwt;
     if (!token) {
-        return res.status(401).send('Access Denied: No Token Provided');
+        return res.redirect('/login');
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Ensure your query method supports Promises or use callbacks appropriately
         const [user] = await db.query('SELECT * FROM Users WHERE UserID = ?', [decoded.id]);
         if (user && user.IsAdmin) {
             req.user = user; // Add user details to the request
@@ -54,7 +62,7 @@ exports.authenticateAdmin = async (req, res, next) => {
             return res.status(403).send('Access Denied: You do not have admin rights.');
         }
     } catch (error) {
-        res.status(400).send('Invalid Token');
+        res.redirect('/login');
     }
 };
 

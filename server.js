@@ -53,6 +53,10 @@ hbs.registerHelper('minus', function(value, decrement) {
     return value - decrement;
 });
 
+hbs.registerHelper('dec', function(value) {
+    return value - 1;
+});
+
 hbs.registerHelper('eq', function(arg1, arg2, options) {
     return arg1 === arg2;
 });
