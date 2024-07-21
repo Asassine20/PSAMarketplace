@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {{> head}}
     <title>Update Inventory</title>
 </head>
+
 <body>
     {{> navbar}}
+    <div style="padding: 10px;">
+        <button type="button" onclick="goBack()"
+            style="color: #007bff; background: none; border: none; font-size: 16px; cursor: pointer; text-decoration: underline;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left"
+                viewBox="0 0 16 16" style="margin-right: 5px;">
+                <path fill-rule="evenodd"
+                    d="M15 8a.5.5 0 0 1-.5.5H2.707l5.147 5.146a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z" />
+            </svg>
+            Back to Inventory
+        </button>
+    </div>
+
     <form action="/admin/submit-inventory" method="post">
         <div class="flex-container">
             <div class="product-info">
@@ -63,20 +77,15 @@
                         {{#each existingInventory}}
                         <tr data-listing-id="{{this.ListingID}}" data-front-image-url="{{this.FrontImageUrl}}">
                             <td>
-                                <img src="{{this.FrontImageURL}}" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: block;">
+                                <img src="{{this.FrontImageURL}}" alt="Card Image" class="card-image"
+                                    style="width: 50px; height: auto; display: block;">
                             </td>
                             <td>
                                 <select name="gradeIds[]">
-                                    <option value="7173751" {{#if (eq this.GradeID 7173751)}}selected{{/if}}>1</option>
-                                    <option value="7173752" {{#if (eq this.GradeID 7173752)}}selected{{/if}}>2</option>
-                                    <option value="7173753" {{#if (eq this.GradeID 7173753)}}selected{{/if}}>3</option>
-                                    <option value="7173754" {{#if (eq this.GradeID 7173754)}}selected{{/if}}>4</option>
-                                    <option value="7173755" {{#if (eq this.GradeID 7173755)}}selected{{/if}}>5</option>
-                                    <option value="7173756" {{#if (eq this.GradeID 7173756)}}selected{{/if}}>6</option>
-                                    <option value="7173757" {{#if (eq this.GradeID 7173757)}}selected{{/if}}>7</option>
-                                    <option value="7173758" {{#if (eq this.GradeID 7173758)}}selected{{/if}}>8</option>
-                                    <option value="7173759" {{#if (eq this.GradeID 7173759)}}selected{{/if}}>9</option>
-                                    <option value="7173760" {{#if (eq this.GradeID 7173760)}}selected{{/if}}>10</option>
+                                    {{#each ../grades}}
+                                    <option value="{{this.GradeID}}" {{#if (eq ../this.GradeID
+                                        this.GradeID)}}selected{{/if}}>{{this.GradeValue}}</option>
+                                    {{/each}}
                                 </select>
                             </td>
                             <td>
@@ -100,133 +109,135 @@
                     <button type="button" onclick="addRow()" style="border-radius: 4px;">+ Add More</button>
                 </div>
                 <div class="button-container">
-                    <button type="submit" name="action" value="clearInventory" style="border-radius: 4px;" class="clear-inventory-button">Clear Inventory</button>
-                    <button type="submit" name="action" value="updateInventory" style="border-radius: 4px;">{{#if existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
+                    <button type="submit" name="action" value="clearInventory" style="border-radius: 4px;"
+                        class="clear-inventory-button">Clear Inventory</button>
+                    <button type="submit" name="action" value="updateInventory" style="border-radius: 4px;">{{#if
+                        existingInventory}}Update{{else}}Add{{/if}} Inventory</button>
                 </div>
             </div>
         </div>
-        <script>
-            function addRow() {
-                const tableBody = document.querySelector("#grades-table tbody");
-                const newRow = document.createElement("tr");
-
-                newRow.innerHTML = `
-                    <td>
-                        <img src="" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: none;">
-                    </td>
-                    <td>
-                        <select name="gradeIds[]">
-                            <option value="7173751">10</option>
-                            <option value="7173752">9</option>
-                            <option value="7173753">8</option>
-                            <option value="7173754">7</option>
-                            <option value="7173755">6</option>
-                            <option value="7173756">5</option>
-                            <option value="7173757">4</option>
-                            <option value="7173758">3</option>
-                            <option value="7173759">2</option>
-                            <option value="7173760">1</option>
-                        </select>
-                    </td>
-                    <td>
-                        <!-- Market Price placeholder or dynamic content -->
-                    </td>
-                    <td>
-                        <input type="text" name="salePrices[]" value="">
-                    </td>
-                    <td>
-                        <input type="text" name="certNumbers[]" class="certNumberInput" value="">
-                    </td>
-                    <td>
-                        <button type="button" onclick="removeRow(this)">-</button>
-                    </td>
-                `;
-                tableBody.appendChild(newRow);
-            }
-
-            function removeRow(button) {
-                button.parentElement.parentElement.remove();
-            }
-
-            async function fetchAndDisplayImage(certNumber) {
-                if (!certNumber) return; // Skip if certNumber is empty
-                try {
-                    const response = await fetch(`/api/fetch-image?certNumber=${certNumber}`);
-                    const data = await response.json();
-                    if (data.frontImageUrl) {
-                        document.querySelector(".update-inventory-card-image").src = data.frontImageUrl;
-                        document.querySelector(".update-inventory-card-image").alt = "Fetched Card Image";
-                    }
-                } catch (error) {
-                    console.error('Error fetching image:', error);
-                }
-            }
-
-            document.addEventListener("DOMContentLoaded", function () {
-                const hasRows = document.querySelector("#grades-table tbody").childElementCount > 0;
-                if (!hasRows) {
-                    addRow();
-                }
-
-                document.querySelector("#grades-table").addEventListener('change', async function (event) {
-                    if (event.target.classList.contains('certNumberInput')) {
-                        const certNumber = event.target.value;
-                        const row = event.target.closest('tr');
-                        const imgElement = row.querySelector('.card-image');
-                        const frontImageUrl = row.getAttribute('data-front-image-url');
-
-                        if (!certNumber) {
-                            imgElement.style.display = 'none';
-                            return;
-                        }
-
-                        if (frontImageUrl && frontImageUrl !== 'undefined') {
-                            imgElement.src = frontImageUrl;
-                            imgElement.alt = "Card Image";
-                            imgElement.style.display = 'block';
-                            return;
-                        }
-
-                        try {
-                            const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
-                            const data = await response.json();
-                            if (data.frontImageUrl) {
-                                imgElement.src = data.frontImageUrl;
-                                imgElement.alt = "Card Image";
-                                imgElement.style.display = 'block';
-                            } else {
-                                imgElement.style.display = 'none';
-                            }
-                        } catch (error) {
-                            console.error('Error fetching image:', error);
-                            imgElement.style.display = 'none';
-                        }
-                    }
-                });
-
-                document.querySelectorAll('input[name="certNumbers[]"]').forEach(input => {
-                    input.addEventListener('change', async function () {
-                        const certNumber = this.value;
-                        if (!certNumber) return;
-
-                        try {
-                            const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
-                            const data = await response.json();
-                            if (data.frontImageUrl) {
-                                const imgElement = document.querySelector(".update-inventory-card-image");
-                                if (imgElement) {
-                                    imgElement.src = data.frontImageUrl;
-                                    imgElement.style.display = 'block';
-                                }
-                            }
-                        } catch (error) {
-                            console.error('Error fetching image:', error);
-                        }
-                    });
-                });
-            });
-        </script>
         <input type="hidden" name="cardId" value="{{cardDetails.CardID}}">
     </form>
+
+    <script>
+        function addRow() {
+            const tableBody = document.querySelector("#grades-table tbody");
+            const newRow = document.createElement("tr");
+
+            newRow.innerHTML = `
+                <td>
+                    <img src="" alt="Card Image" class="card-image" style="width: 50px; height: auto; display: none;">
+                </td>
+                <td>
+                    <select name="gradeIds[]">
+                        {{#each grades}}
+                        <option value="{{this.GradeID}}">{{this.GradeValue}}</option>
+                        {{/each}}
+                    </select>
+                </td>
+                <td>
+                    <!-- Market Price placeholder or dynamic content -->
+                </td>
+                <td>
+                    <input type="text" name="salePrices[]" value="">
+                </td>
+                <td>
+                    <input type="text" name="certNumbers[]" class="certNumberInput" value="">
+                </td>
+                <td>
+                    <button type="button" onclick="removeRow(this)">-</button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+        }
+
+        function removeRow(button) {
+            button.parentElement.parentElement.remove();
+        }
+
+        async function fetchAndDisplayImage(certNumber) {
+            if (!certNumber) return; // Skip if certNumber is empty
+            try {
+                const response = await fetch(`/api/fetch-image?certNumber=${certNumber}`);
+                const data = await response.json();
+                if (data.frontImageUrl) {
+                    document.querySelector(".update-inventory-card-image").src = data.frontImageUrl;
+                    document.querySelector(".update-inventory-card-image").alt = "Fetched Card Image";
+                }
+            } catch (error) {
+                console.error('Error fetching image:', error);
+            }
+        }
+
+        // Function to go back to the inventory page with filters
+        function goBack() {
+            window.location.href = `/admin/inventory`;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const hasRows = document.querySelector("#grades-table tbody").childElementCount > 0;
+            if (!hasRows) {
+                addRow();
+            }
+
+            document.querySelector("#grades-table").addEventListener('change', async function (event) {
+                if (event.target.classList.contains('certNumberInput')) {
+                    const certNumber = event.target.value;
+                    const row = event.target.closest('tr');
+                    const imgElement = row.querySelector('.card-image');
+                    const frontImageUrl = row.getAttribute('data-front-image-url');
+
+                    if (!certNumber) {
+                        imgElement.style.display = 'none';
+                        return;
+                    }
+
+                    if (frontImageUrl && frontImageUrl !== 'undefined') {
+                        imgElement.src = frontImageUrl;
+                        imgElement.alt = "Card Image";
+                        imgElement.style.display = 'block';
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
+                        const data = await response.json();
+                        if (data.frontImageUrl) {
+                            imgElement.src = data.frontImageUrl;
+                            imgElement.alt = "Card Image";
+                            imgElement.style.display = 'block';
+                        } else {
+                            imgElement.style.display = 'none';
+                        }
+                    } catch (error) {
+                        console.error('Error fetching image:', error);
+                        imgElement.style.display = 'none';
+                    }
+                }
+            });
+
+            document.querySelectorAll('input[name="certNumbers[]"]').forEach(input => {
+                input.addEventListener('change', async function () {
+                    const certNumber = this.value;
+                    if (!certNumber) return;
+
+                    try {
+                        const response = await fetch(`/fetch-card-image?certNumber=${certNumber}`);
+                        const data = await response.json();
+                        if (data.frontImageUrl) {
+                            const imgElement = document.querySelector(".update-inventory-card-image");
+                            if (imgElement) {
+                                imgElement.src = data.frontImageUrl;
+                                imgElement.style.display = 'block';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching image:', error);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
+
 </html>

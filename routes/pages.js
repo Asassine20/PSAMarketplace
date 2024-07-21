@@ -783,8 +783,9 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
         const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage, Team, Numbered, ColorPattern, Auto FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
 
-        // Static grade options from 1 to 10
-        const grades = Array.from({ length: 10 }, (_, i) => ({ GradeID: i + 1, GradeValue: i + 1 }));
+        // Fetch grade options based on CardID, in descending order
+        const gradesQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
+        const grades = await db.query(gradesQuery, [cardId]);
 
         // Render the page with fetched data
         res.render('update_inventory', {
@@ -798,6 +799,7 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
         res.status(500).send('Server error');
     }
 });
+
 
 router.post('/admin/submit-inventory', authenticateToken, notificationCounts, async (req, res) => {
     const { action, cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
