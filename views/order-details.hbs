@@ -15,8 +15,7 @@
             <div class="info-row">
                 <div class="info-label">Packing Slip:</div>
                 <div class="info-data">
-                    <button class="table-button" onclick="downloadPackingSlip('{{order.OrderNumber}}')">Download Packing
-                        Slip</button>
+                    <button class="table-button" onclick="downloadPackingSlip('{{order.OrderNumber}}')">Download Packing Slip</button>
                 </div>
             </div>
             <div class="info-row">
@@ -30,7 +29,7 @@
             <div class="info-row">
                 <div class="info-label">Contact Buyer:</div>
                 <div class="info-data">
-                    <button class="table-button" id="contactBuyerBtn">Contact Buyer</button>
+                    <button class="table-button" id="contactBuyerBtn" data-buyer-id="{{order.BuyerID}}">Contact Buyer</button>
                 </div>
             </div>
         </div>
@@ -75,8 +74,7 @@
             <div class="info-row" id="trackingNumberInputRow">
                 <div class="info-label">Tracking Number</div>
                 <div class="info-data">
-                    <input type="text" id="trackingNumberInput" placeholder="Tracking Number"
-                        value="{{shipping.TrackingNumber}}">
+                    <input type="text" id="trackingNumberInput" placeholder="Tracking Number" value="{{shipping.TrackingNumber}}">
                     <button class="table-button" id="submitTrackingBtn">Save</button>
                 </div>
             </div>
@@ -90,8 +88,7 @@
             </div>
             <div class="info-row">
                 <div class="info-label">Status:</div>
-                <div class="info-data"><span
-                        class="{{statusColor shipping.ShipmentStatus}}">{{shipping.ShipmentStatus}}</span></div>
+                <div class="info-data"><span class="{{statusColor shipping.ShipmentStatus}}">{{shipping.ShipmentStatus}}</span></div>
             </div>
         </div>
 
@@ -118,12 +115,8 @@
         <div class="refund-cancel-box">
             <h4>Refunds</h4>
             <div style="text-align: center;">
-                <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button"
-                    onclick="window.location.href='/admin/order-details?ordernumber={{OrderNumber}}'"
-                    class="table-button">Partial Refund</button>
-                <button style="width: 50%;" type="button"
-                    onclick="window.location.href='/admin/order-details?ordernumber={{OrderNumber}}'"
-                    class="table-button">Full Refund</button>
+                <button style="width: 50%; margin-top: 8px; margin-bottom: 8px;" type="button" onclick="window.location.href='/admin/order-details?ordernumber={{OrderNumber}}'" class="table-button">Partial Refund</button>
+                <button style="width: 50%;" type="button" onclick="window.location.href='/admin/order-details?ordernumber={{OrderNumber}}'" class="table-button">Full Refund</button>
             </div>
         </div>
     </div>
@@ -237,27 +230,31 @@
 
     document.getElementById('contactBuyerBtn').addEventListener('click', function () {
         const orderId = '{{order.OrderNumber}}';
-        const buyerId = '{{order.BuyerID}}';
+        const buyerId = this.getAttribute('data-buyer-id'); // Get buyer ID from data attribute
         const sellerId = '{{user.id}}';
+
+        if (!buyerId) {
+            alert('Buyer ID is missing');
+            return;
+        }
 
         fetch('/admin/create-or-find-conversation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ orderNumber: orderId, buyerId, sellerId })
+            body: JSON.stringify({ orderNumber: orderId, buyerId: buyerId, subject: 'General Message' }) // Include subject
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.conversationId) {
-                    window.location.href = `/admin/message-details/${data.conversationId}`; // Redirect to the conversation details page
-                } else {
-                    alert('Failed to create or find conversation');
-                }
-            })
-            .catch(error => console.error('Error:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.conversationId) {
+                window.location.href = `/admin/message-details/${data.conversationId}`; // Redirect to the conversation details page
+            } else {
+                alert('Failed to create or find conversation');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     });
-
 
     function downloadPackingSlip(orderNumber) {
         const url = `/admin/download-order?orderNumber=${orderNumber}`;

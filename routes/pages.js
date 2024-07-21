@@ -995,7 +995,8 @@ router.get('/admin/order-details', authenticateToken, notificationCounts, async 
             Orders.OrderNumber, Orders.OrderDate, Orders.SalePrice, Orders.ShippingPrice,
             Orders.FeeAmount, Orders.NetAmount, Orders.OrderAmount,
             Addresses.FirstName, Addresses.LastName, Addresses.Street, Addresses.City,
-            Addresses.State, Addresses.ZipCode, Addresses.Country
+            Addresses.State, Addresses.ZipCode, Addresses.Country,
+            Orders.BuyerID -- Ensure BuyerID is selected
         FROM Orders
         JOIN Addresses ON Orders.AddressID = Addresses.AddressID
         WHERE Orders.OrderNumber = ?
@@ -1269,7 +1270,7 @@ async function getOrderDetails(orderNumber) {
         a.Country
     FROM Orders o
     JOIN Users buyer ON o.BuyerID = buyer.UserID
-    JOIN Addresses a ON buyer.UserID = a.UserID AND a.IsPrimary = 1
+    JOIN Addresses a ON buyer.UserID = a.UserID
     JOIN Users seller ON o.SellerID = seller.UserID
     JOIN Stores s ON seller.UserID = s.UserID
     WHERE o.OrderNumber = ?
@@ -1381,7 +1382,14 @@ router.get('/admin/download-order', authenticateToken, notificationCounts, async
 
         // Loop through items and add them to the table
         orderDetails.items.forEach(item => {
-            const itemTotalPrice = (item.Quantity * parseFloat(item.Price)).toFixed(2);
+            const quantity = parseFloat(item.Quantity);
+            const price = parseFloat(item.Price);
+            if (isNaN(quantity) || isNaN(price)) {
+                console.error('Invalid item quantity or price:', item);
+                return; // Skip invalid items
+            }
+
+            const itemTotalPrice = (quantity * price).toFixed(2);
             const cardDescription = [
                 item.CardName, 
                 item.CardNumber, 
@@ -1396,21 +1404,27 @@ router.get('/admin/download-order', authenticateToken, notificationCounts, async
                 item.Auto ? "Auto" : ""
             ].filter(part => part).join(' ');
 
-            // Check if the card description exceeds the description width and wrap it accordingly
-            const wrappedDescription = doc.widthOfString(cardDescription) > descriptionWidth
-                ? doc.splitTextToSize(cardDescription, descriptionWidth)
-                : cardDescription;
+            // Handle text wrapping for card description
+            const wrappedDescriptionHeight = doc.heightOfString(cardDescription, {
+                width: descriptionWidth,
+                align: 'left'
+            });
 
-            doc.text(item.Quantity, startX, startY, { width: quantityWidth, align: 'center' });
-            doc.text(wrappedDescription, startX + quantityWidth, startY, { width: descriptionWidth, align: 'left' });
-            doc.text(`$${item.Price}`, startX + quantityWidth + descriptionWidth, startY, { width: priceWidth, align: 'right' });
+            doc.text(quantity, startX, startY, { width: quantityWidth, align: 'center' });
+            doc.text(cardDescription, startX + quantityWidth, startY, { width: descriptionWidth, align: 'left' });
+            doc.text(`$${price.toFixed(2)}`, startX + quantityWidth + descriptionWidth, startY, { width: priceWidth, align: 'right' });
             doc.text(`$${itemTotalPrice}`, startX + quantityWidth + descriptionWidth + priceWidth, startY, { width: priceWidth, align: 'right' });
-            startY += 20; // Increase Y position for each item
+            startY += wrappedDescriptionHeight + 20; // Adjust Y position based on wrapped text height
         });
 
-        // Draw total price below all items
+        // Ensure totalPrice is a number and draw total price below all items
+        const totalPrice = parseFloat(orderDetails.totalPrice);
+        if (isNaN(totalPrice)) {
+            console.error('Invalid total price:', orderDetails.totalPrice);
+            return res.status(500).send('Internal Server Error');
+        }
         startY += 20; // Add a bit of space before the total
-        doc.text(`Total: $${orderDetails.totalPrice}`, startX + quantityWidth + descriptionWidth + priceWidth, startY, { width: priceWidth, align: 'right' });
+        doc.text(`Total: $${totalPrice.toFixed(2)}`, startX + quantityWidth + descriptionWidth + priceWidth, startY, { width: priceWidth, align: 'right' });
 
         doc.end();
     } catch (error) {
@@ -1418,7 +1432,6 @@ router.get('/admin/download-order', authenticateToken, notificationCounts, async
         res.status(500).send('Internal Server Error');
     }
 });
-
 router.get('/admin/feedback', authenticateToken, notificationCounts, async (req, res) => {
     const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
