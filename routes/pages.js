@@ -760,9 +760,8 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
         const cardDetailsQuery = 'SELECT CardID, CardName, CardSet, CardYear, CardNumber, CardColor, CardVariant, CardImage, Team, Numbered, ColorPattern, Auto FROM Card WHERE CardID = ?';
         const cardDetails = await db.query(cardDetailsQuery, [cardId]);
 
-        // Fetch grade options
-        const gradeQuery = 'SELECT GradeID, GradeValue FROM Grade WHERE CardID = ? ORDER BY GradeValue DESC';
-        const grades = await db.query(gradeQuery, [cardId]);
+        // Static grade options from 1 to 10
+        const grades = Array.from({ length: 10 }, (_, i) => ({ GradeID: i + 1, GradeValue: i + 1 }));
 
         // Render the page with fetched data
         res.render('update_inventory', {
@@ -776,7 +775,6 @@ router.get('/admin/update-inventory-pricing', authenticateToken, notificationCou
         res.status(500).send('Server error');
     }
 });
-
 
 router.post('/admin/submit-inventory', authenticateToken, notificationCounts, async (req, res) => {
     const { action, cardId, listingIds = [], gradeIds = [], salePrices = [], certNumbers = [] } = req.body;
@@ -824,7 +822,6 @@ router.post('/admin/submit-inventory', authenticateToken, notificationCounts, as
                 const insertQuery = 'INSERT INTO Inventory (CardID, GradeID, SalePrice, CertNumber, FrontImageUrl, BackImageUrl, SellerID) VALUES (?, ?, ?, ?, ?, ?, ?)';
                 await db.query(insertQuery, [cardId, gradeId, salePrice, certNumber, frontImageUrl, backImageUrl, sellerId]);
             }
-
         }
 
         return res.redirect('/admin/inventory');
@@ -833,8 +830,6 @@ router.post('/admin/submit-inventory', authenticateToken, notificationCounts, as
         return res.status(500).send('Error processing inventory');
     }
 });
-
-
 
 // Function to get card data by cert number from the API
 async function getCardDataByCertNumber(certNumber, apiKey, accessToken) {
