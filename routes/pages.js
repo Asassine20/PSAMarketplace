@@ -233,7 +233,7 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
         const showNext = page < totalPages;
 
         const cardSetsData = await db.query('SELECT DISTINCT CardSet FROM Card');
-        const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card');
+        const cardYearsData = await db.query('SELECT DISTINCT CardYear FROM Card WHERE CardYear IS NOT NULL AND CardYear != \'\' ORDER BY CardYear DESC');
         const sportsData = await db.query('SELECT DISTINCT Sport FROM Card');
         const cardColorsData = await db.query('SELECT DISTINCT CardColor FROM Card WHERE CardColor IS NOT NULL AND CardColor != \'\'');
         const cardVariantsData = await db.query('SELECT DISTINCT CardVariant FROM Card WHERE CardVariant IS NOT NULL');
@@ -256,12 +256,11 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             cards: updatedCards,
             searchTerm,
             cardSet,
-            cardYear,
             sport,
             auto,
             inStock: inStock,
             cardSets: cardSetsData.map(row => row.CardSet),
-            cardYears: cardYearsData.map(row => row.CardYear),
+            cardYears: cardYearsData.map(row => row.CardYear).filter(cardYear => cardYear.trim() !==''),
             sports: sportsData.map(row => row.Sport),
             cardColors: cardColorsData.map(row => row.CardColor).filter(color => color.trim() !== ''),
             cardVariants: cardVariantsData.map(row => row.CardVariant),

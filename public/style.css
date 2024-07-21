@@ -1,6 +1,7 @@
 body {
     font-family: Helvetica, sans-serif;
 }
+
 nav {
     color: #9BA0AA;
     padding: 10px 0;
@@ -8,7 +9,6 @@ nav {
     justify-content: space-between;
     border-bottom: 1px solid #eee; /* Thin line for each row */
     align-items: center;
-
 }
 
 nav ul {
@@ -102,11 +102,9 @@ nav li a:hover {
     margin-right: 5px; /* Adjust as needed */
 }
 
-
 .table-header h2 {
     margin: 0;
     color: #333;
-    /* Other styling as needed */
 }
 
 .table-header span {
@@ -155,7 +153,6 @@ caption {
     font-size: 1.2em;
 }
 
-
 .pagination-bottom {
     text-align: center;
     margin: 10px 0;
@@ -163,11 +160,8 @@ caption {
 
 .inventorySearch {
     margin-top: 20px;
-    padding-left: 20px;
+    padding: 20px;
     max-width: 800px;
-    justify-content: space-between;
-    align-items: center;
-    display: flex;
     background-color: #f1f1f1;
     border: 1px solid black;
     border-radius: 4px;
@@ -188,29 +182,42 @@ caption {
 }
 
 .filter-input {
-    width: 100%;      /* Full width */
-    max-width: 100%; /* Maximum width */
-    margin: 10px;     /* Uniform margin */
+    margin: 5px;     /* Uniform margin */
     border: 1px solid #ddd; /* Border */
     border-radius: 4px; /* Rounded corners */
     flex-grow: 1;
-
 }
 
-.inventorySearch div {
+.fixed-width-dropdown, .fixed-width-input {
+    width: calc(90% - 20px); /* Adjust width to fit within the form with padding */
+}
+
+.inventorySearch .form-row {
     display: flex;
+    align-items: center;
     margin-bottom: 2px; /* Add some space between each row */
 }
 
 .inventorySearch label {
-    flex-basis: 20%;
-    flex-shrink: 0;
+    flex-basis: 15%; /* Adjust label width to 10% of the inventorySearch div */
     margin-right: 5px; /* Keep your existing space between label and input */
 }
 
-.consistent-width-dropdown {
-    min-width: 200px;
+.card-set-container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
 }
+
+#cardSetSearch {
+    width: calc(45% - 15px); /* Adjust to fit within container */
+    margin-right: 5px; /* Space between search input and dropdown */
+}
+
+#cardSet {
+    width: calc(50% - 10px); /* Adjust to fit within container */
+}
+
 
 .button-cell {
     text-align: center;
