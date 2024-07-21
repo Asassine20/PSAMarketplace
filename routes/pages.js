@@ -279,6 +279,8 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
     }
 });
 
+
+
 router.get('/admin/cardsets', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const year = req.query.year || '';
@@ -631,6 +633,7 @@ router.get('/admin/colorpatterns', authenticateToken, notificationCounts, async 
     }
 });
 
+// Route to fetch auto options
 router.get('/admin/auto', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
     const cardSet = req.query.cardSet || '';
@@ -669,6 +672,7 @@ router.get('/admin/auto', authenticateToken, notificationCounts, async (req, res
         res.status(500).send('Server error');
     }
 });
+
 
 // Endpoint for full search
 router.get('/admin/search-card-sets', authenticateToken, notificationCounts, async (req, res) => {

@@ -102,8 +102,9 @@
                 <label for="auto">Auto:</label>
                 <select id="auto" name="auto" class="filter-input fixed-width-dropdown">
                     <option value="">All Auto</option>
-                    <option value="1" {{#if (eq auto '1')}}selected{{/if}}>Auto</option>
-                    <option value="0" {{#if (eq auto '0')}}selected{{/if}}>Non Auto</option>
+                    {{#each autoOptions}}
+                    <option value="{{this}}" {{#if (eq this ../auto)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
                 </select>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -168,7 +169,7 @@
                     <td>{{this.Team}}</td>
                     <td>{{this.Numbered}}</td>
                     <td>{{this.ColorPattern}}</td>
-                    <td>{{#if (eq this.Auto '1')}}Auto{{else}}Non Auto{{/if}}</td>
+                    <td>{{this.Auto}}</td>
                     <td class="button-cell">
                         <button type="button"
                             onclick="window.location.href='/admin/update-inventory-pricing?cardId={{this.CardID}}'"
@@ -252,7 +253,7 @@
                 success: function (sports) {
                     const select = document.getElementById('sport');
                     select.innerHTML = '<option value="">All Sports</option>';
-                    updateDropdown('sport', sports, sport);
+                    updateDropdown('sport', sports, sport, 'All Sports');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading sports:', error);
@@ -279,7 +280,7 @@
                 success: function (sets) {
                     const select = document.getElementById('cardSet');
                     select.innerHTML = '<option value="">All Sets</option>';
-                    updateDropdown('cardSet', sets, cardSet);
+                    updateDropdown('cardSet', sets, cardSet, 'All Sets');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading card sets:', error);
@@ -306,7 +307,7 @@
                 success: function (years) {
                     const select = document.getElementById('cardYear');
                     select.innerHTML = '<option value="">All Years</option>';
-                    updateDropdown('cardYear', years, year);
+                    updateDropdown('cardYear', years, year, 'All Years');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading years:', error);
@@ -333,7 +334,7 @@
                 success: function (colors) {
                     const select = document.getElementById('cardColor');
                     select.innerHTML = '<option value="">All Colors</option>';
-                    updateDropdown('cardColor', colors, cardColor);
+                    updateDropdown('cardColor', colors, cardColor, 'All Colors');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading card colors:', error);
@@ -360,7 +361,7 @@
                 success: function (variants) {
                     const select = document.getElementById('cardVariant');
                     select.innerHTML = '<option value="">All Variants</option>';
-                    updateDropdown('cardVariant', variants, cardVariant);
+                    updateDropdown('cardVariant', variants, cardVariant, 'All Variants');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading card variants:', error);
@@ -387,7 +388,7 @@
                 success: function (teams) {
                     const select = document.getElementById('team');
                     select.innerHTML = '<option value="">All Teams</option>';
-                    updateDropdown('team', teams, team);
+                    updateDropdown('team', teams, team, 'All Teams');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading teams:', error);
@@ -414,7 +415,7 @@
                 success: function (numberedOptions) {
                     const select = document.getElementById('numbered');
                     select.innerHTML = '<option value="">All Numbered</option>';
-                    updateDropdown('numbered', numberedOptions, numbered);
+                    updateDropdown('numbered', numberedOptions, numbered, 'All Numbered');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading numbered options:', error);
@@ -441,7 +442,7 @@
                 success: function (colorPatterns) {
                     const select = document.getElementById('colorPattern');
                     select.innerHTML = '<option value="">All Color Patterns</option>';
-                    updateDropdown('colorPattern', colorPatterns, colorPattern);
+                    updateDropdown('colorPattern', colorPatterns, colorPattern, 'All Color Patterns');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading color patterns:', error);
@@ -468,7 +469,7 @@
                 success: function (autoOptions) {
                     const select = document.getElementById('auto');
                     select.innerHTML = '<option value="">All Auto</option>';
-                    updateDropdown('auto', autoOptions, auto);
+                    updateDropdown('auto', autoOptions, auto, 'All Auto');
                 },
                 error: function (xhr, status, error) {
                     console.error('Error loading auto options:', error);
@@ -476,8 +477,9 @@
             });
         }
         // Updates dropdown options
-        function updateDropdown(dropdownId, items, selectedItem) {
+        function updateDropdown(dropdownId, items, selectedItem, defaultLabel) {
             const select = document.getElementById(dropdownId);
+            select.innerHTML = `<option value="">${defaultLabel}</option>`;
             items.forEach(item => {
                 if (item && item.trim() !== '') {
                     const option = document.createElement('option');
@@ -773,7 +775,7 @@
                 <td>${card.Team || ''}</td>
                 <td>${card.Numbered || ''}</td>
                 <td>${card.ColorPattern || ''}</td>
-                <td>${card.Auto === '1' ? 'Auto' : 'Non Auto'}</td>
+                <td>${card.Auto || ''}</td>
                 <td class="button-cell">
                     <button type="button" onclick="window.location.href='/admin/update-inventory-pricing?cardId=${card.CardID}'" class="table-button">Add</button>
                 </td>
