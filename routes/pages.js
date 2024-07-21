@@ -1510,7 +1510,7 @@ router.get('/admin/feedback', authenticateToken, notificationCounts, async (req,
             FROM Feedback f
             INNER JOIN Orders o ON f.OrderNumber = o.OrderNumber
             INNER JOIN Addresses a ON f.BuyerID = a.UserID
-            WHERE f.SellerID = ? AND a.IsPrimary = 1
+            WHERE f.SellerID = ?
             ORDER BY f.FeedbackDate DESC
             LIMIT ? OFFSET ?`;
         const feedbackResults = await db.query(feedbackQuery, [userId, limit, offset]);
