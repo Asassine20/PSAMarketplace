@@ -107,6 +107,10 @@
                     {{/each}}
                 </select>
             </div>
+            <div>
+                <label for="inStock">In Stock:</label>
+                <input type="checkbox" id="inStock" name="inStock" {{#if inStock}}checked{{/if}} onchange="loadDataWithFilters()">
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <button id="resetButton" type="reset" class="table-button" onclick="resetFilters()">Reset</button>
@@ -656,6 +660,7 @@
             document.getElementById('numbered').selectedIndex = 0;
             document.getElementById('colorPattern').selectedIndex = 0;
             document.getElementById('auto').selectedIndex = 0;
+            document.getElementById('inStock').checked = false;
             document.getElementById('spinner').style.display = 'none';
             loadSetsAndYears(null);
             loadDataWithFilters();
@@ -693,6 +698,7 @@
                 numbered: document.getElementById('numbered').value,
                 colorPattern: document.getElementById('colorPattern').value,
                 auto: document.getElementById('auto').value,
+                inStock: document.getElementById('inStock').checked
             };
             console.log('Sending AJAX request with data:', data);
             try {
@@ -830,6 +836,10 @@
                 loadDataWithFilters();
             });
             document.getElementById('auto').addEventListener('change', function () {
+                currentPage = 1;
+                loadDataWithFilters();
+            });
+            document.getElementById('inStock').addEventListener('change', function () {
                 currentPage = 1;
                 loadDataWithFilters();
             });

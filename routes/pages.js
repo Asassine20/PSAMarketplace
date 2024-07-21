@@ -142,6 +142,7 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
     const numbered = req.query.numbered || '';
     const colorPattern = req.query.colorPattern || '';
     const auto = req.query.auto || '';
+    const inStock = req.query.inStock === 'true';
 
     try {
         let whereConditions = [];
@@ -189,18 +190,38 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             values.push(auto);
         }
 
-        let query = "SELECT * FROM Card";
-        if (whereConditions.length) {
-            query += " WHERE " + whereConditions.join(" AND ");
+        let query = `
+            SELECT * FROM Card
+            ${whereConditions.length ? 'WHERE ' + whereConditions.join(' AND ') : ''}
+        `;
+        
+        if (inStock) {
+            if (whereConditions.length) {
+                query += ` AND CardID IN (SELECT CardID FROM Inventory WHERE SellerID = ? AND Sold != 1)`;
+            } else {
+                query += ` WHERE CardID IN (SELECT CardID FROM Inventory WHERE SellerID = ? AND Sold != 1)`;
+            }
+            values.push(sellerId);
         }
+        
         query += " LIMIT ? OFFSET ?";
         values.push(limit, offset);
 
-        let countQuery = "SELECT COUNT(*) AS count FROM Card";
-        if (whereConditions.length) {
-            countQuery += " WHERE " + whereConditions.join(" AND ");
+        let countQuery = `
+            SELECT COUNT(*) AS count FROM Card
+            ${whereConditions.length ? 'WHERE ' + whereConditions.join(' AND ') : ''}
+        `;
+        
+        if (inStock) {
+            if (whereConditions.length) {
+                countQuery += ` AND CardID IN (SELECT CardID FROM Inventory WHERE SellerID = ? AND Sold != 1)`;
+            } else {
+                countQuery += ` WHERE CardID IN (SELECT CardID FROM Inventory WHERE SellerID = ? AND Sold != 1)`;
+            }
         }
-        const countValues = [...values].slice(0, -2);
+        
+        const countValues = inStock ? [...values.slice(0, -2), sellerId] : values.slice(0, -2);
+
         const cards = await db.query(query, values);
         const totalResult = await db.query(countQuery, countValues);
         const totalItems = totalResult[0].count;
@@ -221,7 +242,7 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
         const colorPatternsData = await db.query('SELECT DISTINCT ColorPattern FROM Card WHERE ColorPattern IS NOT NULL AND ColorPattern != \'\'');
         const autoData = await db.query('SELECT DISTINCT Auto FROM Card');
 
-        const inventoryQuery = 'SELECT *, (ListingID IS NOT NULL) AS isInStock FROM Inventory WHERE SellerID = ?';
+        const inventoryQuery = 'SELECT *, (ListingID IS NOT NULL) AS isInStock FROM Inventory WHERE SellerID = ? AND Sold != 1';
         const inventoryItems = await db.query(inventoryQuery, [sellerId]);
 
         const inStockCardIds = new Set(inventoryItems.filter(item => item.isInStock).map(item => item.CardID));
@@ -238,6 +259,7 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
             cardYear,
             sport,
             auto,
+            inStock: inStock,
             cardSets: cardSetsData.map(row => row.CardSet),
             cardYears: cardYearsData.map(row => row.CardYear),
             sports: sportsData.map(row => row.Sport),
@@ -278,8 +300,6 @@ router.get('/admin/inventory', authenticateToken, notificationCounts, async (req
         res.status(500).send('Server error');
     }
 });
-
-
 
 router.get('/admin/cardsets', authenticateToken, notificationCounts, async (req, res) => {
     const sport = req.query.sport || '';
