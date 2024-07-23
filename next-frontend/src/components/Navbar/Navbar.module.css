@@ -250,6 +250,7 @@
 }
 
 .miniPanel {
+  display: none;
   position: absolute;
   top: 100%;
   background: white;
@@ -259,9 +260,11 @@
   width: max-content;
   border-radius: 6px;
   border: 1px solid #babbbc;
-  display: flex;
   flex-direction: column;
-  left: 0; /* Default position */
+}
+
+.navLinkContainer:hover .miniPanel {
+  display: block;
 }
 
 .miniPanelContent {
@@ -335,6 +338,23 @@
 
 .popularSetsContainer {
   margin-left: 20px;
+}
+
+.morePanel {
+  display: none;
+  position: absolute;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 1000;
+  width: max-content;
+  border-radius: 6px;
+  border: 1px solid #babbbc;
+  flex-direction: column;
+}
+
+.navLinkContainer:hover .morePanel {
+  display: block;
 }
 
 @media (max-width: 988px) {

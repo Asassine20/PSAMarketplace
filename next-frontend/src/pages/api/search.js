@@ -22,6 +22,7 @@ export default async function handler(req, res) {
         filterType
     } = req.query;
 
+
     let baseSql = `FROM Card`;
     let whereConditions = [];
     let values = [];
@@ -35,10 +36,23 @@ export default async function handler(req, res) {
         values.push(`${cardName.trim()}%`);
     }
 
-    ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears', 'teams', 'colorPatterns', 'numbered', 'auto'].forEach(filter => {
+    // Process each filter and ensure correct usage in the SQL query
+    const filterMapping = {
+        cardSets: 'CardSet',
+        cardColors: 'CardColor',
+        cardVariants: 'CardVariant',
+        sports: 'Sport',
+        cardYears: 'CardYear',
+        teams: 'Team',
+        colorPatterns: 'ColorPattern',
+        numbered: 'Numbered',
+        auto: 'Auto'
+    };
+
+    Object.keys(filterMapping).forEach(filter => {
         if (req.query[`${filter}[]`]) {
             const items = Array.isArray(req.query[`${filter}[]`]) ? req.query[`${filter}[]`] : [req.query[`${filter}[]`]];
-            whereConditions.push(`${filter} IN (${items.map(() => '?').join(',')})`);
+            whereConditions.push(`${filterMapping[filter]} IN (${items.map(() => '?').join(',')})`);
             values.push(...items);
         }
     });

@@ -11,7 +11,6 @@ import { FaCaretDown } from 'react-icons/fa';
 import { useCart } from '../Cart/CartProvider';
 
 const Navbar = () => {
-  const [sports, setSports] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -20,11 +19,15 @@ const Navbar = () => {
   const [activeSport, setActiveSport] = useState(null);
   const [recentCardSets, setRecentCardSets] = useState([]);
   const [popularCardSets, setPopularCardSets] = useState([]);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const router = useRouter();
   const { cart } = useCart();
   const sidePanelRef = useRef(null);
   const miniPanelRef = useRef(null);
   const activeSportIndex = useRef(null);
+
+  const mainSports = ['Baseball', 'Basketball', 'Football', 'Pokemon (English)', 'Pokemon (Japan)', 'Hockey'];
+  const moreSports = ['Soccer', 'UFC', 'Golf'];
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -40,20 +43,7 @@ const Navbar = () => {
     };
 
     checkLoginStatus();
-
-    fetch('/api/nav-sports')
-      .then(response => response.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setSports(data.filter(sport => sport.Sport)); // Remove empty nav links
-        } else {
-          setSports([]);
-        }
-      })
-      .catch(error => console.error('Error fetching sports:', error));
-
     window.addEventListener('storage', checkLoginStatus);
-
     setMounted(true);
 
     return () => {
@@ -73,7 +63,7 @@ const Navbar = () => {
         inStock: router.query.inStock || 'true',
       },
     });
-  };  
+  };
 
   const toggleSidePanel = () => {
     setIsSidePanelOpen(!isSidePanelOpen);
@@ -153,7 +143,7 @@ const Navbar = () => {
   useEffect(() => {
     if (activeSport !== null && miniPanelRef.current) {
       const index = activeSportIndex.current;
-      const panelPosition = calculatePanelPosition(index, sports.length);
+      const panelPosition = calculatePanelPosition(index, mainSports.length);
       miniPanelRef.current.style.left = panelPosition.left;
       miniPanelRef.current.style.right = panelPosition.right;
     }
@@ -172,6 +162,14 @@ const Navbar = () => {
   const handleLinkClick = () => {
     setIsSidePanelOpen(false);
     setActiveSport(null);
+  };
+
+  const handleMoreMouseEnter = () => {
+    setIsMoreOpen(true);
+  };
+
+  const handleMoreMouseLeave = () => {
+    setIsMoreOpen(false);
   };
 
   return (
@@ -282,22 +280,16 @@ const Navbar = () => {
       </div>
       <nav className={styles.navbar}>
         <div className={styles.sportsLinks}>
-          {Array.isArray(sports) && sports.map((sport, index) => (
-            <div
-              key={index}
-              className={styles.navLinkContainer}
-            >
-              <div
-                className={styles.navLink}
-                onClick={() => handleNavLinkClick(sport.Sport, index)}
-              >
-                {sport.Sport}
+          {mainSports.map((sport, index) => (
+            <div key={index} className={styles.navLinkContainer}>
+              <div className={styles.navLink} onMouseEnter={() => handleNavLinkClick(sport, index)}>
+                {sport}
                 <FaCaretDown className={styles.caretIcon} />
               </div>
-              {activeSport === sport.Sport && (
-                <div className={styles.miniPanel} ref={miniPanelRef}>
+              {activeSport === sport && (
+                <div className={`${styles.miniPanel} ${index >= mainSports.length - 2 ? styles.rightAligned : styles.leftAligned}`} ref={miniPanelRef}>
                   <div className={styles.miniPanelHeader}>
-                    <span className={styles.miniPanelSport}><b>{sport.Sport}</b></span>
+                    <span className={styles.miniPanelSport}><b>{sport}</b></span>
                     <Link
                       href={{
                         pathname: '/search',
@@ -305,7 +297,7 @@ const Navbar = () => {
                           cardName: '',
                           page: '1',
                           inStock: 'true',
-                          sports: sport.Sport
+                          sports: sport
                         }
                       }}
                       passHref
@@ -327,7 +319,7 @@ const Navbar = () => {
                                   cardName: '',
                                   page: '1',
                                   inStock: 'true',
-                                  sports: sport.Sport,
+                                  sports: sport,
                                   cardSets: cardSet.CardSet
                                 }
                               }}
@@ -352,7 +344,7 @@ const Navbar = () => {
                                   cardName: '',
                                   page: '1',
                                   inStock: 'true',
-                                  sports: sport.Sport,
+                                  sports: sport,
                                   cardSets: cardSet
                                 }
                               }}
@@ -370,6 +362,44 @@ const Navbar = () => {
               )}
             </div>
           ))}
+          <div 
+            className={styles.navLinkContainer}
+            onMouseEnter={handleMoreMouseEnter}
+            onMouseLeave={handleMoreMouseLeave}
+          >
+            <div className={styles.navLink}>
+              More
+              <FaCaretDown className={styles.caretIcon} />
+            </div>
+            {isMoreOpen && (
+              <div className={`${styles.miniPanel} ${styles.rightAligned}`} ref={miniPanelRef}>
+                <div className={styles.miniPanelHeader}>
+                  <span className={styles.miniPanelSport}><b>More Sports</b></span>
+                </div>
+                <ul className={styles.miniPanelList}>
+                  {moreSports.map((sport, index) => (
+                    <li key={index}>
+                      <Link
+                        href={{
+                          pathname: '/search',
+                          query: {
+                            cardName: '',
+                            page: '1',
+                            inStock: 'true',
+                            sports: sport
+                          }
+                        }}
+                        passHref
+                        legacyBehavior
+                      >
+                        <a className={styles.miniPanelItem} onClick={handleLinkClick}>{sport}</a>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
     </div>

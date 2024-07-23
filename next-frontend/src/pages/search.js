@@ -113,7 +113,6 @@ const SearchPage = () => {
   const filterLimit = 50;
   const resultsPerPage = 10;
 
-  // Handles the filters when they are changes. Updates url to include filter parameters.
   const updateFiltersInUrl = (updatedFilters) => {
     const queryParameters = new URLSearchParams({
       cardName: updatedFilters.cardName || '',
@@ -123,7 +122,6 @@ const SearchPage = () => {
     if (updatedFilters.inStock && updatedFilters.sortBy) {
       queryParameters.append('sortBy', updatedFilters.sortBy);
     }
-    // Loops through each filter and appends the selected values to the url
     Object.keys(updatedFilters).forEach((filterKey) => {
       const filterValue = updatedFilters[filterKey];
       if (Array.isArray(filterValue) && filterValue.length) {
@@ -135,7 +133,6 @@ const SearchPage = () => {
     router.push(`/search?${queryParameters.toString()}`, undefined, { shallow: true });
   };
 
-  // Updates the card results based on the filters selected
   const fetchFilteredCards = async (filtersToApply) => {
     setIsLoadingCards(true);
 
@@ -173,7 +170,7 @@ const SearchPage = () => {
       cardName: filtersToApply.cardName || '',
       inStock: filtersToApply.inStock ? 'true' : 'false',
       filterPage: page,
-      filterLimit: searchTerm.length >= 3 ? 10000 : filterLimit, // Load all if searchTerm has 3 or more characters
+      filterLimit: searchTerm.length >= 3 ? 10000 : filterLimit,
       filterType: filterType
     });
 
@@ -264,8 +261,8 @@ const SearchPage = () => {
         ...prevFilters,
         inStock: !prevFilters.inStock,
         page: '1',
-        cardName: prevFilters.cardName, // Preserve the cardName parameter
-        sortBy: '', // Reset sortBy to default
+        cardName: prevFilters.cardName,
+        sortBy: '',
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
@@ -280,7 +277,7 @@ const SearchPage = () => {
         ...prevFilters,
         cardName: cardName,
         page: '1',
-        inStock: prevFilters.inStock, // Preserve inStock value
+        inStock: prevFilters.inStock,
       };
       updateFiltersInUrl(updatedFilters);
       fetchFilteredCards(updatedFilters);
