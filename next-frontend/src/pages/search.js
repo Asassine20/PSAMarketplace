@@ -538,7 +538,9 @@ const SearchPage = () => {
                           <div className={styles.cardTeam}>{card.Team || ''}</div>
                           <div className={styles.cardColorPattern}>{card.ColorPattern || ''}</div>
                           <div className={styles.cardNumbered}>{card.Numbered || ''}</div>
-                          <div className={styles.cardAuto}>{card.Auto || ''}</div>
+                          {card.Auto !== 'Non Auto' && (
+                            <div className={styles.cardAuto}>{card.Auto || ''}</div>
+                          )}
                           <div className={styles.cardListings}>Listings: {card.ListingsCount}</div>
                           <div className={styles.cardMarketPrice}>
                             {card.MarketPrice !== null && card.MarketPrice !== undefined ? (

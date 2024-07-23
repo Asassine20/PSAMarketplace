@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     ['cardSets', 'cardColors', 'cardVariants', 'sports', 'cardYears', 'teams', 'colorPatterns', 'numbered', 'auto'].forEach(filter => {
         if (req.query[`${filter}[]`]) {
             const items = Array.isArray(req.query[`${filter}[]`]) ? req.query[`${filter}[]`] : [req.query[`${filter}[]`]];
-            whereConditions.push(`${filter.slice(0, -1)} IN (${items.map(() => '?').join(',')})`);
+            whereConditions.push(`${filter} IN (${items.map(() => '?').join(',')})`);
             values.push(...items);
         }
     });
