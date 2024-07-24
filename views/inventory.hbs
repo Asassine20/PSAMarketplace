@@ -14,112 +14,118 @@
         </div>
     </div>
     {{> navbar}}
-<div class="inventorySearch" id="inventorySearchForm">
-    <form action="/admin/inventory" method="get" style="flex-grow 1">
-        <div class="form-row">
-            <label for="searchTerm">Player:</label>
-            <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown"
-                placeholder="Player Name" value="{{searchTerm}}">
-        </div>
-        <div class="form-row">
-            <label for="sport">Sport:</label>
-            <select id="sport" name="sport" class="filter-input fixed-width-dropdown">
-                <option value="">All Sports</option>
-                {{#each sports}}
-                <option value="{{this}}" {{#if (eq this ../sport)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="cardSet">Card Set:</label>
-            <div class="card-set-container">
-                <input type="text" id="cardSetSearch" placeholder="Search sets..."
-                    onkeyup="debouncedSearchCardSets(this.value)" class="filter-input fixed-width-dropdown" />
-                <select id="cardSet" name="cardSet" class="filter-input fixed-width-dropdown">
-                    <option value="">All Sets</option>
-                    {{#each cardSets}}
-                    <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
+    {{#if success}}
+    <div class="success-container">
+        <div class="success-message">Inventory updated successfully</div>
+    </div>
+    {{/if}}
+    <div class="inventorySearch" id="inventorySearchForm">
+        <form action="/admin/inventory" method="get" style="flex-grow 1">
+            <div class="form-row">
+                <label for="searchTerm">Player:</label>
+                <input type="text" id="searchTerm" name="searchTerm" class="filter-input fixed-width-dropdown"
+                    placeholder="Player Name" value="{{searchTerm}}">
+            </div>
+            <div class="form-row">
+                <label for="sport">Sport:</label>
+                <select id="sport" name="sport" class="filter-input fixed-width-dropdown">
+                    <option value="">All Sports</option>
+                    {{#each sports}}
+                    <option value="{{this}}" {{#if (eq this ../sport)}}selected{{/if}}>{{this}}</option>
                     {{/each}}
                 </select>
             </div>
-        </div>
-        <div class="form-row">
-            <label for="cardYear">Card Year:</label>
-            <select id="cardYear" name="cardYear" class="filter-input fixed-width-dropdown">
-                <option value="">All Years</option>
-                {{#each cardYears}}
-                <option value="{{this}}" {{#if (eq this ../cardYear)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="cardColor">Card Color:</label>
-            <select id="cardColor" name="cardColor" class="filter-input fixed-width-dropdown">
-                <option value="">All Colors</option>
-                {{#each cardColors}}
-                <option value="{{this}}" {{#if (eq this ../cardColor)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="cardVariant">Card Variant:</label>
-            <select id="cardVariant" name="cardVariant" class="filter-input fixed-width-dropdown">
-                <option value="">All Variants</option>
-                {{#each cardVariants}}
-                <option value="{{this}}" {{#if (eq this ../cardVariant)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="team">Team:</label>
-            <select id="team" name="team" class="filter-input fixed-width-dropdown">
-                <option value="">All Teams</option>
-                {{#each teams}}
-                <option value="{{this}}" {{#if (eq this ../team)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="numbered">Numbered:</label>
-            <select id="numbered" name="numbered" class="filter-input fixed-width-dropdown">
-                <option value="">All Numbered</option>
-                {{#each numberedOptions}}
-                <option value="{{this}}" {{#if (eq this ../numbered)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="colorPattern">Color Pattern:</label>
-            <select id="colorPattern" name="colorPattern" class="filter-input fixed-width-dropdown">
-                <option value="">All Color Patterns</option>
-                {{#each colorPatterns}}
-                <option value="{{this}}" {{#if (eq this ../colorPattern)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="auto">Auto:</label>
-            <select id="auto" name="auto" class="filter-input fixed-width-dropdown">
-                <option value="">All Auto</option>
-                {{#each autoOptions}}
-                <option value="{{this}}" {{#if (eq this ../auto)}}selected{{/if}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </div>
-        <div class="form-row">
-            <label for="inStock">In Stock:</label>
-            <input type="checkbox" id="inStock" name="inStock" {{#if inStock}}checked{{/if}} onchange="loadDataWithFilters()">
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <button id="resetButton" type="reset" class="table-button" onclick="resetFilters()">Reset</button>
+            <div class="form-row">
+                <label for="cardSet">Card Set:</label>
+                <div class="card-set-container">
+                    <input type="text" id="cardSetSearch" placeholder="Search sets..."
+                        onkeyup="debouncedSearchCardSets(this.value)" class="filter-input fixed-width-dropdown" />
+                    <select id="cardSet" name="cardSet" class="filter-input fixed-width-dropdown">
+                        <option value="">All Sets</option>
+                        {{#each cardSets}}
+                        <option value="{{this}}" {{#if (eq this ../cardSet)}}selected{{/if}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
             </div>
-            <div style="padding-right: 12px;">
-                <button type="submit" id="searchButton" class="table-button">Search</button>
+            <div class="form-row">
+                <label for="cardYear">Card Year:</label>
+                <select id="cardYear" name="cardYear" class="filter-input fixed-width-dropdown">
+                    <option value="">All Years</option>
+                    {{#each cardYears}}
+                    <option value="{{this}}" {{#if (eq this ../cardYear)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
             </div>
-        </div>
-    </form>
-</div>
+            <div class="form-row">
+                <label for="cardColor">Card Color:</label>
+                <select id="cardColor" name="cardColor" class="filter-input fixed-width-dropdown">
+                    <option value="">All Colors</option>
+                    {{#each cardColors}}
+                    <option value="{{this}}" {{#if (eq this ../cardColor)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="cardVariant">Card Variant:</label>
+                <select id="cardVariant" name="cardVariant" class="filter-input fixed-width-dropdown">
+                    <option value="">All Variants</option>
+                    {{#each cardVariants}}
+                    <option value="{{this}}" {{#if (eq this ../cardVariant)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="team">Team:</label>
+                <select id="team" name="team" class="filter-input fixed-width-dropdown">
+                    <option value="">All Teams</option>
+                    {{#each teams}}
+                    <option value="{{this}}" {{#if (eq this ../team)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="numbered">Numbered:</label>
+                <select id="numbered" name="numbered" class="filter-input fixed-width-dropdown">
+                    <option value="">All Numbered</option>
+                    {{#each numberedOptions}}
+                    <option value="{{this}}" {{#if (eq this ../numbered)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="colorPattern">Color Pattern:</label>
+                <select id="colorPattern" name="colorPattern" class="filter-input fixed-width-dropdown">
+                    <option value="">All Color Patterns</option>
+                    {{#each colorPatterns}}
+                    <option value="{{this}}" {{#if (eq this ../colorPattern)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="auto">Auto:</label>
+                <select id="auto" name="auto" class="filter-input fixed-width-dropdown">
+                    <option value="">All Auto</option>
+                    {{#each autoOptions}}
+                    <option value="{{this}}" {{#if (eq this ../auto)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="inStock">In Stock:</label>
+                <input type="checkbox" id="inStock" name="inStock" {{#if inStock}}checked{{/if}}
+                    onchange="loadDataWithFilters()">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <button id="resetButton" type="reset" class="table-button" onclick="resetFilters()">Reset</button>
+                </div>
+                <div style="padding-right: 12px;">
+                    <button type="submit" id="searchButton" class="table-button">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
 
 
@@ -135,12 +141,12 @@
                     <div class="page-size-selector">
                         <label for="pageSize">Items per page:</label>
                         <select class="page-size-selector" id="pageSize" onchange="changePageSize()">
-                            <option value="10" {{#if (eq pageSize '10')}}selected{{/if}}>10</option>
-                            <option value="25" {{#if (eq pageSize '25')}}selected{{/if}}>25</option>
-                            <option value="50" {{#if (eq pageSize '50')}}selected{{/if}}>50</option>
-                            <option value="100" {{#if (eq pageSize '100')}}selected{{/if}}>100</option>
-                            <option value="250" {{#if (eq pageSize '250')}}selected{{/if}}>250</option>
-                            <option value="500" {{#if (eq pageSize '500')}}selected{{/if}}>500</option>
+                            <option value="10" {{#if (eq pageSize '10' )}}selected{{/if}}>10</option>
+                            <option value="25" {{#if (eq pageSize '25' )}}selected{{/if}}>25</option>
+                            <option value="50" {{#if (eq pageSize '50' )}}selected{{/if}}>50</option>
+                            <option value="100" {{#if (eq pageSize '100' )}}selected{{/if}}>100</option>
+                            <option value="250" {{#if (eq pageSize '250' )}}selected{{/if}}>250</option>
+                            <option value="500" {{#if (eq pageSize '500' )}}selected{{/if}}>500</option>
                         </select>
                     </div>
                 </div>
@@ -241,6 +247,32 @@
         function showSpinner() {
             document.getElementById('spinner').style.display = 'flex';
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('success')) {
+                const successMessage = document.createElement('div');
+                successMessage.classList.add('success-message');
+                successMessage.innerHTML = `
+                    Inventory updated successfully
+                    <button class="close-btn">&times;</button>
+                `;
+
+                document.body.appendChild(successMessage);
+
+                // Auto-remove the message after 3 seconds
+                setTimeout(() => {
+                    if (successMessage) {
+                        successMessage.remove();
+                    }
+                }, 3000);
+
+                // Allow manual dismissal
+                successMessage.querySelector('.close-btn').addEventListener('click', () => {
+                    successMessage.remove();
+                });
+            }
+        });
         // Fetches and updates sports options
         function fetchSports(sport, cardSet, year, cardColor, cardVariant, team, numbered, colorPattern, auto) {
             $.ajax({

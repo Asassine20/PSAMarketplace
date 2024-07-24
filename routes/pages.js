@@ -846,7 +846,7 @@ router.post('/admin/submit-inventory', authenticateToken, notificationCounts, as
             }
         }
 
-        return res.redirect('/admin/inventory');
+        return res.redirect('/admin/inventory?success=true');
     } catch (err) {
         console.error('Error processing inventory submission:', err);
         return res.status(500).send('Error processing inventory');
